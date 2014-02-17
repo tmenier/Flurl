@@ -5,10 +5,9 @@
     <version>0.1.0</version>
     <title>Flurl</title>
     <authors>Todd Menier</authors>
-    <projectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</projectUrl>
-    <iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>
+    <projectUrl>https://github.com/tmenier/flurl</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>$description$</description>
+    <description>Fluent URL builder for .NET</description>
     <copyright>Copyright 2014</copyright>
     <tags>fluent url uri querystring builder</tags>
   </metadata>
