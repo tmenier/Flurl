@@ -7,7 +7,10 @@
     <authors>Todd Menier</authors>
     <projectUrl>https://github.com/tmenier/flurl</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Fluent URL builder for .NET</description>
+    <description>A fluent URL builder. Example:
+	 
+"http://www.api.com".AppendPathSegment("endpoint").SetQueryParams(new { api_key = key, max_results = 20});
+	</description>
     <copyright>Copyright 2014</copyright>
     <tags>fluent url uri querystring builder</tags>
   </metadata>
