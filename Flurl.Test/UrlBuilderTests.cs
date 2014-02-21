@@ -100,9 +100,9 @@ namespace Flurl.Test
 				.AddQueryParams(new { a = 1, b = 2, c = 999 })
 				.AppendPathSegment("category")
 				.RemoveQueryParam("c")
-				.AddQueryParam("z", 55)
+				.SetQueryParam("z", 55)
 				.RemoveQueryParams("a", "z")
-				.AddQueryParams(new { n = "hi", m = "bye" })
+				.SetQueryParams(new { n = "hi", m = "bye" })
 				.AppendPathSegment("endpoint");
 
 			Assert.AreEqual("http://www.mysite.com/category/endpoint?b=2&n=hi&m=bye", url.ToString());
@@ -123,7 +123,13 @@ namespace Flurl.Test
 		[Test]
 		public void encodes_query_params() {
 			var url = "http://www.mysite.com".AddQueryParams(new { x = "$50", y = "2+2=4" });
-			Assert.AreEqual("http://www.mysite.com?x=%2450&y=2%2b2%3d4", url.ToString());			
+			Assert.AreEqual("http://www.mysite.com?x=%2450&y=2%2b2%3d4", url.ToString());
+		}
+
+		[Test]
+		public void combine_works() {
+			var url = Url.Combine("http://www.foo.com/", "/too/", "/many/", "/slashes/", "too", "few");
+			Assert.AreEqual("http://www.foo.com/too/many/slashes/too/few", url);
 		}
 	}
 }
