@@ -41,23 +41,24 @@ namespace Flurl
 		/// Basically a Path.Combine for URLs. Ensures exactly one '/' character is used to seperate each segment.
 		/// URL-encodes illegal characters but not reserved characters.
 		/// </summary>
-		/// <param name="baseUrl">The URL to use as a starting point (required). NOT URL-encoded.</param>
+		/// <param name="url">The URL to use as a starting point (required).</param>
 		/// <param name="segments">Paths to combine.</param>
 		/// <returns></returns>
-		public static string Combine(string baseUrl, params string[] segments) {
-			if (baseUrl == null)
-				throw new ArgumentNullException("baseUrl");
+		public static string Combine(string url, params string[] segments) {
+			if (url == null)
+				throw new ArgumentNullException("url");
 
-			return new Url(baseUrl).AppendPathSegments(segments).ToString();
+			return new Url(url).AppendPathSegments(segments).ToString();
 		}
 
 		/// <summary>
-		/// Encodes characters that are strictly illegal in a URL. Does not encode reserved characters, i.e. '/', '+', etc.
+		/// Encodes characters that are illegal in a URL path, including '?'. Does not encode reserved characters, i.e. '/', '+', etc.
 		/// </summary>
 		/// <param name="url"></param>
 		/// <returns></returns>
-		public static string Cleanse(string url) {
-			return Uri.EscapeUriString(url);
+		private static string CleanSegment(string url) {
+			// http://stackoverflow.com/questions/4669692/valid-characters-for-directory-part-of-a-url-for-short-links
+			return HttpUtility.UrlPathEncode(url).Replace("?", "%3F");
 		}
 
 		/// <summary>
@@ -71,7 +72,7 @@ namespace Flurl
 				throw new ArgumentNullException("segment");
 
 			if (!Path.EndsWith("/")) Path += "/";
-			Path += HttpUtility.UrlPathEncode(segment.TrimStart('/').TrimEnd('/'));
+			Path += CleanSegment(segment).TrimStart('/').TrimEnd('/');
 			return this;
 		}
 
@@ -103,7 +104,7 @@ namespace Flurl
 		/// <param name="name">name of query string parameter</param>
 		/// <param name="value">value of query string parameter</param>
 		/// <returns>The Url obect with the query string parameter added</returns>
-		public Url AddQueryParam(string name, object value) {
+		public Url SetQueryParam(string name, object value) {
 			QueryParams[name] = (value == null) ? null : value.ToString();
 			return this;
 		}
@@ -113,12 +114,12 @@ namespace Flurl
 		/// </summary>
 		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
 		/// <returns>The Url object with the query string parameters added</returns>
-		public Url AddQueryParams(object values) {
+		public Url SetQueryParams(object values) {
 			if (values == null)
 				return this;
 
 			foreach (PropertyDescriptor prop in TypeDescriptor.GetProperties(values))
-				AddQueryParam(prop.Name, prop.GetValue(values));
+				SetQueryParam(prop.Name, prop.GetValue(values));
 
 			return this;
 		}
@@ -128,12 +129,12 @@ namespace Flurl
 		/// </summary>
 		/// <param name="values">Dictionary of key/value pairs to add to the query string</param>
 		/// <returns>The Url object with the query string parameters added</returns>
-		public Url AddQueryParams(IDictionary values) {
+		public Url SetQueryParams(IDictionary values) {
 			if (values == null)
 				return this;
 
 			foreach (var key in values.Keys)
-				AddQueryParam(key.ToString(), values[key]);
+				SetQueryParam(key.ToString(), values[key]);
 
 			return this;
 		}
