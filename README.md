@@ -24,7 +24,7 @@ A `Url` also converts back to a string implicitly, so you can use it directly in
 var result = await new HttpClient.GetAsync(url);
 ````
 
-Flurl also contains the handy `Url.Combine` method, which is basically a `[Path.Combine](http://msdn.microsoft.com/en-us/library/dd991142.aspx)` for URLs, ensuring one and only one separator character between segments:
+Flurl also contains the handy `Url.Combine` method, which is basically a [Path.Combine](http://msdn.microsoft.com/en-us/library/dd991142.aspx) for URLs, ensuring one and only one separator character between segments:
 
 ````C#
 var url = Url.Combine("http://www.foo.com/", "/too/", "/many/", "/slashes/", "too", "few");
