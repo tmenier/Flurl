@@ -12,7 +12,7 @@ var url = "http://www.some-api.com"
 	});
 ````
 
-At its core is the `Url` class, which is designed to work seamlessly with strings, as demonstrated with the extension method above. Create a `Url` via a string extension is purly optional though; you can create one explicitly if you prefer:
+At its core is the `Url` class, which is designed to work seamlessly with strings, as demonstrated with the extension method above. Creating a `Url` via a string extension is purly optional though; you can create one explicitly if you prefer:
 
 ````C#
 var url = new Url("http://www.some-api.com").AppendPathSegment(...
@@ -24,7 +24,7 @@ A `Url` also converts back to a string implicitly, so you can use it directly in
 var result = await new HttpClient.GetAsync(url);
 ````
 
-Flurl also contains the handy `Url.Combine` method, which is basically a Path.Combine for URLs, ensuring one and only one separator character between segments:
+Flurl also contains the handy `Url.Combine` method, which is basically a `[Path.Combine](http://msdn.microsoft.com/en-us/library/dd991142.aspx)` for URLs, ensuring one and only one separator character between segments:
 
 ````C#
 var url = Url.Combine("http://www.foo.com/", "/too/", "/many/", "/slashes/", "too", "few");
@@ -44,24 +44,24 @@ Flurl takes care of encoding characters in URLs but takes a different approach w
 
 The `Url` API is small, discoverable, and fairly self-explanatory. For completeness, here are all public methods and properties:
 
-````
-Static method:
+````C#
+// Static method:
 
-Combine(string url, params string[] segments) : string (static)
+static string Combine(string url, params string[] segments)
 
-Instance methods (each with equivalent string extension):
+// Instance methods (each with equivalent string extension):
 
-AppendPathSegment(string segment) : Url
-AppendPathSegments(params string[] segments) : Url
-AppendPathSegments(IEnumerable<string> segments) : Url
-SetQueryParam(string name, object value) : Url
-SetQueryParams(object values) : Url
-SetQueryParams(IDictionary values) : Url
-RemoveQueryParam(string name) : Url
-RemoveQueryParams(params string[] names) : Url
-RemoveQueryParams(IEnumerable<string> names) : Url
+Url AppendPathSegment(string segment)
+Url AppendPathSegments(params string[] segments)
+Url AppendPathSegments(IEnumerable<string> segments)
+Url SetQueryParam(string name, object value)
+Url SetQueryParams(object values)
+Url SetQueryParams(IDictionary values)
+Url RemoveQueryParam(string name)
+Url RemoveQueryParams(params string[] names)
+Url RemoveQueryParams(IEnumerable<string> names)
 
-Properties:
+// Properties:
 
 string Path { get; }
 NameValueCollection QueryParams { get; }
