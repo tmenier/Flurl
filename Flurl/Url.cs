@@ -18,7 +18,7 @@ namespace Flurl
 		/// <summary>
 		/// Collection of all query string parameters.
 		/// </summary>
-		public QueryParamCollection QueryParams { get; private set; }
+		public IDictionary<string, object> QueryParams { get; private set; }
 
 		/// <summary>
 		/// Constructs a Url object from a string.
