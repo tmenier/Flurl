@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 using NUnit.Framework;
 
 namespace Flurl.Test
@@ -30,7 +29,7 @@ namespace Flurl.Test
 		public void constructor_parses_url() {
 			var url = new Url("http://www.mysite.com/more?x=1&y=2");
 			Assert.AreEqual("http://www.mysite.com/more", url.Path);
-			CollectionAssert.AreEqual(new NameValueCollection() {{ "x", "1" }, { "y", "2" }}, url.QueryParams);
+			CollectionAssert.AreEqual(new QueryParamCollection {{ "x", "1" }, { "y", "2" }}, url.QueryParams);
 		}
 
 		[Test]
@@ -116,20 +115,20 @@ namespace Flurl.Test
 
 		[Test]
 		public void does_not_reencode_path_escape_chars() {
-			var url = "http://www.mysite.com".AppendPathSegment("hey+there+how+are+ya");
-			Assert.AreEqual("http://www.mysite.com/hey+there+how+are+ya", url.ToString());
+			var url = "http://www.mysite.com".AppendPathSegment("hey%20there%20how%20are%20ya");
+			Assert.AreEqual("http://www.mysite.com/hey%20there%20how%20are%20ya", url.ToString());
 		}
 
 		[Test]
 		public void encodes_query_params() {
 			var url = "http://www.mysite.com".AddQueryParams(new { x = "$50", y = "2+2=4" });
-			Assert.AreEqual("http://www.mysite.com?x=%2450&y=2%2b2%3d4", url.ToString());
+			Assert.AreEqual("http://www.mysite.com?x=%2450&y=2%2B2%3D4", url.ToString());
 		}
 
 		[Test]
 		public void combine_works() {
-			var url = Url.Combine("http://www.foo.com/", "/too/", "/many/", "/slashes/", "too", "few");
-			Assert.AreEqual("http://www.foo.com/too/many/slashes/too/few", url);
+			var url = Url.Combine("http://www.foo.com/", "/too/", "/many/", "/slashes/", "too", "few", "one/two/");
+			Assert.AreEqual("http://www.foo.com/too/many/slashes/too/few/one/two", url);
 		}
 	}
 }
