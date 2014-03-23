@@ -1,17 +1,21 @@
 <?xml version="1.0"?>
 <package >
-  <metadata>
-    <id>Flurl</id>
-    <version>0.1.1</version>
-    <title>Flurl</title>
-    <authors>Todd Menier</authors>
-    <projectUrl>https://github.com/tmenier/flurl</projectUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>A fluent URL builder. Example:
-	 
-"http://www.api.com".AppendPathSegment("endpoint").SetQueryParams(new { api_key = key, max_results = 20});
-	</description>
-    <copyright>Copyright 2014</copyright>
-    <tags>fluent url uri querystring builder</tags>
-  </metadata>
+	<metadata>
+		<id>Flurl</id>
+		<version>0.2.0</version>
+		<title>Flurl</title>
+		<authors>Todd Menier</authors>
+		<projectUrl>https://github.com/tmenier/flurl</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>
+			A portable, fluent URL builder. Example:
+
+			"http://www.api.com".AppendPathSegment("endpoint").SetQueryParams(new { api_key = key, max_results = 20});
+		</description>
+		<releaseNotes>
+			Breaking change in 0.2.0: Url.QueryParams changed from type NameValueCollection to type IDictionary&lt;string, object&gt; for PCL support.
+		</releaseNotes>
+		<copyright>Copyright 2014</copyright>
+		<tags>fluent portable url uri querystring builder</tags>
+	</metadata>
 </package>

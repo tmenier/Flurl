@@ -1,6 +1,6 @@
 #Flurl
 
-Flurl is a tiny library for building URLs. It is best explained with an example:
+Flurl is a tiny, portable, fluent library for building URLs. It is best explained with an example:
 
 ````C#
 var url = "http://www.some-api.com"
@@ -33,10 +33,10 @@ var url = Url.Combine("http://www.foo.com/", "/too/", "/many/", "/slashes/", "to
 
 ###Encoding
 
-Flurl takes care of encoding characters in URLs but takes a different approach with path segments than it does with query string values. The assumption is that query string values are highly variable (such as from user input), whereas path segments tend to be more "fixed" and may already be encoded, in which case you don't want to double-encode. Here are the rule Flurl follows:
+Flurl takes care of encoding characters in URLs but takes a different approach with path segments than it does with query string values. The assumption is that query string values are highly variable (such as from user input), whereas path segments tend to be more "fixed" and may already be encoded, in which case you don't want to double-encode. Here are the rules Flurl follows:
 
 - Query string values are fully URL-encoded.
-- For path segments, *reserved* characters such as `/`, `%`, and `+` are *not* encoded.
+- For path segments, *reserved* characters such as `/` and `%` are *not* encoded.
 - For path segments, *illegal* characters such as spaces are encoded.
 - For path segments, the `?` character is encoded, since query strings get special treatment.
 
@@ -47,24 +47,24 @@ The `Url` API is small, discoverable, and fairly self-explanatory. For completen
 ````C#
 // Static method:
 
-static string Combine(string url, params string[] segments)
+static string Combine(string url, params string[] segments);
 
 // Instance methods (each with equivalent string extension):
 
-Url AppendPathSegment(string segment)
-Url AppendPathSegments(params string[] segments)
-Url AppendPathSegments(IEnumerable<string> segments)
-Url SetQueryParam(string name, object value)
-Url SetQueryParams(object values)
-Url SetQueryParams(IDictionary values)
-Url RemoveQueryParam(string name)
-Url RemoveQueryParams(params string[] names)
-Url RemoveQueryParams(IEnumerable<string> names)
+Url AppendPathSegment(string segment);
+Url AppendPathSegments(params string[] segments);
+Url AppendPathSegments(IEnumerable<string> segments);
+Url SetQueryParam(string name, object value);
+Url SetQueryParams(object values);
+Url SetQueryParams(IDictionary values);
+Url RemoveQueryParam(string name);
+Url RemoveQueryParams(params string[] names);
+Url RemoveQueryParams(IEnumerable<string> names);
 
 // Properties:
 
 string Path { get; }
-NameValueCollection QueryParams { get; }
+IDictionary<string, object> QueryParams { get; }
 ````
 
 ###Get it on NuGet
@@ -73,6 +73,6 @@ NameValueCollection QueryParams { get; }
 PM> Install-Package Flurl
 ````
 
-###Roadmap
+###Credits
 
-The next version of Flurl will add a set of asynchronous HTTP methods to the `Url` API. Things like `GetJsonAsync<T>`, `DownloadFileAsync`, and `PostFormDataAsync` are in the works. These will be thin wrappers around `HttpClient` that encapsulate best practices, and they will be fully testable. (The core URL builder will always be available as a stand-alone package.) Please follow this project to stay current with the progress. If you have a feature request or suggestion for improvement, please create an issue.
+Thanks to [Geoffrey Huntley](https://github.com/ghuntley) for providing an intial portable implementation. 

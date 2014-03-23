@@ -39,9 +39,7 @@
     <Compile Include="StringExtensions.cs" />
     <Compile Include="Url.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="NuGet\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="Flurl.nuspec" />
   </ItemGroup>
