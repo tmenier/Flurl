@@ -58,20 +58,20 @@ namespace Flurl.Test
 
 		[Test]
 		public void can_add_query_param() {
-			var url = "http://www.mysite.com".AddQueryParam("x", 1);
+			var url = "http://www.mysite.com".SetQueryParam("x", 1);
 			Assert.AreEqual("http://www.mysite.com?x=1", url.ToString());
 		}
 
 		[Test]
 		public void can_add_multiple_query_params_from_anon_object() {
-			var url = "http://www.mysite.com".AddQueryParams(new { x = 1, y = 2 });
+			var url = "http://www.mysite.com".SetQueryParams(new { x = 1, y = 2 });
 			Assert.AreEqual("http://www.mysite.com?x=1&y=2", url.ToString());
 		}
 
 		[Test]
 		public void can_add_multiple_query_params_from_dictionary() {
 			// let's challenge it a little with non-string keys
-			var url = "http://www.mysite.com".AddQueryParams(new Dictionary<int, string> {{1, "x"}, {2, "y"}});
+			var url = "http://www.mysite.com".SetQueryParams(new Dictionary<int, string> {{1, "x"}, {2, "y"}});
 			Assert.AreEqual("http://www.mysite.com?1=x&2=y", url.ToString());
 		}
 
@@ -96,7 +96,7 @@ namespace Flurl.Test
 		[Test]
 		public void can_do_crazy_long_fluent_expression() {
 			var url = "http://www.mysite.com"
-				.AddQueryParams(new { a = 1, b = 2, c = 999 })
+				.SetQueryParams(new { a = 1, b = 2, c = 999 })
 				.AppendPathSegment("category")
 				.RemoveQueryParam("c")
 				.SetQueryParam("z", 55)
@@ -121,7 +121,7 @@ namespace Flurl.Test
 
 		[Test]
 		public void encodes_query_params() {
-			var url = "http://www.mysite.com".AddQueryParams(new { x = "$50", y = "2+2=4" });
+			var url = "http://www.mysite.com".SetQueryParams(new { x = "$50", y = "2+2=4" });
 			Assert.AreEqual("http://www.mysite.com?x=%2450&y=2%2B2%3D4", url.ToString());
 		}
 
