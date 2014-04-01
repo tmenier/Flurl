@@ -3,3 +3,4 @@ obj
 *.suo
 *.nupkg
 packages
+*.DotSettings.user
