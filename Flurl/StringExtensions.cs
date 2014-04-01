@@ -53,7 +53,7 @@ namespace Flurl
 		/// <param name="name">name of query string parameter</param>
 		/// <param name="value">value of query string parameter</param>
 		/// <returns>The Url obect with the query string parameter added</returns>
-		public static Url AddQueryParam(this string url, string name, object value) {
+		public static Url SetQueryParam(this string url, string name, object value) {
 			return new Url(url).SetQueryParam(name, value);
 		}
 
@@ -63,7 +63,7 @@ namespace Flurl
 		/// </summary>
 		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
 		/// <returns>The Url object with the query string parameters added</returns>
-		public static Url AddQueryParams(this string url, object values) {
+		public static Url SetQueryParams(this string url, object values) {
 			return new Url(url).SetQueryParams(values);
 		}
 
@@ -73,7 +73,7 @@ namespace Flurl
 		/// </summary>
 		/// <param name="values">Dictionary of key/value pairs to add to the query string</param>
 		/// <returns>The Url object with the query string parameters added</returns>
-		public static Url AddQueryParams(this string url, IDictionary values) {
+		public static Url SetQueryParams(this string url, IDictionary values) {
 			return new Url(url).SetQueryParams(values);
 		}
 
