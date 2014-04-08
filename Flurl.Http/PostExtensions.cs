@@ -1,29 +1,71 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.ServiceModel.Dispatcher;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using Flurl.Common;
 
 namespace Flurl.Http
 {
 	public static class PostExtensions
 	{
-		public static async Task<T> PostJsonAsync<T>(this FlurlClient client, object data) {
-			var content = (HttpContent)new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-			var resp = await client.HttpClient.PostAsync(client.Url, content);
-			using (var stream = await resp.Content.ReadAsStreamAsync())
-				return JsonHelper.ReadJsonFromStream<T>(stream);
+		/// <summary>
+		/// Sends an asynchronous POST request of specified data (usually an anonymous object or dictionary) formatted as JSON.
+		/// </summary>
+		/// <param name="data">Data to be serialized and posted.</param>
+		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
+		public static Task<HttpResponseMessage> PostJsonAsync(this FlurlClient client, object data) {
+			return client.HttpClient.PostAsync(client.Url, new JsonContent(data));
 		}
 
-		public static Task<T> PostJsonAsync<T>(this string url, object data) {
-			return new FlurlClient(url).PostJsonAsync<T>(data);
+		/// <summary>
+		/// Creates a FlurlClient from the URL and sends an asynchronous POST request of specified data (usually an anonymous object or dictionary) formatted as JSON.
+		/// </summary>
+		/// <param name="data">Data to be serialized and posted.</param>
+		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
+		public static Task<HttpResponseMessage> PostJsonAsync(this string url, object data) {
+			return new FlurlClient(url).PostJsonAsync(data);
 		}
 
-		public static Task<T> PostJsonAsync<T>(this Url url, object data) {
-			return new FlurlClient(url).PostJsonAsync<T>(data);
+		/// <summary>
+		/// Creates a FlurlClient from the URL and sends an asynchronous POST request of specified data (usually an anonymous object or dictionary) formatted as JSON.
+		/// </summary>
+		/// <param name="data">Data to be serialized and posted.</param>
+		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
+		public static Task<HttpResponseMessage> PostJsonAsync(this Url url, object data) {
+			return new FlurlClient(url).PostJsonAsync(data);
+		}
+
+		/// <summary>
+		/// Sends an asynchronous POST request of specified data (usually an anonymous object or dictionary) serialized as URL-encoded key/value pair (simulating a form post).
+		/// </summary>
+		/// <param name="data">Data to be serialized and posted.</param>
+		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
+		public static Task<HttpResponseMessage> PostUrlEncodedAsync(this FlurlClient client, object data) {
+			var content = new FormUrlEncodedContent(data.ToKeyValuePairs());
+			return client.HttpClient.PostAsync(client.Url, content);
+		}
+
+		/// <summary>
+		/// Creates a FlurlClient from the URL and sends an asynchronous POST request of specified data (usually an anonymous object or dictionary) serialized as URL-encoded key/value pair (simulating a form post).
+		/// </summary>
+		/// <param name="data">Data to be serialized and posted.</param>
+		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
+		public static Task<HttpResponseMessage> PostUrlEncodedAsync(this string url, object data) {
+			return new FlurlClient(url).PostUrlEncodedAsync(data);
+		}
+
+		/// <summary>
+		/// Creates a FlurlClient from the URL and sends an asynchronous POST request of specified data (usually an anonymous object or dictionary) serialized as URL-encoded key/value pair (simulating a form post).
+		/// </summary>
+		/// <param name="data">Data to be serialized and posted.</param>
+		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
+		public static Task<HttpResponseMessage> PostUrlEncodedAsync(this Url url, object data) {
+			return new FlurlClient(url).PostUrlEncodedAsync(data);
 		}
 	}
 }

@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using Flurl.Common;
 
 namespace Flurl
 {
@@ -109,7 +108,7 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Parses object into name/value pairs and adds them to the query string, overwriting any that already exist.
+		/// Parses values (usually an anonymous object or dictionary) into name/value pairs and adds them to the query string, overwriting any that already exist.
 		/// </summary>
 		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
 		/// <returns>The Url object with the query string parameters added</returns>
@@ -117,23 +116,8 @@ namespace Flurl
 			if (values == null)
 				return this;
 
-			foreach (var prop in values.GetType().GetProperties())
-				SetQueryParam(prop.Name, prop.GetValue(values, null));
-
-			return this;
-		}
-
-		/// <summary>
-		/// Adds key/value pairs and to the query string, overwriting any that already exist.
-		/// </summary>
-		/// <param name="values">Dictionary of key/value pairs to add to the query string</param>
-		/// <returns>The Url object with the query string parameters added</returns>
-		public Url SetQueryParams(IDictionary values) {
-			if (values == null)
-				return this;
-
-			foreach (var key in values.Keys)
-				SetQueryParam(key.ToString(), values[key]);
+			foreach (var kv in values.ToKeyValuePairs())
+				SetQueryParam(kv.Key, kv.Value);
 
 			return this;
 		}

@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Flurl.Http
 {
 	/// <summary>
-	/// A simple container for a Url and an HttpClient, used for fluent chaining.
+	/// A simple container for a Url and an HttpClient, used to enable fluent chaining.
 	/// </summary>
 	public class FlurlClient
 	{
@@ -21,21 +19,20 @@ namespace Flurl.Http
 
 		private HttpClient _httpClient;
 
+		/// <summary>
+		/// Gets the URL to be called in subsequent HTTP calls.
+		/// </summary>
 		public Url Url { get; private set; }
 
+		/// <summary>
+		/// Gets the HttpClient to be used in subsequent HTTP calls. Creation (when necessary) is delegated
+		/// to FlurlHttp.HttpClientFactory. Reused for the life of the FlurlClient.
+		/// </summary>
 		public HttpClient HttpClient {
 			get {
-				if (_httpClient == null) {
-					var handler = new FlurlMesageHandler();
-					_httpClient = new HttpClient(handler) {
-						Timeout = FlurlHttp.DefaultTimeout
-					};
-				}
+				if (_httpClient == null)
+					_httpClient = FlurlHttp.HttpClientFactory.CreateClient(Url);
 				return _httpClient;
-			}
-			set {
-				if (!FlurlHttp.TestMode)
-					_httpClient = value;
 			}
 		}
 	}

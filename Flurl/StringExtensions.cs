@@ -13,7 +13,7 @@ namespace Flurl
 		/// <summary>
 		/// Checks if a string is a well-formed URL.
 		/// </summary>
-		/// <param name="s">the string to check</param>
+		/// <param name="s">The string to check</param>
 		/// <returns>true if s is a well-formed URL</returns>
 		public static bool IsUrl(this string s) {
 			return s != null && Uri.IsWellFormedUriString(s, UriKind.Absolute);
@@ -64,16 +64,6 @@ namespace Flurl
 		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
 		/// <returns>The Url object with the query string parameters added</returns>
 		public static Url SetQueryParams(this string url, object values) {
-			return new Url(url).SetQueryParams(values);
-		}
-
-		/// <summary>
-		/// Converts string to a Url object and adds key/value pairs and to the query string, 
-		/// overwriting any that already exist.
-		/// </summary>
-		/// <param name="values">Dictionary of key/value pairs to add to the query string</param>
-		/// <returns>The Url object with the query string parameters added</returns>
-		public static Url SetQueryParams(this string url, IDictionary values) {
 			return new Url(url).SetQueryParams(values);
 		}
 
