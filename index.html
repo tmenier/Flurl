@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Flurl : A portable, fluent URL builder for .NET" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Flurl</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/tmenier/Flurl">View on GitHub</a>
+
+          <h1 id="project_title">Flurl</h1>
+          <h2 id="project_tagline">A portable, fluent URL builder for .NET</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/tmenier/Flurl/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/tmenier/Flurl/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="flurl" class="anchor" href="#flurl"><span class="octicon octicon-link"></span></a>Flurl</h1>
+
+<p>Flurl is a tiny, portable, fluent library for building URLs. It is best explained with an example:</p>
+
+<div class="highlight highlight-C#"><pre><span class="kt">var</span> <span class="n">url</span> <span class="p">=</span> <span class="s">"http://www.some-api.com"</span>
+    <span class="p">.</span><span class="n">AppendPathSegment</span><span class="p">(</span><span class="s">"endpoint"</span><span class="p">)</span>
+    <span class="p">.</span><span class="n">SetQueryParams</span><span class="p">(</span><span class="k">new</span> <span class="p">{</span>
+        <span class="n">api_key</span> <span class="p">=</span> <span class="n">ConfigurationManager</span><span class="p">.</span><span class="n">AppSettings</span><span class="p">[</span><span class="s">"SomeApiKey"</span><span class="p">],</span>
+        <span class="n">max_results</span> <span class="p">=</span> <span class="m">20</span><span class="p">,</span>
+        <span class="n">q</span> <span class="p">=</span> <span class="s">"Don't worry, I'll get encoded!"</span>
+    <span class="p">});</span>
+</pre></div>
+
+<p>At its core is the <code>Url</code> class, which is designed to work seamlessly with strings, as demonstrated with the extension method above. Creating a <code>Url</code> via a string extension is purly optional though; you can create one explicitly if you prefer:</p>
+
+<div class="highlight highlight-C#"><pre><span class="kt">var</span> <span class="n">url</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Url</span><span class="p">(</span><span class="s">"http://www.some-api.com"</span><span class="p">).</span><span class="n">AppendPathSegment</span><span class="p">(...</span>
+</pre></div>
+
+<p>A <code>Url</code> also converts back to a string implicitly, so you can use it directly in any method that takes a string:</p>
+
+<div class="highlight highlight-C#"><pre><span class="kt">var</span> <span class="n">result</span> <span class="p">=</span> <span class="k">await</span> <span class="k">new</span> <span class="n">HttpClient</span><span class="p">.</span><span class="n">GetAsync</span><span class="p">(</span><span class="n">url</span><span class="p">);</span>
+</pre></div>
+
+<p>Flurl also contains the handy <code>Url.Combine</code> method, which is basically a <a href="http://msdn.microsoft.com/en-us/library/dd991142.aspx">Path.Combine</a> for URLs, ensuring one and only one separator character between segments:</p>
+
+<div class="highlight highlight-C#"><pre><span class="kt">var</span> <span class="n">url</span> <span class="p">=</span> <span class="n">Url</span><span class="p">.</span><span class="n">Combine</span><span class="p">(</span><span class="s">"http://www.foo.com/"</span><span class="p">,</span> <span class="s">"/too/"</span><span class="p">,</span> <span class="s">"/many/"</span><span class="p">,</span> <span class="s">"/slashes/"</span><span class="p">,</span> <span class="s">"too"</span><span class="p">,</span> <span class="s">"few"</span><span class="p">);</span>
+<span class="c1">// result: "http://www.foo.com/too/many/slashes/too/few"</span>
+</pre></div>
+
+<h3>
+<a name="encoding" class="anchor" href="#encoding"><span class="octicon octicon-link"></span></a>Encoding</h3>
+
+<p>Flurl takes care of encoding characters in URLs but takes a different approach with path segments than it does with query string values. The assumption is that query string values are highly variable (such as from user input), whereas path segments tend to be more "fixed" and may already be encoded, in which case you don't want to double-encode. Here are the rules Flurl follows:</p>
+
+<ul>
+<li>Query string values are fully URL-encoded.</li>
+<li>For path segments, <em>reserved</em> characters such as <code>/</code> and <code>%</code> are <em>not</em> encoded.</li>
+<li>For path segments, <em>illegal</em> characters such as spaces are encoded.</li>
+<li>For path segments, the <code>?</code> character is encoded, since query strings get special treatment.</li>
+</ul><h3>
+<a name="url-api" class="anchor" href="#url-api"><span class="octicon octicon-link"></span></a>Url API</h3>
+
+<p>The <code>Url</code> API is small, discoverable, and fairly self-explanatory. For completeness, here are all public methods and properties:</p>
+
+<div class="highlight highlight-C#"><pre><span class="c1">// Static method:</span>
+
+<span class="k">static</span> <span class="kt">string</span> <span class="nf">Combine</span><span class="p">(</span><span class="kt">string</span> <span class="n">url</span><span class="p">,</span> <span class="k">params</span> <span class="kt">string</span><span class="p">[]</span> <span class="n">segments</span><span class="p">);</span>
+
+<span class="c1">// Instance methods (each with equivalent string extension):</span>
+
+<span class="n">Url</span> <span class="nf">AppendPathSegment</span><span class="p">(</span><span class="kt">string</span> <span class="n">segment</span><span class="p">);</span>
+<span class="n">Url</span> <span class="nf">AppendPathSegments</span><span class="p">(</span><span class="k">params</span> <span class="kt">string</span><span class="p">[]</span> <span class="n">segments</span><span class="p">);</span>
+<span class="n">Url</span> <span class="nf">AppendPathSegments</span><span class="p">(</span><span class="n">IEnumerable</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">segments</span><span class="p">);</span>
+<span class="n">Url</span> <span class="nf">SetQueryParam</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">,</span> <span class="kt">object</span> <span class="k">value</span><span class="p">);</span>
+<span class="n">Url</span> <span class="nf">SetQueryParams</span><span class="p">(</span><span class="kt">object</span> <span class="n">values</span><span class="p">);</span>
+<span class="n">Url</span> <span class="nf">SetQueryParams</span><span class="p">(</span><span class="n">IDictionary</span> <span class="n">values</span><span class="p">);</span>
+<span class="n">Url</span> <span class="nf">RemoveQueryParam</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">);</span>
+<span class="n">Url</span> <span class="nf">RemoveQueryParams</span><span class="p">(</span><span class="k">params</span> <span class="kt">string</span><span class="p">[]</span> <span class="n">names</span><span class="p">);</span>
+<span class="n">Url</span> <span class="nf">RemoveQueryParams</span><span class="p">(</span><span class="n">IEnumerable</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">names</span><span class="p">);</span>
+
+<span class="c1">// Properties:</span>
+
+<span class="kt">string</span> <span class="n">Path</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+<span class="n">IDictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="kt">object</span><span class="p">&gt;</span> <span class="n">QueryParams</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+</pre></div>
+
+<h3>
+<a name="get-it-on-nuget" class="anchor" href="#get-it-on-nuget"><span class="octicon octicon-link"></span></a>Get it on NuGet</h3>
+
+<pre><code>PM&gt; Install-Package Flurl
+</code></pre>
+
+<h3>
+<a name="credits" class="anchor" href="#credits"><span class="octicon octicon-link"></span></a>Credits</h3>
+
+<p>Thanks to <a href="https://github.com/ghuntley">Geoffrey Huntley</a> for providing an intial portable implementation. </p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Flurl maintained by <a href="https://github.com/tmenier">tmenier</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
