@@ -52,7 +52,7 @@ html {
   font-size: 16px;
   line-height: 1.5;
 }
-@media (min-width: 38em) {
+@media (min-width: 38rem) {
   html {
     font-size: 20px;
   }
@@ -175,36 +175,12 @@ pre code {
   color: inherit;
   background-color: transparent;
 }
-
-/* Pygments via Jekyll */
 .highlight {
   margin-bottom: 1rem;
   border-radius: 4px;
 }
 .highlight pre {
   margin-bottom: 0;
-}
-
-/* Gist via GitHub Pages */
-.gist .gist-file {
-  font-family: Menlo, Monaco, "Courier New", monospace !important;
-}
-.gist .markdown-body {
-  padding: 15px;
-}
-.gist pre {
-  padding: 0;
-  background-color: transparent;
-}
-.gist .gist-file .gist-data {
-  font-size: .8rem !important;
-  line-height: 1.4;
-}
-.gist code {
-  padding: 0;
-  color: inherit;
-  background-color: transparent;
-  border-radius: 0;
 }
 
 /* Quotes */
@@ -217,7 +193,7 @@ blockquote {
 blockquote p:last-child {
   margin-bottom: 0;
 }
-@media (min-width: 30em) {
+@media (min-width: 30rem) {
   blockquote {
     padding-right: 5rem;
     padding-left: 1.25rem;
@@ -226,9 +202,9 @@ blockquote p:last-child {
 
 img {
   display: block;
-  max-width: 100%;
   margin: 0 0 1rem;
   border-radius: 5px;
+  max-width: 100%;
 }
 
 /* Tables */
@@ -406,7 +382,7 @@ a.pagination-item:hover {
   background-color: #f5f5f5;
 }
 
-@media (min-width: 30em) {
+@media (min-width: 30rem) {
   .pagination {
     margin: 3rem 0;
   }
