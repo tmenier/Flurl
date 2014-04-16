@@ -6,14 +6,14 @@ pygments:         true
 permalink:        pretty
 
 # Setup
-title:            Poole
-tagline:          The Jekyll Butler
+title:            Flurl
+tagline:          Fluent URL Builder and Testable HTTP for .NET
 description:      Base theme for Jekyll themes by @mdo.
 url:              http://getpoole.com
 
 author:
-  name:           Mark Otto
-  url:            https://twitter.com/mdo
+  name:           Todd Menier
+  url:            https://twitter.com/tmenier
 
 paginate:         1
 
@@ -21,4 +21,4 @@ paginate:         1
 version:          1.0.0
 
 github:
-  repo:           https://github.com/poole/poole
+  repo:           https://github.com/tmenier/flurl
