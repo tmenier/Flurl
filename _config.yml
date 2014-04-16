@@ -8,17 +8,14 @@ permalink:        pretty
 # Setup
 title:            Flurl
 tagline:          Fluent URL Builder and Testable HTTP for .NET
-description:      Base theme for Jekyll themes by @mdo.
-url:              http://getpoole.com
+description:      Fluent URL Builder and Testable HTTP for .NET
+url:              http://tmenier.github.io/Flurl
 
 author:
   name:           Todd Menier
   url:            https://twitter.com/tmenier
 
 paginate:         1
-
-# Custom vars
-version:          1.0.0
 
 github:
   repo:           https://github.com/tmenier/flurl
