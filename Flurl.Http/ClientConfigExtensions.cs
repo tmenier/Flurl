@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using Flurl.Common;
@@ -7,6 +8,34 @@ namespace Flurl.Http
 {
 	public static class ClientConfigExtensions
 	{
+		/// <summary>
+		/// Provides access to modifying the underlying HttpClient.
+		/// </summary>
+		/// <param name="action">Action to perform on the HttpClient.</param>
+		/// <returns>The FlurlClient with the modified HttpClient</returns>
+		public static FlurlClient ConfigureHttpClient(this FlurlClient client, Action<HttpClient> action) {
+			action(client.HttpClient);
+			return client;
+		}
+
+		/// <summary>
+		/// Creates a FlurlClient from the URL and provides access to modifying the underlying HttpClient.
+		/// </summary>
+		/// <param name="action">Action to perform on the HttpClient.</param>
+		/// <returns>The FlurlClient with the modified HttpClient</returns>
+		public static FlurlClient ConfigureHttpClient(this string url, Action<HttpClient> action) {
+			return new FlurlClient(url).ConfigureHttpClient(action);
+		}
+
+		/// <summary>
+		/// Creates a FlurlClient from the URL and provides access to modifying the underlying HttpClient.
+		/// </summary>
+		/// <param name="action">Action to perform on the HttpClient.</param>
+		/// <returns>The FlurlClient with the modified HttpClient</returns>
+		public static FlurlClient ConfigureHttpClient(this Url url, Action<HttpClient> action) {
+			return new FlurlClient(url).ConfigureHttpClient(action);
+		}
+
 		/// <summary>
 		/// Sets the client timout to the specified timespan.
 		/// </summary>
@@ -48,7 +77,7 @@ namespace Flurl.Http
 		/// Creates a FlurlClient from the URL and sets the client timout to the specified number of seconds.
 		/// </summary>
 		/// <param name="seconds">Number of seconds to wait before the request times out.</param>
-		/// <returns>The modified FlurlClient.</returns>
+		/// <returns>The created FlurlClient.</returns>
 		public static FlurlClient WithTimeout(this string url, int seconds) {
 			return new FlurlClient(url).WithTimeout(seconds);
 		}
@@ -57,7 +86,7 @@ namespace Flurl.Http
 		/// Creates a FlurlClient from the URL and sets the client timout to the specified number of seconds.
 		/// </summary>
 		/// <param name="seconds">Number of seconds to wait before the request times out.</param>
-		/// <returns>The modified FlurlClient.</returns>
+		/// <returns>The created FlurlClient.</returns>
 		public static FlurlClient WithTimeout(this Url url, int seconds) {
 			return new FlurlClient(url).WithTimeout(seconds);
 		}

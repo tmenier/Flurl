@@ -1,7 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http;
+using Flurl.Http.Testing;
 using NUnit.Framework;
 
 namespace Flurl.Test.Http
@@ -9,74 +12,53 @@ namespace Flurl.Test.Http
 	[TestFixture]
 	public class TestingTests
 	{
-		[Test]
-		public void reset_clears_response_queue_and_call_log() {
-			FlurlHttp.Testing.Reset();
-			FlurlHttp.Testing
-				.RespondWith("x")
-				.RespondWith("y")
-				.RespondWith("z");
+		private HttpTest _httpTest;
 
-			FlurlHttp.Testing.CallLog.Add(null);
-			FlurlHttp.Testing.CallLog.Add(null);
-			FlurlHttp.Testing.CallLog.Add(null);
-
-			Assert.AreEqual(3, FlurlHttp.Testing.ResponseQueue.Count);
-			Assert.AreEqual(3, FlurlHttp.Testing.CallLog.Count);
-
-			FlurlHttp.Testing.Reset();
-
-			Assert.AreEqual(0, FlurlHttp.Testing.ResponseQueue.Count);
-			Assert.AreEqual(0, FlurlHttp.Testing.CallLog.Count);
+		[SetUp]
+		public void CreateHttpTest() {
+			_httpTest = new HttpTest();
 		}
 
-		[Test]
-		public void reset_switches_on_test_mode() {
-			FlurlHttp.TestMode = false;
-			FlurlHttp.Testing.Reset();
-			Assert.IsTrue(FlurlHttp.TestMode);
+		[TearDown]
+		public void DisposeHttpTest() {
+			_httpTest.Dispose();
 		}
 
 		[Test]
 		public async Task fake_get_works() {
-			FlurlHttp.Testing.Reset();
-			FlurlHttp.Testing.RespondWith("great job");
+			_httpTest.RespondWith("great job");
 
 			await "http://www.api.com".GetAsync();
 
-			var lastCall = FlurlHttp.Testing.CallLog.Last();
+			var lastCall = _httpTest.CallLog.Last();
 			Assert.AreEqual(HttpStatusCode.OK, lastCall.Response.StatusCode);
-			Assert.AreEqual("great job", lastCall.ResponseBody);
+			Assert.AreEqual("great job", await lastCall.Response.Content.ReadAsStringAsync());
 		}
 
 		[Test]
 		public async Task fake_post_works() {
-			FlurlHttp.Testing.Reset();
-			FlurlHttp.Testing.RespondWith("great job");
+			_httpTest.RespondWith("great job");
 
 			await "http://www.api.com".PostJsonAsync(new { x = 5 });
 
-			var lastCall = FlurlHttp.Testing.CallLog.Last();
+			var lastCall = _httpTest.CallLog.Last();
 			Assert.AreEqual("{\"x\":5}", lastCall.RequestBody);
 			Assert.AreEqual(HttpStatusCode.OK, lastCall.Response.StatusCode);
-			Assert.AreEqual("great job", lastCall.ResponseBody);
+			Assert.AreEqual("great job", await lastCall.Response.Content.ReadAsStringAsync());
 		}
 
 		[Test]
 		public async Task no_response_setup_returns_empty_reponse() {
-			FlurlHttp.Testing.Reset();
-
 			await "http://www.api.com".GetAsync();
 
-			var lastCall = FlurlHttp.Testing.CallLog.Last();
+			var lastCall = _httpTest.CallLog.Last();
 			Assert.AreEqual(HttpStatusCode.OK, lastCall.Response.StatusCode);
-			Assert.AreEqual("", lastCall.ResponseBody);
+			Assert.AreEqual("", await lastCall.Response.Content.ReadAsStringAsync());
 		}
 
 		[Test]
 		public async Task can_setup_multiple_responses() {
-			FlurlHttp.Testing
-				.Reset()
+			_httpTest
 				.RespondWith("one")
 				.RespondWith("two")
 				.RespondWith("three");
@@ -85,12 +67,27 @@ namespace Flurl.Test.Http
 			await "http://www.api.com/2".GetAsync();
 			await "http://www.api.com/3".GetAsync();
 
-			var calls = FlurlHttp.Testing.CallLog;
+			var calls = _httpTest.CallLog;
 			Assert.AreEqual(3, calls.Count);
-			Assert.AreEqual("one", calls[0].ResponseBody);
-			Assert.AreEqual("two", calls[1].ResponseBody);
-			Assert.AreEqual("three", calls[2].ResponseBody);
+			Assert.AreEqual("one", await calls[0].Response.Content.ReadAsStringAsync());
+			Assert.AreEqual("two", await calls[1].Response.Content.ReadAsStringAsync());
+			Assert.AreEqual("three", await calls[2].Response.Content.ReadAsStringAsync());
+
+			_httpTest.ShouldHaveCalled("http://www.api.com/*", times: 3, verb: HttpMethod.Get);
+			_httpTest.ShouldNotHaveCalled("http://www.otherapi.com/*");
 		}
 
+		[Test]
+		public async Task can_simulate_timeout() {
+			_httpTest.SimulateTimeout();
+			try {
+				await "http://www.api.com".GetAsync();
+				Assert.Fail("Exception was not thrown!");
+			}
+			catch (FlurlHttpTimeoutException ex) {
+				Assert.IsInstanceOf<TaskCanceledException>(ex.InnerException);
+				StringAssert.Contains("timed out", ex.Message);
+			}
+		}
 	}
 }

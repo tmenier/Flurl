@@ -4,10 +4,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 
-namespace Flurl.Http
+namespace Flurl.Http.Testing
 {
-	public interface IHttpClientFactory
+	internal class TimeoutResponseMessage : HttpResponseMessage
 	{
-		HttpClient CreateClient(Url url);
 	}
 }

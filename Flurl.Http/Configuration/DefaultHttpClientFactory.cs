@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
+﻿using System.Net.Http;
 
-namespace Flurl.Http
+namespace Flurl.Http.Configuration
 {
 	/// <summary>
 	/// Default implementation of IHttpClientFactory used by FlurlHttp. The created HttpClient includes hooks
@@ -16,7 +12,7 @@ namespace Flurl.Http
 	{
 		public virtual HttpClient CreateClient(Url url) {
 			return new HttpClient(new FlurlMessageHandler()) {
-				Timeout = FlurlHttp.DefaultTimeout
+				Timeout = FlurlHttp.Configuration.DefaultTimeout
 			};
 		}
 	}

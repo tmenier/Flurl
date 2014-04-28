@@ -1,66 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
-using Flurl.Http.Testing;
+using Flurl.Http.Configuration;
 
 namespace Flurl.Http
 {
 	/// <summary>
-	/// A static configuration object affecting global behavior Flurl HTTP methods
+	/// A static container for global configuration settings affecting Flurl.Http behavior.
 	/// </summary>
 	public static class FlurlHttp
 	{
-		/// <summary>
-		/// Get or set whether to actually execute HTTP methods
-		/// </summary>
-		public static bool TestMode { get; set; }
+		private static readonly object _configLock = new object();
 
-		/// <summary>
-		/// Gets or sets the default timeout for every HTTP request.
-		/// </summary>
-		public static TimeSpan DefaultTimeout { get; set; }
+		private static Lazy<FlurlHttpConfigurationOptions> _config = 
+			new Lazy<FlurlHttpConfigurationOptions>(() => new FlurlHttpConfigurationOptions());
 
-		/// <summary>
-		/// Gets or sets a factory used to create HttpClient object used in Flurl HTTP calls. Default value
-		/// is an instance of DefaultHttpClientFactory. Custom factory implementations should generally
-		/// inherit from DefaultHttpClientFactory, call base.CreateClient, and manipulate the returned HttpClient,
-		/// otherwise functionality such as callbacks and most testing features will be lost.
-		/// </summary>
-		public static IHttpClientFactory HttpClientFactory { get; set; }
-
-		/// <summary>
-		/// Gets or sets a callback function that is fired immediately before every HTTP request is sent.
-		/// </summary>
-		public static Action<HttpRequestMessage> BeforeCall { get; set; }
-
-		/// <summary>
-		/// Register a callback to occur immediately after every HTTP response is received.
-		/// </summary>
-		public static Action<HttpRequestMessage, HttpResponseMessage> AfterCall { get; set; }
-
-		static FlurlHttp() {
-			ResetDefaults();
+		public static FlurlHttpConfigurationOptions Configuration {
+			get { return _config.Value; }
 		}
 
 		/// <summary>
-		/// Sets all FlurlHttp static configuration options back to their default values.
+		/// Provides thread-safe accesss to Flurl.Http's global configuration options. Should only be
+		/// called once at application startup.
 		/// </summary>
-		public static void ResetDefaults() {
-			DefaultTimeout = new HttpClient().Timeout;
-			HttpClientFactory = new DefaultHttpClientFactory();
-			BeforeCall = req => { };
-			AfterCall = (req, resp) => { };			
-		}
-
-		private static readonly Lazy<HttpTester> _tester = new Lazy<HttpTester>();
-
-		/// <summary>
-		/// A container for objects and methods useful in automated testing scenarios.
-		/// </summary>
-		public static HttpTester Testing {
-			get { return _tester.Value; }
+		/// <param name="configAction"></param>
+		public static void Configure(Action<FlurlHttpConfigurationOptions> configAction) {
+			lock (_configLock) {
+				configAction(Configuration);
+			}
 		}
 	}
 }

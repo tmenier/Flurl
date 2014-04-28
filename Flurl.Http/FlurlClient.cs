@@ -31,7 +31,7 @@ namespace Flurl.Http
 		public HttpClient HttpClient {
 			get {
 				if (_httpClient == null)
-					_httpClient = FlurlHttp.HttpClientFactory.CreateClient(Url);
+					_httpClient = FlurlHttp.Configuration.HttpClientFactory.CreateClient(Url);
 				return _httpClient;
 			}
 		}

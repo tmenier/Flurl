@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Flurl.Http;
+using Flurl.Http.Testing;
 using NUnit.Framework;
 
 namespace Flurl.Test.Http
@@ -13,20 +13,20 @@ namespace Flurl.Test.Http
 	[TestFixture]
 	public class GetTests
 	{
-		[SetUp]
-		public void Setup() {
-			FlurlHttp.Testing.Reset();
-		}
-
 		[Test]
 		public async Task can_get() {
+			var test = new HttpTest();
+
 			await "http://www.api.com".GetAsync();
-			HttpAssert.LastRequest(HttpMethod.Get, null, null);
+
+			Assert.AreEqual(1, test.CallLog.Count);
+			Assert.AreEqual(HttpMethod.Get, test.CallLog.Single().Request.Method);
 		}
 
 		[Test]
 		public async Task can_get_json() {
-			FlurlHttp.Testing.RespondWithJson(new TestData { id = 1, name = "Frank" });
+			new HttpTest().RespondWithJson(new TestData { id = 1, name = "Frank" });
+
 			var data = await "http://some-api.com".GetJsonAsync<TestData>();
 
 			Assert.AreEqual(1, data.id);
@@ -35,7 +35,8 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_get_json_dynamic() {
-			FlurlHttp.Testing.RespondWithJson(new { id = 1, name = "Frank" });
+			new HttpTest().RespondWithJson(new { id = 1, name = "Frank" });
+
 			var data = await "http://some-api.com".GetJsonAsync();
 
 			Assert.AreEqual(1, data.id);
@@ -44,10 +45,11 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_get_json_dynamic_list() {
-			FlurlHttp.Testing.RespondWithJson(new[] {
+			new HttpTest().RespondWithJson(new[] {
 				new { id = 1, name = "Frank" },
 				new { id = 2, name = "Claire" }
 			});
+
 			var data = await "http://some-api.com".GetJsonListAsync();
 
 			Assert.AreEqual(1, data[0].id);
@@ -58,7 +60,8 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_get_string() {
-			FlurlHttp.Testing.RespondWith("good job");
+			new HttpTest().RespondWith("good job");
+
 			var data = await "http://some-api.com".GetStringAsync();
 
 			Assert.AreEqual("good job", data);
@@ -66,16 +69,16 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task failure_throws_detailed_exception() {
-			FlurlHttp.Testing.RespondWith(500, "bad job");
+			new HttpTest().RespondWith(500, "bad job");
 
 			try {
 				await "http://api.com".GetStringAsync();
+				Assert.Fail("FlurlHttpException was not thrown!");
 			}
 			catch (FlurlHttpException ex) {
-				Assert.AreEqual("http://api.com/", ex.Request.RequestUri.AbsoluteUri);
-				Assert.AreEqual(HttpMethod.Get, ex.Request.Method);
-				Assert.AreEqual(HttpStatusCode.InternalServerError, ex.Response.StatusCode);
-				Assert.AreEqual(HttpStatusCode.Inte, ex.Response.StatusCode);
+				Assert.AreEqual("http://api.com/", ex.Call.Request.RequestUri.AbsoluteUri);
+				Assert.AreEqual(HttpMethod.Get, ex.Call.Request.Method);
+				Assert.AreEqual(HttpStatusCode.InternalServerError, ex.Call.Response.StatusCode);
 			}
 		}
 

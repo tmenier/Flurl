@@ -8,6 +8,7 @@ using System.ServiceModel.Dispatcher;
 using System.Text;
 using System.Threading.Tasks;
 using Flurl.Common;
+using Flurl.Http.Content;
 
 namespace Flurl.Http
 {
@@ -19,7 +20,7 @@ namespace Flurl.Http
 		/// <param name="data">Data to be serialized and posted.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostJsonAsync(this FlurlClient client, object data) {
-			return client.HttpClient.PostAsync(client.Url, new JsonContent(data));
+			return client.HttpClient.PostAsync(client.Url, new CapturedJsonContent(data));
 		}
 
 		/// <summary>
@@ -46,8 +47,7 @@ namespace Flurl.Http
 		/// <param name="data">Data to be serialized and posted.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostUrlEncodedAsync(this FlurlClient client, object data) {
-			var content = new FormUrlEncodedContent(data.ToKeyValuePairs());
-			return client.HttpClient.PostAsync(client.Url, content);
+			return client.HttpClient.PostAsync(client.Url, new CapturedFormUrlEncodedContent(data));
 		}
 
 		/// <summary>
