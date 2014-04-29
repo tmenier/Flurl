@@ -47,6 +47,8 @@
     <Compile Include="Content\CapturedStringContent.cs" />
     <Compile Include="ClientConfigExtensions.cs" />
     <Compile Include="Configuration\DefaultHttpClientFactory.cs" />
+    <Compile Include="DeleteExtensions.cs" />
+    <Compile Include="PutExtensions.cs" />
     <Compile Include="DownloadExtensions.cs" />
     <Compile Include="Configuration\FlurlHttpConfigurationOptions.cs" />
     <Compile Include="HttpCall.cs" />
