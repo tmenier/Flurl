@@ -9,8 +9,24 @@ namespace Flurl.Http
 		/// Sends an asynchronous DELETE request.
 		/// </summary>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
-		public static Task<HttpResponseMessage> DeleteAsync(this FlurlClient client, object data) {
+		public static Task<HttpResponseMessage> DeleteAsync(this FlurlClient client) {
 			return client.HttpClient.DeleteAsync(client.Url);
+		}
+
+		/// <summary>
+		/// Creates a FlurlClient from the URL and sends an asynchronous DELETE request.
+		/// </summary>
+		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
+		public static Task<HttpResponseMessage> DeleteAsync(this string url) {
+			return new FlurlClient(url).DeleteAsync();
+		}
+
+		/// <summary>
+		/// Creates a FlurlClient from the URL and sends an asynchronous DELETE request.
+		/// </summary>
+		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
+		public static Task<HttpResponseMessage> DeleteAsync(this Url url) {
+			return new FlurlClient(url).DeleteAsync();
 		}
 	}
 }
