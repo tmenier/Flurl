@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using Flurl.Http.Content;
 
 namespace Flurl.Http.Testing
@@ -88,42 +87,19 @@ namespace Flurl.Http.Testing
 		public List<HttpCall> CallLog { get; private set; }
 
 		/// <summary>
-		/// Throws an HttpCallAssertException if a URL matching the given pattern (and other optional criteria) was not called.
+		/// Throws an HttpCallAssertException if a URL matching the given pattern was not called.
 		/// </summary>
 		/// <param name="urlPattern">URL that should have been called. Can include * wildcard character.</param>
-		/// <param name="times">Exact number of times URL should have been called (optional).</param>
-		/// <param name="verb">HTTP verb that should have been used in matched HTTP call(s).</param>
-		/// <param name="contentType">MIME type that should have been specified in content-type header of matched HTTP call(s).</param>
-		/// <param name="bodyPattern">Request body that should have been sent in matched HTTP call(s). Can include * wildcard character.</param>
-		public void ShouldHaveCalled(string urlPattern, int? times = null, HttpMethod verb = null, string contentType = null, string bodyPattern = null) {
-			var calls = CallLog.Where(c => MatchesPattern(c.Request.RequestUri.AbsoluteUri, urlPattern));
-
-			if (verb != null)
-				calls = calls.Where(c => c.Request.Method == verb);
-
-			if (contentType != null)
-				calls = calls.Where(c => c.Request.Content.Headers.ContentType.MediaType == contentType);
-
-			if (bodyPattern != null)
-				calls = calls.Where(c => MatchesPattern(c.RequestBody, bodyPattern));
-
-			var count = calls.Count();
-			var pass = times.HasValue ? count == times.Value : count > 0;
-			if (!pass)
-				throw new HttpCallAssertException(urlPattern, times, count);
-		}
-
-		private bool MatchesPattern(string textToCheck, string pattern) {
-			var regex = Regex.Escape(pattern).Replace("\\*", "(.*)");
-			return Regex.IsMatch(textToCheck, regex);
+		public HttpCallAssertion ShouldHaveCalled(string urlPattern) {
+			return new HttpCallAssertion(this.CallLog, false).WithUrlPattern(urlPattern);
 		}
 
 		/// <summary>
 		/// Throws an HttpCallAssertException if a URL matching the given pattern was called.
 		/// </summary>
 		/// <param name="urlPattern">URL that should not have been called. Can include * wildcard character.</param>
-		public void ShouldNotHaveCalled(string urlPattern) {
-			ShouldHaveCalled(urlPattern, times: 0);
+		public HttpCallAssertion ShouldNotHaveCalled(string urlPattern) {
+			return new HttpCallAssertion(this.CallLog, true).WithUrlPattern(urlPattern);
 		}
 
 		public void Dispose() {

@@ -57,6 +57,7 @@
     <Compile Include="Configuration\IHttpClientFactory.cs" />
     <Compile Include="Content\CapturedJsonContent.cs" />
     <Compile Include="Testing\HttpCallAssertException.cs" />
+    <Compile Include="Testing\HttpCallAssertion.cs" />
     <Compile Include="Testing\TestHttpClientFactory.cs" />
     <Compile Include="Testing\FakeHttpMessageHandler.cs" />
     <Compile Include="Testing\TimeoutResponseMessage.cs" />

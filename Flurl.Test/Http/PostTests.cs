@@ -18,7 +18,11 @@ namespace Flurl.Test.Http
 		public async Task can_post_json() {
 			using (var test = new HttpTest()) {
 				await "http://some-api.com".PostJsonAsync(new { a = 1, b = 2 });
-				test.ShouldHaveCalled("http://some-api.com", times: 1, verb: HttpMethod.Post, contentType: "application/json", bodyPattern: "{\"a\":1,\"b\":2}");
+				test.ShouldHaveCalled("http://some-api.com")
+					.WithVerb(HttpMethod.Post)
+					.WithContentType("application/json")
+					.WithRequestBody("{\"a\":1,\"b\":2}")
+					.Times(1);
 			}
 		}
 
@@ -26,7 +30,11 @@ namespace Flurl.Test.Http
 		public async Task can_post_url_encoded() {
 			using (var test = new HttpTest()) {
 				await "http://some-api.com".PostUrlEncodedAsync(new { a = 1, b = 2, c = "hi there" });
-				test.ShouldHaveCalled("http://some-api.com", times: 1, verb: HttpMethod.Post, contentType: "application/x-www-form-urlencoded", bodyPattern: "a=1&b=2&c=hi+there");
+				test.ShouldHaveCalled("http://some-api.com")
+					.WithVerb(HttpMethod.Post)
+					.WithContentType("application/x-www-form-urlencoded")
+					.WithRequestBody("a=1&b=2&c=hi+there")
+					.Times(1);
 			}
 		}
 

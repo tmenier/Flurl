@@ -73,7 +73,7 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("two", await calls[1].Response.Content.ReadAsStringAsync());
 			Assert.AreEqual("three", await calls[2].Response.Content.ReadAsStringAsync());
 
-			_httpTest.ShouldHaveCalled("http://www.api.com/*", times: 3, verb: HttpMethod.Get);
+			_httpTest.ShouldHaveCalled("http://www.api.com/*").WithVerb(HttpMethod.Get).Times(3);
 			_httpTest.ShouldNotHaveCalled("http://www.otherapi.com/*");
 		}
 
