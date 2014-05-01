@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+	<metadata>
+		<id>Flurl.Http</id>
+		<version>0.1.0</version>
+		<title>Flurl.Http</title>
+		<authors>Todd Menier</authors>
+		<projectUrl>https://github.com/tmenier/flurl</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>
+			Simple, testable HTTP extentions off Flurl's fluent URL builder chain.
+		</description>
+		<releaseNotes />
+		<copyright>Copyright 2014</copyright>
+
+		<tags>httpclient rest json http fluent portable url uri testing tdd assert</tags>
+	</metadata>
+</package>
