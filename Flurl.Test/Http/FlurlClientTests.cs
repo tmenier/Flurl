@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using NUnit.Framework;
+﻿using System.Linq;
 using Flurl.Http;
+using NUnit.Framework;
 
 namespace Flurl.Test.Http
 {

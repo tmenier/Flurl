@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.ServiceModel.Dispatcher;
-using System.Text;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
-using Flurl.Common;
 using Flurl.Http.Content;
 
 namespace Flurl.Http
