@@ -1,15 +1,19 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
-
+<!doctype html>
+<html>
   {% include head.html %}
-
   <body>
+      {% include header.html %}
 
-    {% include sidebar.html %}
+    <div class="wrapper">
+      <section>
 
-    <div class="content container">
       {{ content }}
-    </div>
+      
+      {% include disqus.html %}
 
+      </section>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
   </body>
 </html>

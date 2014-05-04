@@ -625,9 +625,9 @@ blockquote {
 code {
   font-family: "Lucida Sans", Monaco, Bitstream Vera Sans Mono, Lucida Console, Terminal;
   color: #efefef;
+  background: #191919;
   font-size: 13px;
-  margin: 0 4px;
-  padding: 4px 6px;
+  padding: 4px 4px;
   -moz-border-radius: 2px;
   -webkit-border-radius: 2px;
   -o-border-radius: 2px;
@@ -698,7 +698,7 @@ dt {
   z-index: 100;
   left: 0;
   top: 0px;
-  height: 60px;
+  height: 70px;
   width: 100%;
   position: fixed;
   background: url(../images/nav-bg.gif) #353535;
@@ -712,8 +712,8 @@ dt {
   max-width: 650px;
   margin: 0 auto;
   padding: 0 10px;
-  background: blue;
   margin: 6px auto;
+  position: relative;
 }
 #header nav li {
   font-family: 'OpenSansLight', "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -767,8 +767,8 @@ dt {
   box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.2), 0px 1px 0px rgba(0, 0, 0, 0);
 }
 #header nav li.fork {
-  float: left;
-  margin-left: 0px;
+  position: absolute;
+  right: 0px;
 }
 #header nav li.downloads {
   float: right;
