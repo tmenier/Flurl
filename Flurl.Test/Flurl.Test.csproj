@@ -79,7 +79,6 @@
     <Compile Include="Http\DownloadTests.cs" />
     <Compile Include="Http\GetTests.cs" />
     <Compile Include="Http\GlobalConfigTests.cs" />
-    <Compile Include="Http\HttpAssert.cs" />
     <Compile Include="Http\PostTests.cs" />
     <Compile Include="Http\TestingTests.cs" />
     <Compile Include="Http\FlurlClientTests.cs" />
