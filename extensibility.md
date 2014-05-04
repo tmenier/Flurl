@@ -80,7 +80,7 @@ public class MyCustomHttpClientFactory : DefaultHttpClientFactory
 }
 ````
 
-Register the factory as part of your [global configuration](/configuration):
+Register the factory as part of your [global configuration]({{ site.baseurl }}/configuration):
 
 ````c#
 FlurlHttp.Configure(c => {

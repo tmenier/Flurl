@@ -19,7 +19,7 @@ Flurl.Http is a Portable Class Library supporting the following platforms:
 - Xamarin.Android
 - Xamerin.iOS
 
-For *just* the [URL builder functionality](/fluent-url) without the HTTP features:
+For *just* the [URL builder functionality]({{ site.baseurl }}/fluent-url) without the HTTP features:
 
 ````
 PM> Install-Package Flurl

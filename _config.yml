@@ -6,10 +6,7 @@ pygments:         true
 permalink:        pretty
 
 # Setup
-title:            Flurl
-tagline:          Fluent URL Builder and Testable HTTP for .NET
-description:      Fluent URL Builder and Testable HTTP for .NET
-url:              http://tmenier.github.io/Flurl
+baseurl:          /Flurl    
 
 author:
   name:           Todd Menier

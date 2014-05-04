@@ -110,4 +110,4 @@ You can also access the call log directly if the built-in assertions don't meet 
 Assert.That(httpTest.CallLog.Any(call => /* check an HttpCall */));
 ````
 
-As implied, `HttpTest.CallLog` is an instance of `List<HttpCall>`. An HttpCall object contains lots of useful information as sepcified [here](/fluent-http/#httpcall).
+As implied, `HttpTest.CallLog` is an instance of `List<HttpCall>`. An HttpCall object contains lots of useful information as sepcified [here]({{ site.baseurl }}/fluent-http/#httpcall).

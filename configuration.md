@@ -39,10 +39,10 @@ public static async Task HandleErrorAsync(HttpCall call) {
 }
 ````
 
-`HttpCall` wraps a variety of useful objects as specified [here](/fluent-http/#httpcall).
+`HttpCall` wraps a variety of useful objects as specified [here]({{ site.baseurl }}/fluent-http/#httpcall).
 
 ````c#
 FlurlHttp.ResetDefaults();
 ````
 
-The final global configuration option is `HttpClientFactory`, which allows you to change the way HttpClient instances are created. Normally you won't need to set this, and care should be taken when doing so. More details in the [Extensibility](/extensibility) section.
+The final global configuration option is `HttpClientFactory`, which allows you to change the way HttpClient instances are created. Normally you won't need to set this, and care should be taken when doing so. More details in the [Extensibility]({{ site.baseurl }}/extensibility) section.
