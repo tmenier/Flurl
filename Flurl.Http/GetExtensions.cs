@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -38,7 +36,7 @@ namespace Flurl.Http
 		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
 		/// <returns>A Task whose result is an object containing data in the response body.</returns>
 		public static Task<T> GetJsonAsync<T>(this FlurlClient client) {
-			return client.GetAsync().ReceiveJsonAsync<T>();
+			return client.GetAsync().ReceiveJson<T>();
 		}
 
 		/// <summary>
@@ -64,7 +62,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is a dynamic object containing data in the response body.</returns>
 		public static Task<dynamic> GetJsonAsync(this FlurlClient client) {
-			return client.GetAsync().ReceiveJsonAsync();
+			return client.GetAsync().ReceiveJson();
 		}
 
 		/// <summary>
@@ -88,7 +86,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is a list of dynamic objects containing data in the response body.</returns>
 		public static Task<IList<dynamic>> GetJsonListAsync(this FlurlClient client) {
-			return client.GetAsync().ReceiveJsonListAsync();
+			return client.GetAsync().ReceiveJsonList();
 		}
 
 		/// <summary>
@@ -112,7 +110,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the response body.</returns>
 		public static Task<string> GetStringAsync(this FlurlClient client) {
-			return client.GetAsync().ReceiveStringAsync();
+			return client.GetAsync().ReceiveString();
 		}
 
 		/// <summary>

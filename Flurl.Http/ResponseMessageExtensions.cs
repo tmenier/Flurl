@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Dynamic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Flurl.Http
@@ -19,7 +16,7 @@ namespace Flurl.Http
 		/// </summary>
  		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
 		/// <returns>A Task whose result is an object containing data in the response body.</returns>
-		public static async Task<T> ReceiveJsonAsync<T>(this Task<HttpResponseMessage> response) {
+		public static async Task<T> ReceiveJson<T>(this Task<HttpResponseMessage> response) {
 			using (var stream = await (await response).Content.ReadAsStreamAsync())
 				return JsonHelper.ReadJsonFromStream<T>(stream);
 		}
@@ -28,16 +25,16 @@ namespace Flurl.Http
 		/// Deserializes JSON-formatted response body to a dynamic object. Intended to chain off an async HTTP call.
 		/// </summary>
 		/// <returns>A Task whose result is a dynamic object containing data in the response body.</returns>
-		public static async Task<dynamic> ReceiveJsonAsync(this Task<HttpResponseMessage> response) {
-			return await response.ReceiveJsonAsync<ExpandoObject>();
+		public static async Task<dynamic> ReceiveJson(this Task<HttpResponseMessage> response) {
+			return await response.ReceiveJson<ExpandoObject>();
 		}
 
 		/// <summary>
 		/// Deserializes JSON-formatted response body to a list of dynamic objects. Intended to chain off an async HTTP call.
 		/// </summary>
 		/// <returns>A Task whose result is a list of dynamic objects containing data in the response body.</returns>
-		public static async Task<IList<dynamic>> ReceiveJsonListAsync(this Task<HttpResponseMessage> response) {
-			dynamic[] d = await response.ReceiveJsonAsync<ExpandoObject[]>();
+		public static async Task<IList<dynamic>> ReceiveJsonList(this Task<HttpResponseMessage> response) {
+			dynamic[] d = await response.ReceiveJson<ExpandoObject[]>();
 			return d;
 		}
 
@@ -45,7 +42,7 @@ namespace Flurl.Http
 		/// Returns response body as a string. Intended to chain off an async HTTP call.
 		/// </summary>
 		/// <returns>A Task whose result is the response body.</returns>
-		public static async Task<string> ReceiveStringAsync(this Task<HttpResponseMessage> response) {
+		public static async Task<string> ReceiveString(this Task<HttpResponseMessage> response) {
 			return await (await response).Content.ReadAsStringAsync();
 		}
 	}

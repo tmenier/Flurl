@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Runtime;
-using System.Text;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Flurl.Http.Testing;
@@ -43,7 +38,7 @@ namespace Flurl.Test.Http
 			using (var test = new HttpTest()) {
 				test.RespondWithJson(new TestData { id = 1, name = "Frank" });
 				
-				var data = await "http://some-api.com".PostJsonAsync(new { a = 1, b = 2 }).ReceiveJsonAsync<TestData>();
+				var data = await "http://some-api.com".PostJsonAsync(new { a = 1, b = 2 }).ReceiveJson<TestData>();
 
 				Assert.AreEqual(1, data.id);
 				Assert.AreEqual("Frank", data.name);				
@@ -55,7 +50,7 @@ namespace Flurl.Test.Http
 			using (var test = new HttpTest()) {
 				new HttpTest().RespondWithJson(new { id = 1, name = "Frank" });
 
-				var data = await "http://some-api.com".PostJsonAsync(new { a = 1, b = 2 }).ReceiveJsonAsync();
+				var data = await "http://some-api.com".PostJsonAsync(new { a = 1, b = 2 }).ReceiveJson();
 
 				Assert.AreEqual(1, data.id);
 				Assert.AreEqual("Frank", data.name);				
@@ -70,7 +65,7 @@ namespace Flurl.Test.Http
 					new { id = 2, name = "Claire" }
 				});
 
-				var data = await "http://some-api.com".PostJsonAsync(new { a = 1, b = 2 }).ReceiveJsonListAsync();
+				var data = await "http://some-api.com".PostJsonAsync(new { a = 1, b = 2 }).ReceiveJsonList();
 
 				Assert.AreEqual(1, data[0].id);
 				Assert.AreEqual("Frank", data[0].name);
@@ -84,7 +79,7 @@ namespace Flurl.Test.Http
 			using (var test = new HttpTest()) {
 				test.RespondWith("good job");
 
-				var data = await "http://some-api.com".PostJsonAsync(new { a = 1, b = 2 }).ReceiveStringAsync();
+				var data = await "http://some-api.com".PostJsonAsync(new { a = 1, b = 2 }).ReceiveString();
 
 				Assert.AreEqual("good job", data);
 			}
