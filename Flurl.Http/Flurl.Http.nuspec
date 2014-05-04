@@ -5,7 +5,7 @@
 		<version>0.1.0</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
-		<projectUrl>https://github.com/tmenier/flurl</projectUrl>
+		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>
 			Simple, testable HTTP extentions off Flurl's fluent URL builder chain.

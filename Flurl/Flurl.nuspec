@@ -2,17 +2,20 @@
 <package >
 	<metadata>
 		<id>Flurl</id>
-		<version>0.2.1</version>
+		<version>0.2.2</version>
 		<title>Flurl</title>
 		<authors>Todd Menier</authors>
-		<projectUrl>https://github.com/tmenier/flurl</projectUrl>
+		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>
 			A portable, fluent URL builder. Example:
 
 			"http://www.api.com".AppendPathSegment("endpoint").SetQueryParams(new { api_key = key, max_results = 20});
+			
+			For fluent, testable HTTP calls directly off the URL builder chain, check out Flurl.Http on NuGet!
 		</description>
 		<releaseNotes>
+			0.2.2 - Nuspec updates, no changes to binaries.
 			0.2.1 - Fixed a couple string extensions whose names were inconsistent with their Flurl.Url equivalent.
 			0.2.0 - Added PCL support.
 		</releaseNotes>
