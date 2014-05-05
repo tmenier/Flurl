@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>0.1.0</version>
+		<version>0.1.1</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -14,5 +14,9 @@
 		<copyright>Copyright 2014</copyright>
 
 		<tags>httpclient rest json http fluent portable url uri testing tdd assert</tags>
+
+		<dependencies>
+			<dependency id="Microsoft.Bcl.Async" />
+		</dependencies>
 	</metadata>
 </package>
