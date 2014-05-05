@@ -62,7 +62,7 @@ httpTest.RespondWithJson(401, new { message = "unauthorized" });
 httpTest.SimulateTimeout();
 ````
 
-`RespondWith` methods are chainable. Responses will be dequeued and provided to the calling code in the order the were added.
+`RespondWith` methods are chainable. Responses will be dequeued and provided to the calling code in the order they were added.
 
 ````c#
 httpTest
