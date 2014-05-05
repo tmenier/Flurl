@@ -4,7 +4,7 @@ layout: default
 
 ##Testable HTTP
 
-Flurl.Http provides a set of testing features that make isolated arrange-act-assert style testing dead simple. At its core is `HttpTest`, the creation of which kicks Flurl.Http into test mode, where all HTTP activity is automatically faked.
+Flurl.Http provides a set of testing features that make isolated arrange-act-assert style testing dead simple. At its core is `HttpTest`, the creation of which kicks Flurl into test mode, where all HTTP activity is automatically faked and recorded. No need for wrapper interfaces or injected mocks.
 
 ````c#
 using Flurl.Http.Testing;
@@ -12,12 +12,13 @@ using Flurl.Http.Testing;
 [Test]
 public void Test_Some_Http_Calling_Method() {
     using (var httpTest = new HttpTest()) {
-        sut.CallThingThatusesFlurlHttp(); // HTTP calls will be faked!
+        // Flurl is now in test mode
+        sut.CallThingThatUsesFlurlHttp(); // HTTP calls are faked!
     }
 }
 ````
 
-Most unit testing frameworks have some notion of setup/teardown code that is executed before and after each test. For classes with lots of tests against HTTP-calling code, you might prefer this approach:
+Most unit testing frameworks have some notion of setup/teardown code that is executed before/after each test. For classes with lots of tests against HTTP-calling code, you might prefer this approach:
 
 ````c#
 private HttpTest _httpTest;
@@ -34,7 +35,7 @@ public void CreateHttpTest() {
 
 [Test]
 public void Test_Some_Http_Calling_Method() {
-    // Flurl.Http is in test mode
+    // Flurl is in test mode
 }
 ````
 
@@ -61,7 +62,7 @@ httpTest.RespondWithJson(401, new { message = "unauthorized" });
 httpTest.SimulateTimeout();
 ````
 
-`RespondWith` methods are chainable and will be dequeued and provided in fake responses in the order specified.
+`RespondWith` methods are chainable. Responses will be dequeued and provided to the calling code in the order the were added.
 
 ````c#
 httpTest
@@ -72,15 +73,18 @@ httpTest
 sut.DoThingThatMakesSeveralHttpCalls();
 ````
 
-Like most things in Flurl, you can get lower-level access where the fluent methods don't suit your needs. In this case, add `HttpResponseMessage` objects to the response queue directly:
+When the fluent methods don't suit your needs, you can create and add `HttpResponseMessage`s to the queue directly:
 
 ````c#
-httpTest.ResponseQueue.Enqueue(new HttpResponseMessage {...});
+var response = new HttpResponseMessage { ... };
+httpTest.ResponseQueue.Enqueue(response);
 ````
 
 ###Assert
 
-As HTTP methods are faked, they are automatically recorded, allowing you to assert that certain calls were made. `HttpTest` provides a couple assertion methods against the call log:
+As HTTP methods are faked, they are automatically recorded, allowing you to assert that certain calls were made. Assertions are test framework-agnostic; they throw an exception at any point when a match is not found as specified, signaling a test failure in virtually all testing frameworks.
+
+`HttpTest` provides a couple assertion methods against the call log:
 
 ````c#
 sut.DoThing();
@@ -96,18 +100,16 @@ You can make further assertions against the call log with a fluent API:
 httpTest.ShouldHaveCalled("http://some-api.com/*")
     .WithVerb(HttpMethd.Post)
     .WithContentType("application/json")
-    .WithRequestBody("{\"a\":*,\"b\":*}")
+    .WithRequestBody("{\"a\":*,\"b\":*}") // supports wildcards
     .Times(1);
 ````
 
-`Times(n)` allows you to assert that the call was made a specific number of times; otherwise the assertion just tests there are more than zero matches in the call log. `WithRequestBody` supports * wildcards.
+`Times(n)` allows you to assert that the call was made a specific number of times, otherwise the assertion passes when there are one or more matches in the call log.
 
-Assertions are test framework-agnostic; they throw an exception at any point when a match is not found as specified, signaling a test failure to virtually any testing framework.
-
-You can also access the call log directly if the built-in assertions don't meet your needs:
+Here again, you have lower-level access when the fluent methods aren't enough. In this case, to the call log:
 
 ````c#
 Assert.That(httpTest.CallLog.Any(call => /* check an HttpCall */));
 ````
 
-As implied, `HttpTest.CallLog` is an instance of `List<HttpCall>`. An HttpCall object contains lots of useful information as sepcified [here]({{ site.baseurl }}/fluent-http/#httpcall).
+CallLog is an instance of `List<HttpCall>`. An `HttpCall` object contains lots of useful information as sepcified [here]({{ site.baseurl }}/fluent-http/#httpcall).
