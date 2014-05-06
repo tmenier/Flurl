@@ -6,13 +6,10 @@
 		<title>Flurl</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
+		<licenseUrl>https://raw.githubusercontent.com/tmenier/Flurl/master/LICENSE</licenseUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>
-			A portable, fluent URL builder. Example:
-
-			"http://www.api.com".AppendPathSegment("endpoint").SetQueryParams(new { api_key = key, max_results = 20});
-			
-			For fluent, testable HTTP calls directly off the URL builder chain, check out Flurl.Http on NuGet!
+			A portable, fluent URL builder. For HTTP features, get Flurl.Http.
 		</description>
 		<releaseNotes>
 			0.2.2 - Nuspec updates, no changes to binaries.
