@@ -4,7 +4,7 @@ layout: default
 
 ##Testable HTTP
 
-Flurl.Http provides a set of testing features that make isolated arrange-act-assert style testing dead simple. At its core is `HttpTest`, the creation of which kicks Flurl into test mode, where all HTTP activity is automatically faked and recorded. No need for wrapper interfaces or injected mocks.
+Flurl.Http provides a set of testing features that make isolated arrange-act-assert style testing dead simple. At its core is `HttpTest`, the creation of which kicks Flurl into test mode, where all HTTP activity in the test subject is automatically faked and recorded. No need for wrapper interfaces or injected mocks.
 
 ````c#
 using Flurl.Http.Testing;
@@ -18,7 +18,7 @@ public void Test_Some_Http_Calling_Method() {
 }
 ````
 
-Most unit testing frameworks have some notion of setup/teardown code that is executed before/after each test. For classes with lots of tests against HTTP-calling code, you might prefer this approach:
+Most unit testing frameworks have some notion of setup/teardown methods that are executed before/after each test. For classes with lots of tests against HTTP-calling code, you might prefer this approach:
 
 ````c#
 private HttpTest _httpTest;
@@ -104,7 +104,7 @@ httpTest.ShouldHaveCalled("http://some-api.com/*")
     .Times(1);
 ````
 
-`Times(n)` allows you to assert that the call was made a specific number of times, otherwise the assertion passes when there are one or more matches in the call log.
+`Times(n)` allows you to assert that the call was made a specific number of times; otherwise, the assertion passes when one or more matching calls were made.
 
 Here again, you have lower-level access when the fluent methods aren't enough. In this case, to the call log:
 
