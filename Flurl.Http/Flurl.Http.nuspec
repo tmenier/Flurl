@@ -17,7 +17,7 @@
 		<tags>httpclient rest json http fluent portable url uri testing tdd assert</tags>
 
 		<dependencies>
-			<dependency id="Microsoft.Bcl.Async" />
+			<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
 		</dependencies>
 	</metadata>
 </package>
