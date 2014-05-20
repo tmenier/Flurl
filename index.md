@@ -8,30 +8,14 @@ title: Home
 ````c#
 await "https://api.mysite.com"
     .AppendPathSegment("person")
-    .SetQueryParams(new { ap_key = "my-key" })
-    .WithOAuthBearerToken("MyToken")
+    .SetQueryParams(new { api_key = "my_key" })
+    .WithOAuthBearerToken("my_oauth_token")
     .PostJsonAsync(new { first_name = firstName, last_name = lastName });
-
-[Test]
-public void Can_Create_Person() {
-    using (var httpTest = new HttpTest()) {
-        // arrange
-        httpTest.RespondWith(200, "OK");
-
-        // act
-        sut.CreatePersonAsync("Frank", "Underwood").Wait();
-        
-        // assert
-        httpTest.ShouldHaveCalled("http://api.mysite.com/*")
-            .WithVerb(HttpMethod.Post)
-            .WithContentType("application/json");
-    }
-}
 ````
 
-With a discoverable API and extensibility at every turn, Flurl is intended to make building and calling URLs easy and downright fun.
+With a discoverable API, [extensibility](extensibility) at every turn, and a nifty set of [testing features](testable-http), Flurl is intended to make building and calling URLs easy and downright fun.
 
-##Contents
+##Documentation
 
 - [Installation](installation)
 - [Fluent URL building](fluent-url)

@@ -29,7 +29,7 @@ public void CreateHttpTest() {
 }
 
 [TearDown]
-public void CreateHttpTest() {
+public void DisposeHttpTest() {
     _httpTest.Dispose();
 }
 
