@@ -79,7 +79,7 @@ await url.WithBasicAuth("username", "password").GetJson();
 Authenticate with an OAuth bearer token:
 
 ````c#
-await url.WithBasicAuth("username", "password").GetJson();
+await url.WithOAuthBearerToken("mytoken").GetJson();
 ````
 
 Specify a timeout:
