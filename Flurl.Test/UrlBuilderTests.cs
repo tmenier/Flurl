@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using NUnit.Framework;
 
 namespace Flurl.Test
@@ -8,27 +10,43 @@ namespace Flurl.Test
     public class UrlBuilderTests
     {
 		[Test]
-		public void Url_implicitly_converts_to_string() {
-			var url = new Url("http://www.mysite.com/more?x=1&y=2");
-			var someMethodThatTakesAString = new Action<string> (s => { });
-			someMethodThatTakesAString(url); // if this compiles, test passed.
+		// check that for every Url method, we have an equivalent string extension
+		public void extension_methods_consistently_supported() {
+			var urlMethods = typeof(Url).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Where(m => !m.IsSpecialName);
+			var stringExts = ReflectionHelper.GetAllExtensionMethods<string>(typeof(Url).Assembly);
+
+			foreach (var method in urlMethods) {
+				if (method.Name == "ToString")
+					continue;
+
+				if (!stringExts.Any(m => ReflectionHelper.AreSameMethodSignatures(method, m))) {
+					Assert.Fail("No equivalent string extension method found for Url.{0}", method.Name);
+				}
+			}
 		}
 
 		[Test]
-		public void IsUrl_true_for_valid_url() {
-			Assert.IsTrue("http://www.mysite.com/more?x=1&y=2".IsUrl());
+		public void Path_returns_everything_but_querystring() {
+			var path = new Url("http://www.mysite.com/more?x=1&y=2").Path;
+			Assert.AreEqual("http://www.mysite.com/more", path);
 		}
 
 		[Test]
-		public void IsUrl_false_for_invalid_url() {
-			Assert.IsFalse("not_a_url".IsUrl());
+		public void QueryParams_returns_query_params() {
+			var q = new Url("http://www.mysite.com/more?x=1&y=2").QueryParams;
+			CollectionAssert.AreEqual(new[] { "x", "y" }, q.Keys);
+			CollectionAssert.AreEqual(new[] { "1", "2" }, q.Values);
+		}
+
+		[Test, ExpectedException(typeof(ArgumentNullException))]
+		public void constructor_requires_nonnull_arg() {
+			new Url(null);
 		}
 
 		[Test]
-		public void constructor_parses_url() {
-			var url = new Url("http://www.mysite.com/more?x=1&y=2");
-			Assert.AreEqual("http://www.mysite.com/more", url.Path);
-			CollectionAssert.AreEqual(new QueryParamCollection {{ "x", "1" }, { "y", "2" }}, url.QueryParams);
+		public void Combine_works() {
+			var url = Url.Combine("http://www.foo.com/", "/too/", "/many/", "/slashes/", "too", "few", "one/two/");
+			Assert.AreEqual("http://www.foo.com/too/many/slashes/too/few/one/two", url);
 		}
 
 		[Test]
@@ -37,20 +55,20 @@ namespace Flurl.Test
 			Assert.AreEqual("http://www.mysite.com/endpoint", url.ToString());
 		}
 
-		[Test]
+		[Test, ExpectedException(typeof(ArgumentNullException))]
 		public void appending_null_path_segment_throws_arg_null_ex() {
-			Assert.Throws<ArgumentNullException>(() => "http://www.mysite.com".AppendPathSegment(null));
+			"http://www.mysite.com".AppendPathSegment(null);
 		}
 
 		[Test]
 		public void can_append_multiple_path_segments_by_multi_args() {
-			var url = "http://www.mysite.com".AppendPathSegments("category", "endpoint");
+			var url = "http://www.mysite.com".AppendPathSegments("category", "/endpoint/");
 			Assert.AreEqual("http://www.mysite.com/category/endpoint", url.ToString());
 		}
 
 		[Test]
 		public void can_append_multiple_path_segments_by_enumerable() {
-			IEnumerable<string> segments = new[] { "category", "endpoint" };
+			IEnumerable<string> segments = new[] { "/category/", "endpoint" };
 			var url = "http://www.mysite.com".AppendPathSegments(segments);
 			Assert.AreEqual("http://www.mysite.com/category/endpoint", url.ToString());
 		}
@@ -62,9 +80,21 @@ namespace Flurl.Test
 		}
 
 		[Test]
+		public void can_change_query_param() {
+			var url = "http://www.mysite.com?x=1".SetQueryParam("x", 2);
+			Assert.AreEqual("http://www.mysite.com?x=2", url.ToString());
+		}
+
+		[Test]
 		public void can_add_multiple_query_params_from_anon_object() {
 			var url = "http://www.mysite.com".SetQueryParams(new { x = 1, y = 2 });
 			Assert.AreEqual("http://www.mysite.com?x=1&y=2", url.ToString());
+		}
+
+		[Test]
+		public void can_change_multiple_query_params_from_anon_object() {
+			var url = "http://www.mysite.com?x=1&y=2&z=3".SetQueryParams(new { x = 8, z = 9 });
+			Assert.AreEqual("http://www.mysite.com?x=8&y=2&z=9", url.ToString());
 		}
 
 		[Test]
@@ -88,7 +118,13 @@ namespace Flurl.Test
 
 		[Test]
 		public void can_remove_query_params_by_enumerable() {
-			var url = "http://www.mysite.com/more?x=1&y=2".RemoveQueryParams(new[] {"x", "y"});
+			var url = "http://www.mysite.com/more?x=1&y=2&z=3".RemoveQueryParams(new[] {"x", "z"});
+			Assert.AreEqual("http://www.mysite.com/more?y=2", url.ToString());
+		}
+
+		[Test]
+		public void removing_nonexisting_query_params_is_ignored() {
+			var url = "http://www.mysite.com/more".RemoveQueryParams("x", "y");
 			Assert.AreEqual("http://www.mysite.com/more", url.ToString());
 		}
 
@@ -125,9 +161,20 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void combine_works() {
-			var url = Url.Combine("http://www.foo.com/", "/too/", "/many/", "/slashes/", "too", "few", "one/two/");
-			Assert.AreEqual("http://www.foo.com/too/many/slashes/too/few/one/two", url);
+		public void Url_implicitly_converts_to_string() {
+			var url = new Url("http://www.mysite.com/more?x=1&y=2");
+			var someMethodThatTakesAString = new Action<string>(s => { });
+			someMethodThatTakesAString(url); // if this compiles, test passed.
+		}
+
+		[Test]
+		public void IsUrl_true_for_valid_url() {
+			Assert.IsTrue("http://www.mysite.com/more?x=1&y=2".IsUrl());
+		}
+
+		[Test]
+		public void IsUrl_false_for_invalid_url() {
+			Assert.IsFalse("www.mysite.com".IsUrl());
 		}
 	}
 }

@@ -10,14 +10,16 @@ namespace Flurl.Test.Http
 		[Test]
 		// check that for every FlurlClient extension method, we have an equivalent Url and string extension
 		public void extension_methods_consistently_supported() {
-			var allExtMethods = ReflectionHelper.GetAllExtensionMethods(typeof(FlurlClient).Assembly);
-			var fcExtensions = allExtMethods.Where(m => m.GetParameters()[0].ParameterType == typeof(FlurlClient)).ToArray();
+			var fcExts = ReflectionHelper.GetAllExtensionMethods<FlurlClient>(typeof(FlurlClient).Assembly);
+			var urlExts = ReflectionHelper.GetAllExtensionMethods<Url>(typeof(FlurlClient).Assembly);
+			var stringExts = ReflectionHelper.GetAllExtensionMethods<string>(typeof(FlurlClient).Assembly);
 
-			foreach (var method in fcExtensions) {
-				foreach (var type in new[] { typeof(string), typeof(Url) }) {
-					if (!allExtMethods.Except(fcExtensions).Any(m => ReflectionHelper.IsEquivalentExtensionMethod(method, m, type))) {
-						Assert.Fail("No equivalent {0} extension method found for FlurlClient.{1}", type.Name, method.Name);
-					}
+			foreach (var method in fcExts) {
+				if (!urlExts.Any(m => ReflectionHelper.AreSameMethodSignatures(method, m))) {
+					Assert.Fail("No equivalent URL extension method found for FlurlClient.{0}", method.Name);
+				}
+				if (!stringExts.Any(m => ReflectionHelper.AreSameMethodSignatures(method, m))) {
+					Assert.Fail("No equivalent string extension method found for FlurlClient.{0}", method.Name);
 				}
 			}
 		}

@@ -29,7 +29,6 @@ namespace Flurl
 
 			var parts = baseUrl.Split('?');
 			Path = parts[0];
-			// nice tip from John Bledsoe: http://stackoverflow.com/a/1877016/62600
 			QueryParams = QueryParamCollection.Parse(parts.Length > 1 ? parts[1] : "");
 		}
 
@@ -81,6 +80,7 @@ namespace Flurl
 		public Url AppendPathSegments(params string[] segments) {
 			foreach(var segment in segments)
 				AppendPathSegment(segment);
+
 			return this;
 		}
 
@@ -140,6 +140,7 @@ namespace Flurl
 		public Url RemoveQueryParams(params string[] names) {
 			foreach(var name in names)
 				QueryParams.Remove(name);
+
 			return this;
 		}
 
@@ -163,6 +164,7 @@ namespace Flurl
 			var url = Path;
 			if (QueryParams.Count > 0)
 				url += "?" + QueryParams;
+
 			return url;
 		}
 
