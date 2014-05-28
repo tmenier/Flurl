@@ -9,9 +9,10 @@
 		<licenseUrl>https://raw.githubusercontent.com/tmenier/Flurl/master/LICENSE</licenseUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>
-			A portable, fluent URL builder. For HTTP features, get Flurl.Http.
+			A portable, fluent URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.
 		</description>
 		<releaseNotes>
+			1.0.0 - Minor code cleanup, no API changes.
 			0.2.2 - Nuspec updates, no changes to binaries.
 			0.2.1 - Fixed a couple string extensions whose names were inconsistent with their Flurl.Url equivalent.
 			0.2.0 - Added PCL support.

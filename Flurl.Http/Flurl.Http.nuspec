@@ -9,7 +9,7 @@
 		<licenseUrl>https://raw.githubusercontent.com/tmenier/Flurl/master/LICENSE</licenseUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>
-			Simple, testable HTTP calls off Flurl's fluent URL builder. Capable REST client. HttpClient under the hood.
+			Fluent, testable, portable HTTP client. Extends Flurl's URL builder chain. HttpClient under the hood.
 		</description>
 		<releaseNotes />
 		<copyright>Copyright 2014</copyright>
