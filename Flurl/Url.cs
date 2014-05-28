@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Flurl.Common;
+using Flurl.Util;
 
 namespace Flurl
 {

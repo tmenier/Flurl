@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Text;
-using Flurl.Common;
+using Flurl.Util;
 
 namespace Flurl.Http.Content
 {
