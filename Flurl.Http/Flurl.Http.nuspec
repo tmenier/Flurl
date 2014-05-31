@@ -2,19 +2,29 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>0.1.2</version>
+		<version>0.1.3</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
 		<licenseUrl>https://raw.githubusercontent.com/tmenier/Flurl/master/LICENSE</licenseUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>
-			Fluent, testable, portable HTTP client. Extends Flurl's URL builder chain. HttpClient under the hood.
+			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
+
+			* Easily deserialize JSON responses into POCOs or dynamics.
+			* Supports testing by globally faking/recording all HTTP calls and providing fluent assertion helpers.
+			* Sports a modern, asynchronous API supporting the TAP pattern (async/await).
+			* Easy to configure and extend to meet your specific needs.
+			* HttpClient under the hood.
 		</description>
-		<releaseNotes />
+
+		<releaseNotes>
+			0.1.3 - Added support for HEAD requests via HeadAsync (thanks to @benb1n).
+		</releaseNotes>
+
 		<copyright>Copyright 2014</copyright>
 
-		<tags>httpclient rest json http fluent portable url uri testing tdd assert</tags>
+		<tags>httpclient rest json http fluent portable url uri tdd assert async</tags>
 
 		<dependencies>
 			<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
