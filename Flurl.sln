@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl", "Flurl\Flurl.csproj", "{70A34167-759E-4902-82E0-E6A84C2CE46F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl.Test", "Flurl.Test\Flurl.Test.csproj", "{81F583F8-1D15-4E0B-8064-EB892042C09A}"
-EndProject
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{BA3FF997-39E0-49F7-AD38-C3B80225AC41}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
@@ -16,6 +14,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl", "Flurl\Flurl.csproj", "{70A34167-759E-4902-82E0-E6A84C2CE46F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl.Test", "Flurl.Test\Flurl.Test.csproj", "{81F583F8-1D15-4E0B-8064-EB892042C09A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl.Http", "Flurl.Http\Flurl.Http.csproj", "{4C163DD1-318A-42C0-ACF2-9E0D766D8900}"
 EndProject
