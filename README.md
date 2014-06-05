@@ -1,6 +1,6 @@
 #Flurl
 
-Flurl is a modern, fluent, asynchronous, testable, portable, buzzword-laden URL builder and HTTP client helper.
+Flurl is a modern, fluent, asynchronous, testable, portable, buzzword-laden URL builder and HTTP client library.
 
 ````c#
 await "https://api.mysite.com"
