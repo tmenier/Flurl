@@ -11,7 +11,7 @@
     <AssemblyName>Flurl</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile>Profile136</TargetFrameworkProfile>
+    <TargetFrameworkProfile>Profile328</TargetFrameworkProfile>
     <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -46,17 +46,15 @@
     <Compile Include="Url.cs" />
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup>
-    <None Include="Flurl.nuspec">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <PropertyGroup>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>$(SolutionDir).nuget\nuget.exe pack $(ProjectPath) -o $(SolutionDir)\publish -Prop Configuration=$(ConfigurationName)</PostBuildEvent>
+    <PostBuildEvent>$(SolutionDir).nuget\nuget.exe pack $(SolutionDir)Flurl.nuspec
+if $(ConfigurationName) == Release (
+  copy $(TargetDir)Flurl.*.nupkg $(SolutionDir)publish
+)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

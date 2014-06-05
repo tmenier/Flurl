@@ -11,7 +11,7 @@
     <RootNamespace>Flurl.Http</RootNamespace>
     <AssemblyName>Flurl.Http</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Profile158</TargetFrameworkProfile>
+    <TargetFrameworkProfile>Profile344</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -33,54 +33,20 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\Flurl.Http.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Flurl.Http.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .NET Framework is automatically included -->
-    <ProjectReference Include="..\Flurl\Flurl.csproj">
-      <Project>{70a34167-759e-4902-82e0-e6a84c2ce46f}</Project>
-      <Name>Flurl</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Content\CapturedFormUrlEncodedContent.cs" />
-    <Compile Include="Content\CapturedStringContent.cs" />
-    <Compile Include="ClientConfigExtensions.cs" />
-    <Compile Include="Configuration\DefaultHttpClientFactory.cs" />
-    <Compile Include="DeleteExtensions.cs" />
-    <Compile Include="HeadExtensions.cs" />
-    <Compile Include="PutExtensions.cs" />
     <Compile Include="DownloadExtensions.cs" />
-    <Compile Include="Configuration\FlurlHttpConfigurationOptions.cs" />
-    <Compile Include="HttpCall.cs" />
-    <Compile Include="FlurlHttpException.cs" />
-    <Compile Include="GetExtensions.cs" />
-    <Compile Include="Configuration\IHttpClientFactory.cs" />
-    <Compile Include="Content\CapturedJsonContent.cs" />
-    <Compile Include="Testing\HttpCallAssertException.cs" />
-    <Compile Include="Testing\HttpCallAssertion.cs" />
-    <Compile Include="Testing\TestHttpClientFactory.cs" />
-    <Compile Include="Testing\FakeHttpMessageHandler.cs" />
-    <Compile Include="Testing\TimeoutResponseMessage.cs" />
-    <Compile Include="Util\JsonHelper.cs" />
-    <Compile Include="PostExtensions.cs" />
-    <Compile Include="FlurlClient.cs" />
-    <Compile Include="FlurlHttp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Configuration\FlurlMessageHandler.cs" />
-    <Compile Include="ResponseMessageExtensions.cs" />
-    <Compile Include="Testing\HttpTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Flurl.Http.nuspec">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Threading.Tasks">
       <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\portable-net40+sl4+win8+wp71+wpa81\Microsoft.Threading.Tasks.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Threading.Tasks.Extensions">
       <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\portable-net40+sl4+win8+wp71+wpa81\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
@@ -95,24 +61,32 @@
       <HintPath>..\packages\PCLStorage.0.9.6\lib\portable-net45+sl5+wp8+wpa81+win8+monoandroid+monotouch\PCLStorage.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="System.IO">
-      <HintPath>..\packages\Microsoft.Bcl.1.1.8\lib\portable-net40+sl5+win8+wp8+wpa81\System.IO.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Bcl.1.1.9\lib\portable-net40+sl5+win8+wp8+wpa81\System.IO.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http">
-      <HintPath>..\packages\Microsoft.Net.Http.2.2.20\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Net.Http.2.2.22\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http.Extensions">
-      <HintPath>..\packages\Microsoft.Net.Http.2.2.20\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Extensions.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Net.Http.2.2.22\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http.Primitives">
-      <HintPath>..\packages\Microsoft.Net.Http.2.2.20\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Primitives.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Net.Http.2.2.22\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Primitives.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime">
-      <HintPath>..\packages\Microsoft.Bcl.1.1.8\lib\portable-net40+sl5+win8+wp8+wpa81\System.Runtime.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Bcl.1.1.9\lib\portable-net40+sl5+win8+wp8+wpa81\System.Runtime.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Threading.Tasks">
-      <HintPath>..\packages\Microsoft.Bcl.1.1.8\lib\portable-net40+sl5+win8+wp8+wpa81\System.Threading.Tasks.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Bcl.1.1.9\lib\portable-net40+sl5+win8+wp8+wpa81\System.Threading.Tasks.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Flurl\Flurl.csproj">
+      <Project>{70a34167-759e-4902-82e0-e6a84c2ce46f}</Project>
+      <Name>Flurl</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="..\Flurl.Http.Shared\Flurl.Http.Shared.projitems" Label="Shared" Condition="Exists('..\Flurl.Http.Shared\Flurl.Http.Shared.projitems')" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -122,8 +96,9 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>if $(ConfigurationName) == Release (
-  $(SolutionDir).nuget\nuget.exe pack $(ProjectPath) -o $(SolutionDir)publish -IncludeReferencedProjects -Prop Configuration=Release
+    <PostBuildEvent>$(SolutionDir).nuget\nuget.exe pack $(SolutionDir)Flurl.Http.nuspec
+if $(ConfigurationName) == Release (
+  copy $(TargetDir)Flurl.Http.*.nupkg $(SolutionDir)publish
 )</PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
