@@ -12,6 +12,7 @@
 			A portable, fluent URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.
 		</description>
 		<releaseNotes>
+			1.0.1 - Fixed DLL version, dropped support for xbox and wp7 due to VS2013 upgrade 
 			1.0.0 - Minor code cleanup, no API changes.
 			0.2.2 - Nuspec updates, no changes to binaries.
 			0.2.1 - Fixed a couple string extensions whose names were inconsistent with their Flurl.Url equivalent.
