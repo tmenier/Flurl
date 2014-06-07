@@ -34,12 +34,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Flurl">
-      <HintPath>..\packages\Flurl.1.0.0\lib\portable-net40+sl50+win+wpa81+wp80+MonoAndroid10+MonoTouch10\Flurl.dll</HintPath>
-    </Reference>
-    <Reference Include="Flurl.Http, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Flurl, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Flurl.Http.0.2.0\lib\net45\Flurl.Http.dll</HintPath>
+      <HintPath>..\packages\Flurl.1.0.1\lib\portable-net40+sl50+win+wpa81+wp80+MonoAndroid10+MonoTouch10\Flurl.dll</HintPath>
+    </Reference>
+    <Reference Include="Flurl.Http, Version=0.1.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Flurl.Http.0.2.0-pre\lib\net45\Flurl.Http.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
