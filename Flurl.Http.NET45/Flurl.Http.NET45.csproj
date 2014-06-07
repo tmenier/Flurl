@@ -48,7 +48,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DownloadExtensions.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -58,6 +57,9 @@
       <Project>{70a34167-759e-4902-82e0-e6a84c2ce46f}</Project>
       <Name>Flurl</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="..\Flurl.Http.Shared\Flurl.Http.Shared.projitems" Label="Shared" Condition="Exists('..\Flurl.Http.Shared\Flurl.Http.Shared.projitems')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
