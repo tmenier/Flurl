@@ -98,9 +98,8 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>$(SolutionDir).nuget\nuget.exe pack $(SolutionDir)Flurl.Http.nuspec
-if $(ConfigurationName) == Release (
-  copy $(TargetDir)Flurl.Http.*.nupkg $(SolutionDir)publish
+    <PostBuildEvent>if $(ConfigurationName) == Release (
+  "$(SolutionDir).nuget\nuget.exe" pack "$(SolutionDir)Flurl.Http.nuspec" -o "$(SolutionDir)publish" -IncludeReferencedProjects
 )</PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />

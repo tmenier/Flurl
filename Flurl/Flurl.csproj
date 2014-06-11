@@ -51,9 +51,8 @@
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>$(SolutionDir).nuget\nuget.exe pack $(SolutionDir)Flurl.nuspec
-if $(ConfigurationName) == Release (
-  copy $(TargetDir)Flurl.*.nupkg $(SolutionDir)publish
+    <PostBuildEvent>if $(ConfigurationName) == Release (
+  "$(SolutionDir).nuget\nuget.exe" pack "$(SolutionDir)Flurl.nuspec" -o "$(SolutionDir)publish" -IncludeReferencedProjects
 )</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
