@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>0.2.0</version>
+		<version>0.2.1</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -10,15 +10,9 @@
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>
 			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
-
-			var result = await "http://api.com".WithHeaders(new { x = 1, y = 2 }).GetJsonAsync&lt;T&gt;();
-
-			* Capable REST client supporting OAuth headers and all major HTTP verbs.
-			* Supports testing by globally faking/recording all HTTP calls and providing fluent assertion helpers.
-			* Easy to configure and extend to meet your specific needs.
-			* HttpClient under the hood.
 		</description>
 		<releaseNotes>
+			0.2.1 - Added support for getting streams and byte arrays.
 			0.2.0 - Added .NET 4.5 specific version with fewer dependencies.
 			0.1.3 - Added support for HEAD requests via HeadAsync (thanks to @benb1n).
 		</releaseNotes>
