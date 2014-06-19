@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -128,5 +129,53 @@ namespace Flurl.Http
 		public static Task<string> GetStringAsync(this Url url) {
 			return new FlurlClient(url).GetStringAsync();
 		}
+
+		/// <summary>
+		/// Sends an asynchronous GET request and returns the response body as a stream.
+		/// </summary>
+		/// <returns>A Task whose result is the response body.</returns>
+		public static Task<Stream> GetStreamAsync(this FlurlClient client) {
+			return client.GetAsync().ReceiveStream();
+		}
+
+		/// <summary>
+		/// Creates a FlurlClient from the URL and sends an asynchronous GET request and returns the response body as a stream.
+		/// </summary>
+		/// <returns>A Task whose result is the response body.</returns>
+		public static Task<Stream> GetStreamAsync(this string url) {
+			return new FlurlClient(url).GetStreamAsync();
+		}
+
+		/// <summary>
+		/// Creates a FlurlClient from the URL and sends an asynchronous GET request and returns the response body as a stream.
+		/// </summary>
+		/// <returns>A Task whose result is the response body.</returns>
+		public static Task<Stream> GetStreamAsync(this Url url) {
+			return new FlurlClient(url).GetStreamAsync();
+		}
+
+		/// <summary>
+		/// Sends an asynchronous GET request and returns the response body as a byte array.
+		/// </summary>
+		/// <returns>A Task whose result is the response body.</returns>
+		public static Task<byte[]> GetBytesAsync(this FlurlClient client) {
+			return client.GetAsync().ReceiveBytes();
+		}
+
+		/// <summary>
+		/// Creates a FlurlClient from the URL and sends an asynchronous GET request and returns the response body as a byte array.
+		/// </summary>
+		/// <returns>A Task whose result is the response body.</returns>
+		public static Task<byte[]> GetBytesAsync(this string url) {
+			return new FlurlClient(url).GetBytesAsync();
+		}
+
+		/// <summary>
+		/// Creates a FlurlClient from the URL and sends an asynchronous GET request and returns the response body as a byte array.
+		/// </summary>
+		/// <returns>A Task whose result is the response body.</returns>
+		public static Task<byte[]> GetBytesAsync(this Url url) {
+			return new FlurlClient(url).GetBytesAsync();
+		}		
 	}
 }

@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Flurl.Http.Testing;
@@ -63,6 +65,24 @@ namespace Flurl.Test.Http
 			var data = await "http://some-api.com".GetStringAsync();
 
 			Assert.AreEqual("good job", data);
+		}
+
+		[Test]
+		public async Task can_get_stream() {
+			new HttpTest().RespondWith("good job");
+
+			var data = await "http://some-api.com".GetStreamAsync();
+
+			Assert.AreEqual(new MemoryStream(Encoding.UTF8.GetBytes("good job")), data);
+		}
+
+		[Test]
+		public async Task can_get_bytes() {
+			new HttpTest().RespondWith("good job");
+
+			var data = await "http://some-api.com".GetBytesAsync();
+
+			Assert.AreEqual(Encoding.UTF8.GetBytes("good job"), data);
 		}
 
 		[Test]
