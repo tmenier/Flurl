@@ -6,7 +6,7 @@
     <SharedGUID>4c7c0861-84f6-436e-8fa6-4c318b336a7b</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>Flurl.Test.Shared</Import_RootNamespace>
+    <Import_RootNamespace>Flurl.Test</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Http\ClientConfigTests.cs" />
@@ -15,6 +15,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Http\GetTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\GlobalConfigTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\HeadTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Http\HttpTestFixtureBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\PostTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\TestingTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ReflectionHelper.cs" />

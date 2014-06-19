@@ -11,21 +11,19 @@ using NUnit.Framework;
 namespace Flurl.Test.Http
 {
 	[TestFixture]
-	public class GetTests
+	public class GetTests : HttpTestFixtureBase
 	{
 		[Test]
 		public async Task can_get() {
-			var test = new HttpTest();
-
 			await "http://www.api.com".GetAsync();
 
-			Assert.AreEqual(1, test.CallLog.Count);
-			Assert.AreEqual(HttpMethod.Get, test.CallLog.Single().Request.Method);
+			Assert.AreEqual(1, HttpTest.CallLog.Count);
+			Assert.AreEqual(HttpMethod.Get, HttpTest.CallLog.Single().Request.Method);
 		}
 
 		[Test]
 		public async Task can_get_json() {
-			new HttpTest().RespondWithJson(new TestData { id = 1, name = "Frank" });
+			HttpTest.RespondWithJson(new TestData { id = 1, name = "Frank" });
 
 			var data = await "http://some-api.com".GetJsonAsync<TestData>();
 
@@ -35,7 +33,7 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_get_json_dynamic() {
-			new HttpTest().RespondWithJson(new { id = 1, name = "Frank" });
+			HttpTest.RespondWithJson(new { id = 1, name = "Frank" });
 
 			var data = await "http://some-api.com".GetJsonAsync();
 
@@ -45,7 +43,7 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_get_json_dynamic_list() {
-			new HttpTest().RespondWithJson(new[] {
+			HttpTest.RespondWithJson(new[] {
 				new { id = 1, name = "Frank" },
 				new { id = 2, name = "Claire" }
 			});
@@ -60,7 +58,7 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_get_string() {
-			new HttpTest().RespondWith("good job");
+			HttpTest.RespondWith("good job");
 
 			var data = await "http://some-api.com".GetStringAsync();
 
@@ -69,7 +67,7 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_get_stream() {
-			new HttpTest().RespondWith("good job");
+			HttpTest.RespondWith("good job");
 
 			var data = await "http://some-api.com".GetStreamAsync();
 
@@ -78,7 +76,7 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_get_bytes() {
-			new HttpTest().RespondWith("good job");
+			HttpTest.RespondWith("good job");
 
 			var data = await "http://some-api.com".GetBytesAsync();
 
@@ -87,7 +85,7 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task failure_throws_detailed_exception() {
-			new HttpTest().RespondWith(500, "bad job");
+			HttpTest.RespondWith(500, "bad job");
 
 			try {
 				await "http://api.com".GetStringAsync();

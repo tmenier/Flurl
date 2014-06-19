@@ -3,44 +3,31 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http;
-using Flurl.Http.Testing;
 using NUnit.Framework;
 
 namespace Flurl.Test.Http
 {
 	[TestFixture]
-	public class TestingTests
+	public class TestingTests : HttpTestFixtureBase
 	{
-		private HttpTest _httpTest;
-
-		[SetUp]
-		public void CreateHttpTest() {
-			_httpTest = new HttpTest();
-		}
-
-		[TearDown]
-		public void DisposeHttpTest() {
-			_httpTest.Dispose();
-		}
-
 		[Test]
 		public async Task fake_get_works() {
-			_httpTest.RespondWith("great job");
+			HttpTest.RespondWith("great job");
 
 			await "http://www.api.com".GetAsync();
 
-			var lastCall = _httpTest.CallLog.Last();
+			var lastCall = HttpTest.CallLog.Last();
 			Assert.AreEqual(HttpStatusCode.OK, lastCall.Response.StatusCode);
 			Assert.AreEqual("great job", await lastCall.Response.Content.ReadAsStringAsync());
 		}
 
 		[Test]
 		public async Task fake_post_works() {
-			_httpTest.RespondWith("great job");
+			HttpTest.RespondWith("great job");
 
 			await "http://www.api.com".PostJsonAsync(new { x = 5 });
 
-			var lastCall = _httpTest.CallLog.Last();
+			var lastCall = HttpTest.CallLog.Last();
 			Assert.AreEqual("{\"x\":5}", lastCall.RequestBody);
 			Assert.AreEqual(HttpStatusCode.OK, lastCall.Response.StatusCode);
 			Assert.AreEqual("great job", await lastCall.Response.Content.ReadAsStringAsync());
@@ -50,14 +37,14 @@ namespace Flurl.Test.Http
 		public async Task no_response_setup_returns_empty_reponse() {
 			await "http://www.api.com".GetAsync();
 
-			var lastCall = _httpTest.CallLog.Last();
+			var lastCall = HttpTest.CallLog.Last();
 			Assert.AreEqual(HttpStatusCode.OK, lastCall.Response.StatusCode);
 			Assert.AreEqual("", await lastCall.Response.Content.ReadAsStringAsync());
 		}
 
 		[Test]
 		public async Task can_setup_multiple_responses() {
-			_httpTest
+			HttpTest
 				.RespondWith("one")
 				.RespondWith("two")
 				.RespondWith("three");
@@ -66,19 +53,19 @@ namespace Flurl.Test.Http
 			await "http://www.api.com/2".GetAsync();
 			await "http://www.api.com/3".GetAsync();
 
-			var calls = _httpTest.CallLog;
+			var calls = HttpTest.CallLog;
 			Assert.AreEqual(3, calls.Count);
 			Assert.AreEqual("one", await calls[0].Response.Content.ReadAsStringAsync());
 			Assert.AreEqual("two", await calls[1].Response.Content.ReadAsStringAsync());
 			Assert.AreEqual("three", await calls[2].Response.Content.ReadAsStringAsync());
 
-			_httpTest.ShouldHaveCalled("http://www.api.com/*").WithVerb(HttpMethod.Get).Times(3);
-			_httpTest.ShouldNotHaveCalled("http://www.otherapi.com/*");
+			HttpTest.ShouldHaveCalled("http://www.api.com/*").WithVerb(HttpMethod.Get).Times(3);
+			HttpTest.ShouldNotHaveCalled("http://www.otherapi.com/*");
 		}
 
 		[Test]
 		public async Task can_simulate_timeout() {
-			_httpTest.SimulateTimeout();
+			HttpTest.SimulateTimeout();
 			try {
 				await "http://www.api.com".GetAsync();
 				Assert.Fail("Exception was not thrown!");
