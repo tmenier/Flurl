@@ -30,10 +30,12 @@ When builing classes to match the JSON seems like overkill, the non-generic vers
 dynamic d = await "http://api.foo.com".GetJsonAsync();
 ````
 
-Get a string:
+Get strings, bytes, and streams:
 
 ````c#
-string s = await "http://api.foo.com".GetStringAsync();
+string text = await "http://site.com/readme.txt".GetStringAsync();
+byte[] bytes = await "http://site.com/image.jpg".GetBytesAsync();
+Stream stream = await "http://site.com/music.mp3".GetStreamAsync();
 ````
 
 Download a file:
