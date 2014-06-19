@@ -11,13 +11,20 @@ using Flurl;
 using Flurl.Http;
 ````
 
+Send a GET or HEAD request and get back a raw [HttpResponseMessage](http://msdn.microsoft.com/en-us/library/system.net.http.httpresponsemessage):
+
+````c#
+var getResp = await "http://api.foo.com".GetAsync();
+var headResp = await "http://api.foo.com".HeadAsync();
+````
+
 Get a strongly-typed poco from a JSON API:
 
 ````c#
 T poco = await "http://api.foo.com".GetJsonAsync<T>();
 ````
 
-The non-generic version returns a dynamic:
+When builing classes to match the JSON seems like overkill, the non-generic version returns a dynamic:
 
 ````c#
 dynamic d = await "http://api.foo.com".GetJsonAsync();
@@ -46,7 +53,7 @@ await "http://api.foo.com".PostJsonAsync(new { a = 1, b = 2 });
 Simulate an HTML form post:
 
 ````c#
-await "http://api.foo.com".PostUrlEncodedAsync(new { a = 1, b = 2 });
+await "http://site.com/login".PostUrlEncodedAsync(new { user = "me", pass = "xxxx" });
 ````
 
 The Post methods above return a `Task<HttpResponseMessage>`. You may of course expect some data to be returned in the response body:
@@ -65,9 +72,9 @@ Set request headers:
 
 ````c#
 // one-off:
-await url.WithHeader("someheader", "foo").GetJson();
+await url.WithHeader("someheader", "foo").GetJsonAsync();
 // multiple:
-await url.WithHeaders(new { header1 = "foo", header2 = "bar" }}).GetJson();
+await url.WithHeaders(new { header1 = "foo", header2 = "bar" }}).GetJsonAsync();
 ````
 
 Authenticate with Basic Authentication:

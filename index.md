@@ -8,10 +8,10 @@ title: Home
 ````c#
 var result = await "https://api.mysite.com"
     .AppendPathSegment("person")
-    .SetQueryParams(new { api_key = "my_key" })
+    .SetQueryParams(new { a = 1, b = 2 })
     .WithOAuthBearerToken("my_oauth_token")
     .PostJsonAsync(new { first_name = "Frank", last_name = "Underwood" })
-    .ReceiveJson<Result>();
+    .ReceiveJson<T>();
 ````
 
 With a discoverable API, [extensibility](extensibility) at every turn, and a nifty set of [testing features](testable-http), Flurl is intended to make building and calling URLs easy and downright fun.
