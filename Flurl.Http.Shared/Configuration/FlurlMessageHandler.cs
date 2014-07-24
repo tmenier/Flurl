@@ -30,12 +30,11 @@ namespace Flurl.Http.Configuration
 
 			try {
 				call.Response = await base.SendAsync(request, cancellationToken);
+				call.EndedUtc = DateTime.UtcNow;
 			}
 			catch (Exception ex) {
 				call.Exception = ex;
 			}
-
-			call.EndedUtc = DateTime.UtcNow;
 
 			if (call.Exception != null)
 				await RaiseGlobalEventAsync(FlurlHttp.Configuration.OnError, FlurlHttp.Configuration.OnErrorAsync, call);
