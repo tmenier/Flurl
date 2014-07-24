@@ -138,6 +138,10 @@ public class HttpCall
     public TimeSpan? Duration { get; set; }
     public Exception Exception { get; set; }
     public bool ExceptionHandled { get; set; }
+    public string Url { get; }
+    public bool Completed { get; }
+    public bool Succeeded { get; }
+    public HttpStatusCode? HttpStatus { get; }
 }
 ````
 `RequestBody` is particularly useful in POST and PUT scenarios to work around the [forward-only, read-once nature](http://stackoverflow.com/questions/12102879/httprequestmessage-content-is-lost-when-it-is-read-in-a-logging-delegatinghandle) of `HttpRequestMessage.Content`. It is important to do a null check on `RequestBody` however, as it is typically only populated when using Flurl's Post* and Put* methods.
