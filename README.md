@@ -3,20 +3,22 @@
 Flurl is a modern, fluent, asynchronous, testable, portable, buzzword-laden URL builder and HTTP client library.
 
 ````c#
-await "https://api.mysite.com"
+var result = await "https://api.mysite.com"
     .AppendPathSegment("person")
-    .SetQueryParams(new { ap_key = "my-key" })
-    .WithOAuthBearerToken("MyToken")
-    .PostJsonAsync(new { first_name = firstName, last_name = lastName });
+    .SetQueryParams(new { api_key = "xyz" })
+    .WithOAuthBearerToken("my_oauth_token")
+    .PostJsonAsync(new { first_name = firstName, last_name = lastName })
+    .ReceiveJson<T>();
 
 [Test]
 public void Can_Create_Person() {
+	// fake & record all http calls in the test subject
     using (var httpTest = new HttpTest()) {
         // arrange
         httpTest.RespondWith(200, "OK");
 
         // act
-        sut.CreatePersonAsync("Frank", "Underwood").Wait();
+        await sut.CreatePersonAsync("Frank", "Underwood");
         
         // assert
         httpTest.ShouldHaveCalled("http://api.mysite.com/*")
