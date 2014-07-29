@@ -73,7 +73,7 @@ There are a variety of ways to set up HTTP calls without breaking the fluent cha
 Set request headers:
 
 ````c#
-// one-off:
+// single:
 await url.WithHeader("someheader", "foo").GetJsonAsync();
 // multiple:
 await url.WithHeaders(new { header1 = "foo", header2 = "bar" }}).GetJsonAsync();
@@ -82,26 +82,26 @@ await url.WithHeaders(new { header1 = "foo", header2 = "bar" }}).GetJsonAsync();
 Authenticate with Basic Authentication:
 
 ````c#
-await url.WithBasicAuth("username", "password").GetJson();
+await url.WithBasicAuth("username", "password").GetJsonAsync();
 ````
 
 Authenticate with an OAuth bearer token:
 
 ````c#
-await url.WithOAuthBearerToken("mytoken").GetJson();
+await url.WithOAuthBearerToken("mytoken").GetJsonAsync();
 ````
 
 Specify a timeout:
 
 ````c#
-await url.WithTimeout(10).DownloadFile(); // 10 seconds
-await url.WithTimeout(TimeSpan.FromMinutes(2)).DownloadFile();
+await url.WithTimeout(10).DownloadFileAsync(); // 10 seconds
+await url.WithTimeout(TimeSpan.FromMinutes(2)).DownloadFileAsync();
 ````
 
 Get at the underlying HttpClient directly if none of the other convenience methods meet your needs:
 
 ````c#
-await url.ConfigureHttpClient(http => /* do whatever you need! */).GetJson();
+await url.ConfigureHttpClient(http => /* do whatever you need! */).GetJsonAsync();
 ````
 
 `ConfigureHttpClient` is a nice hook for extending Flurl with your own extension methods.
