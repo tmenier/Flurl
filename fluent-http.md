@@ -108,7 +108,7 @@ await url.ConfigureHttpClient(http => /* do whatever you need! */).GetJsonAsync(
 
 ###Exceptions
 
-Flurl deviates from HttpClient conventions a bit when it comes to excpetions. HttpClient doesn't throw exceptions upon receiving unsuccessful HTTP response codes; Flurl does.
+Flurl deviates from HttpClient conventions a bit when it comes to exceptions. HttpClient doesn't throw exceptions upon receiving unsuccessful HTTP response codes; Flurl does.
 
 ````c#
 try {
