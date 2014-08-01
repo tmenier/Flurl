@@ -3,6 +3,7 @@ using System.Dynamic;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Rackspace.Threading;
 
 namespace Flurl.Http
 {
@@ -17,9 +18,9 @@ namespace Flurl.Http
  		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
 		/// <returns>A Task whose result is an object containing data in the response body.</returns>
 		/// <example>x = await url.PostAsync(data).ReceiveJson&lt;T&gt;()</example>
-		public static async Task<T> ReceiveJson<T>(this Task<HttpResponseMessage> response) {
-			using (var stream = await (await response).Content.ReadAsStreamAsync())
-				return JsonHelper.ReadJsonFromStream<T>(stream);
+		public static Task<T> ReceiveJson<T>(this Task<HttpResponseMessage> response) {
+			return TaskBlocks.Using(() => response.Then(task => task.Result.Content.ReadAsStreamAsync()),
+				streamTask => CompletedTask.FromResult(JsonHelper.ReadJsonFromStream<T>(streamTask.Result)));
 		}
 
 		/// <summary>
@@ -27,8 +28,8 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is a dynamic object containing data in the response body.</returns>
 		/// <example>d = await url.PostAsync(data).ReceiveJson()</example>
-		public static async Task<dynamic> ReceiveJson(this Task<HttpResponseMessage> response) {
-			return await response.ReceiveJson<ExpandoObject>();
+		public static Task<dynamic> ReceiveJson(this Task<HttpResponseMessage> response) {
+			return response.ReceiveJson<ExpandoObject>().Select(task => (dynamic)task.Result);
 		}
 
 		/// <summary>
@@ -36,9 +37,11 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is a list of dynamic objects containing data in the response body.</returns>
 		/// <example>d = await url.PostAsync(data).ReceiveJsonList()</example>
-		public static async Task<IList<dynamic>> ReceiveJsonList(this Task<HttpResponseMessage> response) {
-			dynamic[] d = await response.ReceiveJson<ExpandoObject[]>();
-			return d;
+		public static Task<IList<dynamic>> ReceiveJsonList(this Task<HttpResponseMessage> response) {
+			return response.ReceiveJson<ExpandoObject[]>().Select(task => {
+				dynamic[] d = task.Result;
+				return (IList<dynamic>)d;
+			});
 		}
 
 		/// <summary>
@@ -46,8 +49,8 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the response body as a string.</returns>
 		/// <example>s = await url.PostAsync(data).ReceiveString()</example>
-		public static async Task<string> ReceiveString(this Task<HttpResponseMessage> response) {
-			return await (await response).Content.ReadAsStringAsync();
+		public static Task<string> ReceiveString(this Task<HttpResponseMessage> response) {
+			return response.Then(task => task.Result.Content.ReadAsStringAsync());
 		}
 
 		/// <summary>
@@ -55,8 +58,8 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the response body as a stream.</returns>
 		/// <example>stream = await url.PostAsync(data).ReceiveStream()</example>
-		public static async Task<Stream> ReceiveStream(this Task<HttpResponseMessage> response) {
-			return await (await response).Content.ReadAsStreamAsync();
+		public static Task<Stream> ReceiveStream(this Task<HttpResponseMessage> response) {
+			return response.Then(task => task.Result.Content.ReadAsStreamAsync());
 		}
 
 		/// <summary>
@@ -64,8 +67,8 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the response body as a byte array.</returns>
 		/// <example>bytes = await url.PostAsync(data).ReceiveBytes()</example>
-		public static async Task<byte[]> ReceiveBytes(this Task<HttpResponseMessage> response) {
-			return await (await response).Content.ReadAsByteArrayAsync();
+		public static Task<byte[]> ReceiveBytes(this Task<HttpResponseMessage> response) {
+			return response.Then(task => task.Result.Content.ReadAsByteArrayAsync());
 		}
 	}
 }

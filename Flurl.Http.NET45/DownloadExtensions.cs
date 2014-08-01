@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Rackspace.Threading;
 
 namespace Flurl.Http
 {
@@ -14,7 +15,7 @@ namespace Flurl.Http
 		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
 		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
 		/// <returns>A Task whose result is the local path of the downloaded file.</returns>
-		public static async Task<string> DownloadFileAsync(this FlurlClient client, string localFolderPath, string localFileName = null, int bufferSize = 4096) {
+		public static Task<string> DownloadFileAsync(this FlurlClient client, string localFolderPath, string localFileName = null, int bufferSize = 4096) {
 			if (localFileName == null)
 				localFileName = client.Url.Path.Split('/').Last();
 
@@ -24,15 +25,13 @@ namespace Flurl.Http
 			var filePath = Path.Combine(localFolderPath, localFileName);
 
 			// http://developer.greenbutton.com/downloading-large-files-with-the-net-httpclient
-			var response = await client.HttpClient.GetAsync(client.Url, HttpCompletionOption.ResponseHeadersRead);
-
-			// http://codereview.stackexchange.com/a/18679
-			using (var httpStream = await response.Content.ReadAsStreamAsync())
-			using (var filestream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, useAsync: true)) {
-				await httpStream.CopyToAsync(filestream, bufferSize);
-			}
-
-			return filePath;
+			return client.HttpClient.GetAsync(client.Url, HttpCompletionOption.ResponseHeadersRead)
+				.Then(task => {
+					return TaskBlocks.Using(() => task.Result.Content.ReadAsStreamAsync(),
+						httpStreamTask => TaskBlocks.Using(() => CompletedTask.FromResult(new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, useAsync: true)),
+							filestreamTask => httpStreamTask.Result.CopyToAsync(filestreamTask.Result, bufferSize)));
+				})
+				.Select(task => filePath);
 		}
 
 		/// <summary>
