@@ -76,7 +76,7 @@ Set request headers:
 // single:
 await url.WithHeader("someheader", "foo").GetJsonAsync();
 // multiple:
-await url.WithHeaders(new { header1 = "foo", header2 = "bar" }}).GetJsonAsync();
+await url.WithHeaders(new { header1 = "foo", header2 = "bar" }).GetJsonAsync();
 ````
 
 Authenticate with Basic Authentication:
