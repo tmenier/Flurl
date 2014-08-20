@@ -18,7 +18,7 @@ var url = "http://www.some-api.com"
 	});
 ````
 
-At its core is the `Url` class, which is designed to work seamlessly with strings, as demonstrated above. Creating a `Url` via a string extension is purly optional though; you can create one explicitly if you prefer:
+At its core is the `Url` class, which is designed to work seamlessly with strings, as demonstrated above. Creating a `Url` via a string extension is purely optional though; you can create one explicitly if you prefer:
 
 ````c#
 var url = new Url("http://www.some-api.com").AppendPathSegment(...
