@@ -29,7 +29,7 @@ namespace Flurl
 			foreach (var kv in queryString.Split('&')) {
 				var pair = kv.Split('=');
 				var key = pair[0];
-				var value = pair.Length > 0 ? pair[1] : "";
+				var value = pair.Length >= 2 ? pair[1] : "";
 				result.Add(key, Uri.UnescapeDataString(value));
 			}
 
