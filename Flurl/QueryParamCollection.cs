@@ -45,7 +45,10 @@ namespace Flurl
 		/// </summary>
 		/// <returns></returns>
 		public override string ToString() {
-			return string.Join("&", _orderedKeys.Select(k => k + "=" + Uri.EscapeDataString(this[k].ToString())).ToArray());
+			return string.Join("&", _orderedKeys.Select(k => {
+				var value = Uri.EscapeDataString(this[k].ToString());
+				return string.IsNullOrEmpty(value) ? k : (k + "=" + value);
+			}).ToArray());
 		}
 
 		#region IDictionary<string, object> members
