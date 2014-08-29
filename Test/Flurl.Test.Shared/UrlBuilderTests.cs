@@ -26,6 +26,15 @@ namespace Flurl.Test
 		}
 
 		[Test]
+		public void Should_Accept_QueryString_Without_ValuePair()
+		{
+			var url = new Url("http://example.com?123456");
+			Assert.AreEqual("http://example.com", url.Path);
+			Assert.AreEqual(1, url.QueryParams.Keys.Count);
+			Assert.AreEqual(string.Empty, url.QueryParams["123456"]);
+		}
+
+		[Test]
 		public void Path_returns_everything_but_querystring() {
 			var path = new Url("http://www.mysite.com/more?x=1&y=2").Path;
 			Assert.AreEqual("http://www.mysite.com/more", path);
