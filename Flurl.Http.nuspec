@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>0.2.3</version>
+		<version>0.2.4</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -12,6 +12,7 @@
 			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
 		</description>
 		<releaseNotes>
+			0.2.4 - Updated Flurl dependency for PCL to 1.0.2.
 			0.2.3 - New properties added to HttpCall: Url, Completed, Succeeded, HttpStatus.
 			0.2.2 - Updated Flurl dependency for PCL to 1.0.1.
 			0.2.1 - Added support for getting streams and byte arrays.
@@ -23,14 +24,14 @@
 		<dependencies>
 			<group targetFramework="net45">
 				<dependency id="Newtonsoft.Json" version="6.0.3" />
-				<dependency id="Flurl" version="1.0.1" />
+				<dependency id="Flurl" version="1.0.2" />
 			</group>
 			<group targetFramework="portable-net45+sl50+win+wpa81+wp80+MonoAndroid10+MonoTouch10">
 				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
 				<dependency id="Microsoft.Net.Http" version="2.2.22" />
 				<dependency id="PCLStorage" version="0.9.6" />
 				<dependency id="Newtonsoft.Json" version="6.0.3" />
-				<dependency id="Flurl" version="1.0.1" />
+				<dependency id="Flurl" version="1.0.2" />
 			</group>
 		</dependencies>
 	</metadata>
