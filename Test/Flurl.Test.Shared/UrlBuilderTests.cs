@@ -26,6 +26,13 @@ namespace Flurl.Test
 		}
 
 		[Test]
+		public void Should_Not_Add_Equals_Without_Value()
+		{
+			var url = new Url("http://example.com?123456");
+			Assert.AreEqual("http://example.com?123456", url.ToString());
+		}
+
+		[Test]
 		public void Should_Accept_QueryString_Without_ValuePair()
 		{
 			var url = new Url("http://example.com?123456");
