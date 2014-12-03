@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using NUnit.Framework;
 
 namespace Flurl.Test
@@ -111,6 +113,22 @@ namespace Flurl.Test
 			// let's challenge it a little with non-string keys
 			var url = "http://www.mysite.com".SetQueryParams(new Dictionary<int, string> {{1, "x"}, {2, "y"}});
 			Assert.AreEqual("http://www.mysite.com?1=x&2=y", url.ToString());
+		}
+
+		[Test]
+		public void SetQueryParam_uses_invariant_culture()
+		{
+			Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("es-ES");
+			var url = "http://www.mysite.com".SetQueryParam("x", 1.1);
+			Assert.AreEqual("http://www.mysite.com?x=1.1", url.ToString());
+		}
+
+		[Test]
+		public void SetQueryParams_uses_invariant_culture()
+		{
+			Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("es-ES");
+			var url = "http://www.mysite.com".SetQueryParams(new { x = 1.1 });
+			Assert.AreEqual("http://www.mysite.com?x=1.1", url.ToString());
 		}
 
 		[Test]

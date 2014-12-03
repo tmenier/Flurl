@@ -103,7 +103,7 @@ namespace Flurl
 		/// <param name="value">value of query string parameter</param>
 		/// <returns>The Url obect with the query string parameter added</returns>
 		public Url SetQueryParam(string name, object value) {
-			QueryParams[name] = (value == null) ? null : value.ToString();
+			QueryParams[name] = (value == null) ? null : value.ToInvariantString();
 			return this;
 		}
 
