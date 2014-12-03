@@ -17,12 +17,13 @@ namespace Flurl.Util
 				throw new ArgumentNullException("obj");
 
 			if (obj is IDictionary) {
-				foreach (DictionaryEntry kv in (IDictionary)obj)
-					yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value.ToString());
+			    foreach (DictionaryEntry kv in (IDictionary)obj)
+			        yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value != null ? kv.Value.ToString() : String.Empty);
 			}
 			else {
 				foreach (var prop in obj.GetType().GetProperties()) {
-					yield return new KeyValuePair<string, string>(prop.Name, prop.GetValue(obj, null).ToString());
+				    object value = prop.GetValue(obj, null);
+                    yield return new KeyValuePair<string, string>(prop.Name, value != null ? value.ToString() : String.Empty);
 				}
 			}
 		}

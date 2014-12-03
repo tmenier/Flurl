@@ -9,7 +9,8 @@ namespace PackageTester.PCL
     public static class Tester
     {
 		public static async Task DoTestsAsync(Action<string> log) {
-			var source = await "http://www.google.com".GetStringAsync();
+		    string nullValue = null;
+            var source = await "http://www.google.com".SetQueryParams(new { RandomKeyName = nullValue, AnotherRandomKeyName = "" }).GetStringAsync();
 			log(source.Substring(0, 40));
 			log("^-- real response");
 			using (var test = new HttpTest()) {
