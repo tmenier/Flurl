@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http.Content;
+using Rackspace.Threading;
 
 namespace Flurl.Http.Configuration
 {
@@ -15,7 +16,7 @@ namespace Flurl.Http.Configuration
 
 		public FlurlMessageHandler() : base(new HttpClientHandler()) { }
 
-		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
+		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
 			var call = new HttpCall {
 				Request = request
 			};
@@ -24,35 +25,53 @@ namespace Flurl.Http.Configuration
 			if (stringContent != null)
 				call.RequestBody = stringContent.Content;
 
-			await RaiseGlobalEventAsync(FlurlHttp.Configuration.BeforeCall, FlurlHttp.Configuration.BeforeCallAsync, call);
+			Task t1 = RaiseGlobalEventAsync(FlurlHttp.Configuration.BeforeCall, FlurlHttp.Configuration.BeforeCallAsync, call);
 
-			call.StartedUtc = DateTime.UtcNow;
+			Func<Task, Task> sendContinuation =
+				_ => {
+					call.StartedUtc = DateTime.UtcNow;
+					return base.SendAsync(request, cancellationToken)
+					.Select(task => {
+						if (task.Status == TaskStatus.RanToCompletion) {
+							call.Response = task.Result;
+							call.EndedUtc = DateTime.UtcNow;
+						} else {
+							call.Exception = task.Exception;
+						}
+					}, supportsErrors: true);
+				};
 
-			try {
-				call.Response = await base.SendAsync(request, cancellationToken);
-				call.EndedUtc = DateTime.UtcNow;
-			}
-			catch (Exception ex) {
-				call.Exception = ex;
-			}
+			Task t2 = t1.Then(sendContinuation);
 
-			if (call.Exception != null)
-				await RaiseGlobalEventAsync(FlurlHttp.Configuration.OnError, FlurlHttp.Configuration.OnErrorAsync, call);
+			Func<Task, Task> exceptionContinuation =
+				_ => {
+					if (call.Exception != null)
+						return RaiseGlobalEventAsync(FlurlHttp.Configuration.OnError, FlurlHttp.Configuration.OnErrorAsync, call);
 
-			await RaiseGlobalEventAsync(FlurlHttp.Configuration.AfterCall, FlurlHttp.Configuration.AfterCallAsync, call);
+					return CompletedTask.Default;
+				};
 
-			if (IsErrorCondition(call)) {
-				throw IsTimeout(call, cancellationToken) ?
-					new FlurlHttpTimeoutException(call, call.Exception) :
-					new FlurlHttpException(call, call.Exception);
-			}
+			Task t3 = t2.Then(exceptionContinuation);
 
-			return call.Response;
+			Task t4 = t3.Then(_ => RaiseGlobalEventAsync(FlurlHttp.Configuration.AfterCall, FlurlHttp.Configuration.AfterCallAsync, call));
+
+			Task<HttpResponseMessage> resultTask = t4.Select(_ => {
+					if (IsErrorCondition(call)) {
+						throw IsTimeout(call, cancellationToken) ?
+							new FlurlHttpTimeoutException(call, call.Exception) :
+							new FlurlHttpException(call, call.Exception);
+					}
+
+					return call.Response;
+				});
+
+			return resultTask;
 		}
 
-		private async Task RaiseGlobalEventAsync(Action<HttpCall> syncVersion, Func<HttpCall, Task> asyncVersion, HttpCall call) {
+		private Task RaiseGlobalEventAsync(Action<HttpCall> syncVersion, Func<HttpCall, Task> asyncVersion, HttpCall call) {
 			if (syncVersion != null) syncVersion(call);
-			if (asyncVersion != null) await asyncVersion(call);
+			if (asyncVersion != null) return asyncVersion(call);
+			return CompletedTask.Default;
 		}
 
 		private bool IsErrorCondition(HttpCall call) {

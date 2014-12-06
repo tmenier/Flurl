@@ -59,6 +59,9 @@
     <Reference Include="PCLStorage.Abstractions">
       <HintPath>..\packages\PCLStorage.0.9.6\lib\portable-net45+sl5+wp8+wpa81+win8+monoandroid+monotouch\PCLStorage.Abstractions.dll</HintPath>
     </Reference>
+    <Reference Include="Rackspace.Threading">
+      <HintPath>..\packages\Rackspace.Threading.1.0.0\lib\portable-net4+sl5+netcore45+wp8+MonoAndroid1+MonoTouch1\Rackspace.Threading.dll</HintPath>
+    </Reference>
     <Reference Include="System.IO">
       <HintPath>..\packages\Microsoft.Bcl.1.1.9\lib\portable-net40+sl5+win8+wp8+wpa81\System.IO.dll</HintPath>
     </Reference>
