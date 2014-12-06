@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl</id>
-		<version>1.0.2</version>
+		<version>1.0.3</version>
 		<title>Flurl</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -12,6 +12,7 @@
 			A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.
 		</description>
 		<releaseNotes>
+			1.0.3 - Bugfix - exclude null values from querystring (thanks to @niemyjski)
 			1.0.2 - Bugfix related to querystring with only key (thanks to @rafaelsteil)
 			1.0.1 - Fixed DLL version, dropped support for xbox and wp7 due to VS2013 upgrade
 			1.0.0 - Minor code cleanup, no API changes.
