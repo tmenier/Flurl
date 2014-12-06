@@ -12,18 +12,18 @@ namespace Flurl.Util
 		/// </summary>
 		/// <param name="obj">The object to parse into key-value pairs</param>
 		/// <returns></returns>
-		public static IEnumerable<KeyValuePair<string, string>> ToKeyValuePairs(this object obj) {
+		public static IEnumerable<KeyValuePair<string, object>> ToKeyValuePairs(this object obj) {
 			if (obj == null)
 				throw new ArgumentNullException("obj");
 
 			if (obj is IDictionary) {
 				foreach (DictionaryEntry kv in (IDictionary)obj)
-					yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value.ToString());
+					yield return new KeyValuePair<string, object>(kv.Key.ToString(), kv.Value);
 			}
 			else {
 				foreach (var prop in obj.GetType().GetProperties()) {
 					var val = prop.GetValue(obj, null);
-					yield return new KeyValuePair<string, string>(prop.Name, (val == null) ? null : val.ToString());
+					yield return new KeyValuePair<string, object>(prop.Name, val);
 				}
 			}
 		}

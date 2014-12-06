@@ -97,19 +97,34 @@ namespace Flurl.Test
 		[Test]
 		public void null_query_param_is_excluded() {
 			var url = "http://www.mysite.com".SetQueryParam("x", null);
-			Assert.AreEqual("http://www.mysite.com", url.ToString());			
+			Assert.AreEqual("http://www.mysite.com", url.ToString());
+		}
+
+		[Test]
+		public void enumerable_query_param_is_split_into_multiple() {
+			var url = "http://www.mysite.com".SetQueryParam("x", new[] { "a", "b", null, "c" });
+			Assert.AreEqual("http://www.mysite.com?x=a&x=b&x=c", url.ToString());
 		}
 
 		[Test]
 		public void can_add_multiple_query_params_from_anon_object() {
-			var url = "http://www.mysite.com".SetQueryParams(new { x = 1, y = 2, exclude_me = (string)null });
-			Assert.AreEqual("http://www.mysite.com?x=1&y=2", url.ToString());
+			var url = "http://www.mysite.com".SetQueryParams(new {
+				x = 1,
+				y = 2,
+				z = new[] { 3, 4 },
+				exclude_me = (string)null
+			});
+			Assert.AreEqual("http://www.mysite.com?x=1&y=2&z=3&z=4", url.ToString());
 		}
 
 		[Test]
 		public void can_change_multiple_query_params_from_anon_object() {
-			var url = "http://www.mysite.com?x=1&y=2&z=3".SetQueryParams(new { x = 8, z = 9 });
-			Assert.AreEqual("http://www.mysite.com?x=8&y=2&z=9", url.ToString());
+			var url = "http://www.mysite.com?x=1&y=2&z=3".SetQueryParams(new {
+				x = 8, 
+				y = new[] {"a", "b"},
+				z = (int?)null
+			});
+			Assert.AreEqual("http://www.mysite.com?x=8&y=a&y=b", url.ToString());
 		}
 
 		[Test]

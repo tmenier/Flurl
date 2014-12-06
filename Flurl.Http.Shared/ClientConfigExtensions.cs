@@ -131,8 +131,12 @@ namespace Flurl.Http
 			if (headers == null)
 				return client;
 
-			foreach (var kv in headers.ToKeyValuePairs())
-				client.HttpClient.DefaultRequestHeaders.Add(kv.Key, new[] { kv.Value });
+			foreach (var kv in headers.ToKeyValuePairs()) {
+				if (kv.Value == null)
+					continue;
+
+				client.HttpClient.DefaultRequestHeaders.Add(kv.Key, new[] { kv.Value.ToString() });
+			}
 
 			return client;
 		}
