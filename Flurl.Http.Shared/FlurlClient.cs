@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Net;
+using System.Net.Http;
 
 namespace Flurl.Http
 {
@@ -7,7 +8,7 @@ namespace Flurl.Http
 	/// </summary>
 	public class FlurlClient
 	{
-		public FlurlClient(string url) : this(new Url(url)) { }
+        public FlurlClient(string url, CookieContainer cookieContainer = null) : this(new Url(url, cookieContainer)) { }
 
 		public FlurlClient(Url url) {
 			this.Url = url;
@@ -27,7 +28,7 @@ namespace Flurl.Http
 		public HttpClient HttpClient {
 			get {
 				if (_httpClient == null)
-					_httpClient = FlurlHttp.Configuration.HttpClientFactory.CreateClient(Url);
+                    _httpClient = FlurlHttp.Configuration.HttpClientFactory.CreateClient(Url);
 				return _httpClient;
 			}
 		}

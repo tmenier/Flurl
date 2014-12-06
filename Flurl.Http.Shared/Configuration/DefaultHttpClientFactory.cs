@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Net;
+using System.Net.Http;
 
 namespace Flurl.Http.Configuration
 {
@@ -10,8 +11,14 @@ namespace Flurl.Http.Configuration
 	/// </summary>
 	public class DefaultHttpClientFactory : IHttpClientFactory
 	{
-		public virtual HttpClient CreateClient(Url url) {
-			return new HttpClient(new FlurlMessageHandler()) {
+        public virtual HttpClient CreateClient(Url url) {
+
+            FlurlMessageHandler flurlHandler;
+            if (url.CookieContainer != null)
+                flurlHandler = new FlurlMessageHandler(new HttpClientHandler() { CookieContainer = url.CookieContainer });
+            else
+                flurlHandler = new FlurlMessageHandler();
+            return new HttpClient(flurlHandler) {
 				Timeout = FlurlHttp.Configuration.DefaultTimeout
 			};
 		}

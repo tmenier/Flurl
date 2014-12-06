@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Flurl.Util;
+using System.Net;
 
 namespace Flurl
 {
@@ -19,17 +20,22 @@ namespace Flurl
 		/// </summary>
 		public IDictionary<string, object> QueryParams { get; private set; }
 
+        /// <summary>
+        /// Cookies container for the FlurlClient
+        /// </summary>
+        public CookieContainer CookieContainer { get; private set; }
 		/// <summary>
 		/// Constructs a Url object from a string.
 		/// </summary>
 		/// <param name="baseUrl">The URL to use as a starting point (required)</param>
-		public Url(string baseUrl) {
+		public Url(string baseUrl, CookieContainer cookieContainer = null) {
 			if (baseUrl == null)
 				throw new ArgumentNullException("baseUrl");
 
 			var parts = baseUrl.Split('?');
 			Path = parts[0];
 			QueryParams = QueryParamCollection.Parse(parts.Length > 1 ? parts[1] : "");
+            CookieContainer = cookieContainer;
 		}
 
 		/// <summary>
@@ -95,6 +101,11 @@ namespace Flurl
 
 			return this;
 		}
+
+        public Url WithCookieContainer(CookieContainer cookieContainer) {
+            CookieContainer = cookieContainer;
+            return this;
+        }
 
 		/// <summary>
 		/// Adds a parameter to the query string, overwriting the value if name exists.
