@@ -36,4 +36,6 @@ Or get just the stand-alone URL builder without the HTTP features:
 
 `PM> Install-Package Flurl`
 
-For detailed documentation, Please visit the [main site](http://tmenier.github.io/Flurl/).
+For updates and announcements, [follow @FlurlHttp on Twitter](https://twitter.com/intent/user?screen_name=FlurlHttp).
+
+For detailed documentation, please visit the [main site](http://tmenier.github.io/Flurl/).
