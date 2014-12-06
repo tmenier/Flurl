@@ -95,8 +95,14 @@ namespace Flurl.Test
 		}
 
 		[Test]
+		public void null_query_param_is_excluded() {
+			var url = "http://www.mysite.com".SetQueryParam("x", null);
+			Assert.AreEqual("http://www.mysite.com", url.ToString());			
+		}
+
+		[Test]
 		public void can_add_multiple_query_params_from_anon_object() {
-			var url = "http://www.mysite.com".SetQueryParams(new { x = 1, y = 2 });
+			var url = "http://www.mysite.com".SetQueryParams(new { x = 1, y = 2, exclude_me = (string)null });
 			Assert.AreEqual("http://www.mysite.com?x=1&y=2", url.ToString());
 		}
 

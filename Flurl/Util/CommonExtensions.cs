@@ -22,7 +22,8 @@ namespace Flurl.Util
 			}
 			else {
 				foreach (var prop in obj.GetType().GetProperties()) {
-					yield return new KeyValuePair<string, string>(prop.Name, prop.GetValue(obj, null).ToString());
+					var val = prop.GetValue(obj, null);
+					yield return new KeyValuePair<string, string>(prop.Name, (val == null) ? null : val.ToString());
 				}
 			}
 		}

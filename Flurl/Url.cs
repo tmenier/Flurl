@@ -162,8 +162,9 @@ namespace Flurl
 		/// <returns></returns>
 		public override string ToString() {
 			var url = Path;
-			if (QueryParams.Count > 0)
-				url += "?" + QueryParams;
+			var query = QueryParams.ToString();
+			if (query.Length > 0)
+				url += "?" + query;
 
 			return url;
 		}
