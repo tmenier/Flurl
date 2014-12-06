@@ -114,7 +114,10 @@ namespace Flurl
 		/// <param name="value">value of query string parameter</param>
 		/// <returns>The Url obect with the query string parameter added</returns>
 		public Url SetQueryParam(string name, object value) {
-			QueryParams[name] = (value == null) ? null : value.ToString();
+			if (name == null)
+				throw new ArgumentNullException("name", "Query parameter name cannot be null.");
+
+			QueryParams[name] = value;
 			return this;
 		}
 
@@ -173,8 +176,9 @@ namespace Flurl
 		/// <returns></returns>
 		public override string ToString() {
 			var url = Path;
-			if (QueryParams.Count > 0)
-				url += "?" + QueryParams;
+			var query = QueryParams.ToString();
+			if (query.Length > 0)
+				url += "?" + query;
 
 			return url;
 		}

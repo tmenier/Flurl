@@ -45,7 +45,30 @@ namespace Flurl
 		/// </summary>
 		/// <returns></returns>
 		public override string ToString() {
-			return string.Join("&", _orderedKeys.Select(k => k + "=" + Uri.EscapeDataString(this[k].ToString())).ToArray());
+			return string.Join("&", GetPairs());
+		}
+
+		private IEnumerable<string> GetPairs() {
+			foreach (var key in _orderedKeys) {
+				var val = this[key];
+				if (val == null)
+					continue;
+
+				if (val is string || !(val is IEnumerable)) {
+					yield return key + "=" + Uri.EscapeDataString(val.ToString());
+				}
+				else {
+					// if value is IEnumerable (other than string), break it into multiple
+					// values with same param name, i.e. x=1&x2&x=3
+					// https://github.com/tmenier/Flurl/issues/15
+					foreach (var subval in val as IEnumerable) {
+						if (subval == null)
+							continue;
+
+						yield return key + "=" + Uri.EscapeDataString(subval.ToString());
+					}
+				}
+			}
 		}
 
 		#region IDictionary<string, object> members

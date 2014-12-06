@@ -24,12 +24,14 @@ namespace Flurl.Http.Content
 				throw new ArgumentNullException("data");
 
 			var sb = new StringBuilder();
-			foreach (KeyValuePair<string, string> keyValuePair in data.ToKeyValuePairs()) {
+			foreach (var kv in data.ToKeyValuePairs()) {
+				if (kv.Value == null)
+					continue;
 				if (sb.Length > 0)
 					sb.Append('&');
-				sb.Append(Encode(keyValuePair.Key));
+				sb.Append(Encode(kv.Key));
 				sb.Append('=');
-				sb.Append(Encode(keyValuePair.Value));
+				sb.Append(Encode(kv.Value.ToString()));
 			}
 			return sb.ToString();
 		}
