@@ -9,11 +9,9 @@ namespace Flurl.Http.Configuration
 	/// <summary>
 	/// HTTP message handler used by default in all Flurl-created HttpClients.
 	/// </summary>
-	internal class FlurlMessageHandler : DelegatingHandler
+	public class FlurlMessageHandler : DelegatingHandler
 	{
 		public FlurlMessageHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
-
-		public FlurlMessageHandler() : base(new HttpClientHandler()) { }
 
 		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
 			var call = new HttpCall {

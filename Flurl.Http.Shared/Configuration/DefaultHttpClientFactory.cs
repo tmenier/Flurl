@@ -10,10 +10,20 @@ namespace Flurl.Http.Configuration
 	/// </summary>
 	public class DefaultHttpClientFactory : IHttpClientFactory
 	{
+		/// <summary>
+		/// Override in custom factory to customize the creation of HttpClient.
+		/// </summary>
 		public virtual HttpClient CreateClient(Url url) {
-			return new HttpClient(new FlurlMessageHandler()) {
+			return new HttpClient(new FlurlMessageHandler(CreateClientHandler())) {
 				Timeout = FlurlHttp.Configuration.DefaultTimeout
 			};
+		}
+
+		/// <summary>
+		/// Override in custom factory to customize the creation of HttpClientHandler.
+		/// </summary>
+		public virtual HttpClientHandler CreateClientHandler() {
+			return new HttpClientHandler();
 		}
 	}
 }
