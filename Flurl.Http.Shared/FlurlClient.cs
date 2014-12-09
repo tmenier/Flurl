@@ -14,6 +14,7 @@ namespace Flurl.Http
 		}
 
 		private HttpClient _httpClient;
+		private HttpMessageHandler _httpMessageHandler;
 
 		/// <summary>
 		/// Gets the URL to be called in subsequent HTTP calls.
@@ -27,9 +28,22 @@ namespace Flurl.Http
 		public HttpClient HttpClient {
 			get {
 				if (_httpClient == null)
-					_httpClient = FlurlHttp.Configuration.HttpClientFactory.CreateClient(Url);
+					_httpClient = FlurlHttp.Configuration.HttpClientFactory.CreateClient(Url, HttpMessageHandler);
 				return _httpClient;
 			}
+		}
+
+		/// <summary>
+		/// Gets the HttpMessageHandler to be used in subsequent HTTP calls. Creation (when necessary) is delegated
+		/// to FlurlHttp.HttpClientFactory.
+		/// </summary>
+		public HttpMessageHandler HttpMessageHandler {
+			get {
+				if (_httpMessageHandler == null)
+					_httpMessageHandler = FlurlHttp.Configuration.HttpClientFactory.CreateMessageHandler();
+
+				return _httpMessageHandler;
+			}			
 		}
 	}
 }

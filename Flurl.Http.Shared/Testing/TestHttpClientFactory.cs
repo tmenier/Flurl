@@ -11,10 +11,8 @@ namespace Flurl.Http.Testing
 			_test = test;
 		}
 
-		public override HttpClient CreateClient(Url url) {
-			return new HttpClient(new FlurlMessageHandler(new FakeHttpMessageHandler(_test.GetNextResponse))) {
-				Timeout = FlurlHttp.Configuration.DefaultTimeout
-			};
+		public override HttpMessageHandler CreateMessageHandler() {
+			return new FakeHttpMessageHandler(_test.GetNextResponse);
 		}
 	}
 }
