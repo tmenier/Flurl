@@ -25,7 +25,7 @@ namespace Flurl.Http
 		/// <param name="action">Action to perform on the HttpClient.</param>
 		/// <returns>The FlurlClient with the modified HttpClient</returns>
 		public static FlurlClient ConfigureHttpClient(this string url, Action<HttpClient> action) {
-			return new FlurlClient(url).ConfigureHttpClient(action);
+			return new FlurlClient(url, true).ConfigureHttpClient(action);
 		}
 
 		/// <summary>
@@ -34,7 +34,7 @@ namespace Flurl.Http
 		/// <param name="action">Action to perform on the HttpClient.</param>
 		/// <returns>The FlurlClient with the modified HttpClient</returns>
 		public static FlurlClient ConfigureHttpClient(this Url url, Action<HttpClient> action) {
-			return new FlurlClient(url).ConfigureHttpClient(action);
+			return new FlurlClient(url, true).ConfigureHttpClient(action);
 		}
 
 		/// <summary>
@@ -53,7 +53,7 @@ namespace Flurl.Http
 		/// <param name="timespan">Time to wait before the request times out.</param>
 		/// <returns>The created FlurlClient.</returns>
 		public static FlurlClient WithTimeout(this string url, TimeSpan timespan) {
-			return new FlurlClient(url).WithTimeout(timespan);
+			return new FlurlClient(url, true).WithTimeout(timespan);
 		}
 
 		/// <summary>
@@ -62,7 +62,7 @@ namespace Flurl.Http
 		/// <param name="timespan">Time to wait before the request times out.</param>
 		/// <returns>The created FlurlClient.</returns>
 		public static FlurlClient WithTimeout(this Url url, TimeSpan timespan) {
-			return new FlurlClient(url).WithTimeout(timespan);
+			return new FlurlClient(url, true).WithTimeout(timespan);
 		}
 
 		/// <summary>
@@ -80,7 +80,7 @@ namespace Flurl.Http
 		/// <param name="seconds">Number of seconds to wait before the request times out.</param>
 		/// <returns>The created FlurlClient.</returns>
 		public static FlurlClient WithTimeout(this string url, int seconds) {
-			return new FlurlClient(url).WithTimeout(seconds);
+			return new FlurlClient(url, true).WithTimeout(seconds);
 		}
 
 		/// <summary>
@@ -89,7 +89,7 @@ namespace Flurl.Http
 		/// <param name="seconds">Number of seconds to wait before the request times out.</param>
 		/// <returns>The created FlurlClient.</returns>
 		public static FlurlClient WithTimeout(this Url url, int seconds) {
-			return new FlurlClient(url).WithTimeout(seconds);
+			return new FlurlClient(url, true).WithTimeout(seconds);
 		}
 
 		/// <summary>
@@ -111,7 +111,7 @@ namespace Flurl.Http
 		/// <param name="value">HTTP header value.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithHeader(this string url, string name, object value) {
-			return new FlurlClient(url).WithHeader(name, value);
+			return new FlurlClient(url, true).WithHeader(name, value);
 		}
 
 		/// <summary>
@@ -121,7 +121,7 @@ namespace Flurl.Http
 		/// <param name="value">HTTP header value.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithHeader(this Url url, string name, object value) {
-			return new FlurlClient(url).WithHeader(name, value);
+			return new FlurlClient(url, true).WithHeader(name, value);
 		}
 
 		/// <summary>
@@ -149,7 +149,7 @@ namespace Flurl.Http
 		/// <param name="headers">Names/values of HTTP headers to set. Typically an anonymous object or IDictionary.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithHeaders(this Url url, object headers) {
-			return new FlurlClient(url).WithHeaders(headers);
+			return new FlurlClient(url, true).WithHeaders(headers);
 		}
 
 		/// <summary>
@@ -158,7 +158,7 @@ namespace Flurl.Http
 		/// <param name="headers">Names/values of HTTP headers to set. Typically an anonymous object or IDictionary.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithHeaders(this string url, object headers) {
-			return new FlurlClient(url).WithHeaders(headers);
+			return new FlurlClient(url, true).WithHeaders(headers);
 		}
 
 		/// <summary>
@@ -182,7 +182,7 @@ namespace Flurl.Http
 		/// <param name="cookie">the cookie to set.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithCookie(this string url, Cookie cookie) {
-			return new FlurlClient(url).WithCookie(cookie);
+			return new FlurlClient(url, true).WithCookie(cookie);
 		}
 
 		/// <summary>
@@ -191,7 +191,7 @@ namespace Flurl.Http
 		/// <param name="cookie">the cookie to set.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithCookie(this Url url, Cookie cookie) {
-			return new FlurlClient(url).WithCookie(cookie);
+			return new FlurlClient(url, true).WithCookie(cookie);
 		}
 
 
@@ -214,7 +214,7 @@ namespace Flurl.Http
 		/// <param name="expires">cookie expiration (optional). If excluded, cookie only lives for duration of session.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithCookie(this string url, string name, object value, DateTime? expires = null) {
-			return new FlurlClient(url).WithCookie(name, value, expires);
+			return new FlurlClient(url, true).WithCookie(name, value, expires);
 		}
 
 		/// <summary>
@@ -225,7 +225,7 @@ namespace Flurl.Http
 		/// <param name="expires">cookie expiration (optional). If excluded, cookie only lives for duration of session.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithCookie(this Url url, string name, object value, DateTime? expires = null) {
-			return new FlurlClient(url).WithCookie(name, value, expires);
+			return new FlurlClient(url, true).WithCookie(name, value, expires);
 		}
 
 		/// <summary>
@@ -251,7 +251,7 @@ namespace Flurl.Http
 		/// <param name="expires">Expiration for all cookies (optional). If excluded, cookies only live for duration of session.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithCookies(this Url url, object cookies, DateTime? expires = null) {
-			return new FlurlClient(url).WithCookies(cookies);
+			return new FlurlClient(url, true).WithCookies(cookies);
 		}
 
 		/// <summary>
@@ -261,7 +261,7 @@ namespace Flurl.Http
 		/// <param name="expires">Expiration for all cookies (optional). If excluded, cookies only live for duration of session.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithCookies(this string url, object cookies, DateTime? expires = null) {
-			return new FlurlClient(url).WithCookies(cookies);
+			return new FlurlClient(url, true).WithCookies(cookies);
 		}
 
 		/// <summary>
@@ -284,7 +284,7 @@ namespace Flurl.Http
 		/// <param name="password">Password of authenticating user.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithBasicAuth(this Url url, string username, string password) {
-			return new FlurlClient(url).WithBasicAuth(username, password);
+			return new FlurlClient(url, true).WithBasicAuth(username, password);
 		}
 
 		/// <summary>
@@ -294,7 +294,7 @@ namespace Flurl.Http
 		/// <param name="password">Password of authenticating user.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithBasicAuth(this string url, string username, string password) {
-			return new FlurlClient(url).WithBasicAuth(username, password);
+			return new FlurlClient(url, true).WithBasicAuth(username, password);
 		}
 
 		/// <summary>
@@ -313,7 +313,7 @@ namespace Flurl.Http
 		/// <param name="token">The acquired bearer token to pass.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithOAuthBearerToken(this Url url, string token) {
-			return new FlurlClient(url).WithOAuthBearerToken(token);
+			return new FlurlClient(url, true).WithOAuthBearerToken(token);
 		}
 
 		/// <summary>
@@ -322,7 +322,7 @@ namespace Flurl.Http
 		/// <param name="token">The acquired bearer token to pass.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithOAuthBearerToken(this string url, string token) {
-			return new FlurlClient(url).WithOAuthBearerToken(token);
+			return new FlurlClient(url, true).WithOAuthBearerToken(token);
 		}
 	}
 }

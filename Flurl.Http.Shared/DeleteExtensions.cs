@@ -10,7 +10,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> DeleteAsync(this FlurlClient client) {
-			return client.HttpClient.DeleteAsync(client.Url);
+			return client.DoCallAsync(http => http.DeleteAsync(client.Url));
 		}
 
 		/// <summary>
@@ -18,7 +18,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> DeleteAsync(this string url) {
-			return new FlurlClient(url).DeleteAsync();
+			return new FlurlClient(url, true).DeleteAsync();
 		}
 
 		/// <summary>
@@ -26,7 +26,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> DeleteAsync(this Url url) {
-			return new FlurlClient(url).DeleteAsync();
+			return new FlurlClient(url, true).DeleteAsync();
 		}
 	}
 }

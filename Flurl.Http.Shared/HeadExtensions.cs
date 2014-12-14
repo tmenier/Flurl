@@ -11,8 +11,8 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> HeadAsync(this FlurlClient client)
 		{
-			HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Head, client.Url);
-			return client.HttpClient.SendAsync(message);
+			var message = new HttpRequestMessage(HttpMethod.Head, client.Url);
+			return client.DoCallAsync(http => http.SendAsync(message));
 		}
 
 		/// <summary>
@@ -21,7 +21,7 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> HeadAsync(this string url)
 		{
-			return new FlurlClient(url).HeadAsync();
+			return new FlurlClient(url, true).HeadAsync();
 		}
 
 		/// <summary>
@@ -30,7 +30,7 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> HeadAsync(this Url url)
 		{
-			return new FlurlClient(url).HeadAsync();
+			return new FlurlClient(url, true).HeadAsync();
 		}
 	}
 }

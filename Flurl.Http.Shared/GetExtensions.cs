@@ -12,7 +12,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> GetAsync(this FlurlClient client) {
-			return client.HttpClient.GetAsync(client.Url);
+			return client.DoCallAsync(http => http.GetAsync(client.Url));
 		}
 
 		/// <summary>
@@ -20,7 +20,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> GetAsync(this string url) {
-			return new FlurlClient(url).GetAsync();
+			return new FlurlClient(url, true).GetAsync();
 		}
 
 		/// <summary>
@@ -28,7 +28,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> GetAsync(this Url url) {
-			return new FlurlClient(url).GetAsync();
+			return new FlurlClient(url, true).GetAsync();
 		}
 
 		/// <summary>
@@ -46,7 +46,7 @@ namespace Flurl.Http
 		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
 		/// <returns>A Task whose result is an object containing data in the response body.</returns>
 		public static Task<T> GetJsonAsync<T>(this string url) {
-			return new FlurlClient(url).GetJsonAsync<T>();
+			return new FlurlClient(url, true).GetJsonAsync<T>();
 		}
 
 		/// <summary>
@@ -55,7 +55,7 @@ namespace Flurl.Http
 		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
 		/// <returns>A Task whose result is an object containing data in the response body.</returns>
 		public static Task<T> GetJsonAsync<T>(this Url url) {
-			return new FlurlClient(url).GetJsonAsync<T>();
+			return new FlurlClient(url, true).GetJsonAsync<T>();
 		}
 
 		/// <summary>
@@ -71,7 +71,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is a dynamic object containing data in the response body.</returns>
 		public static Task<dynamic> GetJsonAsync(this string url) {
-			return new FlurlClient(url).GetJsonAsync();
+			return new FlurlClient(url, true).GetJsonAsync();
 		}
 
 		/// <summary>
@@ -79,7 +79,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is a dynamic object containing data in the response body.</returns>
 		public static Task<dynamic> GetJsonAsync(this Url url) {
-			return new FlurlClient(url).GetJsonAsync();
+			return new FlurlClient(url, true).GetJsonAsync();
 		}
 
 		/// <summary>
@@ -95,7 +95,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is a list of dynamic objects containing data in the response body.</returns>
 		public static Task<IList<dynamic>> GetJsonListAsync(this string url) {
-			return new FlurlClient(url).GetJsonListAsync();
+			return new FlurlClient(url, true).GetJsonListAsync();
 		}
 
 		/// <summary>
@@ -103,7 +103,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is a list of dynamic objects containing data in the response body.</returns>
 		public static Task<IList<dynamic>> GetJsonListAsync(this Url url) {
-			return new FlurlClient(url).GetJsonListAsync();
+			return new FlurlClient(url, true).GetJsonListAsync();
 		}
 
 		/// <summary>
@@ -119,7 +119,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the response body.</returns>
 		public static Task<string> GetStringAsync(this string url) {
-			return new FlurlClient(url).GetStringAsync();
+			return new FlurlClient(url, true).GetStringAsync();
 		}
 
 		/// <summary>
@@ -127,7 +127,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the response body.</returns>
 		public static Task<string> GetStringAsync(this Url url) {
-			return new FlurlClient(url).GetStringAsync();
+			return new FlurlClient(url, true).GetStringAsync();
 		}
 
 		/// <summary>
@@ -143,7 +143,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the response body.</returns>
 		public static Task<Stream> GetStreamAsync(this string url) {
-			return new FlurlClient(url).GetStreamAsync();
+			return new FlurlClient(url, true).GetStreamAsync();
 		}
 
 		/// <summary>
@@ -151,7 +151,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the response body.</returns>
 		public static Task<Stream> GetStreamAsync(this Url url) {
-			return new FlurlClient(url).GetStreamAsync();
+			return new FlurlClient(url, true).GetStreamAsync();
 		}
 
 		/// <summary>
@@ -167,7 +167,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the response body.</returns>
 		public static Task<byte[]> GetBytesAsync(this string url) {
-			return new FlurlClient(url).GetBytesAsync();
+			return new FlurlClient(url, true).GetBytesAsync();
 		}
 
 		/// <summary>
@@ -175,7 +175,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the response body.</returns>
 		public static Task<byte[]> GetBytesAsync(this Url url) {
-			return new FlurlClient(url).GetBytesAsync();
+			return new FlurlClient(url, true).GetBytesAsync();
 		}		
 	}
 }

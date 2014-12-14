@@ -22,15 +22,17 @@ namespace Flurl.Http
 			var file = await folder.CreateFileAsync(localFileName, CreationCollisionOption.ReplaceExisting);
 
 			// http://developer.greenbutton.com/downloading-large-files-with-the-net-httpclient
-			var response = await client.HttpClient.GetAsync(client.Url, HttpCompletionOption.ResponseHeadersRead);
+			return await client.DoCallAsync(async http => {
+				var response = await http.GetAsync(client.Url, HttpCompletionOption.ResponseHeadersRead);
 
-			// http://codereview.stackexchange.com/a/18679
-			using (var httpStream = await response.Content.ReadAsStreamAsync())
-			using (var fileStream = await file.OpenAsync(FileAccess.ReadAndWrite)) {
-				await httpStream.CopyToAsync(fileStream, bufferSize);
-			}
+				// http://codereview.stackexchange.com/a/18679
+				using (var httpStream = await response.Content.ReadAsStreamAsync())
+				using (var fileStream = await file.OpenAsync(FileAccess.ReadAndWrite)) {
+					await httpStream.CopyToAsync(fileStream, bufferSize);
+				}
 
-			return PortablePath.Combine(localFolderPath, localFileName);
+				return PortablePath.Combine(localFolderPath, localFileName);
+			});
 		}
 
 		/// <summary>
@@ -41,7 +43,7 @@ namespace Flurl.Http
 		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
 		/// <returns>A Task whose result is the local path of the downloaded file.</returns>
 		public static Task<string> DownloadFileAsync(this string url, string localFolderPath, string localFileName = null, int bufferSize = 4096) {
-			return new FlurlClient(url).DownloadFileAsync(localFolderPath, localFileName, bufferSize);
+			return new FlurlClient(url, true).DownloadFileAsync(localFolderPath, localFileName, bufferSize);
 		}
 
 		/// <summary>
@@ -52,7 +54,7 @@ namespace Flurl.Http
 		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
 		/// <returns>A Task whose result is the local path of the downloaded file.</returns>
 		public static Task<string> DownloadFileAsync(this Url url, string localFolderPath, string localFileName = null, int bufferSize = 4096) {
-			return new FlurlClient(url).DownloadFileAsync(localFolderPath, localFileName, bufferSize);
+			return new FlurlClient(url, true).DownloadFileAsync(localFolderPath, localFileName, bufferSize);
 		}
 
 		private static Task<IFolder> EnsureFolderAsync(string path) {

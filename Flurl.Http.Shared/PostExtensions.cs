@@ -12,7 +12,7 @@ namespace Flurl.Http
 		/// <param name="data">Data to be serialized and posted.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostJsonAsync(this FlurlClient client, object data) {
-			return client.HttpClient.PostAsync(client.Url, new CapturedJsonContent(data));
+			return client.DoCallAsync(http => http.PostAsync(client.Url, new CapturedJsonContent(data)));
 		}
 
 		/// <summary>
@@ -21,7 +21,7 @@ namespace Flurl.Http
 		/// <param name="data">Data to be serialized and posted.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostJsonAsync(this string url, object data) {
-			return new FlurlClient(url).PostJsonAsync(data);
+			return new FlurlClient(url, true).PostJsonAsync(data);
 		}
 
 		/// <summary>
@@ -30,7 +30,7 @@ namespace Flurl.Http
 		/// <param name="data">Data to be serialized and posted.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostJsonAsync(this Url url, object data) {
-			return new FlurlClient(url).PostJsonAsync(data);
+			return new FlurlClient(url, true).PostJsonAsync(data);
 		}
 
 		/// <summary>
@@ -39,7 +39,7 @@ namespace Flurl.Http
 		/// <param name="data">Data to be serialized and posted.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostUrlEncodedAsync(this FlurlClient client, object data) {
-			return client.HttpClient.PostAsync(client.Url, new CapturedFormUrlEncodedContent(data));
+			return client.DoCallAsync(http => http.PostAsync(client.Url, new CapturedFormUrlEncodedContent(data)));
 		}
 
 		/// <summary>
@@ -48,7 +48,7 @@ namespace Flurl.Http
 		/// <param name="data">Data to be serialized and posted.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostUrlEncodedAsync(this string url, object data) {
-			return new FlurlClient(url).PostUrlEncodedAsync(data);
+			return new FlurlClient(url, true).PostUrlEncodedAsync(data);
 		}
 
 		/// <summary>
@@ -57,7 +57,7 @@ namespace Flurl.Http
 		/// <param name="data">Data to be serialized and posted.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostUrlEncodedAsync(this Url url, object data) {
-			return new FlurlClient(url).PostUrlEncodedAsync(data);
+			return new FlurlClient(url, true).PostUrlEncodedAsync(data);
 		}
 	}
 }
