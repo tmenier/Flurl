@@ -47,6 +47,15 @@ namespace Flurl
 		}
 
 		/// <summary>
+		/// Returns the root URL of the given full URL, including the scheme, any user info, host, and port (if specified).
+		/// </summary>
+		public static string GetRoot(string url) {
+			// http://stackoverflow.com/a/27473521/62600
+			var uri = new Uri(url);
+			return uri.GetComponents(UriComponents.SchemeAndServer | UriComponents.UserInfo, UriFormat.Unescaped);
+		}
+
+		/// <summary>
 		/// Encodes characters that are illegal in a URL path, including '?'. Does not encode reserved characters, i.e. '/', '+', etc.
 		/// </summary>
 		/// <param name="segment"></param>
@@ -160,6 +169,16 @@ namespace Flurl
 		}
 
 		/// <summary>
+		/// Trims the URL to its root, including the scheme, any user info, host, and port (if specified).
+		/// </summary>
+		/// <returns>The Url object trimmed to its root.</returns>
+		public Url TrimToRoot() {
+			Path = GetRoot(Path);
+			QueryParams.Clear();
+			return this;
+		}
+
+		/// <summary>
 		/// Converts this Url object to its string representation.
 		/// </summary>
 		/// <returns></returns>
@@ -173,12 +192,21 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Implicit conversion to string.
+		/// Implicit conversion from Url to String.
 		/// </summary>
 		/// <param name="url">the Url object</param>
 		/// <returns>The string</returns>
 		public static implicit operator string(Url url) {
 			return url.ToString();
+		}
+
+		/// <summary>
+		/// Implicit conversion from String to Url.
+		/// </summary>
+		/// <param name="url">the String representation of the URL</param>
+		/// <returns>The string</returns>
+		public static implicit operator Url(string url) {
+			return new Url(url);
 		}
 	}
 }

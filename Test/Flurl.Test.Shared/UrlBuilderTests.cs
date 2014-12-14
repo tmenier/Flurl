@@ -59,6 +59,17 @@ namespace Flurl.Test
 		}
 
 		[Test]
+		public void GetRoot_works() {
+			// simple case
+			var root = Url.GetRoot("http://mysite.com/one/two/three");
+			Assert.AreEqual("http://mysite.com", root);
+
+			// a litte more fancy
+			root = Url.GetRoot("https://me:you@www.site.com:8080/hello/goodbye?foo=bar");
+			Assert.AreEqual("https://me:you@www.site.com:8080", root);
+		}
+
+		[Test]
 		public void can_append_path_segment() {
 			var url = "http://www.mysite.com".AppendPathSegment("endpoint");
 			Assert.AreEqual("http://www.mysite.com/endpoint", url.ToString());
@@ -156,6 +167,13 @@ namespace Flurl.Test
 		public void removing_nonexisting_query_params_is_ignored() {
 			var url = "http://www.mysite.com/more".RemoveQueryParams("x", "y");
 			Assert.AreEqual("http://www.mysite.com/more", url.ToString());
+		}
+
+		[Test]
+		public void can_trim_to_root() {
+			var url = "http://www.mysite.com/one".AppendPathSegments("two", "three").SetQueryParams(new { x = 1, y = 2 });
+			url.TrimToRoot();
+			Assert.AreEqual("http://www.mysite.com", url.ToString());
 		}
 
 		[Test]

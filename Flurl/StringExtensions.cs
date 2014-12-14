@@ -84,12 +84,21 @@ namespace Flurl
 		}
 
 		/// <summary>
-		///  Converts string to a Url object and removes multiple name/value pairs from the query string by name.
+		/// Converts string to a Url object and removes multiple name/value pairs from the query string by name.
 		/// </summary>
 		/// <param name="names">Query string parameter names to remove</param>
 		/// <returns>The Url object with the query string parameters removed</returns>
 		public static Url RemoveQueryParams(this string url, IEnumerable<string> names) {
 			return new Url(url).RemoveQueryParams(names);
 		}
+
+		/// <summary>
+		/// Trims the URL to its root, including the scheme, any user info, host, and port (if specified).
+		/// </summary>
+		/// <returns>The Url object trimmed to its root.</returns>
+		public static Url TrimToRoot(this string url) {
+			return new Url(url).TrimToRoot();
+		}
+
 	}
 }
