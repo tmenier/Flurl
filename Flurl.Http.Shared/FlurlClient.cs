@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -17,7 +20,7 @@ namespace Flurl.Http
 		public FlurlClient(string url, bool autoDispose) : this(new Url(url), autoDispose) { }
 		public FlurlClient(Url url) : this(url, false) { }
 		public FlurlClient(string url) : this(new Url(url), false) { }
-		public FlurlClient() : this(null, false) { }
+		public FlurlClient() : this((Url)null, false) { }
 
 		private HttpClient _httpClient;
 		private HttpMessageHandler _httpMessageHandler;
@@ -74,6 +77,10 @@ namespace Flurl.Http
 			}			
 		}
 
+		/// <summary>
+		/// Disposes the underlying HttpClient and HttpMessageHandler, setting both properties to null.
+		/// This FlurlClient can still be reused, but those underlying objects will be re-created as needed. Previously set headers, etc, will be lost.
+		/// </summary>
 		public void Dispose() {
 			if (_httpMessageHandler != null)
 				_httpMessageHandler.Dispose();

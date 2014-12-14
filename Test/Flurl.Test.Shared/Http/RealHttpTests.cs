@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,9 +29,42 @@ namespace Flurl.Test.Http
 		[Test]
 		public async Task can_set_cookies() {
 			var resp = await "http://httpbin.org/cookies".WithCookies(new { x = 1, y = 2 }).GetJsonAsync();
-			// httpbin.org will return json representation of cookies that were set on the server.
+
+			// httpbin returns json representation of cookies that were set on the server.
 			Assert.AreEqual("1", resp.cookies.x);
 			Assert.AreEqual("2", resp.cookies.y);
+		}
+
+		[Test]
+		public async Task cant_persist_cookies_without_resuing_client() {
+			var fc = "http://httpbin.org/cookies".WithCookie("z", 999);
+			// cookie should be set
+			Assert.AreEqual("999", fc.GetCookies()["z"].Value);
+
+			await fc.HeadAsync();
+			// FlurlClient was auto-disposed, so cookie should be gone
+			Assert.IsFalse(fc.GetCookies().ContainsKey("z"));
+
+			// httpbin returns json representation of cookies that were set on the server.
+			var resp = await "http://httpbin.org/cookies".GetJsonAsync();
+			Assert.IsFalse((resp.cookies as IDictionary<string, object>).ContainsKey("z"));
+		}
+
+		[Test]
+		public async Task can_persist_cookies() {
+			using (var fc = new FlurlClient()) {
+				"http://httpbin.org/cookies".WithClient(fc).WithCookie("z", 999);
+				// cookie should be set
+				Assert.AreEqual("999", fc.GetCookies()["z"].Value);
+
+				await fc.HeadAsync();
+				// FlurlClient should be re-used, so cookie should stick
+				Assert.AreEqual("999", fc.GetCookies()["z"].Value);
+
+				// httpbin returns json representation of cookies that were set on the server.
+				var resp = await "http://httpbin.org/cookies".WithClient(fc).GetJsonAsync();
+				Assert.AreEqual("999", resp.cookies.z);
+			}
 		}
 
 		[Test]

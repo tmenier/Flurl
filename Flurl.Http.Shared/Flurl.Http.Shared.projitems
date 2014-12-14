@@ -17,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Content\CapturedFormUrlEncodedContent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Content\CapturedJsonContent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Content\CapturedStringContent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CookieExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DeleteExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlurlClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlurlHttp.cs" />
