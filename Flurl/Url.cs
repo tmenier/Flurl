@@ -169,10 +169,10 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Trims the URL to its root, including the scheme, any user info, host, and port (if specified).
+		/// Resets the URL to its root, including the scheme, any user info, host, and port (if specified).
 		/// </summary>
 		/// <returns>The Url object trimmed to its root.</returns>
-		public Url TrimToRoot() {
+		public Url ResetToRoot() {
 			Path = GetRoot(Path);
 			QueryParams.Clear();
 			return this;

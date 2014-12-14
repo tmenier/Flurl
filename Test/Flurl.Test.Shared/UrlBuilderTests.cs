@@ -170,9 +170,9 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void can_trim_to_root() {
+		public void can_reset_to_root() {
 			var url = "http://www.mysite.com/one".AppendPathSegments("two", "three").SetQueryParams(new { x = 1, y = 2 });
-			url.TrimToRoot();
+			url.ResetToRoot();
 			Assert.AreEqual("http://www.mysite.com", url.ToString());
 		}
 

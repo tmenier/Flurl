@@ -95,9 +95,9 @@ namespace Flurl
 		/// <summary>
 		/// Trims the URL to its root, including the scheme, any user info, host, and port (if specified).
 		/// </summary>
-		/// <returns>The Url object trimmed to its root.</returns>
-		public static Url TrimToRoot(this string url) {
-			return new Url(url).TrimToRoot();
+		/// <returns>A Url object.</returns>
+		public static Url ResetToRoot(this string url) {
+			return new Url(url).ResetToRoot();
 		}
 
 	}
