@@ -13,7 +13,7 @@
 			A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.
 		</description>
 		<releaseNotes>
-			1.0.5 - Url.GetRoot (static) and Url.TrimToRoot
+			1.0.5 - Url.GetRoot (static) and Url.ResetToRoot
 			1.0.4 - Support for multi-value query params, i.e. SetQueryParam("x", new[] { 1, 2 }) => "x=1&amp;x=2")
 			1.0.3 - Bugfix - exclude null values from querystring (thanks to @niemyjski)
 			1.0.2 - Bugfix related to querystring with only key (thanks to @rafaelsteil)
