@@ -55,7 +55,10 @@ await "http://api.foo.com".PostJsonAsync(new { a = 1, b = 2 });
 Simulate an HTML form post:
 
 ````c#
-await "http://site.com/login".PostUrlEncodedAsync(new { user = "me", pass = "xxxx" });
+await "http://site.com/login".PostUrlEncodedAsync(new { 
+    user = "user", 
+    pass = "pass"
+});
 ````
 
 The Post methods above return a `Task<HttpResponseMessage>`. You may of course expect some data to be returned in the response body:
@@ -73,10 +76,10 @@ There are a variety of ways to set up HTTP calls without breaking the fluent cha
 Set request headers:
 
 ````c#
-// single:
+// one:
 await url.WithHeader("someheader", "foo").GetJsonAsync();
 // multiple:
-await url.WithHeaders(new { header1 = "foo", header2 = "bar" }).GetJsonAsync();
+await url.WithHeaders(new { h1 = "foo", h2 = "bar" }).GetJsonAsync();
 ````
 
 Authenticate with Basic Authentication:
@@ -98,10 +101,20 @@ await url.WithTimeout(10).DownloadFileAsync(); // 10 seconds
 await url.WithTimeout(TimeSpan.FromMinutes(2)).DownloadFileAsync();
 ````
 
+Set some cookies:
+
+````c#
+// one:
+await url.WithCookie("name", "value", expDate).HeadAsync();
+// multiple:
+await url.WithCookies(new { c1 = 1, c2 = 2 }, expDate).HeadAsync();
+// date is optional; excluding it makes it a session cookie.
+````
+
 Get at the underlying HttpClient directly if none of the other convenience methods meet your needs:
 
 ````c#
-await url.ConfigureHttpClient(http => /* do whatever you need! */).GetJsonAsync();
+await url.ConfigureHttpClient(http => /* configure away! */).GetJsonAsync();
 ````
 
 `ConfigureHttpClient` is a nice hook for extending Flurl with your own extension methods.
