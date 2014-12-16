@@ -31,6 +31,16 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
+		/// Fluently specify the URL to be called with the current FlurlClient instance.
+		/// </summary>
+		/// <param name="url">The Url to call.</param>
+		/// <returns></returns>
+		public static FlurlClient WithUrl(this FlurlClient client, Url url) {
+			client.Url = url;
+			return client;
+		}
+
+		/// <summary>
 		/// Provides access to modifying the underlying HttpClient.
 		/// </summary>
 		/// <param name="action">Action to perform on the HttpClient.</param>
