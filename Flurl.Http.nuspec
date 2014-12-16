@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>0.4.0-pre2</version>
+		<version>0.4.0</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,7 +13,7 @@
 			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
 		</description>
 		<releaseNotes>
-			0.4.0 - Client lifetime features - disposible FlurlClient, auto-dispose by default, Url.WithClient to attach to reusable instance. More cookie features.
+			0.4.0 - Client lifetime management - see http://bit.ly/1zqmuLA.
 			0.3.0 - Added support for sending cookies (WithCookie/WithCookies), including breaking change to IHttpClientFactory.
 			0.2.5 - Added hook to create HttpClientHandler from custom factory, updated Flurl dependency.
 			0.2.4 - Updated Flurl dependency for PCL to 1.0.2.
