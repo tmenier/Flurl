@@ -54,7 +54,7 @@ In this example, the call to `EnableCookies()` is important. Cookie functionalit
 
 ###How important is it to dispose of HttpClient?
 
-The general consensus is that [it's not very imporant](http://stackoverflow.com/questions/15705092/do-httpclient-and-httpclienthandler-have-to-be-disposed), particularly in cases where you have relatively few instances and are re-using them. So although the above examples demonstrate disposing `FlurlClient` via `using` statements, it may be appropriate to let them live much longer. For example, you may want to hold a reference to one in a member variable of a class where many calls are made to the same host.
+The general consensus is that [it's not very important](http://stackoverflow.com/questions/15705092/do-httpclient-and-httpclienthandler-have-to-be-disposed), particularly in cases where you have relatively few instances and are re-using them. So although the above examples demonstrate disposing `FlurlClient` via `using` statements, it may be appropriate to let them live much longer. For example, you may want to hold a reference to one in a member variable of a class where many calls are made to the same host.
 
 ###Should I hold static instances of FlurlClient?
 
