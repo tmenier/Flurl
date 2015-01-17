@@ -13,7 +13,7 @@ namespace Flurl.Test.Http
 			var fcExts = ReflectionHelper.GetAllExtensionMethods<FlurlClient>(typeof(FlurlClient).Assembly);
 			var urlExts = ReflectionHelper.GetAllExtensionMethods<Url>(typeof(FlurlClient).Assembly);
 			var stringExts = ReflectionHelper.GetAllExtensionMethods<string>(typeof(FlurlClient).Assembly);
-			var whitelist = new[] { "GetCookies" }; // cases where Url method of the same name was excluded intentionally
+			var whitelist = new[] { "GetCookies", "WithUrl" }; // cases where Url method of the same name was excluded intentionally
 
 			foreach (var method in fcExts) {
 				if (whitelist.Contains(method.Name))

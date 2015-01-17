@@ -87,6 +87,8 @@ namespace Flurl.Test.Http
 		public async Task failure_throws_detailed_exception() {
 			HttpTest.RespondWith(500, "bad job");
 
+			HttpCall failedCall = null;
+
 			try {
 				await "http://api.com".GetStringAsync();
 				Assert.Fail("FlurlHttpException was not thrown!");
@@ -95,7 +97,12 @@ namespace Flurl.Test.Http
 				Assert.AreEqual("http://api.com/", ex.Call.Request.RequestUri.AbsoluteUri);
 				Assert.AreEqual(HttpMethod.Get, ex.Call.Request.Method);
 				Assert.AreEqual(HttpStatusCode.InternalServerError, ex.Call.Response.StatusCode);
+				failedCall = ex.Call;
 			}
+
+			// can't await inside a catch block
+			var resp = await failedCall.Response.Content.ReadAsStringAsync();
+			Assert.AreEqual(resp, "bad job");
 		}
 
 		private class TestData
