@@ -54,6 +54,30 @@ namespace Flurl.Test.Http
 			}
 		}
 
+		[TestCase(true)]
+		[TestCase(false)]
+		public async Task can_set_error_callback(bool markExceptionHandled) {
+			var callbackCalled = false;
+			using (var test = new HttpTest()) {
+				test.RespondWith(500, "server error");
+				FlurlHttp.Configuration.OnError = call => {
+					CollectionAssert.IsEmpty(test.ResponseQueue); // verifies that callback is running after HTTP call is made
+					callbackCalled = true;
+					call.ExceptionHandled = markExceptionHandled;
+				};
+				Assert.IsFalse(callbackCalled);
+				try {
+					await "http://www.api.com".GetAsync();
+					Assert.IsTrue(callbackCalled, "OnError was never called");
+					Assert.IsTrue(markExceptionHandled, "ExceptionHandled was marked false in callback, but exception was not propagated.");
+				}
+				catch (FlurlHttpException) {
+					Assert.IsTrue(callbackCalled, "OnError was never called");
+					Assert.IsFalse(markExceptionHandled, "ExceptionHandled was marked true in callback, but exception was propagated.");
+				}
+			}			
+		}
+
 		private class SomeCustomHttpClientFactory : IHttpClientFactory
 		{
 			public HttpClient CreateClient(Url url, HttpMessageHandler handler) {
