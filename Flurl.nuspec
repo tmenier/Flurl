@@ -23,7 +23,6 @@
 			0.2.1 - Fixed a couple string extensions whose names were inconsistent with their Flurl.Url equivalent.
 			0.2.0 - Added PCL support.
 		</releaseNotes>
-		<copyright>Copyright 2014</copyright>
 		<tags>fluent portable url uri querystring builder</tags>
 	</metadata>
 	<files>
