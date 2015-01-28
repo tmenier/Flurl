@@ -19,7 +19,6 @@ PM> Install-Package Flurl
 Both Flurl and Flurl.Http are Portable Class Libraries supporting the following platforms:
 
 - .NET Framework 4 and above for Flurl, 4.5 and above for Flurl.Http
-- Silverlight 5
 - Windows 8
 - Windows Phone 8.1
 - Windows Phone Silverlight 8
