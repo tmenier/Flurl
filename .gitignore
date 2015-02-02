@@ -1,6 +1,6 @@
 bin
 obj
+packages
 *.suo
 *.nupkg
-packages
 *.DotSettings.user

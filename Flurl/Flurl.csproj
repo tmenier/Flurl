@@ -52,7 +52,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>if $(ConfigurationName) == Release (
-  "$(SolutionDir).nuget\nuget.exe" pack "$(SolutionDir)Flurl.nuspec" -o "$(SolutionDir)publish" -IncludeReferencedProjects
+  "$(SolutionDir)Build\nuget.exe" pack "$(SolutionDir)Build\Flurl.nuspec" -o "$(SolutionDir)Publish" -IncludeReferencedProjects
 )</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

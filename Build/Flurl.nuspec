@@ -27,6 +27,6 @@
 		<tags>fluent portable url uri querystring builder</tags>
 	</metadata>
 	<files>
-		<file src="Flurl\bin\Release\Flurl.*" target="lib\portable-net40+sl50+win+wpa81+wp80+MonoAndroid10+MonoTouch10" />
+		<file src="..\Flurl\bin\Release\Flurl.*" target="lib\portable-net40+sl50+win+wpa81+wp80+MonoAndroid10+MonoTouch10" />
 	</files>
 </package>
