@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Flurl.Util;
 
 namespace Flurl
 {
@@ -55,7 +56,7 @@ namespace Flurl
 					continue;
 
 				if (val is string || !(val is IEnumerable)) {
-					yield return key + "=" + Uri.EscapeDataString(val.ToString());
+					yield return key + "=" + Uri.EscapeDataString(val.ToInvariantString());
 				}
 				else {
 					// if value is IEnumerable (other than string), break it into multiple
@@ -65,7 +66,7 @@ namespace Flurl
 						if (subval == null)
 							continue;
 
-						yield return key + "=" + Uri.EscapeDataString(subval.ToString());
+						yield return key + "=" + Uri.EscapeDataString(subval.ToInvariantString());
 					}
 				}
 			}

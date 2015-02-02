@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using Flurl.Util;
 
 namespace Flurl.Http
@@ -82,7 +81,7 @@ namespace Flurl.Http
 		/// <param name="expires">cookie expiration (optional). If excluded, cookie only lives for duration of session.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithCookie(this FlurlClient client, string name, object value, DateTime? expires = null) {
-			return client.WithCookie(new Cookie(name, (value == null) ? null : value.ToString()) { Expires = expires ?? DateTime.MinValue });
+			return client.WithCookie(new Cookie(name, (value == null) ? null : value.ToInvariantString()) { Expires = expires ?? DateTime.MinValue });
 		}
 
 		/// <summary>

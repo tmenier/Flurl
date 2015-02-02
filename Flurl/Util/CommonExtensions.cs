@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Flurl.Util
 {
@@ -18,7 +19,7 @@ namespace Flurl.Util
 
 			if (obj is IDictionary) {
 				foreach (DictionaryEntry kv in (IDictionary)obj)
-					yield return new KeyValuePair<string, object>(kv.Key.ToString(), kv.Value);
+					yield return new KeyValuePair<string, object>(kv.Key.ToInvariantString(), kv.Value);
 			}
 			else {
 				foreach (var prop in obj.GetType().GetProperties()) {
@@ -26,6 +27,23 @@ namespace Flurl.Util
 					yield return new KeyValuePair<string, object>(prop.Name, val);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Returns a string that represents the current object, using CultureInfo.InvariantCulture where possible.
+		/// </summary>
+		public static string ToInvariantString(this object obj) {
+			// inspired by: http://stackoverflow.com/a/19570016/62600
+
+			var c = obj as IConvertible;
+			if (c != null) 
+				return c.ToString(CultureInfo.InvariantCulture);
+
+			var f = obj as IFormattable;
+			if (f != null)
+				return f.ToString(null, CultureInfo.InvariantCulture);
+
+			return obj.ToString();
 		}
 	}
 }
