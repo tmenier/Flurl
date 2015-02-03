@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Flurl.Http.Configuration;
@@ -76,6 +77,24 @@ namespace Flurl.Test.Http
 					Assert.IsFalse(markExceptionHandled, "ExceptionHandled was marked true in callback, but exception was propagated.");
 				}
 			}			
+		}
+
+		[Test]
+		public async Task can_disable_exception_behavior() {
+			FlurlHttp.Configuration.OnError = call => {
+				call.ExceptionHandled = true;
+			};
+
+			using (var test = new HttpTest()) {
+				test.RespondWith(500, "server error");
+				try {
+					var result = await "http://www.api.com".GetAsync();
+					Assert.IsFalse(result.IsSuccessStatusCode);
+				}
+				catch (Exception) {
+					Assert.Fail("Exception should not have been thrown.");
+				}
+			}
 		}
 
 		private class SomeCustomHttpClientFactory : IHttpClientFactory
