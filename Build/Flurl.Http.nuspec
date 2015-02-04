@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>0.4.2</version>
+		<version>0.5.0</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,6 +13,7 @@
 			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
 		</description>
 		<releaseNotes>
+			0.5.0 - Added deserialization helpers for error responses (FlurlHttpException.FlurlHttpException.GetResponseJson, etc).
 			0.4.2 - Updated Flurl dependency to 1.0.6.
 			0.4.1 - GitHub #25 - some exceptions not triggering global OnError.
 			0.4.0 - Client lifetime management - see http://bit.ly/1zqmuLA.
