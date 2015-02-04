@@ -87,8 +87,6 @@ namespace Flurl.Test.Http
 		public async Task failure_throws_detailed_exception() {
 			HttpTest.RespondWith(500, "bad job");
 
-			HttpCall failedCall = null;
-
 			try {
 				await "http://api.com".GetStringAsync();
 				Assert.Fail("FlurlHttpException was not thrown!");
@@ -97,18 +95,50 @@ namespace Flurl.Test.Http
 				Assert.AreEqual("http://api.com/", ex.Call.Request.RequestUri.AbsoluteUri);
 				Assert.AreEqual(HttpMethod.Get, ex.Call.Request.Method);
 				Assert.AreEqual(HttpStatusCode.InternalServerError, ex.Call.Response.StatusCode);
-				failedCall = ex.Call;
+				Assert.AreEqual(ex.GetResponseString(), "bad job");
 			}
+		}
 
-			// can't await inside a catch block
-			var resp = await failedCall.Response.Content.ReadAsStringAsync();
-			Assert.AreEqual(resp, "bad job");
+		[Test]
+		public async Task can_get_error_json_typed() {
+			HttpTest.RespondWithJson(500, new { code = 999, message = "our server crashed" });
+
+			try {
+				await "http://api.com".GetStringAsync();
+			}
+			catch (FlurlHttpException ex) {
+				var error = ex.GetResponseJson<TestError>();
+				Assert.IsNotNull(error);
+				Assert.AreEqual(999, error.code);
+				Assert.AreEqual("our server crashed", error.message);
+			}
+		}
+
+		[Test]
+		public async Task can_get_error_json_untyped() {
+			HttpTest.RespondWithJson(500, new { code = 999, message = "our server crashed" });
+
+			try {
+				await "http://api.com".GetStringAsync();
+			}
+			catch (FlurlHttpException ex) {
+				var error = ex.GetResponseJson(); // error is a dynamic this time
+				Assert.IsNotNull(error);
+				Assert.AreEqual(999, error.code);
+				Assert.AreEqual("our server crashed", error.message);
+			}
 		}
 
 		private class TestData
 		{
 			public int id { get; set; }
 			public string name { get; set; }
+		}
+
+		private class TestError
+		{
+			public int code { get; set; }
+			public string message { get; set; }
 		}
 	}
 }

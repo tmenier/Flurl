@@ -38,8 +38,12 @@ namespace Flurl.Http.Configuration
 				call.Exception = new FlurlHttpException(call, ex);
 			}
 
-			if (call.Response != null && !call.Response.IsSuccessStatusCode)
+			if (call.Response != null && !call.Response.IsSuccessStatusCode) {
+				if (call.Response.Content != null)
+					call.ErrorResponseBody = await call.Response.Content.ReadAsStringAsync();
+
 				call.Exception = new FlurlHttpException(call, null);
+			}
 
 			if (call.Exception != null)
 				await RaiseGlobalEventAsync(FlurlHttp.Configuration.OnError, FlurlHttp.Configuration.OnErrorAsync, call);

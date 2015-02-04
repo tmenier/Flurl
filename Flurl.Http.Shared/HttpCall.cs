@@ -50,7 +50,7 @@ namespace Flurl.Http
 		/// Total duration of the call if it completed, otherwise null.
 		/// </summary>
 		public TimeSpan? Duration {
-			get { return EndedUtc.HasValue ? EndedUtc - StartedUtc : null; }
+			get { return EndedUtc - StartedUtc; }
 		}
 
 		/// <summary>
@@ -80,5 +80,10 @@ namespace Flurl.Http
 		public HttpStatusCode? HttpStatus {
 			get { return Completed ? (HttpStatusCode?)Response.StatusCode : null; }
 		}
+
+		/// <summary>
+		/// Body of the HTTP response if unsuccessful, otherwise null. (Successful responses are not captured as strings, mainly for performance reasons.)
+		/// </summary>
+		public string ErrorResponseBody { get; set; }
 	}
 }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Dynamic;
 using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace Flurl.Http
 {
@@ -36,6 +38,33 @@ namespace Flurl.Http
 
 			// in theory we should never get here.
 			return string.Format("Request to {0} failed.", call.Request.RequestUri.AbsoluteUri);
+		}
+
+		/// <summary>
+		/// Gets the response body of the failed call.
+		/// </summary>
+		public string GetResponseString() {
+			return (Call == null) ? null : Call.ErrorResponseBody;
+		}
+
+		/// <summary>
+		/// Deserializes the JSON response body to an object of the given type.
+		/// </summary>
+		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
+		/// <returns>An object containing data in the response body.</returns>
+		public T GetResponseJson<T>() {
+			return
+				(Call == null) ? default(T) :
+				(Call.ErrorResponseBody == null) ? default(T) :
+				JsonConvert.DeserializeObject<T>(Call.ErrorResponseBody);
+		}
+
+		/// <summary>
+		/// Deserializes the JSON response body to a dynamic object.
+		/// </summary>
+		/// <returns>An object containing data in the response body.</returns>
+		public dynamic GetResponseJson() {
+			return GetResponseJson<ExpandoObject>();
 		}
 	}
 
