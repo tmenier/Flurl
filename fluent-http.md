@@ -24,10 +24,16 @@ Get a strongly-typed poco from a JSON API:
 T poco = await "http://api.foo.com".GetJsonAsync<T>();
 ````
 
-When builing classes to match the JSON seems like overkill, the non-generic version returns a dynamic:
+When creating classes to match the JSON seems like overkill, the non-generic version returns a dynamic:
 
 ````c#
 dynamic d = await "http://api.foo.com".GetJsonAsync();
+````
+
+Or get a list of dynamics from an API that returns a JSON array:
+
+````c#
+var list = await "http://api.foo.com".GetJsonListAsync();
 ````
 
 Get strings, bytes, and streams:
