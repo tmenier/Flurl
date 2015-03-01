@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Flurl.Http
@@ -55,9 +56,11 @@ namespace Flurl.Http
 		/// <typeparam name="T">Type (wrapped in a Task) returned in underlying async HTTP call.</typeparam>
 		/// <param name="func">Underlying async call made against an HttpClient.</param>
 		/// <returns></returns>
-		public async Task<T> DoCallAsync<T>(Func<HttpClient, Task<T>> func) {
+		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			try {
-				return await func(HttpClient);
+				var request = new HttpRequestMessage(verb, this.Url) { Content = content };
+				return await HttpClient.SendAsync(request, completionOption, CancellationToken.None);
+				//return await HttpClient.PostAsync(this.Url, content);
 			}
 			finally {
 				if (AutoDispose) Dispose();

@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace Flurl.Test.Http
 {
 	/// <summary>
-	/// Most HTTP tests in this project are with Flurl in fake mode, these are some real ones, mostly using the handy site 
+	/// Most HTTP tests in this project are with Flurl in fake mode. These are some real ones, mostly using the handy site 
 	/// http://httpbin.org. One important aspect these verify is that AutoDispose behavior is not preventing us from getting
 	/// stuff out of the response (i.e. that we're not disposing too early).
 	/// </summary>

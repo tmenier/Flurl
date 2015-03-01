@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Flurl.Http
@@ -14,7 +15,7 @@ namespace Flurl.Http
 		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
 		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
 		/// <returns>A Task whose result is the local path of the downloaded file.</returns>
-		public static Task<string> DownloadFileAsync(this FlurlClient client, string localFolderPath, string localFileName = null, int bufferSize = 4096) {
+		public static async Task<string> DownloadFileAsync(this FlurlClient client, string localFolderPath, string localFileName = null, int bufferSize = 4096) {
 			if (localFileName == null)
 				localFileName = client.Url.Path.Split('/').Last();
 
@@ -23,8 +24,8 @@ namespace Flurl.Http
 
 			var filePath = Path.Combine(localFolderPath, localFileName);
 
-			return client.DoCallAsync(async http => {
-				var response = await http.GetAsync(client.Url, HttpCompletionOption.ResponseHeadersRead);
+			try {
+				var response = await client.HttpClient.GetAsync(client.Url, HttpCompletionOption.ResponseHeadersRead);
 
 				// http://codereview.stackexchange.com/a/18679
 				using (var httpStream = await response.Content.ReadAsStreamAsync())
@@ -33,7 +34,10 @@ namespace Flurl.Http
 				}
 
 				return filePath;
-			});
+			}
+			finally {
+				if (client.AutoDispose) client.Dispose();
+			}
 		}
 
 		/// <summary>

@@ -21,18 +21,20 @@ namespace Flurl.Http
 			var folder = await EnsureFolderAsync(localFolderPath);
 			var file = await folder.CreateFileAsync(localFileName, CreationCollisionOption.ReplaceExisting);
 
-			// http://developer.greenbutton.com/downloading-large-files-with-the-net-httpclient
-			return await client.DoCallAsync(async http => {
-				var response = await http.GetAsync(client.Url, HttpCompletionOption.ResponseHeadersRead);
+			try {
+				var response = await client.HttpClient.GetAsync(client.Url, HttpCompletionOption.ResponseHeadersRead);
 
 				// http://codereview.stackexchange.com/a/18679
 				using (var httpStream = await response.Content.ReadAsStreamAsync())
-				using (var fileStream = await file.OpenAsync(FileAccess.ReadAndWrite)) {
-					await httpStream.CopyToAsync(fileStream, bufferSize);
+				using (var filestream = await file.OpenAsync(FileAccess.ReadAndWrite)) {
+					await httpStream.CopyToAsync(filestream, bufferSize);
 				}
 
 				return PortablePath.Combine(localFolderPath, localFileName);
-			});
+			}
+			finally {
+				if (client.AutoDispose) client.Dispose();
+			}
 		}
 
 		/// <summary>

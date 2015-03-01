@@ -25,7 +25,7 @@ namespace Flurl.Http
 		public FlurlHttpException(HttpCall call) : this(call, BuildMessage(call, null), null) { }
 
 		private static string BuildMessage(HttpCall call, Exception inner) {
-			if (call.Response != null && !call.Response.IsSuccessStatusCode) {
+			if (call.Response != null && !call.Succeeded) {
 				return string.Format("Request to {0} failed with status code {1} ({2}).",
 					call.Request.RequestUri.AbsoluteUri,
 					(int) call.Response.StatusCode,

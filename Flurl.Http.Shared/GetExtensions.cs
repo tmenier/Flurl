@@ -12,7 +12,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> GetAsync(this FlurlClient client) {
-			return client.DoCallAsync(http => http.GetAsync(client.Url));
+			return client.SendAsync(HttpMethod.Get);
 		}
 
 		/// <summary>

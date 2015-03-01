@@ -12,7 +12,7 @@ namespace Flurl.Http
 		/// <param name="data">Data to be serialized and posted.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostJsonAsync(this FlurlClient client, object data) {
-			return client.DoCallAsync(http => http.PostAsync(client.Url, new CapturedJsonContent(data)));
+			return client.SendAsync(HttpMethod.Post, new CapturedJsonContent(data));
 		}
 
 		/// <summary>
@@ -39,7 +39,7 @@ namespace Flurl.Http
 		/// <param name="data">Data to be serialized and posted.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostUrlEncodedAsync(this FlurlClient client, object data) {
-			return client.DoCallAsync(http => http.PostAsync(client.Url, new CapturedFormUrlEncodedContent(data)));
+			return client.SendAsync(HttpMethod.Post, new CapturedFormUrlEncodedContent(data));
 		}
 
 		/// <summary>

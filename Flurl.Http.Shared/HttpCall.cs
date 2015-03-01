@@ -71,7 +71,11 @@ namespace Flurl.Http
 		/// True if a response with a successful HTTP status was received.
 		/// </summary>
 		public bool Succeeded {
-			get { return Completed && Response.IsSuccessStatusCode; }
+			get {
+				if (!Completed) return false;
+				if (Response.IsSuccessStatusCode) return true;
+				return false;
+			}
 		}
 
 		/// <summary>
