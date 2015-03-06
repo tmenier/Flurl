@@ -35,6 +35,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Testing\HttpTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Testing\TestHttpClientFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Testing\TimeoutResponseMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\HttpStatusRangeParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\JsonHelper.cs" />
   </ItemGroup>
 </Project>
