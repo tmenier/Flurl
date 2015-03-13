@@ -9,7 +9,16 @@ namespace Flurl.Http.Shared.Util
     public static class HttpStatusRangeParser
     {
 	    public static bool IsMatch(string pattern, int value) {
+		    if (pattern == null)
+			    return false;
+
 		    foreach (var range in pattern.Split(',').Select(p => p.Trim())) {
+			    if (range == "")
+				    continue;
+
+			    if (range == "*")
+				    return true; // special case - allow everything
+
 			    var bounds = range.Split('-');
 			    int lower = 0, upper = 0;
 
