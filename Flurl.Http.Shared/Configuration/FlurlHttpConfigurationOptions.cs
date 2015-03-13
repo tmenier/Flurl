@@ -19,6 +19,13 @@ namespace Flurl.Http.Configuration
 		public TimeSpan DefaultTimeout { get; set; }
 
 		/// <summary>
+		/// Gets or sets a pattern representing a range of HTTP status codes which (in addtion to 2xx) will NOT result in Flurl.Http throwing an Exception.
+		/// Examples: "3xx", "100,300,600", "100-299,6xx", "*" (allow everything)
+		/// 2xx will never throw regardless of this setting.
+		/// </summary>
+		public string AllowedHttpStatusRange { get; set; }
+
+		/// <summary>
 		/// Gets or sets a factory used to create HttpClient object used in Flurl HTTP calls. Default value
 		/// is an instance of DefaultHttpClientFactory. Custom factory implementations should generally
 		/// inherit from DefaultHttpClientFactory, call base.CreateClient, and manipulate the returned HttpClient,

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Flurl.Http.Shared.Util;
+using Flurl.Http;
 using NUnit.Framework;
 
 namespace Flurl.Test.Http

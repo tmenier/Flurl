@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Flurl.Http.Shared.Util
+namespace Flurl.Http
 {
     public static class HttpStatusRangeParser
     {

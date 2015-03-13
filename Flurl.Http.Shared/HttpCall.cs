@@ -74,7 +74,7 @@ namespace Flurl.Http
 			get {
 				if (!Completed) return false;
 				if (Response.IsSuccessStatusCode) return true;
-				return false;
+				return HttpStatusRangeParser.IsMatch(FlurlHttp.Configuration.AllowedHttpStatusRange, (int)Response.StatusCode);
 			}
 		}
 

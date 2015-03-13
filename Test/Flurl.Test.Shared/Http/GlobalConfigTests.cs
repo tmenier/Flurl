@@ -26,6 +26,21 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public async Task can_allow_non_success_status() {
+			FlurlHttp.Configuration.AllowedHttpStatusRange = "4xx";
+			using (var test = new HttpTest()) {
+				test.RespondWith(418, "I'm a teapot");
+				try {
+					var result = await "http://www.api.com".GetAsync();
+					Assert.IsFalse(result.IsSuccessStatusCode);
+				}
+				catch (Exception) {
+					Assert.Fail("Exception should not have been thrown.");
+				}
+			}
+		}
+
+		[Test]
 		public async Task can_set_pre_callback() {
 			var callbackCalled = false;
 			using (var test = new HttpTest()) {

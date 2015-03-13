@@ -38,7 +38,7 @@ namespace Flurl.Http.Configuration
 				call.Exception = new FlurlHttpException(call, ex);
 			}
 
-			if (call.Response != null && !call.Response.IsSuccessStatusCode) {
+			if (call.Response != null && !call.Succeeded) {
 				if (call.Response.Content != null)
 					call.ErrorResponseBody = await call.Response.Content.ReadAsStringAsync();
 
