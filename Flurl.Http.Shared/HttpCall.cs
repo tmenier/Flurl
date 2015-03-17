@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 
@@ -74,7 +76,8 @@ namespace Flurl.Http
 			get {
 				if (!Completed) return false;
 				if (Response.IsSuccessStatusCode) return true;
-				return HttpStatusRangeParser.IsMatch(FlurlHttp.Configuration.AllowedHttpStatusRange, (int)Response.StatusCode);
+				var allowedStatuses = Request.Properties["AllowedHttpStatusRanges"] as IEnumerable<string>;
+				return allowedStatuses != null && allowedStatuses.Any(s => HttpStatusRangeParser.IsMatch(s, Response.StatusCode));
 			}
 		}
 

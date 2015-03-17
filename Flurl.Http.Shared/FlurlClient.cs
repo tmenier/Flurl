@@ -9,13 +9,16 @@ using System.Threading.Tasks;
 namespace Flurl.Http
 {
 	/// <summary>
-	/// A simple container for a Url and an HttpClient, used to enable fluent chaining.
+	/// A chainable wrapper around HttpClient and Flurl.Url.
 	/// </summary>
 	public class FlurlClient : IDisposable
 	{
 		public FlurlClient(Url url, bool autoDispose) {
 			this.Url = url;
 			this.AutoDispose = autoDispose;
+			this.AllowedHttpStatusRanges = new List<string>();
+			if (FlurlHttp.Configuration.AllowedHttpStatusRange != null)
+				this.AllowedHttpStatusRanges.Add(FlurlHttp.Configuration.AllowedHttpStatusRange);
 		}
 
 		public FlurlClient(string url, bool autoDispose) : this(new Url(url), autoDispose) { }
@@ -59,8 +62,9 @@ namespace Flurl.Http
 		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			try {
 				var request = new HttpRequestMessage(verb, this.Url) { Content = content };
+				// mechanism for passing ad-hoc data to the MessageHandler
+				request.Properties.Add("AllowedHttpStatusRanges", AllowedHttpStatusRanges);
 				return await HttpClient.SendAsync(request, completionOption, CancellationToken.None);
-				//return await HttpClient.PostAsync(this.Url, content);
 			}
 			finally {
 				if (AutoDispose) Dispose();
@@ -79,6 +83,13 @@ namespace Flurl.Http
 				return _httpMessageHandler;
 			}			
 		}
+
+		/// <summary>
+		/// Gets a collection of pattern representing HTTP status codes (or ranges) which, in addition to 2xx, will NOT result in FlurlHttpException being thrown.
+		/// Examples: "3xx", "100,300,600", "100-299,6xx", "*" (allow everything)
+		/// 2xx will never throw regardless of this setting.
+		/// </summary>
+		public ICollection<string> AllowedHttpStatusRanges { get; private set; }
 
 		/// <summary>
 		/// Disposes the underlying HttpClient and HttpMessageHandler, setting both properties to null.

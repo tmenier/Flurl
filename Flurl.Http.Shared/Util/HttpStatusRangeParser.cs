@@ -1,13 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace Flurl.Http
 {
     public static class HttpStatusRangeParser
     {
+	    public static bool IsMatch(string pattern, HttpStatusCode value) {
+		    return IsMatch(pattern, (int)value);
+	    }
+
 	    public static bool IsMatch(string pattern, int value) {
 		    if (pattern == null)
 			    return false;

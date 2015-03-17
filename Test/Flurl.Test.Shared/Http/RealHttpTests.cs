@@ -82,5 +82,15 @@ namespace Flurl.Test.Http
 				Assert.Greater(ms.Length, 0);
 			}
 		}
+
+		[Test, ExpectedException(typeof(FlurlHttpException))]
+		public async Task fails_on_non_success_status() {
+			await "http://httpbin.org/status/418".GetAsync();
+		}
+
+		[Test]
+		public async Task can_allow_non_success_status() {
+			await "http://httpbin.org/status/418".AllowHttpStatus("4xx").GetAsync();
+		}
 	}
 }

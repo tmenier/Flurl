@@ -70,6 +70,7 @@ namespace Flurl.Http.Configuration
 		/// </summary>
 		public void ResetDefaults() {
 			DefaultTimeout = new HttpClient().Timeout;
+			AllowedHttpStatusRange = null;
 			HttpClientFactory = new DefaultHttpClientFactory();
 			BeforeCall = null;
 			BeforeCallAsync = null;
