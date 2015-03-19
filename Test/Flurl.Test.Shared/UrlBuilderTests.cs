@@ -42,9 +42,10 @@ namespace Flurl.Test
 
 		[Test]
 		public void QueryParams_returns_query_params() {
-			var q = new Url("http://www.mysite.com/more?x=1&y=2").QueryParams;
-			CollectionAssert.AreEqual(new[] { "x", "y" }, q.Keys);
-			CollectionAssert.AreEqual(new[] { "1", "2" }, q.Values);
+			// y has 2 values, which should be grouped into an array
+			var q = new Url("http://www.mysite.com/more?x=1&y=2&z=3&y=4").QueryParams;
+			CollectionAssert.AreEqual(new[] { "x", "y", "z" }, q.Keys);
+			CollectionAssert.AreEqual(new object[] { "1", new[] { "2", "4" }, "3" }, q.Values);
 		}
 
 		[Test, ExpectedException(typeof(ArgumentNullException))]

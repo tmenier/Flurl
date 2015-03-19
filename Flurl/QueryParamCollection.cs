@@ -27,14 +27,22 @@ namespace Flurl
 
 			queryString = queryString.TrimStart('?').Split('?')[0];
 
-			foreach (var kv in queryString.Split('&')) {
-				var pair = kv.Split('=');
-				var key = pair[0];
-				var value = pair.Length >= 2 ? pair[1] : "";
-				result.Add(key, Uri.UnescapeDataString(value));
+			var pairs = (
+				from kv in queryString.Split('&')
+				let pair = kv.Split('=')
+				let key = pair[0]
+				let value = Uri.UnescapeDataString(pair.Length >= 2 ? pair[1] : "")
+				group value by key into g
+				select new { Key = g.Key, Values = g.ToArray() });
+
+			foreach (var g in pairs) {
+				if (g.Values.Length == 1)
+					result.Add(g.Key, g.Values[0]);
+				else
+					result.Add(g.Key, g.Values);
 			}
 
-			return result;			
+			return result;
 		}
 
 		public IEnumerator<KeyValuePair<string, object>> GetEnumerator() {
