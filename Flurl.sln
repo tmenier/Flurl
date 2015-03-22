@@ -15,10 +15,16 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Flurl.Http.Shared", "Flurl.Http.Shared\Flurl.Http.Shared.shproj", "{734E6962-97E2-4318-9A2D-C87E76921AFB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl.Http.NET45", "Flurl.Http.NET45\Flurl.Http.NET45.csproj", "{E7001E27-E952-4E1A-A391-B14ADAE2A1A9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0571F8FF-1649-433C-97F3-7341942AC886} = {0571F8FF-1649-433C-97F3-7341942AC886}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl", "Flurl\Flurl.csproj", "{70A34167-759E-4902-82E0-E6A84C2CE46F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl.Http.PCL", "Flurl.Http.PCL\Flurl.Http.PCL.csproj", "{4C163DD1-318A-42C0-ACF2-9E0D766D8900}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0571F8FF-1649-433C-97F3-7341942AC886} = {0571F8FF-1649-433C-97F3-7341942AC886}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{CF0659E1-9C0D-4D35-8FBA-CC5E94619853}"
 EndProject
@@ -29,6 +35,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl.Test.PCL", "Test\Flurl.Test.PCL\Flurl.Test.PCL.csproj", "{49CB777F-D13D-401A-9206-48A6B2ECB276}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageTester.PCL", "PackageTester.PCL\PackageTester.PCL.csproj", "{0A32978C-BC48-4DFB-B1F7-B88541B0D686}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl.Http.CodeGen", "Flurl.Http.CodeGen\Flurl.Http.CodeGen.csproj", "{0571F8FF-1649-433C-97F3-7341942AC886}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -226,6 +234,30 @@ Global
 		{0A32978C-BC48-4DFB-B1F7-B88541B0D686}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{0A32978C-BC48-4DFB-B1F7-B88541B0D686}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{0A32978C-BC48-4DFB-B1F7-B88541B0D686}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Ad-Hoc|Any CPU.ActiveCfg = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Ad-Hoc|Any CPU.Build.0 = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Ad-Hoc|iPhone.ActiveCfg = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Ad-Hoc|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Ad-Hoc|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Ad-Hoc|Mixed Platforms.Build.0 = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.AppStore|Any CPU.ActiveCfg = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.AppStore|Any CPU.Build.0 = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.AppStore|iPhone.ActiveCfg = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.AppStore|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.AppStore|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.AppStore|Mixed Platforms.Build.0 = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0571F8FF-1649-433C-97F3-7341942AC886}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
