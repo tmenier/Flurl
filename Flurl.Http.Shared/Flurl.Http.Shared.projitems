@@ -18,17 +18,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Content\CapturedJsonContent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Content\CapturedStringContent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CookieExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DeleteExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlurlClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlurlHttp.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlurlHttpException.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)GetExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)HeadExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpCall.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PostExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Properties\AssemblyInfo.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PutExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ResponseMessageExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Testing\FakeHttpMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Testing\HttpCallAssertException.cs" />
