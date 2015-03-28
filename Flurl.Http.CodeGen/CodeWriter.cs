@@ -62,12 +62,6 @@ namespace Flurl.Http.CodeGen
 			return this;
 		}
 
-		public CodeWriter WriteLines(IEnumerable<string> lines) {
-			foreach (var line in lines)
-				WriteLine(line);
-			return this;
-		}
-
 		public void Dispose() {
 			_sw.Dispose();
 		}

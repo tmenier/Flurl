@@ -59,12 +59,12 @@ namespace Flurl.Http
 		/// <typeparam name="T">Type (wrapped in a Task) returned in underlying async HTTP call.</typeparam>
 		/// <param name="func">Underlying async call made against an HttpClient.</param>
 		/// <returns></returns>
-		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
+		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			try {
 				var request = new HttpRequestMessage(verb, this.Url) { Content = content };
 				// mechanism for passing ad-hoc data to the MessageHandler
 				request.Properties.Add("AllowedHttpStatusRanges", AllowedHttpStatusRanges);
-				return await HttpClient.SendAsync(request, completionOption, CancellationToken.None);
+				return await HttpClient.SendAsync(request, completionOption, cancellationToken ?? CancellationToken.None);
 			}
 			finally {
 				if (AutoDispose) Dispose();

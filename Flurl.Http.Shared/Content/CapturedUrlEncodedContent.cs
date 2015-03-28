@@ -10,12 +10,12 @@ namespace Flurl.Http.Content
 	/// Provides HTTP content based on object serialized to URL-encoded name-value, with the with the captured to a property
 	/// so it can be read without affecting the read-once content stream.
 	/// </summary>
-	public class CapturedFormUrlEncodedContent : CapturedStringContent
+	public class CapturedUrlEncodedContent : CapturedStringContent
 	{
 		// This implementation was largely lifted from System.Net.Http.FormUrlEncodedContent, which unfortunately
 		// doesn't have the hooks needed for getting the content body as a string.
 
-		public CapturedFormUrlEncodedContent(object data) : base(GetContent(data)) {
+		public CapturedUrlEncodedContent(object data) : base(GetContent(data)) {
 			this.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 		}
 
