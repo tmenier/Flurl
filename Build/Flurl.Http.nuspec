@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>0.5.3</version>
+		<version>0.6.0</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,6 +13,7 @@
 			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
 		</description>
 		<releaseNotes>
+			0.6.0 - Added support for cancellation tokens, PATCH, string request bodies.
 			0.5.3 - Updated Flurl dependency to 1.0.7.
 			0.5.2 - Allowed HTTP status at the individual client/call level, i.e. url.AllowHttpStatus("3xx"), url.AllowAnyHttpStatus()
 			0.5.1 - Configure which HTTP statuses won't throw exceptions, i.e. FlurlHttp.Configure(c => c.AllowedHttpStatusRange = "100-299,4xx");
