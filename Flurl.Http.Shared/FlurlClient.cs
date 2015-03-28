@@ -53,12 +53,10 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// Encapsulates pattern for making an HTTP call and immediately disposing if AutoDispose is true.
-		/// Primarily used by FlurlClient extension methods, not directly in application code.
+		/// Creates and asynchronously sends an HttpRequestMethod, disposing HttpClient if AutoDispose it true.
+		/// Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
 		/// </summary>
-		/// <typeparam name="T">Type (wrapped in a Task) returned in underlying async HTTP call.</typeparam>
-		/// <param name="func">Underlying async call made against an HttpClient.</param>
-		/// <returns></returns>
+		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			try {
 				var request = new HttpRequestMessage(verb, this.Url) { Content = content };

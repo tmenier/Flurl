@@ -2,7 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
 using NUnit.Framework;
@@ -76,11 +77,23 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_get_stream() {
-			using (var stream = await "http://www.google.com".GetStreamAsync()) 
+			using (var stream = await "http://www.google.com".GetStreamAsync())
 			using (var ms = new MemoryStream()) {
 				stream.CopyTo(ms);
 				Assert.Greater(ms.Length, 0);
 			}
+		}
+
+		[Test]
+		public async Task can_get_string() {
+			var s = await "http://www.google.com".GetStringAsync();
+			Assert.Greater(s.Length, 0);
+		}
+
+		[Test]
+		public async Task can_get_byte_array() {
+			var bytes = await "http://www.google.com".GetBytesAsync();
+			Assert.Greater(bytes.Length, 0);
 		}
 
 		[Test, ExpectedException(typeof(FlurlHttpException))]
@@ -91,6 +104,20 @@ namespace Flurl.Test.Http
 		[Test]
 		public async Task can_allow_non_success_status() {
 			await "http://httpbin.org/status/418".AllowHttpStatus("4xx").GetAsync();
+		}
+
+		[Test]
+		public async Task can_cancel_request() {
+			try {
+				var cts = new CancellationTokenSource();
+				var task = "http://www.google.com".GetStringAsync(cts.Token);
+				cts.Cancel();
+				await task;
+				Assert.Fail("Should have thrown exception on cancelation");
+			}
+			catch (FlurlHttpException ex) {
+				Assert.IsNotNull(ex.InnerException as TaskCanceledException);
+			}
 		}
 	}
 }

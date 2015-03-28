@@ -30,12 +30,10 @@ namespace Flurl.Http.Configuration
 				call.Response = await base.SendAsync(request, cancellationToken);
 				call.EndedUtc = DateTime.UtcNow;
 			}
-			catch (TaskCanceledException ex) {
-				if (!cancellationToken.IsCancellationRequested)
-					call.Exception = new FlurlHttpTimeoutException(call, ex);
-			}
 			catch (Exception ex) {
-				call.Exception = new FlurlHttpException(call, ex);
+				call.Exception =  (ex is TaskCanceledException && !cancellationToken.IsCancellationRequested) ?
+					new FlurlHttpTimeoutException(call, ex) :
+					new FlurlHttpException(call, ex);
 			}
 
 			if (call.Response != null && !call.Succeeded) {
