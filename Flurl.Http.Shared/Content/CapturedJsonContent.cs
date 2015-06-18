@@ -9,6 +9,7 @@ namespace Flurl.Http.Content
 	/// </summary>
 	public class CapturedJsonContent : CapturedStringContent
 	{
-		public CapturedJsonContent(object data) : base(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json") { }
+		public CapturedJsonContent(object data)
+			: base(JsonConvert.SerializeObject(data, FlurlHttp.Configuration.JsonSerializerSettings), Encoding.UTF8, "application/json") { }
 	}
 }

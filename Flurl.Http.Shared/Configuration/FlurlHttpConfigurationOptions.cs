@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Flurl.Http.Configuration
 {
@@ -32,6 +33,13 @@ namespace Flurl.Http.Configuration
 		/// otherwise functionality such as callbacks and most testing features will be lost.
 		/// </summary>
 		public IHttpClientFactory HttpClientFactory { get; set; }
+
+		/// <summary>
+		/// Allows global customization of the JSON.Net serializer settings. These allow you to add custom
+		/// JsonConverters and alter other behaviors like date formatting and null handling. For more information,
+		/// see: http://www.newtonsoft.com/json/help/html/SerializationSettings.htm
+		/// </summary>
+		public JsonSerializerSettings JsonSerializerSettings { get; set; }
 
 		/// <summary>
 		/// Gets or sets a callback that is called immediately before every HTTP request is sent.
@@ -72,6 +80,7 @@ namespace Flurl.Http.Configuration
 			DefaultTimeout = new HttpClient().Timeout;
 			AllowedHttpStatusRange = null;
 			HttpClientFactory = new DefaultHttpClientFactory();
+			JsonSerializerSettings = new JsonSerializerSettings();
 			BeforeCall = null;
 			BeforeCallAsync = null;
 			AfterCall = null;

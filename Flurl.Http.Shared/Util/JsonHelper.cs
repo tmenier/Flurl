@@ -9,7 +9,7 @@ namespace Flurl.Http
 			// http://james.newtonking.com/json/help/index.html?topic=html/Performance.htm
 			using (var sr = new StreamReader(stream))
 			using (var jr = new JsonTextReader(sr)) {
-				return new JsonSerializer().Deserialize<T>(jr);
+				return JsonSerializer.Create(FlurlHttp.Configuration.JsonSerializerSettings).Deserialize<T>(jr);
 			}
 		}
 	}
