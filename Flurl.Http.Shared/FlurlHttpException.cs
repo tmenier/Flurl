@@ -56,7 +56,7 @@ namespace Flurl.Http
 			return
 				(Call == null) ? default(T) :
 				(Call.ErrorResponseBody == null) ? default(T) :
-				JsonConvert.DeserializeObject<T>(Call.ErrorResponseBody);
+				JsonConvert.DeserializeObject<T>(Call.ErrorResponseBody, FlurlHttp.Configuration.JsonSerializerSettings);
 		}
 
 		/// <summary>
