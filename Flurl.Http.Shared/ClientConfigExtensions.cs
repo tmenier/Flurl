@@ -263,6 +263,15 @@ namespace Flurl.Http
 			return client;
 		}
 
+	    /// <summary>
+	    /// Adds an <see cref="HttpStatusCode"/> which (in addtion to 2xx) will NOT result in a FlurlHttpException being thrown.
+	    /// </summary>
+	    /// <param name="statusCode">Examples: HttpStatusCode.NotFound</param>
+	    /// <returns>The modified FlurlClient.</returns>
+	    public static FlurlClient AllowHttpStatus(this FlurlClient client, HttpStatusCode statusCode) {
+            return AllowHttpStatus(client, ((int)statusCode).ToString());
+        }
+
 		/// <summary>
 		/// Creates a FlurlClient from the URL and adds a pattern representing an HTTP status code or range of codes which (in addtion to 2xx) will NOT result in a FlurlHttpException being thrown.
 		/// </summary>
@@ -280,6 +289,15 @@ namespace Flurl.Http
 		public static FlurlClient AllowHttpStatus(this string url, string pattern) {
 			return new FlurlClient(url, true).AllowHttpStatus(pattern);
 		}
+
+        /// <summary>
+        /// Adds an <see cref="HttpStatusCode"/> which (in addtion to 2xx) will NOT result in a FlurlHttpException being thrown.
+        /// </summary>
+        /// <param name="statusCode">Examples: HttpStatusCode.NotFound</param>
+        /// <returns>The new FlurlClient.</returns>
+        public static FlurlClient AllowHttpStatus(this string url, HttpStatusCode statusCode) {
+            return new FlurlClient(url, true).AllowHttpStatus(statusCode);
+        }
 
 		/// <summary>
 		/// Prevents a FlurlHttpException from being thrown on any completed response, regardless of the HTTP status code.
