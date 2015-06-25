@@ -56,7 +56,7 @@ namespace Flurl.Test
 		[Test]
 		public void Combine_works() {
 			var url = Url.Combine("http://www.foo.com/", "/too/", "/many/", "/slashes/", "too", "few", "one/two/");
-			Assert.AreEqual("http://www.foo.com/too/many/slashes/too/few/one/two", url);
+			Assert.AreEqual("http://www.foo.com/too/many/slashes/too/few/one/two/", url);
 		}
 
 		[Test]
@@ -84,7 +84,7 @@ namespace Flurl.Test
 		[Test]
 		public void can_append_multiple_path_segments_by_multi_args() {
 			var url = "http://www.mysite.com".AppendPathSegments("category", "/endpoint/");
-			Assert.AreEqual("http://www.mysite.com/category/endpoint", url.ToString());
+			Assert.AreEqual("http://www.mysite.com/category/endpoint/", url.ToString());
 		}
 
 		[Test]

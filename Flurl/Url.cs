@@ -77,7 +77,7 @@ namespace Flurl
 				throw new ArgumentNullException("segment");
 
 			if (!Path.EndsWith("/")) Path += "/";
-			Path += CleanSegment(segment.TrimStart('/').TrimEnd('/'));
+			Path += CleanSegment(segment.TrimStart('/'));
 			return this;
 		}
 
