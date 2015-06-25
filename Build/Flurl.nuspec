@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl</id>
-		<version>1.0.7</version>
+		<version>1.0.8</version>
 		<title>Flurl</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,17 +13,18 @@
 			A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.
 		</description>
 		<releaseNotes>
-			1.0.7 - Bugfix - parsing querystrings like: "?x=1&amp;x=2" (thanks @miiihi)
-			1.0.6 - Use CultureInfo.InvariantCulture in a few string conversions
-			1.0.5 - Url.GetRoot (static) and Url.ResetToRoot
-			1.0.4 - Support for multi-value query params, i.e. SetQueryParam("x", new[] { 1, 2 }) => "x=1&amp;x=2")
-			1.0.3 - Bugfix - exclude null values from querystring (thanks to @niemyjski)
-			1.0.2 - Bugfix related to querystring with only key (thanks to @rafaelsteil)
-			1.0.1 - Fixed DLL version, dropped support for xbox and wp7 due to VS2013 upgrade
-			1.0.0 - Minor code cleanup, no API changes.
-			0.2.2 - Nuspec updates, no changes to binaries.
-			0.2.1 - Fixed a couple string extensions whose names were inconsistent with their Flurl.Url equivalent.
-			0.2.0 - Added PCL support.
+1.0.8 - Don't trim trailing slash (github #37)
+1.0.7 - Bugfix - parsing querystrings like: "?x=1&amp;x=2" (thanks @miiihi)
+1.0.6 - Use CultureInfo.InvariantCulture in a few string conversions
+1.0.5 - Url.GetRoot (static) and Url.ResetToRoot
+1.0.4 - Support for multi-value query params, i.e. SetQueryParam("x", new[] { 1, 2 }) => "x=1&amp;x=2")
+1.0.3 - Bugfix - exclude null values from querystring (thanks to @niemyjski)
+1.0.2 - Bugfix related to querystring with only key (thanks to @rafaelsteil)
+1.0.1 - Fixed DLL version, dropped support for xbox and wp7 due to VS2013 upgrade
+1.0.0 - Minor code cleanup, no API changes.
+0.2.2 - Nuspec updates, no changes to binaries.
+0.2.1 - Fixed a couple string extensions whose names were inconsistent with their Flurl.Url equivalent.
+0.2.0 - Added PCL support.
 		</releaseNotes>
 		<tags>fluent portable url uri querystring builder</tags>
 	</metadata>
