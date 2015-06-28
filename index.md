@@ -21,8 +21,8 @@ With a discoverable API, [extensibility](extensibility) at every turn, and a nif
 - [Installation](installation)
 - [Fluent URL building](fluent-url)
 - [Fluent HTTP](fluent-http)
-- [HttpClient Lifetime Management](client-lifetime) <em>(new!)</em>
 - [Testable HTTP](testable-http)
 - [Configuration](configuration)
+- [Error Handling](error-handling) <em>(new!)</em>
+- [HttpClient Lifetime Management](client-lifetime)
 - [Extensibility](extensibility)
-

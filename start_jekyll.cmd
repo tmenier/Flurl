@@ -1,0 +1,2 @@
+cmd /k jekyll serve
+

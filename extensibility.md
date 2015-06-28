@@ -41,25 +41,29 @@ public static FlurlClient DoMyThing(this FlurlClient fc) {
 }
 
 public static Url DoMyThing(this Url url) {
-    return new FlurlClient(url).DoMyThing();
+    return new FlurlClient(url, true).DoMyThing();
 }
 
 public static Url DoMyThing(this string url) {
-    return new FlurlClient(url).DoMyThing();
+    return new FlurlClient(url, true).DoMyThing();
 }
 ````
 
 Now all of these work:
 
 ````c#
-url = "http://api.com".DoMyThing(); // uses string extension
-url = "http://api.com"
+result = await "http://api.com"
+    .DoMyThing() // uses string extension
+    .GetAsync();
+result = "http://api.com"
     .AppendPathSegment("endpoint")
-    .DoMyThing(); // uses Url extension
-url = "http://api.com"
+    .DoMyThing() // uses Url extension
+    .GetAsync();
+result = "http://api.com"
     .AppendPathSegment("endpoint")
     .WithBasicAuth(u, p)
-    .DoMyThing(); // uses FlurlClient extension
+    .DoMyThing() // uses FlurlClient extension
+    .GetAsync();
 ````
 
 ###Providing a custom HttpClient factory
@@ -71,7 +75,7 @@ Here is the recommended way to create a custom factory:
 ````c#
 public class MyCustomHttpClientFactory : DefaultHttpClientFactory
 {
-    public virtual HttpClient CreateClient(Url url)
+    public override HttpClient CreateClient(Url url)
     {
     	var client = base.CreateClient(Url url);
         // customize the client here
