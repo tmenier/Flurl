@@ -40,11 +40,11 @@ public static FlurlClient DoMyThing(this FlurlClient fc) {
     return fc;
 }
 
-public static Url DoMyThing(this Url url) {
+public static FlurlClient DoMyThing(this Url url) {
     return new FlurlClient(url, true).DoMyThing();
 }
 
-public static Url DoMyThing(this string url) {
+public static FlurlClient DoMyThing(this string url) {
     return new FlurlClient(url, true).DoMyThing();
 }
 ````
