@@ -217,6 +217,19 @@ namespace Flurl.Test
 		}
 
 		[Test]
+		public void interprest_plus_as_space() {
+			var url = new Url("http://www.mysite.com/foo+bar?x=1+2");
+			Assert.AreEqual("1 2", url.QueryParams["x"]);
+			Assert.AreEqual("http://www.mysite.com/foo+bar?x=1%202", url.ToString());
+		}
+
+		[Test]
+		public void can_encode_space_as_plus() {
+			var url = new Url("http://www.mysite.com/foo+bar?x=1+2");
+			Assert.AreEqual("http://www.mysite.com/foo+bar?x=1+2", url.ToString(true));
+		}
+
+		[Test]
 		public void IsUrl_true_for_valid_url() {
 			Assert.IsTrue("http://www.mysite.com/more?x=1&y=2".IsUrl());
 		}

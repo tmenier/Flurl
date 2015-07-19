@@ -17,7 +17,7 @@ namespace Flurl
 		/// <summary>
 		/// Collection of all query string parameters.
 		/// </summary>
-		public IDictionary<string, object> QueryParams { get; private set; }
+		public QueryParamCollection QueryParams { get; private set; }
 
 		/// <summary>
 		/// Constructs a Url object from a string.
@@ -53,6 +53,28 @@ namespace Flurl
 			// http://stackoverflow.com/a/27473521/62600
 			var uri = new Uri(url);
 			return uri.GetComponents(UriComponents.SchemeAndServer | UriComponents.UserInfo, UriFormat.Unescaped);
+		}
+
+		/// <summary>
+		/// Decodes a URL-encoded query string value.
+		/// </summary>
+		/// <param name="value">The encoded query string value.</param>
+		/// <returns></returns>
+		public static string DecodeQueryParamValue(string value) {
+			// Uri.UnescapeDataString comes closest to doing it right, but famously stumbles on the + sign
+			// http://weblog.west-wind.com/posts/2009/Feb/05/Html-and-Uri-String-Encoding-without-SystemWeb
+			return Uri.UnescapeDataString((value ?? "").Replace("+", " "));
+		}
+
+		/// <summary>
+		/// URL-encodes a query string value.
+		/// </summary>
+		/// <param name="value">The query string value to encode.</param>
+		/// <param name="value">If true, spaces will be encoded as + signs. Otherwise, they'll be encoded as %20.</param>
+		/// <returns></returns>
+		public static string EncodeQueryParamValue(object value, bool encodeSpaceAsPlus) {
+			var result = Uri.EscapeDataString((value ?? "").ToInvariantString());
+			return encodeSpaceAsPlus ? result.Replace("%20", "+") : result;
 		}
 
 		/// <summary>
@@ -183,8 +205,16 @@ namespace Flurl
 		/// </summary>
 		/// <returns></returns>
 		public override string ToString() {
+			return ToString(false);
+		}
+
+		/// <summary>
+		/// Converts this Url object to its string representation.
+		/// </summary>
+		/// <returns></returns>
+		public string ToString(bool encodeStringAsPlus) {
 			var url = Path;
-			var query = QueryParams.ToString();
+			var query = QueryParams.ToString(encodeStringAsPlus);
 			if (query.Length > 0)
 				url += "?" + query;
 

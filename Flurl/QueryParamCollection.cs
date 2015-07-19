@@ -31,7 +31,7 @@ namespace Flurl
 				from kv in queryString.Split('&')
 				let pair = kv.Split('=')
 				let key = pair[0]
-				let value = Uri.UnescapeDataString(pair.Length >= 2 ? pair[1] : "")
+				let value = pair.Length >= 2 ? Url.DecodeQueryParamValue(pair[1]) : ""
 				group value by key into g
 				select new { Key = g.Key, Values = g.ToArray() });
 
@@ -54,17 +54,25 @@ namespace Flurl
 		/// </summary>
 		/// <returns></returns>
 		public override string ToString() {
-			return string.Join("&", GetPairs());
+			return ToString(false);
 		}
 
-		private IEnumerable<string> GetPairs() {
+		/// <summary>
+		/// Returns serialized, encoded query string. Insertion order is preserved.
+		/// </summary>
+		/// <returns></returns>
+		public string ToString(bool encodeSpaceAsPlus) {
+			return string.Join("&", GetPairs(encodeSpaceAsPlus));
+		}
+
+		private IEnumerable<string> GetPairs(bool encodeSpaceAsPlus) {
 			foreach (var key in _orderedKeys) {
 				var val = this[key];
 				if (val == null)
 					continue;
 
 				if (val is string || !(val is IEnumerable)) {
-					yield return key + "=" + Uri.EscapeDataString(val.ToInvariantString());
+					yield return key + "=" + Url.EncodeQueryParamValue(val, encodeSpaceAsPlus);
 				}
 				else {
 					// if value is IEnumerable (other than string), break it into multiple
@@ -74,7 +82,7 @@ namespace Flurl
 						if (subval == null)
 							continue;
 
-						yield return key + "=" + Uri.EscapeDataString(subval.ToInvariantString());
+						yield return key + "=" + Url.EncodeQueryParamValue(subval, encodeSpaceAsPlus);
 					}
 				}
 			}

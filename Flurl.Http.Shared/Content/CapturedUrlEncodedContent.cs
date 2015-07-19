@@ -29,18 +29,11 @@ namespace Flurl.Http.Content
 					continue;
 				if (sb.Length > 0)
 					sb.Append('&');
-				sb.Append(Encode(kv.Key));
+				sb.Append(Url.EncodeQueryParamValue(kv.Key, true));
 				sb.Append('=');
-				sb.Append(Encode(kv.Value.ToString()));
+				sb.Append(Url.EncodeQueryParamValue(kv.Value, true));
 			}
 			return sb.ToString();
-		}
-
-		private static string Encode(string data) {
-			if (string.IsNullOrEmpty(data))
-				return string.Empty;
-			else
-				return Uri.EscapeDataString(data).Replace("%20", "+");
 		}
 	}
 }
