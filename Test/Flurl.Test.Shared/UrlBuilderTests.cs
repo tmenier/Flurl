@@ -217,9 +217,10 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void interprest_plus_as_space() {
+		public void interprets_plus_as_space() {
 			var url = new Url("http://www.mysite.com/foo+bar?x=1+2");
 			Assert.AreEqual("1 2", url.QueryParams["x"]);
+			// encode + in query string but not path segment
 			Assert.AreEqual("http://www.mysite.com/foo+bar?x=1%202", url.ToString());
 		}
 
@@ -227,6 +228,12 @@ namespace Flurl.Test
 		public void can_encode_space_as_plus() {
 			var url = new Url("http://www.mysite.com/foo+bar?x=1+2");
 			Assert.AreEqual("http://www.mysite.com/foo+bar?x=1+2", url.ToString(true));
+		}
+
+		[Test]
+		public void encodes_plus() {
+			var url = new Url("http://www.mysite.com").SetQueryParam("x", "1+2");
+			Assert.AreEqual("http://www.mysite.com?x=1%2B2", url.ToString());
 		}
 
 		[Test]
