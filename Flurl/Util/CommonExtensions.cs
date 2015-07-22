@@ -21,6 +21,10 @@ namespace Flurl.Util
 				foreach (DictionaryEntry kv in (IDictionary)obj)
 					yield return new KeyValuePair<string, object>(kv.Key.ToInvariantString(), kv.Value);
 			}
+			else if (obj is IEnumerable<KeyValuePair<object, object>>) {
+				foreach (var kv in (IEnumerable<KeyValuePair<object, object>>)obj)
+					yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value.ToString());
+			}
 			else {
 				foreach (var prop in obj.GetType().GetProperties()) {
 					var val = prop.GetValue(obj, null);
