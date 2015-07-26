@@ -39,7 +39,7 @@
 				<dependency id="Newtonsoft.Json" version="6.0.3" />
 				<dependency id="Flurl" version="1.0.9" />
 			</group>
-			<group targetFramework="portable-net45+sl50+win+wpa81+wp80+MonoAndroid10+MonoTouch10">
+			<group targetFramework="portable-net45+sl50+win+wpa81+wp80">
 				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
 				<dependency id="Microsoft.Net.Http" version="2.2.22" />
 				<dependency id="PCLStorage" version="0.9.6" />
@@ -50,6 +50,6 @@
 	</metadata>
 	<files>
 		<file src="..\Flurl.Http.NET45\bin\Release\Flurl.Http.*" target="lib\net45" />
-		<file src="..\Flurl.Http.PCL\bin\Release\Flurl.Http.*" target="lib\portable-net45+sl50+win+wpa81+wp80+MonoAndroid10+MonoTouch10" />
+		<file src="..\Flurl.Http.PCL\bin\Release\Flurl.Http.*" target="lib\portable-net45+sl50+win+wpa81+wp80" />
 	</files>
 </package>
