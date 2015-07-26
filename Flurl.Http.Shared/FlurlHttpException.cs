@@ -16,13 +16,18 @@ namespace Flurl.Http
 		/// </summary>
 		public HttpCall Call { get; private set; }
 
-		public FlurlHttpException(HttpCall call, string message, Exception inner) : base(message, inner) {
+		public FlurlHttpException(HttpCall call, string message, Exception inner) : base(message, inner ?? BuildInnerException(call)) {
 			this.Call = call;
 		}
 
 		public FlurlHttpException(HttpCall call, Exception inner) : this(call, BuildMessage(call, inner), inner) { }
 
-		public FlurlHttpException(HttpCall call) : this(call, BuildMessage(call, null), null) { }
+		public FlurlHttpException(HttpCall call) : this(call, BuildMessage(call, null), BuildInnerException(call)) { }
+
+		private static Exception BuildInnerException(HttpCall call)
+		{
+			return new Exception(call.ErrorResponseBody);
+		}
 
 		private static string BuildMessage(HttpCall call, Exception inner) {
 			if (call.Response != null && !call.Succeeded) {
