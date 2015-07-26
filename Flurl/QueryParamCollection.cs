@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Flurl.Util;
 
 namespace Flurl
 {
@@ -25,7 +24,7 @@ namespace Flurl
 			if (string.IsNullOrEmpty(queryString))
 				return result;
 
-			queryString = queryString.TrimStart('?').Split('?')[0];
+			queryString = queryString.TrimStart('?').Split('?').Last();
 
 			var pairs = (
 				from kv in queryString.Split('&')

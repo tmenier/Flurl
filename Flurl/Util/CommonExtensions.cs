@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace Flurl.Util
 {
@@ -17,16 +18,10 @@ namespace Flurl.Util
 			if (obj == null)
 				throw new ArgumentNullException("obj");
 
-			if (obj is IDictionary) {
-				foreach (DictionaryEntry kv in (IDictionary)obj)
-					yield return new KeyValuePair<string, object>(kv.Key.ToInvariantString(), kv.Value);
-			}
-			else {
-				foreach (var prop in obj.GetType().GetProperties()) {
-					var val = prop.GetValue(obj, null);
-					yield return new KeyValuePair<string, object>(prop.Name, val);
-				}
-			}
+			return
+				(obj is string) ? QueryParamCollection.Parse((string)obj) :
+				(obj is IEnumerable) ? CollectionToKV((IEnumerable)obj) :
+				ObjectToKV(obj);
 		}
 
 		/// <summary>
@@ -44,6 +39,36 @@ namespace Flurl.Util
 				return f.ToString(null, CultureInfo.InvariantCulture);
 
 			return obj.ToString();
+		}
+
+		private static IEnumerable<KeyValuePair<string, object>> ObjectToKV(object obj) {
+			return from prop in obj.GetType().GetProperties() 
+				   let val = prop.GetValue(obj, null) 
+				   select new KeyValuePair<string, object>(prop.Name, val);
+		}
+
+		private static IEnumerable<KeyValuePair<string, object>> CollectionToKV(IEnumerable col) {
+			// Accepts KeyValuePairs or any aribitray types that contain a property called "Key" or "Name" and a property called "Value".
+			foreach (var item in col) {
+				if (item == null)
+					continue;
+
+				var type = item.GetType();
+				var keyProp = type.GetProperty("Key") ?? type.GetProperty("key") ?? type.GetProperty("Name") ?? type.GetProperty("name");
+				if (keyProp == null)
+					throw new ArgumentException("Cannot parse " + type.Name + " to key-value pair. Type must contain a property called 'Key' or 'Name'.");
+
+				var valProp = type.GetProperty("Value") ?? type.GetProperty("value");
+				if (valProp == null)
+					throw new ArgumentException("Cannot parse " + type.Name + " to key-value pair. Type must contain a property called 'Value'.");
+
+				var key = keyProp.GetValue(item, null);
+				if (key == null)
+					continue;
+
+				var val = valProp.GetValue(item, null);
+				yield return new KeyValuePair<string, object>(key.ToInvariantString(), val);
+			}
 		}
 	}
 }
