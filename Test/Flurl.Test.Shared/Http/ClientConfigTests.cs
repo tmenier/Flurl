@@ -116,16 +116,14 @@ namespace Flurl.Test.Http
 			}
 		}
 
-        [Test]
-        public async Task can_allow_specific_http_status()
-        {
-            using (var test = new HttpTest())
-            {
-                test.RespondWith(404, "Nothing to see here");
-                // allow 404
-                var client = "http://www.api.com".AllowHttpStatus(HttpStatusCode.NotFound);
-                await client.DeleteAsync();
-            }
-        }
+		[Test]
+		public async Task can_allow_specific_http_status() {
+			using (var test = new HttpTest()) {
+				test.RespondWith(404, "Nothing to see here");
+				// allow 404
+				var client = "http://www.api.com".AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
+				await client.DeleteAsync();
+			}
+		}
 	}
 }
