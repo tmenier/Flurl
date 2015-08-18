@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>0.6.3</version>
+		<version>0.6.4</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,6 +13,7 @@
 			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
 		</description>
 		<releaseNotes>
+0.6.4 - nuspec fix for Xamarin/non-PCL, AllowHttpStatus overloads with HttpStatusCode enum.
 0.6.3 - Updated Flurl dependency to 1.0.9.
 0.6.2 - Respect Json.NET's JsonConvert.DefaultSettings
 0.6.1 - Fixed possibly dictionary lookup bug (github #34).
@@ -37,14 +38,14 @@
 		<dependencies>
 			<group targetFramework="net45">
 				<dependency id="Newtonsoft.Json" version="6.0.3" />
-				<dependency id="Flurl" version="1.0.9" />
+				<dependency id="Flurl" version="1.0.10" />
 			</group>
 			<group targetFramework="portable-net45+sl50+win+wpa81+wp80">
 				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
 				<dependency id="Microsoft.Net.Http" version="2.2.22" />
 				<dependency id="PCLStorage" version="0.9.6" />
 				<dependency id="Newtonsoft.Json" version="6.0.3" />
-				<dependency id="Flurl" version="1.0.9" />
+				<dependency id="Flurl" version="1.0.10" />
 			</group>
 		</dependencies>
 	</metadata>
