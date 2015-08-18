@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl</id>
-		<version>1.0.9</version>
+		<version>1.0.10</version>
 		<title>Flurl</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,6 +13,7 @@
 			A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.
 		</description>
 		<releaseNotes>
+1.0.10 - More flexible kv parsing (github pr #16)
 1.0.9 - Decode + as space, optionally encode space as + (github #41)
 1.0.8 - Don't trim trailing slash (github #37)
 1.0.7 - Bugfix - parsing querystrings like: "?x=1&amp;x=2" (thanks @miiihi)
