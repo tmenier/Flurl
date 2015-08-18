@@ -3,6 +3,7 @@ using System.Dynamic;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Flurl.Http
 {
@@ -18,8 +19,8 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is an object containing data in the response body.</returns>
 		/// <example>x = await url.PostAsync(data).ReceiveJson&lt;T&gt;()</example>
 		public static async Task<T> ReceiveJson<T>(this Task<HttpResponseMessage> response) {
-			using (var stream = await (await response).Content.ReadAsStreamAsync())
-				return JsonHelper.ReadJsonFromStream<T>(stream);
+			using (var stream = await response.ReceiveStream())
+				return JsonSerializer.CreateDefault().Deserialize<T>(stream);
 		}
 
 		/// <summary>

@@ -23,6 +23,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)FlurlHttpException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpCall.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HttpStatusRangeParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)JsonExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Properties\AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ResponseMessageExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Testing\FakeHttpMessageHandler.cs" />
@@ -31,7 +33,5 @@
     <Compile Include="$(MSBuildThisFileDirectory)Testing\HttpTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Testing\TestHttpClientFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Testing\TimeoutResponseMessage.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Util\HttpStatusRangeParser.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Util\JsonHelper.cs" />
   </ItemGroup>
 </Project>
