@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Dynamic;
 using System.Net.Http;
-using Newtonsoft.Json;
 
 namespace Flurl.Http
 {
@@ -56,7 +55,7 @@ namespace Flurl.Http
 			return
 				(Call == null) ? default(T) :
 				(Call.ErrorResponseBody == null) ? default(T) :
-				JsonConvert.DeserializeObject<T>(Call.ErrorResponseBody);
+				Call.Request.GetFlurlSettings().JsonSerializer.Deserialize<T>(Call.ErrorResponseBody);
 		}
 
 		/// <summary>

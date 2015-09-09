@@ -10,21 +10,23 @@ namespace Flurl.Http
 	{
 		private static readonly object _configLock = new object();
 
-		private static Lazy<FlurlHttpConfigurationOptions> _config = 
-			new Lazy<FlurlHttpConfigurationOptions>(() => new FlurlHttpConfigurationOptions());
+		private static Lazy<FlurlHttpSettings> _settings = 
+			new Lazy<FlurlHttpSettings>(() => new FlurlHttpSettings());
 
-		public static FlurlHttpConfigurationOptions Configuration {
-			get { return _config.Value; }
+		/// <summary>
+		/// Globally configured Flurl.Http settings. Should normally be written to by calling FlurlHttp.Configure once application at startup.
+		/// </summary>
+		public static FlurlHttpSettings GlobalSettings {
+			get { return _settings.Value; }
 		}
 
 		/// <summary>
-		/// Provides thread-safe accesss to Flurl.Http's global configuration options. Should only be
-		/// called once at application startup.
+		/// Provides thread-safe accesss to Flurl.Http's global configuration settings. Should only be called once at application startup.
 		/// </summary>
 		/// <param name="configAction"></param>
-		public static void Configure(Action<FlurlHttpConfigurationOptions> configAction) {
+		public static void Configure(Action<FlurlHttpSettings> configAction) {
 			lock (_configLock) {
-				configAction(Configuration);
+				configAction(GlobalSettings);
 			}
 		}
 	}

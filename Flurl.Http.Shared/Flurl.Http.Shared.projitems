@@ -11,9 +11,12 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)ClientConfigExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Configuration\DefaultHttpClientFactory.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Configuration\FlurlHttpConfigurationOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\FlurlHttpSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Configuration\FlurlMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Configuration\IHttpClientFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\ISerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\NewtonsoftJsonSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\DefaultUrlEncodedSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Content\CapturedUrlEncodedContent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Content\CapturedJsonContent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Content\CapturedStringContent.cs" />
@@ -23,10 +26,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)FlurlHttpException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpCall.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HttpRequestMessageExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpStatusRangeParser.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)JsonExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Properties\AssemblyInfo.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ResponseMessageExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HttpResponseMessageExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Testing\FakeHttpMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Testing\HttpCallAssertException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Testing\HttpCallAssertion.cs" />

@@ -14,6 +14,8 @@ namespace Flurl.Http.Configuration
 		public FlurlMessageHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
 
 		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
+			var settings = request.GetFlurlSettings();
+
 			var call = new HttpCall {
 				Request = request
 			};
@@ -22,7 +24,7 @@ namespace Flurl.Http.Configuration
 			if (stringContent != null)
 				call.RequestBody = stringContent.Content;
 
-			await RaiseGlobalEventAsync(FlurlHttp.Configuration.BeforeCall, FlurlHttp.Configuration.BeforeCallAsync, call);
+			await RaiseGlobalEventAsync(settings.BeforeCall, settings.BeforeCallAsync, call);
 
 			call.StartedUtc = DateTime.UtcNow;
 
@@ -44,13 +46,14 @@ namespace Flurl.Http.Configuration
 			}
 
 			if (call.Exception != null)
-				await RaiseGlobalEventAsync(FlurlHttp.Configuration.OnError, FlurlHttp.Configuration.OnErrorAsync, call);
+				await RaiseGlobalEventAsync(settings.OnError, settings.OnErrorAsync, call);
 
-			await RaiseGlobalEventAsync(FlurlHttp.Configuration.AfterCall, FlurlHttp.Configuration.AfterCallAsync, call);
+			await RaiseGlobalEventAsync(settings.AfterCall, settings.AfterCallAsync, call);
 
 			if (call.Exception != null && !call.ExceptionHandled)
 				throw call.Exception;
 
+			call.Response.RequestMessage = request;
 			return call.Response;
 		}
 

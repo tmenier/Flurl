@@ -58,16 +58,29 @@ namespace Flurl.Http.CodeGen
 
 				writer.WriteLine("public static Task<@0> @1@2(@3) {", xm.TaskArg, xm.Name, xm.IsGeneric ? "<T>" : "", string.Join(", ", args));
 
-				args.Clear();
-				args.Add(xm.HttpVerb == "Patch" ? "new HttpMethod(\"PATCH\")" : "HttpMethod." + xm.HttpVerb); // there's no HttpMethod.Patch
-				if (xm.BodyType != null)
-					args.Add(string.Format("content: new Captured{0}Content(data)", xm.BodyType));
-				if (xm.HasCancelationToken)
-					args.Add("cancellationToken: cancellationToken");
+				if (xm.ExtentionOfType == "FlurlClient") {
+					if (xm.BodyType != null) {
+						writer.WriteLine("var content = new Captured@0Content(@1);",
+							xm.BodyType,
+							xm.BodyType == "String" ? "data" : string.Format("client.Settings.{0}Serializer.Serialize(data)", xm.BodyType));
+					}
 
-				var client = (xm.ExtentionOfType == "FlurlClient") ? "client" : "new FlurlClient(url, false)";
-				var receive = (xm.DeserializeToType == null) ? "" : string.Format(".Receive{0}{1}()", xm.DeserializeToType, xm.IsGeneric ? "<T>" : "");
-				writer.WriteLine("return @0.SendAsync(@1)@2;", client, string.Join(", ", args), receive);
+					args.Clear();
+					args.Add(xm.HttpVerb == "Patch" ? "new HttpMethod(\"PATCH\")" : "HttpMethod." + xm.HttpVerb); // there's no HttpMethod.Patch
+					if (xm.BodyType != null)
+						args.Add("content: content");
+					if (xm.HasCancelationToken)
+						args.Add("cancellationToken: cancellationToken");
+
+					var client = (xm.ExtentionOfType == "FlurlClient") ? "client" : "new FlurlClient(url, false)";
+					var receive = (xm.DeserializeToType == null) ? "" : string.Format(".Receive{0}{1}()", xm.DeserializeToType, xm.IsGeneric ? "<T>" : "");
+					writer.WriteLine("return @0.SendAsync(@1)@2;", client, string.Join(", ", args), receive);
+				}
+				else {
+					writer.WriteLine("return new FlurlClient(url, false).@0(@1);",
+						xm.Name + (xm.IsGeneric ? "<T>" : ""),
+						string.Join(", ", args.Skip(1).Select(a => a.Split(' ').Last())));
+				}
 
 				writer.WriteLine("}").WriteLine();
 			}

@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Flurl.Http.Configuration;
 
 namespace Flurl.Http
 {
@@ -16,9 +17,7 @@ namespace Flurl.Http
 		public FlurlClient(Url url, bool autoDispose) {
 			this.Url = url;
 			this.AutoDispose = autoDispose;
-			this.AllowedHttpStatusRanges = new List<string>();
-			if (FlurlHttp.Configuration.AllowedHttpStatusRange != null)
-				this.AllowedHttpStatusRanges.Add(FlurlHttp.Configuration.AllowedHttpStatusRange);
+			this.Settings = FlurlHttp.GlobalSettings.Clone();
 		}
 
 		public FlurlClient(string url, bool autoDispose) : this(new Url(url), autoDispose) { }
@@ -28,6 +27,11 @@ namespace Flurl.Http
 
 		private HttpClient _httpClient;
 		private HttpMessageHandler _httpMessageHandler;
+
+		/// <summary>
+		/// Gets or sets the FlurlHttpSettings object used by this client.
+		/// </summary>
+		public FlurlHttpSettings Settings { get; set; }
 
 		/// <summary>
 		/// Gets or sets the URL to be called.
@@ -46,8 +50,10 @@ namespace Flurl.Http
 		/// </summary>
 		public HttpClient HttpClient {
 			get {
-				if (_httpClient == null)
-					_httpClient = FlurlHttp.Configuration.HttpClientFactory.CreateClient(Url, HttpMessageHandler);
+				if (_httpClient == null) {
+					_httpClient = Settings.HttpClientFactory.CreateClient(Url, HttpMessageHandler);
+					_httpClient.Timeout = Settings.DefaultTimeout;
+				}
 				return _httpClient;
 			}
 		}
@@ -60,8 +66,7 @@ namespace Flurl.Http
 		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			try {
 				var request = new HttpRequestMessage(verb, this.Url) { Content = content };
-				// mechanism for passing ad-hoc data to the MessageHandler
-				request.Properties.Add("AllowedHttpStatusRanges", AllowedHttpStatusRanges);
+				request.SetFlurlSettings(this.Settings);
 				return await HttpClient.SendAsync(request, completionOption, cancellationToken ?? CancellationToken.None);
 			}
 			finally {
@@ -76,18 +81,11 @@ namespace Flurl.Http
 		public HttpMessageHandler HttpMessageHandler {
 			get {
 				if (_httpMessageHandler == null)
-					_httpMessageHandler = FlurlHttp.Configuration.HttpClientFactory.CreateMessageHandler();
+					_httpMessageHandler = Settings.HttpClientFactory.CreateMessageHandler();
 
 				return _httpMessageHandler;
 			}			
 		}
-
-		/// <summary>
-		/// Gets a collection of pattern representing HTTP status codes (or ranges) which, in addition to 2xx, will NOT result in FlurlHttpException being thrown.
-		/// Examples: "3xx", "100,300,600", "100-299,6xx", "*" (allow everything)
-		/// 2xx will never throw regardless of this setting.
-		/// </summary>
-		public ICollection<string> AllowedHttpStatusRanges { get; private set; }
 
 		/// <summary>
 		/// Disposes the underlying HttpClient and HttpMessageHandler, setting both properties to null.

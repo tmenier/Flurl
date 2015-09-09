@@ -13,12 +13,12 @@ namespace Flurl.Test.Http
 	{
 		[TearDown]
 		public void ResetDefaults() {
-			FlurlHttp.Configuration.ResetDefaults();
+			FlurlHttp.GlobalSettings.ResetDefaults();
 		}
 
 		[Test]
 		public void can_provide_custom_httpclient_factory() {
-			FlurlHttp.Configuration.HttpClientFactory = new SomeCustomHttpClientFactory();
+			FlurlHttp.GlobalSettings.HttpClientFactory = new SomeCustomHttpClientFactory();
 			var client = new FlurlClient("http://www.api.com");
 
 			Assert.IsInstanceOf<SomeCustomHttpClient>(client.HttpClient);
@@ -27,8 +27,8 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_allow_non_success_status() {
-			FlurlHttp.Configuration.AllowedHttpStatusRange = "4xx";
 			using (var test = new HttpTest()) {
+				FlurlHttp.GlobalSettings.AllowedHttpStatusRange = "4xx";
 				test.RespondWith(418, "I'm a teapot");
 				try {
 					var result = await "http://www.api.com".GetAsync();
@@ -45,7 +45,7 @@ namespace Flurl.Test.Http
 			var callbackCalled = false;
 			using (var test = new HttpTest()) {
 				test.RespondWith("ok");
-				FlurlHttp.Configuration.BeforeCall = req => {
+				FlurlHttp.GlobalSettings.BeforeCall = req => {
 					CollectionAssert.IsNotEmpty(test.ResponseQueue); // verifies that callback is running before HTTP call is made
 					callbackCalled = true;
 				};
@@ -60,7 +60,7 @@ namespace Flurl.Test.Http
 			var callbackCalled = false;
 			using (var test = new HttpTest()) {
 				test.RespondWith("ok");
-				FlurlHttp.Configuration.AfterCall = call => {
+				FlurlHttp.GlobalSettings.AfterCall = call => {
 					CollectionAssert.IsEmpty(test.ResponseQueue); // verifies that callback is running after HTTP call is made
 					callbackCalled = true;
 				};
@@ -76,7 +76,7 @@ namespace Flurl.Test.Http
 			var callbackCalled = false;
 			using (var test = new HttpTest()) {
 				test.RespondWith(500, "server error");
-				FlurlHttp.Configuration.OnError = call => {
+				FlurlHttp.GlobalSettings.OnError = call => {
 					CollectionAssert.IsEmpty(test.ResponseQueue); // verifies that callback is running after HTTP call is made
 					callbackCalled = true;
 					call.ExceptionHandled = markExceptionHandled;
@@ -96,19 +96,30 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_disable_exception_behavior() {
-			FlurlHttp.Configuration.OnError = call => {
-				call.ExceptionHandled = true;
-			};
-
 			using (var test = new HttpTest()) {
+				FlurlHttp.GlobalSettings.OnError = call => {
+					call.ExceptionHandled = true;
+				};
 				test.RespondWith(500, "server error");
 				try {
 					var result = await "http://www.api.com".GetAsync();
 					Assert.IsFalse(result.IsSuccessStatusCode);
 				}
-				catch (Exception) {
-					Assert.Fail("Exception should not have been thrown.");
+				catch (FlurlHttpException) {
+					Assert.Fail("Flurl should not have thrown exception.");
 				}
+			}
+		}
+
+		[Test]
+		public async Task client_can_override_global_settings() {
+			var overridden = false;
+			using (new HttpTest()) {
+				FlurlHttp.GlobalSettings.AfterCall = _ => overridden = false;
+				var fc = new FlurlClient("http://www.api.com");
+				fc.Settings.AfterCall = _ => overridden = true;
+				await fc.GetAsync();
+				Assert.True(overridden);
 			}
 		}
 

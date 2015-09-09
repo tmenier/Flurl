@@ -15,7 +15,7 @@ namespace Flurl.Test.Http
 
 		public ClientLifetimeTests() {
 			_fac = new TestHttpClientFactoryWithCounter();
-			FlurlHttp.Configure(opts => opts.HttpClientFactory = _fac);
+			FlurlHttp.Configure(settings => settings.HttpClientFactory = _fac);
 		} 
 
 		[SetUp]

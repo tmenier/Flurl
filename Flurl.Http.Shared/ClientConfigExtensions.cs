@@ -260,7 +260,13 @@ namespace Flurl.Http
 		/// <param name="pattern">Examples: "3xx", "100,300,600", "100-299,6xx"</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient AllowHttpStatus(this FlurlClient client, string pattern) {
-			client.AllowedHttpStatusRanges.Add(pattern);
+			if (!string.IsNullOrWhiteSpace(pattern)) {
+				var current = client.Settings.AllowedHttpStatusRange;
+				if (string.IsNullOrWhiteSpace(current))
+					client.Settings.AllowedHttpStatusRange = pattern;
+				else
+					client.Settings.AllowedHttpStatusRange += "," + pattern;
+			}
 			return client;
 		}
 
@@ -315,8 +321,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient AllowAnyHttpStatus(this FlurlClient client) {
-			client.AllowedHttpStatusRanges.Clear();
-			client.AllowedHttpStatusRanges.Add("*");
+			client.Settings.AllowedHttpStatusRange = "*";
 			return client;
 		}
 

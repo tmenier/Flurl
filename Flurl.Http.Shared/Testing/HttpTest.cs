@@ -19,9 +19,9 @@ namespace Flurl.Http.Testing
 		};
 
 		public HttpTest() {
-			FlurlHttp.Configure(opts => {
-				opts.HttpClientFactory = new TestHttpClientFactory(this);
-				opts.AfterCall = call => CallLog.Add(call);
+			FlurlHttp.Configure(settings => {
+				settings.HttpClientFactory = new TestHttpClientFactory(this);
+				settings.AfterCall = call => CallLog.Add(call);
 			});
 			ResponseQueue = new Queue<HttpResponseMessage>();
 			CallLog = new List<HttpCall>();
@@ -51,7 +51,7 @@ namespace Flurl.Http.Testing
 		public HttpTest RespondWithJson(int status, object data) {
 			ResponseQueue.Enqueue(new HttpResponseMessage {
 				StatusCode = (HttpStatusCode)status,
-				Content = new CapturedJsonContent(data)
+				Content = new CapturedJsonContent(FlurlHttp.GlobalSettings.JsonSerializer.Serialize(data))
 			});
 			return this;
 		}
@@ -103,7 +103,7 @@ namespace Flurl.Http.Testing
 		}
 
 		public void Dispose() {
-			FlurlHttp.Configuration.ResetDefaults();
+			FlurlHttp.GlobalSettings.ResetDefaults();
 		}
 	}
 }

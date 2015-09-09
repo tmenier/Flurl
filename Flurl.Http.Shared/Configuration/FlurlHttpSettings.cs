@@ -7,9 +7,9 @@ namespace Flurl.Http.Configuration
 	/// <summary>
 	/// A set of properties that affect Flurl.Http behavior. Generally set via static FlurlHttp.Configure method.
 	/// </summary>
-	public class FlurlHttpConfigurationOptions
+	public class FlurlHttpSettings
 	{
-		internal FlurlHttpConfigurationOptions() {
+		public FlurlHttpSettings() {
 			ResetDefaults();
 		}
 
@@ -32,6 +32,16 @@ namespace Flurl.Http.Configuration
 		/// otherwise functionality such as callbacks and most testing features will be lost.
 		/// </summary>
 		public IHttpClientFactory HttpClientFactory { get; set; }
+
+		/// <summary>
+		/// Gets or sets object used to serialize and deserialize JSON. Default implementation uses Newtonsoft Json.NET.
+		/// </summary>
+		public ISerializer JsonSerializer { get; set; }
+
+		/// <summary>
+		/// Gets or sets object used to serialize URL-encoded data. (Deserialization not supported in default implementation.)
+		/// </summary>
+		public DefaultUrlEncodedSerializer UrlEncodedSerializer { get; set; }
 
 		/// <summary>
 		/// Gets or sets a callback that is called immediately before every HTTP request is sent.
@@ -72,12 +82,18 @@ namespace Flurl.Http.Configuration
 			DefaultTimeout = new HttpClient().Timeout;
 			AllowedHttpStatusRange = null;
 			HttpClientFactory = new DefaultHttpClientFactory();
+			JsonSerializer = new NewtonsoftJsonSerializer(null);
+			UrlEncodedSerializer = new DefaultUrlEncodedSerializer();
 			BeforeCall = null;
 			BeforeCallAsync = null;
 			AfterCall = null;
 			AfterCallAsync = null;
 			OnError = null;
 			OnErrorAsync = null;
+		}
+
+		public FlurlHttpSettings Clone() {
+			return (FlurlHttpSettings)this.MemberwiseClone();
 		}
 	}
 }

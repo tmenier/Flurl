@@ -15,9 +15,7 @@ namespace Flurl.Http.Configuration
 		/// customize the result.
 		/// </summary>
 		public virtual HttpClient CreateClient(Url url, HttpMessageHandler handler) {
-			return new HttpClient(new FlurlMessageHandler(handler)) {
-				Timeout = FlurlHttp.Configuration.DefaultTimeout
-			};
+			return new HttpClient(new FlurlMessageHandler(handler));
 		}
 
 		/// <summary>

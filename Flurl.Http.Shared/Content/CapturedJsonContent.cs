@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Newtonsoft.Json;
 
 namespace Flurl.Http.Content
 {
@@ -9,6 +8,6 @@ namespace Flurl.Http.Content
 	/// </summary>
 	public class CapturedJsonContent : CapturedStringContent
 	{
-		public CapturedJsonContent(object data) : base(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json") { }
+		public CapturedJsonContent(string json) : base(json, Encoding.UTF8, "application/json") { }
 	}
 }

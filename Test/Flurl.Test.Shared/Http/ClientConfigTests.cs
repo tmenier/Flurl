@@ -111,7 +111,7 @@ namespace Flurl.Test.Http
 				// allow 4xx
 				var client = "http://www.api.com".AllowHttpStatus("4xx");
 				// but then disallow it
-				client.AllowedHttpStatusRanges.Clear();
+				client.Settings.AllowedHttpStatusRange = null;
 				await client.GetAsync();
 			}
 		}
