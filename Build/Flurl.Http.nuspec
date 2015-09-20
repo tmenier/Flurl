@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>0.6.4</version>
+		<version>0.7.0</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,6 +13,7 @@
 			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
 		</description>
 		<releaseNotes>
+0.7.0 - BREAKING CHANGES: https://github.com/tmenier/Flurl/wiki/Release-Notes
 0.6.4 - nuspec fix for Xamarin/non-PCL, AllowHttpStatus overloads with HttpStatusCode enum.
 0.6.3 - Updated Flurl dependency to 1.0.9.
 0.6.2 - Respect Json.NET's JsonConvert.DefaultSettings
