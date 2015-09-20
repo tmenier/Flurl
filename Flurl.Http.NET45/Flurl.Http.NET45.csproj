@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DownloadExtensions.cs" />
+    <Compile Include="NoOpTask.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

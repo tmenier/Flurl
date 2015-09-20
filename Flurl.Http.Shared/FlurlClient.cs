@@ -67,7 +67,7 @@ namespace Flurl.Http
 			try {
 				var request = new HttpRequestMessage(verb, this.Url) { Content = content };
 				request.SetFlurlSettings(this.Settings);
-				return await HttpClient.SendAsync(request, completionOption, cancellationToken ?? CancellationToken.None);
+				return await HttpClient.SendAsync(request, completionOption, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
 			}
 			finally {
 				if (AutoDispose) Dispose();

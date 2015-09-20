@@ -38,6 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DownloadExtensions.cs" />
+    <Compile Include="NoOpTask.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

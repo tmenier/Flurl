@@ -25,12 +25,12 @@ namespace Flurl.Http
 			var filePath = Path.Combine(localFolderPath, localFileName);
 
 			try {
-				var response = await client.HttpClient.GetAsync(client.Url, HttpCompletionOption.ResponseHeadersRead);
+				var response = await client.HttpClient.GetAsync(client.Url, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
 
 				// http://codereview.stackexchange.com/a/18679
-				using (var httpStream = await response.Content.ReadAsStreamAsync())
+				using (var httpStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
 				using (var filestream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, useAsync: true)) {
-					await httpStream.CopyToAsync(filestream, bufferSize);
+					await httpStream.CopyToAsync(filestream, bufferSize).ConfigureAwait(false);
 				}
 
 				return filePath;

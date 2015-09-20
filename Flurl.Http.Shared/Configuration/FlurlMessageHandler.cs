@@ -24,12 +24,12 @@ namespace Flurl.Http.Configuration
 			if (stringContent != null)
 				call.RequestBody = stringContent.Content;
 
-			await RaiseGlobalEventAsync(settings.BeforeCall, settings.BeforeCallAsync, call);
+			await RaiseGlobalEventAsync(settings.BeforeCall, settings.BeforeCallAsync, call).ConfigureAwait(false);
 
 			call.StartedUtc = DateTime.UtcNow;
 
 			try {
-				call.Response = await base.SendAsync(request, cancellationToken);
+				call.Response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 				call.EndedUtc = DateTime.UtcNow;
 			}
 			catch (Exception ex) {
@@ -40,15 +40,15 @@ namespace Flurl.Http.Configuration
 
 			if (call.Response != null && !call.Succeeded) {
 				if (call.Response.Content != null)
-					call.ErrorResponseBody = await call.Response.Content.ReadAsStringAsync();
+					call.ErrorResponseBody = await call.Response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
 				call.Exception = new FlurlHttpException(call, null);
 			}
 
 			if (call.Exception != null)
-				await RaiseGlobalEventAsync(settings.OnError, settings.OnErrorAsync, call);
+				await RaiseGlobalEventAsync(settings.OnError, settings.OnErrorAsync, call).ConfigureAwait(false);
 
-			await RaiseGlobalEventAsync(settings.AfterCall, settings.AfterCallAsync, call);
+			await RaiseGlobalEventAsync(settings.AfterCall, settings.AfterCallAsync, call).ConfigureAwait(false);
 
 			if (call.Exception != null && !call.ExceptionHandled)
 				throw call.Exception;
@@ -57,9 +57,12 @@ namespace Flurl.Http.Configuration
 			return call.Response;
 		}
 
-		private async Task RaiseGlobalEventAsync(Action<HttpCall> syncVersion, Func<HttpCall, Task> asyncVersion, HttpCall call) {
-			if (syncVersion != null) syncVersion(call);
-			if (asyncVersion != null) await asyncVersion(call);
+		private Task RaiseGlobalEventAsync(Action<HttpCall> syncVersion, Func<HttpCall, Task> asyncVersion, HttpCall call) {
+			if (syncVersion != null)
+				syncVersion(call);
+			if (asyncVersion != null) 
+				return asyncVersion(call);
+			return NoOpTask.Instance;
 		}
 	}
 }

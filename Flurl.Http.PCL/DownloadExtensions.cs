@@ -18,16 +18,16 @@ namespace Flurl.Http
 			if (localFileName == null)
 				localFileName = client.Url.Path.Split('/').Last();
 
-			var folder = await EnsureFolderAsync(localFolderPath);
-			var file = await folder.CreateFileAsync(localFileName, CreationCollisionOption.ReplaceExisting);
+			var folder = await EnsureFolderAsync(localFolderPath).ConfigureAwait(false);
+			var file = await folder.CreateFileAsync(localFileName, CreationCollisionOption.ReplaceExisting).ConfigureAwait(false);
 
 			try {
-				var response = await client.HttpClient.GetAsync(client.Url, HttpCompletionOption.ResponseHeadersRead);
+				var response = await client.HttpClient.GetAsync(client.Url, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
 
 				// http://codereview.stackexchange.com/a/18679
-				using (var httpStream = await response.Content.ReadAsStreamAsync())
-				using (var filestream = await file.OpenAsync(FileAccess.ReadAndWrite)) {
-					await httpStream.CopyToAsync(filestream, bufferSize);
+				using (var httpStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+				using (var filestream = await file.OpenAsync(FileAccess.ReadAndWrite).ConfigureAwait(false)) {
+					await httpStream.CopyToAsync(filestream, bufferSize).ConfigureAwait(false);
 				}
 
 				return PortablePath.Combine(localFolderPath, localFileName);
