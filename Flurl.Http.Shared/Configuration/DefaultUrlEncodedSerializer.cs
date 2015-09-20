@@ -6,7 +6,11 @@ using Flurl.Util;
 
 namespace Flurl.Http.Configuration
 {
-    public class DefaultUrlEncodedSerializer : ISerializer
+	/// <summary>
+	/// ISerializer implementation that converts an object representing name/value pairs to a URL-encoded string.
+	/// Default serializer used in calls to PostUrlEncodedAsync, etc. 
+	/// </summary>
+	public class DefaultUrlEncodedSerializer : ISerializer
     {
 	    public string Serialize(object obj) {
 			var sb = new StringBuilder();

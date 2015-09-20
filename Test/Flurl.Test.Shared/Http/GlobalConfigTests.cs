@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -8,30 +9,41 @@ using NUnit.Framework;
 
 namespace Flurl.Test.Http
 {
-	[TestFixture]
-	public class GlobalConfigTests
+	/// <summary>
+	/// All global settings can also be set at the client level, so this base class allows ClientConfigTests to 
+	/// inherit all the same tests.
+	/// </summary>
+	public abstract class ConfigTestsBase
 	{
+		protected abstract FlurlHttpSettings GetSettings();
+
+		private FlurlClient _client;
+		protected FlurlClient GetClient() {
+			if (_client == null)
+				_client = new FlurlClient("http://www.api.com");
+			return _client;
+		}
+
 		[TearDown]
 		public void ResetDefaults() {
-			FlurlHttp.GlobalSettings.ResetDefaults();
+			GetSettings().ResetDefaults();
+			_client = null;
 		}
 
 		[Test]
 		public void can_provide_custom_httpclient_factory() {
-			FlurlHttp.GlobalSettings.HttpClientFactory = new SomeCustomHttpClientFactory();
-			var client = new FlurlClient("http://www.api.com");
-
-			Assert.IsInstanceOf<SomeCustomHttpClient>(client.HttpClient);
-			Assert.IsInstanceOf<SomeCustomMessageHandler>(client.HttpMessageHandler);
+			GetSettings().HttpClientFactory = new SomeCustomHttpClientFactory();
+			Assert.IsInstanceOf<SomeCustomHttpClient>(GetClient().HttpClient);
+			Assert.IsInstanceOf<SomeCustomMessageHandler>(GetClient().HttpMessageHandler);
 		}
 
 		[Test]
 		public async Task can_allow_non_success_status() {
 			using (var test = new HttpTest()) {
-				FlurlHttp.GlobalSettings.AllowedHttpStatusRange = "4xx";
+				GetSettings().AllowedHttpStatusRange = "4xx";
 				test.RespondWith(418, "I'm a teapot");
 				try {
-					var result = await "http://www.api.com".GetAsync();
+					var result = await GetClient().GetAsync();
 					Assert.IsFalse(result.IsSuccessStatusCode);
 				}
 				catch (Exception) {
@@ -45,12 +57,12 @@ namespace Flurl.Test.Http
 			var callbackCalled = false;
 			using (var test = new HttpTest()) {
 				test.RespondWith("ok");
-				FlurlHttp.GlobalSettings.BeforeCall = req => {
+				GetSettings().BeforeCall = req => {
 					CollectionAssert.IsNotEmpty(test.ResponseQueue); // verifies that callback is running before HTTP call is made
 					callbackCalled = true;
 				};
 				Assert.IsFalse(callbackCalled);
-				await "http://www.api.com".GetAsync();
+				await GetClient().GetAsync();
 				Assert.IsTrue(callbackCalled);
 			}
 		}
@@ -60,12 +72,12 @@ namespace Flurl.Test.Http
 			var callbackCalled = false;
 			using (var test = new HttpTest()) {
 				test.RespondWith("ok");
-				FlurlHttp.GlobalSettings.AfterCall = call => {
+				GetSettings().AfterCall = call => {
 					CollectionAssert.IsEmpty(test.ResponseQueue); // verifies that callback is running after HTTP call is made
 					callbackCalled = true;
 				};
 				Assert.IsFalse(callbackCalled);
-				await "http://www.api.com".GetAsync();
+				await GetClient().GetAsync();
 				Assert.IsTrue(callbackCalled);				
 			}
 		}
@@ -76,14 +88,14 @@ namespace Flurl.Test.Http
 			var callbackCalled = false;
 			using (var test = new HttpTest()) {
 				test.RespondWith(500, "server error");
-				FlurlHttp.GlobalSettings.OnError = call => {
+				GetSettings().OnError = call => {
 					CollectionAssert.IsEmpty(test.ResponseQueue); // verifies that callback is running after HTTP call is made
 					callbackCalled = true;
 					call.ExceptionHandled = markExceptionHandled;
 				};
 				Assert.IsFalse(callbackCalled);
 				try {
-					await "http://www.api.com".GetAsync();
+					await GetClient().GetAsync();
 					Assert.IsTrue(callbackCalled, "OnError was never called");
 					Assert.IsTrue(markExceptionHandled, "ExceptionHandled was marked false in callback, but exception was not propagated.");
 				}
@@ -97,29 +109,17 @@ namespace Flurl.Test.Http
 		[Test]
 		public async Task can_disable_exception_behavior() {
 			using (var test = new HttpTest()) {
-				FlurlHttp.GlobalSettings.OnError = call => {
+				GetSettings().OnError = call => {
 					call.ExceptionHandled = true;
 				};
 				test.RespondWith(500, "server error");
 				try {
-					var result = await "http://www.api.com".GetAsync();
+					var result = await GetClient().GetAsync();
 					Assert.IsFalse(result.IsSuccessStatusCode);
 				}
 				catch (FlurlHttpException) {
 					Assert.Fail("Flurl should not have thrown exception.");
 				}
-			}
-		}
-
-		[Test]
-		public async Task client_can_override_global_settings() {
-			var overridden = false;
-			using (new HttpTest()) {
-				FlurlHttp.GlobalSettings.AfterCall = _ => overridden = false;
-				var fc = new FlurlClient("http://www.api.com");
-				fc.Settings.AfterCall = _ => overridden = true;
-				await fc.GetAsync();
-				Assert.True(overridden);
 			}
 		}
 
@@ -136,5 +136,13 @@ namespace Flurl.Test.Http
 
 		private class SomeCustomHttpClient : HttpClient { }
 		private class SomeCustomMessageHandler : HttpClientHandler { }
+	}
+
+	[TestFixture]
+	public class GlobalConfigTestsBase : ConfigTestsBase
+	{
+		protected override FlurlHttpSettings GetSettings() {
+			return FlurlHttp.GlobalSettings;
+		}
 	}
 }

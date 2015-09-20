@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using Flurl.Http.Configuration;
 using Flurl.Util;
 
 namespace Flurl.Http
@@ -39,6 +40,34 @@ namespace Flurl.Http
 		public static FlurlClient WithUrl(this FlurlClient client, Url url) {
 			client.Url = url;
 			return client;
+		}
+
+		/// <summary>
+		/// Change FlurlHttpSettings for this client instance.
+		/// </summary>
+		/// <param name="action">Action defining the settings changes.</param>
+		/// <returns>The FlurlClient with the modified HttpClient</returns>
+		public static FlurlClient ConfigureClient(this FlurlClient client, Action<FlurlHttpSettings> action) {
+			action(client.Settings);
+			return client;
+		}
+
+		/// <summary>
+		/// Creates a FlurlClient from the URL and allows changing the FlurlHttpSettings associated with the instance.
+		/// </summary>
+		/// <param name="action">Action defining the settings changes.</param>
+		/// <returns>The FlurlClient with the modified HttpClient</returns>
+		public static FlurlClient ConfigureClient(this Url url, Action<FlurlHttpSettings> action) {
+			return new FlurlClient(url, true).ConfigureClient(action);
+		}
+
+		/// <summary>
+		/// Creates a FlurlClient from the URL and allows changing the FlurlHttpSettings associated with the instance.
+		/// </summary>
+		/// <param name="action">Action defining the settings changes.</param>
+		/// <returns>The FlurlClient with the modified HttpClient</returns>
+		public static FlurlClient ConfigureClient(this string url, Action<FlurlHttpSettings> action) {
+			return new FlurlClient(url, true).ConfigureClient(action);
 		}
 
 		/// <summary>

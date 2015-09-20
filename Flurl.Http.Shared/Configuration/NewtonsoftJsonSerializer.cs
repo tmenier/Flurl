@@ -7,7 +7,8 @@ using Newtonsoft.Json;
 namespace Flurl.Http.Configuration
 {
 	/// <summary>
-	/// ISerializer implementation that uses Newtonsoft Json.NET. Used as Flurl.Http's default JSON serializer.
+	/// ISerializer implementation that uses Newtonsoft Json.NET.
+	/// Default serializer used in calls to GetJsonAsync, PostJsonAsync, etc.
 	/// </summary>
     public class NewtonsoftJsonSerializer : ISerializer
     {

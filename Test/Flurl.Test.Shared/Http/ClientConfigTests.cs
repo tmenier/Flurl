@@ -4,14 +4,19 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Flurl.Http;
+using Flurl.Http.Configuration;
 using Flurl.Http.Testing;
 using NUnit.Framework;
 
 namespace Flurl.Test.Http
 {
 	[TestFixture]
-	public class ClientConfigTests
+	public class ClientConfigTestsBase : ConfigTestsBase
 	{
+		protected override FlurlHttpSettings GetSettings() {
+			return GetClient().Settings;
+		}
+
 		[Test]
 		public void can_set_timeout() {
 			var client = "http://www.api.com".WithTimeout(TimeSpan.FromSeconds(15));
@@ -77,16 +82,25 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task can_allow_non_success_status() {
+		public async Task can_allow_specific_http_status() {
+			using (var test = new HttpTest()) {
+				test.RespondWith(404, "Nothing to see here");
+				// no exception = pass
+				await "http://www.api.com"
+					.AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound)
+					.DeleteAsync();
+			}
+		}
+
+		[Test, ExpectedException(typeof(FlurlHttpException))]
+		public async Task can_clear_non_success_status() {
 			using (var test = new HttpTest()) {
 				test.RespondWith(418, "I'm a teapot");
-				try {
-					var result = await "http://www.api.com".AllowHttpStatus("1xx,300-500").GetAsync();
-					Assert.IsFalse(result.IsSuccessStatusCode);
-				}
-				catch (Exception) {
-					Assert.Fail("Exception should not have been thrown.");
-				}
+				// allow 4xx
+				var client = "http://www.api.com".AllowHttpStatus("4xx");
+				// but then disallow it
+				client.Settings.AllowedHttpStatusRange = null;
+				await client.GetAsync();
 			}
 		}
 
@@ -105,24 +119,11 @@ namespace Flurl.Test.Http
 		}
 
 		[Test, ExpectedException(typeof(FlurlHttpException))]
-		public async Task can_clear_non_success_status() {
+		public async Task can_override_settings_fluently() {
 			using (var test = new HttpTest()) {
-				test.RespondWith(418, "I'm a teapot");
-				// allow 4xx
-				var client = "http://www.api.com".AllowHttpStatus("4xx");
-				// but then disallow it
-				client.Settings.AllowedHttpStatusRange = null;
-				await client.GetAsync();
-			}
-		}
-
-		[Test]
-		public async Task can_allow_specific_http_status() {
-			using (var test = new HttpTest()) {
-				test.RespondWith(404, "Nothing to see here");
-				// allow 404
-				var client = "http://www.api.com".AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
-				await client.DeleteAsync();
+				FlurlHttp.GlobalSettings.AllowedHttpStatusRange = "*";
+				test.RespondWith(500, "epic fail");
+				await "http://www.api.com".ConfigureClient(c => c.AllowedHttpStatusRange = "2xx").GetAsync();
 			}
 		}
 	}

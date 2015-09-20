@@ -16,7 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Http\RealHttpTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\FlurlClientTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\GetTests.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Http\SettingsTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Http\GlobalConfigTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\HeadTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\HttpTestFixtureBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\PostTests.cs" />
