@@ -41,7 +41,7 @@ namespace Flurl.Http.Configuration
 		/// <summary>
 		/// Gets or sets object used to serialize URL-encoded data. (Deserialization not supported in default implementation.)
 		/// </summary>
-		public DefaultUrlEncodedSerializer UrlEncodedSerializer { get; set; }
+		public ISerializer UrlEncodedSerializer { get; set; }
 
 		/// <summary>
 		/// Gets or sets a callback that is called immediately before every HTTP request is sent.
