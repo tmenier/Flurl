@@ -217,7 +217,14 @@ namespace Flurl.Test
 			Assert.AreEqual("http://www.mysite.com?x=%2450&y=2%2B2%3D4", url.ToString());
 		}
 
-		[Test]
+        [Test]
+        public void does_not_reencode_percent_in_query_params()
+        {
+            var url = "http://www.mysite.com".SetQueryParams(new { x = "%CD", y = "1" });
+            Assert.AreEqual("http://www.mysite.com?x=%CD&y=1", url.ToString());
+        }
+
+        [Test]
 		public void Url_implicitly_converts_to_string() {
 			var url = new Url("http://www.mysite.com/more?x=1&y=2");
 			var someMethodThatTakesAString = new Action<string>(s => { });
