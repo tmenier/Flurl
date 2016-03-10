@@ -4,3 +4,6 @@ packages
 *.suo
 *.nupkg
 *.DotSettings.user
+.vs
+artifacts
+*.xproj.user

@@ -1,0 +1,42 @@
+{
+  "version": "0.7.0-*",
+  "description": "A fluent, testable, wrist-friendly HTTP client library",
+  "authors": [ "Todd Menier" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "dependencies": {
+    "Newtonsoft.Json": "8.0.2",
+    "Microsoft.Net.Http": "2.2.29",
+    "Microsoft.Bcl": "1.1.7",
+    "Microsoft.Bcl.Async": "1.0.168",
+    "Microsoft.Bcl.Build": "1.0.21"
+  },
+  "frameworks": {
+    "net451": {
+      "dependencies": {
+        "System.Net.Http": "4.0.1-beta-23516",
+        "System.Text.RegularExpressions": "4.0.11-rc2-23623"
+      }
+    },
+    "dnx451": {
+      "dependencies": {
+        "System.Net.Http": "4.0.1-beta-23516",
+        "System.Text.RegularExpressions": "4.0.11-rc2-23623"
+      }
+    },
+    "dnxcore50": {
+      "dependencies": {
+        "System.Net.Http": "4.0.1-beta-23516",
+        "Microsoft.CSharp": "4.0.1-beta-23516",
+        "System.Collections": "4.0.11-beta-23516",
+        "System.Linq": "4.0.1-beta-23516",
+        "System.Runtime": "4.0.21-beta-23516",
+        "System.Threading": "4.0.11-beta-23516",
+        "System.Text.RegularExpressions": "4.0.11-rc2-23623",
+        "System.IO.FileSystem": "4.0.1-rc2-23826",
+        "System.Reflection.TypeExtensions": "4.1.0-rc2-23623"
+      }
+    }
+  }
+}
