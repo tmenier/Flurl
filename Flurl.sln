@@ -1,12 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EB46FFA3-B1A5-4137-8B5F-8CC9F7422A12}"
 	ProjectSection(SolutionItems) = preProject
 		Build\Flurl.Http.nuspec = Build\Flurl.Http.nuspec
 		Build\Flurl.nuspec = Build\Flurl.nuspec
+		global.json = global.json
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -37,6 +38,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageTester.PCL", "PackageTester.PCL\PackageTester.PCL.csproj", "{0A32978C-BC48-4DFB-B1F7-B88541B0D686}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl.Http.CodeGen", "Flurl.Http.CodeGen\Flurl.Http.CodeGen.csproj", "{0571F8FF-1649-433C-97F3-7341942AC886}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Flurl.Http.NETCore", "Flurl.Http.NETCore\Flurl.Http.NETCore.xproj", "{52C8C00D-9BD2-4642-B103-F0A8C564FE05}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -258,6 +261,38 @@ Global
 		{0571F8FF-1649-433C-97F3-7341942AC886}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{0571F8FF-1649-433C-97F3-7341942AC886}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{0571F8FF-1649-433C-97F3-7341942AC886}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Ad-Hoc|Any CPU.ActiveCfg = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Ad-Hoc|Any CPU.Build.0 = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Ad-Hoc|iPhone.ActiveCfg = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Ad-Hoc|iPhone.Build.0 = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Ad-Hoc|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Ad-Hoc|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Ad-Hoc|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Ad-Hoc|Mixed Platforms.Build.0 = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.AppStore|Any CPU.ActiveCfg = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.AppStore|Any CPU.Build.0 = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.AppStore|iPhone.ActiveCfg = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.AppStore|iPhone.Build.0 = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.AppStore|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.AppStore|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.AppStore|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.AppStore|Mixed Platforms.Build.0 = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Release|iPhone.Build.0 = Release|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{52C8C00D-9BD2-4642-B103-F0A8C564FE05}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
