@@ -1,5 +1,5 @@
 ﻿{
-  "version": "0.8.0",
+  "version": "0.8.1",
   "title": "Flurl.Http.NETCore",
   "description": "A fluent, testable HTTP client library that extends Flurl's URL builder chain.",
   "summary": "A fluent, testable HTTP client library that extends Flurl's URL builder chain.",
@@ -9,14 +9,14 @@
   "iconUrl": "https://pbs.twimg.com/profile_images/534024476296376320/IuPGZ_bX_400x400.png",
   "licenseUrl": "https://raw.githubusercontent.com/tmenier/Flurl/master/LICENSE",
   "requireLicenseAcceptance": false,
-  "releaseNotes": "0.8.0 - Added Flurl.Http target to .NET Platform Standard 1.0 (NET45+, NETCore, other targets)",
+  "releaseNotes": "0.8.1 - Added Flurl.Http target to .NET Platform Standard 1.0 (NET45+, NETCore, other targets)",
   "repository": {
     "type": "git",
     "url": "https://github.com/tmenier/Flurl.git"
   },
 
   "dependencies": {
-    "Flurl.NETCore": "1.1.0",
+    "Flurl.NETCore": "1.1.1",
     "Newtonsoft.Json": "8.0.3"
   },
 
@@ -24,6 +24,11 @@
   "compileExclude": [ "../**/AssemblyInfo.cs" ],
 
   "frameworks": {
+    "net45": {
+      "frameworkAssemblies": {
+        "System.Net.Http": "4.0.0"
+      }
+    },
     "dotnet50": {
       "dependencies": {
         "System.Dynamic.Runtime": "4.0.10",
