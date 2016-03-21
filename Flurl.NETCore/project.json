@@ -1,0 +1,29 @@
+﻿{
+  "version": "1.1.0",
+  "title": "Flurl.NETCore",
+  "description": "A fluent, URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.NETCore",
+  "summary": "A fluent, URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.NETCore",
+  "authors": [ "Todd Menier" ],
+  "tags": [ "fluent url uri querystring builder" ],
+  "projectUrl": "http://tmenier.github.io/Flurl",
+  "iconUrl": "https://pbs.twimg.com/profile_images/534024476296376320/IuPGZ_bX_400x400.png",
+  "licenseUrl": "https://raw.githubusercontent.com/tmenier/Flurl/master/LICENSE",
+  "requireLicenseAcceptance": false,
+  "releaseNotes": "1.1.0 - Added Flurl.NETCore target to .NET Platform Standard 1.0 (NET45+, NETCore, other targets)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tmenier/Flurl.git"
+  },
+
+  "compile": [ "../Flurl/**/*.cs" ],
+  "compileExclude": [ "../**/AssemblyInfo.cs", "../Flurl/Util/CommonExtensions.cs" ],
+
+  "frameworks": {
+    "dotnet50": {
+      "dependencies": {
+        "System.Linq": "4.0.0",
+        "System.Reflection.TypeExtensions": "4.0.0"
+      }
+    }
+  }
+}
