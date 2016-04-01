@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using Flurl.Http.Configuration;
 
 namespace Flurl.Http
 {
@@ -13,9 +14,29 @@ namespace Flurl.Http
 	public class HttpCall
 	{
 		/// <summary>
-		/// HttpRequestMessage associated with the call.
+		/// Gets the Flurl HttpCall that was set for the given request, or null if Flurl.Http was not used to make the request
 		/// </summary>
-		public HttpRequestMessage Request { get; set; }
+		public static HttpCall Get(HttpRequestMessage request) {
+			object obj;
+			if (request != null && request.Properties != null && request.Properties.TryGetValue("FlurlHttpCall", out obj) && obj is HttpCall)
+				return (HttpCall)obj;
+			return null;
+		}
+
+		internal static void Set(HttpRequestMessage request, FlurlHttpSettings settings) {
+			if (request != null && request.Properties != null)
+				request.Properties["FlurlHttpCall"] = new HttpCall { Request = request, Settings = settings };
+		}
+
+		/// <summary>
+		/// FlurlHttpSettings used for this call.
+		/// </summary>
+		public FlurlHttpSettings Settings { get; private set; }
+
+		/// <summary>
+		/// HttpRequestMessage associated with this call.
+		/// </summary>
+		public HttpRequestMessage Request { get; private set; }
 
 		/// <summary>
 		/// Captured request body. More reliably available than HttpRequestMessage.Content, which is a forward-only, read-once stream.
@@ -74,9 +95,10 @@ namespace Flurl.Http
 		/// </summary>
 		public bool Succeeded {
 			get {
-				if (!Completed) return false;
-				if (Response.IsSuccessStatusCode) return true;
-				return HttpStatusRangeParser.IsMatch(Request.GetFlurlSettings().AllowedHttpStatusRange, Response.StatusCode);
+				return
+					!Completed ? false :
+					Response.IsSuccessStatusCode ? true :
+					HttpStatusRangeParser.IsMatch(Settings.AllowedHttpStatusRange, Response.StatusCode);
 			}
 		}
 

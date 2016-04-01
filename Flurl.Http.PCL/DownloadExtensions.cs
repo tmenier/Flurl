@@ -21,8 +21,12 @@ namespace Flurl.Http
 			var folder = await EnsureFolderAsync(localFolderPath).ConfigureAwait(false);
 			var file = await folder.CreateFileAsync(localFileName, CreationCollisionOption.ReplaceExisting).ConfigureAwait(false);
 
+			// need to temporarily disable autodispose if set, otherwise reading from stream will fail
+			var autoDispose = client.AutoDispose;
+			client.AutoDispose = false;
+
 			try {
-				var response = await client.HttpClient.GetAsync(client.Url, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+				var response = await client.SendAsync(HttpMethod.Get, completionOption: HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
 
 				// http://codereview.stackexchange.com/a/18679
 				using (var httpStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
@@ -33,6 +37,7 @@ namespace Flurl.Http
 				return PortablePath.Combine(localFolderPath, localFileName);
 			}
 			finally {
+				client.AutoDispose = autoDispose;
 				if (client.AutoDispose) client.Dispose();
 			}
 		}

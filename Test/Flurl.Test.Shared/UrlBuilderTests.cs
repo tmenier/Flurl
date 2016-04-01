@@ -253,5 +253,13 @@ namespace Flurl.Test
 		public void IsUrl_false_for_invalid_url() {
 			Assert.IsFalse("www.mysite.com".IsUrl());
 		}
+
+		// known issue - https://github.com/tmenier/Flurl/issues/56
+		[Test, Ignore]
+		public void does_not_alter_url_passed_to_constructor() {
+			var expected = "http://www.mysite.com/hi%20there/more?x=%CD%EE%E2%FB%E9%20%E3%EE%E4";
+			var url = new Url(expected);
+			Assert.AreEqual(expected, url.ToString());
+		}
 	}
 }

@@ -14,17 +14,13 @@ namespace Flurl.Http.Configuration
 		public FlurlMessageHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
 
 		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
-			var settings = request.GetFlurlSettings();
-
-			var call = new HttpCall {
-				Request = request
-			};
+			var call = HttpCall.Get(request);
 
 			var stringContent = request.Content as CapturedStringContent;
 			if (stringContent != null)
 				call.RequestBody = stringContent.Content;
 
-			await RaiseGlobalEventAsync(settings.BeforeCall, settings.BeforeCallAsync, call).ConfigureAwait(false);
+			await FlurlHttp.RaiseEventAsync(request, FlurlEventType.BeforeCall).ConfigureAwait(false);
 
 			call.StartedUtc = DateTime.UtcNow;
 
@@ -46,23 +42,15 @@ namespace Flurl.Http.Configuration
 			}
 
 			if (call.Exception != null)
-				await RaiseGlobalEventAsync(settings.OnError, settings.OnErrorAsync, call).ConfigureAwait(false);
+				await FlurlHttp.RaiseEventAsync(request, FlurlEventType.OnError).ConfigureAwait(false);
 
-			await RaiseGlobalEventAsync(settings.AfterCall, settings.AfterCallAsync, call).ConfigureAwait(false);
+			await FlurlHttp.RaiseEventAsync(request, FlurlEventType.AfterCall).ConfigureAwait(false);
 
 			if (call.Exception != null && !call.ExceptionHandled)
 				throw call.Exception;
 
 			call.Response.RequestMessage = request;
 			return call.Response;
-		}
-
-		private Task RaiseGlobalEventAsync(Action<HttpCall> syncVersion, Func<HttpCall, Task> asyncVersion, HttpCall call) {
-			if (syncVersion != null)
-				syncVersion(call);
-			if (asyncVersion != null) 
-				return asyncVersion(call);
-			return NoOpTask.Instance;
 		}
 	}
 }

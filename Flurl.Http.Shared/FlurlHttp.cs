@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Flurl.Http.Configuration;
 
 namespace Flurl.Http
@@ -29,5 +31,39 @@ namespace Flurl.Http
 				configAction(GlobalSettings);
 			}
 		}
+
+		/// <summary>
+		/// Triggers the specified sync and async event handlers, usually defined on 
+		/// </summary>
+		public static Task RaiseEventAsync(HttpRequestMessage request, FlurlEventType eventType) {
+			var call = HttpCall.Get(request);
+			if (call == null)
+				return NoOpTask.Instance;
+
+			var settings = call.Settings;
+			if (settings == null)
+				return NoOpTask.Instance;
+
+			switch (eventType) {
+				case FlurlEventType.BeforeCall:
+					return HandleEventAsync(settings.BeforeCall, settings.BeforeCallAsync, call);
+				case FlurlEventType.AfterCall:
+					return HandleEventAsync(settings.AfterCall, settings.AfterCallAsync, call);
+				case FlurlEventType.OnError:
+					return HandleEventAsync(settings.OnError, settings.OnErrorAsync, call);
+				default:
+					return NoOpTask.Instance;
+			}
+		}
+
+		private static Task HandleEventAsync(Action<HttpCall> syncHandler, Func<HttpCall, Task> asyncHandler, HttpCall call) {
+			if (syncHandler != null)
+				syncHandler(call);
+			if (asyncHandler != null)
+				return asyncHandler(call);
+			return NoOpTask.Instance;
+		}
 	}
+
+	public enum FlurlEventType { BeforeCall, AfterCall, OnError }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Net.Http;
@@ -19,9 +20,15 @@ namespace Flurl.Http
 		/// <example>x = await url.PostAsync(data).ReceiveJson&lt;T&gt;()</example>
 		public static async Task<T> ReceiveJson<T>(this Task<HttpResponseMessage> response) {
 			var resp = await response.ConfigureAwait(false);
-			var settings = resp.RequestMessage.GetFlurlSettings();
-			using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false))
-				return settings.JsonSerializer.Deserialize<T>(stream);
+			var call = HttpCall.Get(resp.RequestMessage);
+			try {
+				using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false))
+					return call.Settings.JsonSerializer.Deserialize<T>(stream);
+			}
+			catch (Exception ex) {
+				call.Exception = ex;
+				throw new FlurlHttpException(call);
+			}
 		}
 
 		/// <summary>

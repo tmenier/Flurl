@@ -42,7 +42,7 @@ namespace Flurl.Http
 		/// Gets a value indicating whether the underlying HttpClient
 		/// should be disposed immediately after the first HTTP call is made.
 		/// </summary>
-		public bool AutoDispose { get; private set; }
+		public bool AutoDispose { get; set; }
 
 		/// <summary>
 		/// Gets the HttpClient to be used in subsequent HTTP calls. Creation (when necessary) is delegated
@@ -66,7 +66,7 @@ namespace Flurl.Http
 		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			try {
 				var request = new HttpRequestMessage(verb, this.Url) { Content = content };
-				request.SetFlurlSettings(this.Settings);
+				HttpCall.Set(request, this.Settings);
 				return await HttpClient.SendAsync(request, completionOption, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
 			}
 			finally {

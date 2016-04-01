@@ -53,9 +53,9 @@ namespace Flurl.Http
 		/// <returns>An object containing data in the response body.</returns>
 		public T GetResponseJson<T>() {
 			return
-				(Call == null) ? default(T) :
-				(Call.ErrorResponseBody == null) ? default(T) :
-				Call.Request.GetFlurlSettings().JsonSerializer.Deserialize<T>(Call.ErrorResponseBody);
+				Call?.ErrorResponseBody == null ? default(T) :
+				Call.Settings?.JsonSerializer == null ? default(T) :
+				Call.Settings.JsonSerializer.Deserialize<T>(Call.ErrorResponseBody);
 		}
 
 		/// <summary>
