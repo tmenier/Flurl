@@ -25,8 +25,8 @@ namespace Flurl.Http
 		public FlurlClient(string url) : this(new Url(url), false) { }
 		public FlurlClient() : this((Url)null, false) { }
 
-		private HttpClient _httpClient;
-		private HttpMessageHandler _httpMessageHandler;
+		protected HttpClient _httpClient;
+		protected HttpMessageHandler _httpMessageHandler;
 
 		/// <summary>
 		/// Gets or sets the FlurlHttpSettings object used by this client.
