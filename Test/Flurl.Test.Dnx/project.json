@@ -1,0 +1,35 @@
+{
+  "version": "1.0.0-*",
+  "description": "Flurl.Test.Dnx Class Library",
+  "authors": [ "ebyte23" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "dependencies": {
+    "Nunit": "3.2.0",
+    "System.Collections": "4.0.11-rc2-23623",
+    "System.Runtime": "4.0.21-rc2-23623",
+    "System.Linq": "4.0.1-beta-23516",
+    "Flurl.Dnx": "0.7.0-*"
+  },
+  "frameworks": {
+    "net451": {
+      "dependencies": {
+      }
+    },
+    "dnx451": {
+      "dependencies": {
+      }
+    },
+    "dnxcore50": {
+      "Microsoft.CSharp": "4.0.1-beta-23516",
+      "System.Collections": "4.0.11-beta-23516",
+      "System.Linq": "4.0.1-beta-23516",
+      "System.Runtime": "4.0.21-beta-23516",
+      "System.Threading": "4.0.11-beta-23516",
+      "dependencies": {
+        "System.Threading.Thread": "4.0.0-rc2-23623"
+      }
+    }
+    }
+}
