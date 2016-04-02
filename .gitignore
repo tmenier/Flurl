@@ -7,3 +7,4 @@ packages
 *.xproj.user
 .vs
 *.lock.json
+*.log
