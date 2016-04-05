@@ -1,0 +1,23 @@
+﻿{
+  "title": "Flurl.NETCore",
+
+  "compile": [ "../Flurl/**/*.cs" ],
+  "compileExclude": [ "../**/AssemblyInfo.cs", "../Flurl/Util/CommonExtensions.cs" ],
+
+  "configurations": {
+    "Release": {
+      "compilationOptions": {
+        "optimize": true
+      }
+    }
+  },
+
+  "frameworks": {
+    "dotnet54": {
+      "dependencies": {
+        "System.Linq": "4.0.0",
+        "System.Reflection.TypeExtensions": "4.0.0"
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+﻿{
+  "title": "Flurl.Http.NETCore",
+
+  "dependencies": {
+    "Flurl": "1.1.0",
+    "Newtonsoft.Json": "8.0.3"
+  },
+
+  "compile": [ "../Flurl.Http.Shared/**/*.cs", "../Flurl.Http.NET45/**/*.cs" ],
+  "compileExclude": [ "../**/AssemblyInfo.cs" ],
+
+  "configurations": {
+    "Release": {
+      "compilationOptions": {
+        "optimize": true
+      }
+    }
+  },
+
+  "frameworks": {
+    "dotnet54": {
+      "dependencies": {
+        "System.Dynamic.Runtime": "4.0.10",
+        "System.IO.FileSystem": "4.0.0",
+        "System.Net.Http": "4.0.0",
+        "System.Text.RegularExpressions": "4.0.10",
+        "System.Threading": "4.0.10"
+      }
+    }
+  }
+}
