@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>0.7.0</version>
+		<version>0.8.0</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,6 +13,7 @@
 			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
 		</description>
 		<releaseNotes>
+0.8.0 - Support for the NETCore (github #61)
 0.7.0 - BREAKING CHANGES: https://github.com/tmenier/Flurl/wiki/Release-Notes
 0.6.4 - nuspec fix for Xamarin/non-PCL, AllowHttpStatus overloads with HttpStatusCode enum.
 0.6.3 - Updated Flurl dependency to 1.0.9.
@@ -39,19 +40,29 @@
 		<dependencies>
 			<group targetFramework="net45">
 				<dependency id="Newtonsoft.Json" version="6.0.3" />
-				<dependency id="Flurl" version="1.0.10" />
+				<dependency id="Flurl" version="1.1.0" />
 			</group>
 			<group targetFramework="portable-net45+sl50+win+wpa81+wp80">
 				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
 				<dependency id="Microsoft.Net.Http" version="2.2.22" />
 				<dependency id="PCLStorage" version="0.9.6" />
 				<dependency id="Newtonsoft.Json" version="6.0.3" />
-				<dependency id="Flurl" version="1.0.10" />
+				<dependency id="Flurl" version="1.1.0" />
 			</group>
+		    <group targetFramework=".NETPlatform5.4">
+		        <dependency id="Flurl" version="1.1.0" />
+		        <dependency id="Newtonsoft.Json" version="8.0.3" />
+		        <dependency id="System.Dynamic.Runtime" version="4.0.10" />
+		        <dependency id="System.IO.FileSystem" version="4.0.0" />
+		        <dependency id="System.Net.Http" version="4.0.0" />
+		        <dependency id="System.Text.RegularExpressions" version="4.0.10" />
+		        <dependency id="System.Threading" version="4.0.10" />
+		    </group>
 		</dependencies>
 	</metadata>
 	<files>
 		<file src="..\Flurl.Http.NET45\bin\Release\Flurl.Http.*" target="lib\net45" />
 		<file src="..\Flurl.Http.PCL\bin\Release\Flurl.Http.*" target="lib\portable-net45+sl50+win+wpa81+wp80" />
+	    <file src="..\artifacts\bin\Flurl.Http.NETCore\Release\dotnet5.4\Flurl.Http.*" target="lib\dotnet5.4" />
 	</files>
 </package>
