@@ -4,3 +4,7 @@ packages
 *.suo
 *.nupkg
 *.DotSettings.user
+*.xproj.user
+.vs
+*.lock.json
+*.log
