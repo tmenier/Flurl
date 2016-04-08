@@ -2,7 +2,7 @@
   "title": "Flurl.NETCore",
 
   "compile": [ "../Flurl/**/*.cs" ],
-  "compileExclude": [ "../**/AssemblyInfo.cs", "../Flurl/Util/CommonExtensions.cs" ],
+  "compileExclude": [ "../**/AssemblyInfo.cs" ],
 
   "configurations": {
     "Release": {
