@@ -13,7 +13,7 @@
 			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
 		</description>
 		<releaseNotes>
-0.8.0 - Support for the NETCore (github #61)
+0.8.0 - .NET Core support (github #61, thx @kroniak)
 0.7.0 - BREAKING CHANGES: https://github.com/tmenier/Flurl/wiki/Release-Notes
 0.6.4 - nuspec fix for Xamarin/non-PCL, AllowHttpStatus overloads with HttpStatusCode enum.
 0.6.3 - Updated Flurl dependency to 1.0.9.

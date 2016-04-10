@@ -13,7 +13,7 @@
 			A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.
 		</description>
 		<releaseNotes>
-1.1.0 - Support for the NETCore (github #61)
+1.1.0 - .NET Core support (github #61, thx @kroniak)
 1.0.10 - More flexible kv parsing (github pr #16)
 1.0.9 - Decode + as space, optionally encode space as + (github #41)
 1.0.8 - Don't trim trailing slash (github #37)
