@@ -2,7 +2,7 @@
   "title": "Flurl.Http.NETCore",
 
   "dependencies": {
-    "Flurl": "1.1.0",
+    "Flurl": "1.1.0-pre",
     "Newtonsoft.Json": "8.0.3"
   },
 
