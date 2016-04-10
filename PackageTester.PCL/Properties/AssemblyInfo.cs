@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("PackageTester.PCL")]
-[assembly: AssemblyCopyright("Copyright © Todd Menier 2015")]
+[assembly: AssemblyCopyright("Copyright © Todd Menier 2016")]
 
 // Version information for an assembly consists of the following four values:
 //
