@@ -1,14 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
-using Flurl;
 using Flurl.Http;
 using Flurl.Http.Testing;
 
-namespace PackageTester.PCL
+namespace PackageTester
 {
-    public static class Tester
-    {
-		public static async Task DoTestsAsync(Action<string> log) {
+	public abstract class Tester
+	{
+		public async Task DoTestsAsync(Action<string> log) {
 			var source = await "http://www.google.com".GetStringAsync();
 			log(source.Substring(0, 40));
 			log("^-- real response");
@@ -22,5 +23,5 @@ namespace PackageTester.PCL
 			log("dowloaded google source to " + path);
 			log("done");
 		}
-    }
+	}
 }

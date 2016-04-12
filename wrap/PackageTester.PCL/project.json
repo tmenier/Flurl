@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0-*",
+  "frameworks": {
+    "net45+win+wpa81+wp80+MonoAndroid10+Xamarin.iOS10+MonoTouch10": {
+      "wrappedProject": "../../PackageTesters/PackageTester.PCL/PackageTester.PCL.csproj",
+      "bin": {
+        "assembly": "../../PackageTesters/PackageTester.PCL/obj/{configuration}/PackageTester.PCL.dll",
+        "pdb": "../../PackageTesters/PackageTester.PCL/obj/{configuration}/PackageTester.PCL.pdb"
+      },
+      "dependencies": {
+        "Flurl": "1.1.0-pre",
+        "Flurl.Http": "0.8.0-pre",
+        "Microsoft.Bcl": "1.1.9",
+        "Microsoft.Bcl.Async": "1.0.168",
+        "Microsoft.Bcl.Build": "1.0.14",
+        "Microsoft.Net.Http": "2.2.22",
+        "Newtonsoft.Json": "6.0.3",
+        "PCLStorage": "0.9.6"
+      }
+    }
+  }
+}

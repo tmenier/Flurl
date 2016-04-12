@@ -1,0 +1,34 @@
+﻿{
+	"version": "1.0.0-*",
+	"description": "PackageTester Console Application",
+	"authors": [ "Todd" ],
+	"tags": [ "" ],
+	"projectUrl": "",
+	"licenseUrl": "",
+
+	"compile": [ "../PackageTester.Shared/**/*.cs" ],
+
+	"compilationOptions": {
+		"emitEntryPoint": true
+	},
+
+	"dependencies": {
+		"Flurl.Http": "0.8.0-pre"
+	},
+
+	"commands": {
+		"PackageTester.NETCore": "PackageTester.NETCore"
+	},
+
+	"frameworks": {
+		"dnxcore50": {
+			"dependencies": {
+				"Microsoft.CSharp": "4.0.1-beta-23516",
+				"System.Collections": "4.0.11-beta-23516",
+				"System.Console": "4.0.0-beta-23516",
+				"System.Linq": "4.0.1-beta-23516",
+				"System.Threading": "4.0.11-beta-23516"
+			}
+		}
+	}
+}

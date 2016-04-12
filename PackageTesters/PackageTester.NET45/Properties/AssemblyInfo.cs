@@ -5,8 +5,14 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PackageTester")]
-[assembly: AssemblyCopyright("Copyright © Todd Menier 2016")]
+[assembly: AssemblyTitle("PackageTester.NET45")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("PackageTester.NET45")]
+[assembly: AssemblyCopyright("Copyright ©  2016")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
@@ -14,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("12ecd955-9439-4ad9-828a-c8b62a22d795")]
+[assembly: Guid("48ae832a-29c0-4778-94a4-31e2f6e10805")]
 
 // Version information for an assembly consists of the following four values:
 //
