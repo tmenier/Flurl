@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl</id>
-		<version>1.1.0-pre</version>
+		<version>1.1.1</version>
 		<title>Flurl</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,6 +13,7 @@
 			A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.
 		</description>
 		<releaseNotes>
+1.1.1 - Packaging fix
 1.1.0 - .NET Core support (github #61, thx @kroniak)
 1.0.10 - More flexible kv parsing (github pr #16)
 1.0.9 - Decode + as space, optionally encode space as + (github #41)

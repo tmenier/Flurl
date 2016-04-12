@@ -1,10 +1,10 @@
 ﻿{
   "title": "Flurl.Http.NETCore",
 
-  "dependencies": {
-    "Flurl": "1.1.0-pre",
-    "Newtonsoft.Json": "8.0.3"
-  },
+	"dependencies": {
+		"Flurl": "1.1.0",
+		"Newtonsoft.Json": "8.0.3"
+	},
 
   "compile": [ "../Flurl.Http.Shared/**/*.cs", "../Flurl.Http.NET45/**/*.cs" ],
   "compileExclude": [ "../**/AssemblyInfo.cs" ],

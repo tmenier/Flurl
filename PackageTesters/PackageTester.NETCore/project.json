@@ -5,21 +5,13 @@
 	"tags": [ "" ],
 	"projectUrl": "",
 	"licenseUrl": "",
-
 	"compile": [ "../PackageTester.Shared/**/*.cs" ],
-
 	"compilationOptions": {
 		"emitEntryPoint": true
 	},
-
-	"dependencies": {
-		"Flurl.Http": "0.8.0-pre"
-	},
-
 	"commands": {
 		"PackageTester.NETCore": "PackageTester.NETCore"
 	},
-
 	"frameworks": {
 		"dnxcore50": {
 			"dependencies": {
@@ -30,5 +22,8 @@
 				"System.Threading": "4.0.11-beta-23516"
 			}
 		}
+	},
+	"dependencies": {
+		"Flurl.Http": "0.8.0"
 	}
 }
