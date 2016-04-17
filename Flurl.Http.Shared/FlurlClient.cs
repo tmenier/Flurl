@@ -25,8 +25,8 @@ namespace Flurl.Http
 		public FlurlClient(string url) : this(new Url(url), false) { }
 		public FlurlClient() : this((Url)null, false) { }
 
-		private HttpClient _httpClient;
-		private HttpMessageHandler _httpMessageHandler;
+		protected HttpClient _httpClient;
+		protected HttpMessageHandler _httpMessageHandler;
 
 		/// <summary>
 		/// Gets or sets the FlurlHttpSettings object used by this client.
@@ -87,11 +87,17 @@ namespace Flurl.Http
 			}			
 		}
 
+		public void Dispose() {
+			Dispose(true);
+		}
+
 		/// <summary>
 		/// Disposes the underlying HttpClient and HttpMessageHandler, setting both properties to null.
 		/// This FlurlClient can still be reused, but those underlying objects will be re-created as needed. Previously set headers, etc, will be lost.
 		/// </summary>
-		public void Dispose() {
+		protected virtual void Dispose(bool disposing) {
+			if (!disposing) return;
+
 			if (_httpMessageHandler != null)
 				_httpMessageHandler.Dispose();
 
