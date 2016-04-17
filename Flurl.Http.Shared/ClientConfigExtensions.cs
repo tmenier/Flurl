@@ -33,13 +33,18 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// Fluently specify the URL to be called with the current FlurlClient instance.
+		/// Returns a new FlurlClient where all state (HttpClient, etc) is shared but with a different URL.
+		/// Allows you to re-use the underlying HttpClient instance (such as to share cookies, etc) with
+		/// different URLs in a thread-safe way.
 		/// </summary>
 		/// <param name="url">The Url to call.</param>
 		/// <returns></returns>
 		public static FlurlClient WithUrl(this FlurlClient client, Url url) {
-			client.Url = url;
-			return client;
+			var fc = client.Clone();
+			fc.Url = url;
+			// prevent the new client from automatically disposing the parent's HttpClient
+			fc.AutoDispose = false;
+			return fc;
 		}
 
 		/// <summary>

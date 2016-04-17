@@ -25,6 +25,20 @@ namespace Flurl.Http
 		public FlurlClient(string url) : this(new Url(url), false) { }
 		public FlurlClient() : this((Url)null, false) { }
 
+		/// <summary>
+		/// Creates a copy of this FlurlClient with a shared instance of HttpClient and HttpMessageHandler
+		/// </summary>
+		/// <returns></returns>
+		public FlurlClient Clone() {
+			return new FlurlClient {
+				_httpClient = _httpClient,
+				_httpMessageHandler = _httpMessageHandler,
+				Settings = Settings,
+				Url = Url,
+				AutoDispose = AutoDispose
+			};
+		}
+
 		private HttpClient _httpClient;
 		private HttpMessageHandler _httpMessageHandler;
 
@@ -92,12 +106,8 @@ namespace Flurl.Http
 		/// This FlurlClient can still be reused, but those underlying objects will be re-created as needed. Previously set headers, etc, will be lost.
 		/// </summary>
 		public void Dispose() {
-			if (_httpMessageHandler != null)
-				_httpMessageHandler.Dispose();
-
-			if (_httpClient != null)
-				_httpClient.Dispose();
-
+			_httpMessageHandler?.Dispose();
+			_httpClient?.Dispose();
 			_httpMessageHandler = null;
 			_httpClient = null;
 		}

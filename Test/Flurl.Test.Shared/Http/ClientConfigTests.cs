@@ -126,5 +126,36 @@ namespace Flurl.Test.Http
 				await "http://www.api.com".ConfigureClient(c => c.AllowedHttpStatusRange = "2xx").GetAsync();
 			}
 		}
+
+		[Test]
+		public async Task can_share_HttpClient_with_different_urls() {
+			var client1 = new FlurlClient("http://www.api.com/for-client1").WithCookie("mycookie", "123");
+			var client2 = client1.WithUrl("http://www.api.com/for-client2");
+			var client3 = client1.WithUrl("http://www.api.com/for-client3");
+			var client4 = client2.WithUrl("http://www.api.com/for-client4");
+
+			CollectionAssert.AreEquivalent(client1.GetCookies(), client2.GetCookies());
+			CollectionAssert.AreEquivalent(client1.GetCookies(), client3.GetCookies());
+			CollectionAssert.AreEquivalent(client1.GetCookies(), client4.GetCookies());
+			var urls = new[] { client1, client2, client3, client4 }.Select(c => c.Url.ToString());
+			CollectionAssert.AllItemsAreUnique(urls);
+		}
+
+		[Test]
+		public async Task disposing_FlurlClient_doesnt_dispose_shared_HttpClient() {
+			var client1 = new FlurlClient("http://www.api.com/for-client1").WithCookie("mycookie", "123");
+			var client2 = client1.WithUrl("http://www.api.com/for-client2");
+			var client3 = client1.WithUrl("http://www.api.com/for-client3");
+			var client4 = client2.WithUrl("http://www.api.com/for-client4");
+
+			client2.Dispose();
+			client3.Dispose();
+
+			CollectionAssert.IsEmpty(client2.GetCookies());
+			CollectionAssert.IsEmpty(client3.GetCookies());
+
+			CollectionAssert.IsNotEmpty(client1.GetCookies());
+			CollectionAssert.IsNotEmpty(client4.GetCookies());
+		}
 	}
 }
