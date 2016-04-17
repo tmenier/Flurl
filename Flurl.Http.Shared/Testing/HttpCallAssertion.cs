@@ -79,9 +79,10 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		/// <param name="token">Expected token value</param>
 		/// <returns></returns>
-		public HttpCallAssertion WithOAuthBearerToken(string token) {
+		public HttpCallAssertion WithOAuthBearerToken(string token)
+		{
 			return With(c => c.Request.Headers.Authorization?.Scheme == "Bearer"
-							 && c.Request.Headers.Authorization?.Parameter == token);
+				&& c.Request.Headers.Authorization?.Parameter == token);
 		}
 
 		/// <summary>
@@ -94,7 +95,7 @@ namespace Flurl.Http.Testing
 		{
 			var value = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}"));
 			return With(c => c.Request.Headers.Authorization?.Scheme == "Basic"
-			                 && c.Request.Headers.Authorization?.Parameter == value);
+				&& c.Request.Headers.Authorization?.Parameter == value);
 		}
 
 		/// <summary>
