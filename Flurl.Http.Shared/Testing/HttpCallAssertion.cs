@@ -62,9 +62,9 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		/// <param name="body"></param>
 		/// <returns></returns>
-		public HttpCallAssertion WithRequestBodyJson(object body) {
+		public HttpCallAssertion WithRequestJson(object body) {
 			var serializedBody = FlurlHttp.GlobalSettings.JsonSerializer.Serialize(body);
-			return With(c => MatchesPattern(c.RequestBody, serializedBody));
+			return WithRequestBody(serializedBody);
 		}
 
 		/// <summary>

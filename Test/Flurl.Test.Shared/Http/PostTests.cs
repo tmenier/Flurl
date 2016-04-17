@@ -9,12 +9,13 @@ namespace Flurl.Test.Http
 	public class PostTests : HttpTestFixtureBase
 	{
 		[Test]
-		public async Task can_post_json() {
-			await "http://some-api.com".PostJsonAsync(new { a = 1, b = 2 });
-			HttpTest.ShouldHaveCalled("http://some-api.com")
+		public async Task can_post_string() {
+			var expectedEndpoint = "http://some-api.com";
+			var expectedBody = "abc123";
+			await expectedEndpoint.PostStringAsync(expectedBody);
+			HttpTest.ShouldHaveCalled(expectedEndpoint)
 				.WithVerb(HttpMethod.Post)
-				.WithContentType("application/json")
-				.WithRequestBody("{\"a\":1,\"b\":2}")
+				.WithRequestBody(expectedBody)
 				.Times(1);
 		}
 
@@ -26,7 +27,7 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveCalled(expectedEndpoint)
 				.WithVerb(HttpMethod.Post)
 				.WithContentType("application/json")
-				.WithRequestBodyJson(expectedBody)
+				.WithRequestJson(expectedBody)
 				.Times(1);
 		}
 
