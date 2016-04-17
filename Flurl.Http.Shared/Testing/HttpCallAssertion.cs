@@ -57,15 +57,15 @@ namespace Flurl.Http.Testing
 			return With(c => MatchesPattern(c.RequestBody, bodyPattern));
 		}
 
-        /// <summary>
-        /// Asserts whether calls were made containing given request body.
-        /// </summary>
-        /// <param name="body"></param>
-        /// <returns></returns>
-	    public HttpCallAssertion WithRequestBodyJson(object body){
-            var serializedBody = FlurlHttp.GlobalSettings.JsonSerializer.Serialize(body);
-            return With(c => MatchesPattern(c.RequestBody, serializedBody));
-	    }
+		/// <summary>
+		/// Asserts whether calls were made containing given request body.
+		/// </summary>
+		/// <param name="body"></param>
+		/// <returns></returns>
+		public HttpCallAssertion WithRequestBodyJson(object body) {
+			var serializedBody = FlurlHttp.GlobalSettings.JsonSerializer.Serialize(body);
+			return With(c => MatchesPattern(c.RequestBody, serializedBody));
+		}
 
 		/// <summary>
 		/// Asserts whether calls were made with given HTTP verb.

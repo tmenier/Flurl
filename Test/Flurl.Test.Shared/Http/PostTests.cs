@@ -18,17 +18,17 @@ namespace Flurl.Test.Http
 				.Times(1);
 		}
 
-	    [Test]
-	    public async Task can_post_object_as_json(){
-	        var expectedEndpoint = "http://some-api.com";
-	        var expectedBody = new {a = 1, b = 2};
-	        await expectedEndpoint.PostJsonAsync(expectedBody);
-            HttpTest.ShouldHaveCalled(expectedEndpoint)
-                .WithVerb(HttpMethod.Post)
-                .WithContentType("application/json")
-                .WithRequestBodyJson(expectedBody)
-                .Times(1);
-	    }
+		[Test]
+		public async Task can_post_object_as_json() {
+			var expectedEndpoint = "http://some-api.com";
+			var expectedBody = new {a = 1, b = 2};
+			await expectedEndpoint.PostJsonAsync(expectedBody);
+			HttpTest.ShouldHaveCalled(expectedEndpoint)
+				.WithVerb(HttpMethod.Post)
+				.WithContentType("application/json")
+				.WithRequestBodyJson(expectedBody)
+				.Times(1);
+		}
 
 		[Test]
 		public async Task can_post_url_encoded() {
