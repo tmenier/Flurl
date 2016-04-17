@@ -49,13 +49,23 @@ namespace Flurl.Http.Testing
 		}
 
 		/// <summary>
-		/// Asserts wheter calls were made containing given request body or request body pattern.
+		/// Asserts whether calls were made containing given request body or request body pattern.
 		/// </summary>
 		/// <param name="bodyPattern">Can contain * wildcard.</param>
 		/// <returns></returns>
 		public HttpCallAssertion WithRequestBody(string bodyPattern) {
 			return With(c => MatchesPattern(c.RequestBody, bodyPattern));
 		}
+
+        /// <summary>
+        /// Asserts whether calls were made containing given request body.
+        /// </summary>
+        /// <param name="body"></param>
+        /// <returns></returns>
+	    public HttpCallAssertion WithRequestBodyJson(object body){
+            var serializedBody = FlurlHttp.GlobalSettings.JsonSerializer.Serialize(body);
+            return With(c => MatchesPattern(c.RequestBody, serializedBody));
+	    }
 
 		/// <summary>
 		/// Asserts whether calls were made with given HTTP verb.
