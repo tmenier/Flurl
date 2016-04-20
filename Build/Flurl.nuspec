@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl</id>
-		<version>1.1.1</version>
+		<version>1.1.2</version>
 		<title>Flurl</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,6 +13,7 @@
 			A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.
 		</description>
 		<releaseNotes>
+1.1.2 - Fix net461 target (github #74)
 1.1.1 - Packaging fix
 1.1.0 - .NET Core support (github #61, thx @kroniak)
 1.0.10 - More flexible kv parsing (github pr #16)
@@ -40,6 +41,6 @@
 	</metadata>
 	<files>
 		<file src="..\Flurl\bin\Release\Flurl.*" target="lib\portable-net40+sl50+win+wpa81+wp80+MonoAndroid10+MonoTouch10" />
-		<file src="..\artifacts\bin\Flurl.NETCore\Release\dotnet5.4\Flurl.*" target="lib\dotnet5.4" />
+		<file src="..\artifacts\bin\Flurl\Release\dotnet5.4\Flurl.*" target="lib\dotnet5.4" />
 	</files>
 </package>
