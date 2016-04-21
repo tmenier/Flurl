@@ -12,27 +12,6 @@ namespace Flurl.Http
 	public static class ClientConfigExtensions
 	{
 		/// <summary>
-		/// Fluently specify that an existing FlurlClient should be used to call the Url, rather than creating a new one.
-		/// Enables re-using the underlying HttpClient.
-		/// </summary>
-		/// <param name="fc">The FlurlClient to use in calling the Url</param>
-		/// <returns></returns>
-		public static FlurlClient WithClient(this Url url, FlurlClient fc) {
-			fc.Url = url;
-			return fc;
-		}
-
-		/// <summary>
-		/// Fluently specify that an existing FlurlClient should be used to call the Url, rather than creating a new one.
-		/// Enables re-using the underlying HttpClient.
-		/// </summary>
-		/// <param name="fc">The FlurlClient to use in calling the Url</param>
-		/// <returns></returns>
-		public static FlurlClient WithClient(this string url, FlurlClient fc) {
-			return new Url(url).WithClient(fc);
-		}
-
-		/// <summary>
 		/// Returns a new FlurlClient where all state (HttpClient, etc) is shared but with a different URL.
 		/// Allows you to re-use the underlying HttpClient instance (such as to share cookies, etc) with
 		/// different URLs in a thread-safe way.
@@ -45,6 +24,26 @@ namespace Flurl.Http
 			// prevent the new client from automatically disposing the parent's HttpClient
 			fc.AutoDispose = false;
 			return fc;
+		}
+
+		/// <summary>
+		/// Fluently specify that an existing FlurlClient should be used to call the Url, rather than creating a new one.
+		/// Enables re-using the underlying HttpClient.
+		/// </summary>
+		/// <param name="client">The FlurlClient to use in calling the Url</param>
+		/// <returns></returns>
+		public static FlurlClient WithClient(this Url url, FlurlClient client) {
+			return client.WithUrl(url);
+		}
+
+		/// <summary>
+		/// Fluently specify that an existing FlurlClient should be used to call the Url, rather than creating a new one.
+		/// Enables re-using the underlying HttpClient.
+		/// </summary>
+		/// <param name="client">The FlurlClient to use in calling the Url</param>
+		/// <returns></returns>
+		public static FlurlClient WithClient(this string url, FlurlClient client) {
+			return client.WithUrl(url);
 		}
 
 		/// <summary>

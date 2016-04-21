@@ -128,7 +128,7 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task can_share_HttpClient_with_different_urls() {
+		public void WithUrl_shares_HttpClient_but_not_Url() {
 			var client1 = new FlurlClient("http://www.api.com/for-client1").WithCookie("mycookie", "123");
 			var client2 = client1.WithUrl("http://www.api.com/for-client2");
 			var client3 = client1.WithUrl("http://www.api.com/for-client3");
@@ -142,7 +142,7 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task disposing_FlurlClient_doesnt_dispose_shared_HttpClient() {
+		public void WithUrl_doesnt_propagate_HttpClient_disposal() {
 			var client1 = new FlurlClient("http://www.api.com/for-client1").WithCookie("mycookie", "123");
 			var client2 = client1.WithUrl("http://www.api.com/for-client2");
 			var client3 = client1.WithUrl("http://www.api.com/for-client3");
@@ -157,5 +157,37 @@ namespace Flurl.Test.Http
 			CollectionAssert.IsNotEmpty(client1.GetCookies());
 			CollectionAssert.IsNotEmpty(client4.GetCookies());
 		}
+
+		[Test]
+		public void WithClient_shares_HttpClient_but_not_Url() {
+			var client1 = new FlurlClient("http://www.api.com/for-client1").WithCookie("mycookie", "123");
+			var client2 = "http://www.api.com/for-client2".WithClient(client1);
+			var client3 = "http://www.api.com/for-client3".WithClient(client1);
+			var client4 = "http://www.api.com/for-client4".WithClient(client1);
+
+			CollectionAssert.AreEquivalent(client1.GetCookies(), client2.GetCookies());
+			CollectionAssert.AreEquivalent(client1.GetCookies(), client3.GetCookies());
+			CollectionAssert.AreEquivalent(client1.GetCookies(), client4.GetCookies());
+			var urls = new[] { client1, client2, client3, client4 }.Select(c => c.Url.ToString());
+			CollectionAssert.AllItemsAreUnique(urls);
+		}
+
+		[Test]
+		public void WithClient_doesnt_propagate_HttpClient_disposal() {
+			var client1 = new FlurlClient("http://www.api.com/for-client1").WithCookie("mycookie", "123");
+			var client2 = "http://www.api.com/for-client2".WithClient(client1);
+			var client3 = "http://www.api.com/for-client3".WithClient(client1);
+			var client4 = "http://www.api.com/for-client4".WithClient(client1);
+
+			client2.Dispose();
+			client3.Dispose();
+
+			CollectionAssert.IsEmpty(client2.GetCookies());
+			CollectionAssert.IsEmpty(client3.GetCookies());
+
+			CollectionAssert.IsNotEmpty(client1.GetCookies());
+			CollectionAssert.IsNotEmpty(client4.GetCookies());
+		}
+
 	}
 }

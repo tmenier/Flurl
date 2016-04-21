@@ -54,13 +54,15 @@ namespace Flurl.Test.Http
 		[Test]
 		public async Task can_persist_cookies() {
 			using (var fc = new FlurlClient()) {
-				"http://httpbin.org/cookies".WithClient(fc).WithCookie("z", 999);
+				var fc2 = "http://httpbin.org/cookies".WithClient(fc).WithCookie("z", 999);
 				// cookie should be set
 				Assert.AreEqual("999", fc.GetCookies()["z"].Value);
+				Assert.AreEqual("999", fc2.GetCookies()["z"].Value);
 
-				await fc.HeadAsync();
+				await fc2.HeadAsync();
 				// FlurlClient should be re-used, so cookie should stick
 				Assert.AreEqual("999", fc.GetCookies()["z"].Value);
+				Assert.AreEqual("999", fc2.GetCookies()["z"].Value);
 
 				// httpbin returns json representation of cookies that were set on the server.
 				var resp = await "http://httpbin.org/cookies".WithClient(fc).GetJsonAsync();

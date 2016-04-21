@@ -33,6 +33,7 @@ namespace Flurl.Http
 			return new FlurlClient {
 				_httpClient = _httpClient,
 				_httpMessageHandler = _httpMessageHandler,
+				_parent = this,
 				Settings = Settings,
 				Url = Url,
 				AutoDispose = AutoDispose
@@ -41,6 +42,7 @@ namespace Flurl.Http
 
 		private HttpClient _httpClient;
 		private HttpMessageHandler _httpMessageHandler;
+		private FlurlClient _parent;
 
 		/// <summary>
 		/// Gets or sets the FlurlHttpSettings object used by this client.
@@ -62,14 +64,18 @@ namespace Flurl.Http
 		/// Gets the HttpClient to be used in subsequent HTTP calls. Creation (when necessary) is delegated
 		/// to FlurlHttp.HttpClientFactory. Reused for the life of the FlurlClient.
 		/// </summary>
-		public HttpClient HttpClient {
-			get {
-				if (_httpClient == null) {
-					_httpClient = Settings.HttpClientFactory.CreateClient(Url, HttpMessageHandler);
-					_httpClient.Timeout = Settings.DefaultTimeout;
+		public HttpClient HttpClient => EnsureHttpClient();
+
+		private HttpClient EnsureHttpClient(HttpClient hc = null) {
+			if (_httpClient == null) {
+				if (hc == null) {
+					hc = Settings.HttpClientFactory.CreateClient(Url, HttpMessageHandler);
+					hc.Timeout = Settings.DefaultTimeout;
 				}
-				return _httpClient;
+				_httpClient = hc;
+				_parent?.EnsureHttpClient(hc);
 			}
+			return _httpClient;
 		}
 
 		/// <summary>
@@ -92,13 +98,16 @@ namespace Flurl.Http
 		/// Gets the HttpMessageHandler to be used in subsequent HTTP calls. Creation (when necessary) is delegated
 		/// to FlurlHttp.HttpClientFactory.
 		/// </summary>
-		public HttpMessageHandler HttpMessageHandler {
-			get {
-				if (_httpMessageHandler == null)
-					_httpMessageHandler = Settings.HttpClientFactory.CreateMessageHandler();
+		public HttpMessageHandler HttpMessageHandler => EnsureHttpMessageHandler();
 
-				return _httpMessageHandler;
-			}			
+		private HttpMessageHandler EnsureHttpMessageHandler(HttpMessageHandler hmh = null) {
+			if (_httpMessageHandler == null) {
+				if (hmh == null)
+					hmh = Settings.HttpClientFactory.CreateMessageHandler();
+				_httpMessageHandler = hmh;
+				_parent?.EnsureHttpMessageHandler(hmh);
+			}
+			return _httpMessageHandler;
 		}
 
 		/// <summary>

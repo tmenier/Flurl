@@ -13,12 +13,7 @@ namespace Flurl.Http
 		/// Gets a collection of cookies that will be sent in calls using this client. (Use FlurlClient.WithCookie/WithCookies to set cookies.)
 		/// </summary>
 		public static Dictionary<string, Cookie> GetCookies(this FlurlClient client) {
-			var jar = GetCookieContainer(client);
-			if (jar == null)
-				return null;
-
-			var uri = new Uri(Url.GetRoot(client.Url));
-			return jar.GetCookies(uri).Cast<Cookie>().ToDictionary(c => c.Name, c => c);
+			return GetCookieContainer(client)?.GetCookies(client.HttpClient.BaseAddress).Cast<Cookie>().ToDictionary(c => c.Name, c => c);
 		}
 
 		/// <summary>
@@ -49,8 +44,7 @@ namespace Flurl.Http
 		/// <param name="cookie">the cookie to set.</param>
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithCookie(this FlurlClient client, Cookie cookie) {
-			var uri = new Uri(Url.GetRoot(client.Url));
-			GetCookieContainer(client).Add(uri, cookie);
+			GetCookieContainer(client).Add(client.HttpClient.BaseAddress, cookie);
 			return client;
 		}
 
@@ -146,6 +140,9 @@ namespace Flurl.Http
 			var handler = client.HttpMessageHandler as HttpClientHandler;
 			if (handler == null)
 				return null;
+
+			if (client.HttpClient.BaseAddress == null)
+				client.HttpClient.BaseAddress = new Uri(Url.GetRoot(client.Url));
 
 			return handler.CookieContainer ?? (handler.CookieContainer = new CookieContainer());
 		}
