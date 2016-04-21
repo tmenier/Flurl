@@ -1,13 +1,13 @@
 ﻿{
-  "title": "Flurl.Http.NETCore",
+  "title": "Flurl.Http",
 
 	"dependencies": {
-		"Flurl": "1.1.0",
+    "Flurl": "1.1.2",
 		"Newtonsoft.Json": "8.0.3"
 	},
 
-  "compile": [ "../Flurl.Http.Shared/**/*.cs", "../Flurl.Http.NET45/**/*.cs" ],
-  "compileExclude": [ "../**/AssemblyInfo.cs" ],
+  "compile": [ "../../Flurl.Http.Shared/**/*.cs", "../../Flurl.Http.NET45/**/*.cs" ],
+  "compileExclude": [ "../../**/AssemblyInfo.cs" ],
 
   "configurations": {
     "Release": {

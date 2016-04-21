@@ -1,8 +1,9 @@
 ﻿{
-  "title": "Flurl.NETCore",
+  "title": "Flurl",
+  "version": "1.1.2",
 
-  "compile": [ "../Flurl/**/*.cs" ],
-  "compileExclude": [ "../**/AssemblyInfo.cs" ],
+  "compile": [ "../../Flurl/**/*.cs" ],
+  "compileExclude": [ "../../**/AssemblyInfo.cs" ],
 
   "configurations": {
     "Release": {
