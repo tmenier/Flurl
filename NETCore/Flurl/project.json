@@ -1,6 +1,6 @@
 ﻿{
   "title": "Flurl",
-  "version": "1.1.2",
+  "version": "1.1.2-pre",
 
   "compile": [ "../../Flurl/**/*.cs" ],
   "compileExclude": [ "../../**/AssemblyInfo.cs" ],

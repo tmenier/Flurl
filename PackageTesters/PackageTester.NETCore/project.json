@@ -24,6 +24,6 @@
 		}
 	},
 	"dependencies": {
-		"Flurl.Http": "0.8.0"
+		"Flurl.Http": "0.9.0-pre"
 	}
 }
