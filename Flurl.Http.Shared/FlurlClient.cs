@@ -87,7 +87,12 @@ namespace Flurl.Http
 			try {
 				var request = new HttpRequestMessage(verb, this.Url) { Content = content };
 				HttpCall.Set(request, this.Settings);
-				return await HttpClient.SendAsync(request, completionOption, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+				var response = await HttpClient.SendAsync(request, completionOption, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+				if (response?.Content?.Headers?.ContentType?.CharSet != null)
+				{
+					response.Content.Headers.ContentType.CharSet = response.Content.Headers.ContentType.CharSet.Replace("\"", string.Empty);
+				}
+				return response;
 			}
 			finally {
 				if (AutoDispose) Dispose();
