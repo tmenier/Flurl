@@ -20,26 +20,26 @@ namespace Flurl
 		/// </summary>
 		public QueryParamCollection QueryParams { get; private set; }
 
-        /// <summary>
-        /// The fragment part of the url (after the #, RFC 3986)
-        /// </summary>
-        public string Fragment { get; private set; }
+		/// <summary>
+		/// The fragment part of the url (after the #, RFC 3986)
+		/// </summary>
+		public string Fragment { get; private set; }
 
-        const string URL_SLICE_REGEXP = @"^([^?#\n]*)([^#\n]*)(.*)$";
+		const string URL_SLICE_REGEXP = @"^([^?#\n]*)([^#\n]*)(.*)$";
 
-        /// <summary>
-        /// Constructs a Url object from a string.
-        /// </summary>
-        /// <param name="baseUrl">The URL to use as a starting point (required)</param>
-        public Url(string baseUrl) {
-			if (baseUrl == null)
+		/// <summary>
+		/// Constructs a Url object from a string.
+		/// </summary>
+		/// <param name="baseUrl">The URL to use as a starting point (required)</param>
+		public Url(string baseUrl) {
+			if(baseUrl == null)
 				throw new ArgumentNullException("baseUrl");
 
-            var urlParts = Regex.Match(baseUrl, URL_SLICE_REGEXP, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            Path = urlParts.Groups[1].Value;
-            QueryParams = QueryParamCollection.Parse(urlParts.Groups[2].Value);
-            Fragment = urlParts.Groups[3].Value;
-        }
+			var urlParts = Regex.Match(baseUrl, URL_SLICE_REGEXP, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+			Path = urlParts.Groups[1].Value;
+			QueryParams = QueryParamCollection.Parse(urlParts.Groups[2].Value);
+			Fragment = urlParts.Groups[3].Value;
+		}
 
 		/// <summary>
 		/// Basically a Path.Combine for URLs. Ensures exactly one '/' character is used to seperate each segment.
@@ -224,10 +224,10 @@ namespace Flurl
 		public string ToString(bool encodeStringAsPlus) {
 			var url = Path;
 			var query = QueryParams.ToString(encodeStringAsPlus);
-			if (query.Length > 0)
+			if(query.Length > 0)
 				url += "?" + query;
 
-            url += Fragment;
+			url += Fragment;
 
 			return url;
 		}
