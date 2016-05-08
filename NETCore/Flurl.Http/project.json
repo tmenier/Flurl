@@ -2,7 +2,7 @@
   "title": "Flurl.Http",
 
 	"dependencies": {
-    "Flurl": "1.1.2-pre",
+    "Flurl": "1.1.2",
 		"Newtonsoft.Json": "8.0.3"
 	},
 
