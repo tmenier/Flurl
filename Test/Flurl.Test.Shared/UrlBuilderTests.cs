@@ -261,5 +261,45 @@ namespace Flurl.Test
 			var url = new Url(expected);
 			Assert.AreEqual(expected, url.ToString());
 		}
+
+		[Test]
+		public void is_fragment_parsed_in_url_without_querystring() {
+			var expected = "http://www.mysite.com/index#first";
+			var url = new Url(expected);
+			Assert.AreEqual(expected, url.ToString());
+		}
+
+		[Test]
+		public void is_fragment_parsed_in_url_with_querystring() {
+			var expected = "http://www.mysite.com/more?x=1#first";
+			var url = new Url(expected);
+			Assert.AreEqual(expected, url.ToString());
+		}
+
+		// Support Anchor / Hash URL parts #29
+		[Test]
+		public void has_fragment_after_SetQueryParam() {
+			var expected = "http://www.mysite.com/more?x=1#first";
+			var url = new Url(expected).SetQueryParam("x", 3);
+			Assert.AreEqual("http://www.mysite.com/more?x=3#first", url.ToString());
+		}
+
+		[Test]
+		public void constructor_parse_url_correctly() {
+			var simpleUrl = "http://www.mysite.com";
+			var simpleUrlWithEmptyQueryParam = simpleUrl + "?3423423";
+			var simpleUrlWithPath = simpleUrl + "/with/path";
+			var urlWithQueryString = simpleUrlWithPath + "?qs=2&z=3";
+			var urlWithEmtpyFragment = simpleUrlWithPath + "#";
+			var urlWithFragment = simpleUrlWithPath + "#something";
+
+
+			Assert.AreEqual(simpleUrl, new Url(simpleUrl).ToString());
+			Assert.AreEqual(simpleUrlWithEmptyQueryParam + "=", new Url(simpleUrlWithEmptyQueryParam).ToString());
+			Assert.AreEqual(simpleUrlWithPath, new Url(simpleUrlWithPath).ToString());
+			Assert.AreEqual(urlWithQueryString, new Url(urlWithQueryString).ToString());
+			Assert.AreEqual(urlWithEmtpyFragment, new Url(urlWithEmtpyFragment).ToString());
+			Assert.AreEqual(urlWithFragment, new Url(urlWithFragment).ToString());
+		}
 	}
 }
