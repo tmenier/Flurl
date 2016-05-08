@@ -55,8 +55,12 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the response body as a string.</returns>
 		/// <example>s = await url.PostAsync(data).ReceiveString()</example>
-		public static async Task<string> ReceiveString(this Task<HttpResponseMessage> response) {
-			return await (await response.ConfigureAwait(false)).Content.ReadAsStringAsync().ConfigureAwait(false);
+		public static async Task<string> ReceiveString(this Task<HttpResponseMessage> response)
+		{
+			return await (await response.ConfigureAwait(false))
+				.StripCharsetQuotes()
+				.Content.ReadAsStringAsync()
+				.ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -75,6 +79,15 @@ namespace Flurl.Http
 		/// <example>bytes = await url.PostAsync(data).ReceiveBytes()</example>
 		public static async Task<byte[]> ReceiveBytes(this Task<HttpResponseMessage> response) {
 			return await (await response.ConfigureAwait(false)).Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+		}
+
+		public static HttpResponseMessage StripCharsetQuotes(this HttpResponseMessage response)
+		{
+			if (response?.Content?.Headers?.ContentType?.CharSet != null)
+			{
+				response.Content.Headers.ContentType.CharSet = response.Content.Headers.ContentType.CharSet.Replace("\"", string.Empty);
+			}
+			return response;
 		}
 	}
 }
