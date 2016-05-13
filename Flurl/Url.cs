@@ -131,12 +131,12 @@ namespace Flurl
 		/// <param name="segment">The segment to append</param>
 		/// <param name="encode">If true, URL-encode the segment where necessary</param>
 		/// <returns>the Url object with the segment appended</returns>
-		public Url AppendPathSegment(string segment) {
+		public Url AppendPathSegment(object segment) {
 			if (segment == null)
 				throw new ArgumentNullException("segment");
 
 			if (!Path.EndsWith("/")) Path += "/";
-			Path += CleanSegment(segment.TrimStart('/'));
+			Path += CleanSegment(segment.ToInvariantString().TrimStart('/'));
 			return this;
 		}
 
@@ -145,7 +145,7 @@ namespace Flurl
 		/// </summary>
 		/// <param name="segments">The segments to append</param>
 		/// <returns>the Url object with the segments appended</returns>
-		public Url AppendPathSegments(params string[] segments) {
+		public Url AppendPathSegments(params object[] segments) {
 			foreach(var segment in segments)
 				AppendPathSegment(segment);
 
@@ -157,7 +157,7 @@ namespace Flurl
 		/// </summary>
 		/// <param name="segments">The segments to append</param>
 		/// <returns>the Url object with the segments appended</returns>
-		public Url AppendPathSegments(IEnumerable<string> segments) {
+		public Url AppendPathSegments(IEnumerable<object> segments) {
 			foreach(var s in segments)
 				AppendPathSegment(s);
 

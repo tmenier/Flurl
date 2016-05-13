@@ -23,7 +23,7 @@ namespace Flurl
 		/// </summary>
 		/// <param name="segment">The segment to append</param>
 		/// <returns>the resulting Url object</returns>
-		public static Url AppendPathSegment(this string url, string segment) {
+		public static Url AppendPathSegment(this string url, object segment) {
 			return new Url(url).AppendPathSegment(segment);
 		}
 
@@ -32,7 +32,7 @@ namespace Flurl
 		/// </summary>
 		/// <param name="segments">The segments to append</param>
 		/// <returns>the Url object with the segments appended</returns>
-		public static Url AppendPathSegments(this string url, params string[] segments) {
+		public static Url AppendPathSegments(this string url, params object[] segments) {
 			return new Url(url).AppendPathSegments(segments);
 		}
 
@@ -41,7 +41,7 @@ namespace Flurl
 		/// </summary>
 		/// <param name="segments">The segments to append</param>
 		/// <returns>the Url object with the segments appended</returns>
-		public static Url AppendPathSegments(this string url, IEnumerable<string> segments) {
+		public static Url AppendPathSegments(this string url, IEnumerable<object> segments) {
 			return new Url(url).AppendPathSegments(segments);
 		}
 
