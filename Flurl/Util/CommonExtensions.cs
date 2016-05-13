@@ -17,10 +17,10 @@ namespace Flurl.Util
 		/// <returns></returns>
 		public static IEnumerable<KeyValuePair<string, object>> ToKeyValuePairs(this object obj) {
 			if (obj == null)
-				throw new ArgumentNullException("obj");
+				throw new ArgumentNullException(nameof(obj));
 
 			return
-				(obj is string) ? QueryParamCollection.Parse((string)obj) :
+				(obj is string) ? StringToKV((string)obj) :
 				(obj is IEnumerable) ? CollectionToKV((IEnumerable)obj) :
 				ObjectToKV(obj);
 		}
@@ -40,6 +40,10 @@ namespace Flurl.Util
 				return f.ToString(null, CultureInfo.InvariantCulture);
 
 			return obj.ToString();
+		}
+
+		private static IEnumerable<KeyValuePair<string, object>> StringToKV(string s) {
+			return Url.ParseQueryParams(s).Select(p => new KeyValuePair<string, object>(p.Name, p.Value));
 		}
 
 		private static IEnumerable<KeyValuePair<string, object>> ObjectToKV(object obj) {

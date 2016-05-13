@@ -1,7 +1,7 @@
 ﻿using Flurl.Util;
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace Flurl
 {
@@ -11,34 +11,63 @@ namespace Flurl
 	public class Url
 	{
 		/// <summary>
-		/// The full absolute path part of the URL (everthing except the query string).
+		/// The full absolute path part of the URL (everthing except the query string and fragment).
 		/// </summary>
 		public string Path { get; private set; }
 
 		/// <summary>
-		/// Collection of all query string parameters.
+		/// The query part of the URL (after the ?, RFC 3986).
+		/// </summary>
+		public string Query {
+			get { return QueryParams.ToString(); }
+			set { QueryParams = ParseQueryParams(value); }
+		}
+
+		/// <summary>
+		/// Query parsed to name/value pairs.
 		/// </summary>
 		public QueryParamCollection QueryParams { get; private set; }
 
 		/// <summary>
-		/// The fragment part of the url (after the #, RFC 3986)
+		/// The fragment part of the URL (after the #, RFC 3986).
 		/// </summary>
-		public string Fragment { get; private set; }
-
-		const string URL_SLICE_REGEXP = @"^([^?#\n]*)([^#\n]*)(.*)$";
+		public string Fragment { get; }
 
 		/// <summary>
 		/// Constructs a Url object from a string.
 		/// </summary>
 		/// <param name="baseUrl">The URL to use as a starting point (required)</param>
 		public Url(string baseUrl) {
-			if(baseUrl == null)
-				throw new ArgumentNullException("baseUrl");
+			if (baseUrl == null)
+				throw new ArgumentNullException(nameof(baseUrl));
 
-			var urlParts = Regex.Match(baseUrl, URL_SLICE_REGEXP, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-			Path = urlParts.Groups[1].Value;
-			QueryParams = QueryParamCollection.Parse(urlParts.Groups[2].Value);
-			Fragment = urlParts.Groups[3].Value;
+			var parts = baseUrl.Split(new[] { '#' }, 2);
+			Fragment = (parts.Length == 2) ? parts[1] : "";
+			parts = parts[0].Split(new[] { '?' }, 2);
+			Query = (parts.Length == 2) ? parts[1] : "";
+			Path = parts[0];
+		}
+
+		/// <summary>
+		/// Parses a URL query string to a QueryParamCollection dictionary.
+		/// </summary>
+		/// <param name="queryString">The URL query to parse.</param>
+		/// <returns></returns>
+		public static QueryParamCollection ParseQueryParams(string query) {
+			var result = new QueryParamCollection();
+
+			query = query?.TrimStart('?');
+			if (string.IsNullOrEmpty(query))
+				return result;
+
+			result.AddRange(
+				from p in query.Split('&')
+				let pair = p.Split(new[] { '=' }, 2)
+				let name = pair[0]
+				let value = (pair.Length == 1) ? "" : pair[1]
+				select new QueryParameter(name, value, true));
+
+			return result;
 		}
 
 		/// <summary>
@@ -60,8 +89,7 @@ namespace Flurl
 		/// </summary>
 		public static string GetRoot(string url) {
 			// http://stackoverflow.com/a/27473521/62600
-			var uri = new Uri(url);
-			return uri.GetComponents(UriComponents.SchemeAndServer | UriComponents.UserInfo, UriFormat.Unescaped);
+			return new Uri(url).GetComponents(UriComponents.SchemeAndServer | UriComponents.UserInfo, UriFormat.Unescaped);
 		}
 
 		/// <summary>
@@ -139,14 +167,29 @@ namespace Flurl
 		/// <summary>
 		/// Adds a parameter to the query string, overwriting the value if name exists.
 		/// </summary>
-		/// <param name="name">name of query string parameter</param>
-		/// <param name="value">value of query string parameter</param>
+		/// <param name="name">Name of query string parameter</param>
+		/// <param name="value">Value of query string parameter</param>
 		/// <returns>The Url obect with the query string parameter added</returns>
 		public Url SetQueryParam(string name, object value) {
 			if (name == null)
-				throw new ArgumentNullException("name", "Query parameter name cannot be null.");
+				throw new ArgumentNullException(nameof(name), "Query parameter name cannot be null.");
 
 			QueryParams[name] = value;
+			return this;
+		}
+
+		/// <summary>
+		/// Adds a parameter to the query string, overwriting the value if name exists.
+		/// </summary>
+		/// <param name="name">Name of query string parameter</param>
+		/// <param name="value">Value of query string parameter</param>
+		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded (typically false)</param>
+		/// <returns>The Url obect with the query string parameter added</returns>
+		public Url SetQueryParam(string name, string value, bool isEncoded) {
+			if (name == null)
+				throw new ArgumentNullException(nameof(name), "Query parameter name cannot be null.");
+
+			QueryParams[name] = new QueryParameter(name, value, isEncoded);
 			return this;
 		}
 
@@ -171,7 +214,7 @@ namespace Flurl
 		/// <param name="name">Query string parameter name to remove</param>
 		/// <returns>The Url object with the query string parameter removed</returns>
 		public Url RemoveQueryParam(string name) {
-			QueryParams.Remove(name);
+			QueryParams.RemoveAll(name);
 			return this;
 		}
 
@@ -182,7 +225,7 @@ namespace Flurl
 		/// <returns>The Url object with the query string parameters removed</returns>
 		public Url RemoveQueryParams(params string[] names) {
 			foreach(var name in names)
-				QueryParams.Remove(name);
+				QueryParams.RemoveAll(name);
 
 			return this;
 		}
@@ -194,7 +237,7 @@ namespace Flurl
 		/// <returns>The Url object with the query string parameters removed</returns>
 		public Url RemoveQueryParams(IEnumerable<string> names) {
 			foreach(var name in names)
-				QueryParams.Remove(name);
+				QueryParams.RemoveAll(name);
 
 			return this;
 		}
@@ -222,14 +265,12 @@ namespace Flurl
 		/// </summary>
 		/// <returns></returns>
 		public string ToString(bool encodeStringAsPlus) {
-			var url = Path;
-			var query = QueryParams.ToString(encodeStringAsPlus);
-			if(query.Length > 0)
-				url += "?" + query;
-
-			url += Fragment;
-
-			return url;
+			var sb = new System.Text.StringBuilder(Path);
+			if (Query.Length > 0)
+				sb.Append("?").Append(Query);
+			if (Fragment.Length > 0)
+				sb.Append("#").Append(Fragment);
+			return sb.ToString();
 		}
 
 		/// <summary>

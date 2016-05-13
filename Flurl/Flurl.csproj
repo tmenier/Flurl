@@ -11,7 +11,7 @@
     <AssemblyName>Flurl</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile>Profile328</TargetFrameworkProfile>
+    <TargetFrameworkProfile>Profile92</TargetFrameworkProfile>
     <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -39,6 +39,7 @@
     <DocumentationFile>bin\Release\Flurl.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="QueryParameter.cs" />
     <Compile Include="Util\CommonExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryParamCollection.cs" />

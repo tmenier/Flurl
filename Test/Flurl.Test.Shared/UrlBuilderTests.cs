@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -34,11 +35,32 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void QueryParams_returns_query_params() {
+		public void query_params_parse_correctly() {
 			// y has 2 values, which should be grouped into an array
 			var q = new Url("http://www.mysite.com/more?x=1&y=2&z=3&y=4").QueryParams;
-			CollectionAssert.AreEqual(new[] { "x", "y", "z" }, q.Keys);
-			CollectionAssert.AreEqual(new object[] { "1", new[] { "2", "4" }, "3" }, q.Values);
+			Assert.AreEqual("1", q["x"]);
+			CollectionAssert.AreEqual(new[] { "2", "4" }, q["y"] as IEnumerable);
+			Assert.AreEqual("3", q["z"]);
+		}
+
+		[Test]
+		public void can_get_query_param_array() {
+			var url = new Url("http://www.mysite.com/more?x=1&y=2&x=3&z=4&x=5");
+			CollectionAssert.AreEqual(new[] { "1", "3", "5" }, url.QueryParams["x"] as object[]);
+		}
+
+		[Test]
+		public void can_set_query_param_array() {
+			var url = new Url("http://www.mysite.com/more?x=1&y=2&x=2&z=4");
+			// go from 2 values to 3, order should be preserved
+			url.QueryParams["x"] = new[] { 8, 9, 10 };
+			Assert.AreEqual("http://www.mysite.com/more?x=8&y=2&x=9&z=4&x=10", url.ToString());
+			// go from 3 values to 2, order should be preserved
+			url.QueryParams["x"] = new[] { 101, 102 };
+			Assert.AreEqual("http://www.mysite.com/more?x=101&y=2&x=102&z=4", url.ToString());
+			// wipe them out. all of them.
+			url.QueryParams["x"] = null;
+			Assert.AreEqual("http://www.mysite.com/more?y=2&z=4", url.ToString());
 		}
 
 		[Test, ExpectedException(typeof(ArgumentNullException))]
@@ -97,7 +119,7 @@ namespace Flurl.Test
 		public void can_add_query_param_without_value() {
 			var url = new Url("http://example.com?123456");
 			Assert.AreEqual("http://example.com", url.Path);
-			Assert.AreEqual(1, url.QueryParams.Keys.Count);
+			Assert.AreEqual(1, url.QueryParams.Count);
 			Assert.AreEqual(string.Empty, url.QueryParams["123456"]);
 		}
 
@@ -218,6 +240,18 @@ namespace Flurl.Test
 		}
 
 		[Test]
+		public void does_not_reencode_encoded_query_values() {
+			var url = "http://www.mysite.com".SetQueryParam("x", "%CD%EE%E2%FB%E9%20%E3%EE%E4", true);
+			Assert.AreEqual("http://www.mysite.com?x=%CD%EE%E2%FB%E9%20%E3%EE%E4", url.ToString());
+		}
+
+		[Test]
+		public void reencodes_encoded_query_values_when_isEncoded_false() {
+			var url = "http://www.mysite.com".SetQueryParam("x", "%CD%EE%E2%FB%E9%20%E3%EE%E4", false);
+			Assert.AreEqual("http://www.mysite.com?x=%25CD%25EE%25E2%25FB%25E9%2520%25E3%25EE%25E4", url.ToString());
+		}
+
+		[Test]
 		public void Url_implicitly_converts_to_string() {
 			var url = new Url("http://www.mysite.com/more?x=1&y=2");
 			var someMethodThatTakesAString = new Action<string>(s => { });
@@ -228,8 +262,6 @@ namespace Flurl.Test
 		public void interprets_plus_as_space() {
 			var url = new Url("http://www.mysite.com/foo+bar?x=1+2");
 			Assert.AreEqual("1 2", url.QueryParams["x"]);
-			// encode + in query string but not path segment
-			Assert.AreEqual("http://www.mysite.com/foo+bar?x=1%202", url.ToString());
 		}
 
 		[Test]
@@ -244,34 +276,22 @@ namespace Flurl.Test
 			Assert.AreEqual("http://www.mysite.com?x=1%2B2", url.ToString());
 		}
 
-		[Test]
-		public void IsUrl_true_for_valid_url() {
-			Assert.IsTrue("http://www.mysite.com/more?x=1&y=2".IsUrl());
+		[TestCase("http://www.mysite.com/more", Result = true)]
+		[TestCase("http://www.mysite.com/more?x=1&y=2", Result = true)]
+		[TestCase("http://www.mysite.com/more?x=1&y=2#frag", Result = true)]
+		[TestCase("http://www.mysite.com#frag", Result = true)]
+		[TestCase("", Result = false)]
+		[TestCase("blah", Result = false)]
+		[TestCase("http:/www.mysite.com", Result = false)]
+		[TestCase("www.mysite.com", Result = false)]
+		public bool IsUrl_works(string s) {
+			return s.IsUrl();
 		}
 
+		// #56
 		[Test]
-		public void IsUrl_false_for_invalid_url() {
-			Assert.IsFalse("www.mysite.com".IsUrl());
-		}
-
-		// known issue - https://github.com/tmenier/Flurl/issues/56
-		[Test, Ignore]
 		public void does_not_alter_url_passed_to_constructor() {
 			var expected = "http://www.mysite.com/hi%20there/more?x=%CD%EE%E2%FB%E9%20%E3%EE%E4";
-			var url = new Url(expected);
-			Assert.AreEqual(expected, url.ToString());
-		}
-
-		[Test]
-		public void is_fragment_parsed_in_url_without_querystring() {
-			var expected = "http://www.mysite.com/index#first";
-			var url = new Url(expected);
-			Assert.AreEqual(expected, url.ToString());
-		}
-
-		[Test]
-		public void is_fragment_parsed_in_url_with_querystring() {
-			var expected = "http://www.mysite.com/more?x=1#first";
 			var url = new Url(expected);
 			Assert.AreEqual(expected, url.ToString());
 		}
@@ -280,26 +300,24 @@ namespace Flurl.Test
 		[Test]
 		public void has_fragment_after_SetQueryParam() {
 			var expected = "http://www.mysite.com/more?x=1#first";
-			var url = new Url(expected).SetQueryParam("x", 3);
-			Assert.AreEqual("http://www.mysite.com/more?x=3#first", url.ToString());
+			var url = new Url(expected)
+				.SetQueryParam("x", 3)
+				.SetQueryParam("y", 4);
+			Assert.AreEqual("http://www.mysite.com/more?x=3&y=4#first", url.ToString());
 		}
 
-		[Test]
-		public void constructor_parse_url_correctly() {
-			var simpleUrl = "http://www.mysite.com";
-			var simpleUrlWithEmptyQueryParam = simpleUrl + "?3423423";
-			var simpleUrlWithPath = simpleUrl + "/with/path";
-			var urlWithQueryString = simpleUrlWithPath + "?qs=2&z=3";
-			var urlWithEmtpyFragment = simpleUrlWithPath + "#";
-			var urlWithFragment = simpleUrlWithPath + "#something";
-
-
-			Assert.AreEqual(simpleUrl, new Url(simpleUrl).ToString());
-			Assert.AreEqual(simpleUrlWithEmptyQueryParam + "=", new Url(simpleUrlWithEmptyQueryParam).ToString());
-			Assert.AreEqual(simpleUrlWithPath, new Url(simpleUrlWithPath).ToString());
-			Assert.AreEqual(urlWithQueryString, new Url(urlWithQueryString).ToString());
-			Assert.AreEqual(urlWithEmtpyFragment, new Url(urlWithEmtpyFragment).ToString());
-			Assert.AreEqual(urlWithFragment, new Url(urlWithFragment).ToString());
+		[TestCase("http://www.mysite.com/with/path?x=1", "http://www.mysite.com/with/path", "x=1", "")]
+		[TestCase("http://www.mysite.com/with/path?x=1#foo", "http://www.mysite.com/with/path", "x=1", "foo")]
+		[TestCase("http://www.mysite.com/with/path?x=1?y=2", "http://www.mysite.com/with/path", "x=1?y=2", "")]
+		[TestCase("http://www.mysite.com/#with/path?x=1?y=2", "http://www.mysite.com/", "", "with/path?x=1?y=2")]
+		public void constructor_parses_url_correctly(string full, string path, string query, string fragment) {
+			var url = new Url(full);
+			Assert.AreEqual(path, url.Path);
+			Assert.AreEqual(query, url.Query);
+			Assert.AreEqual(fragment, url.Fragment);
+			Assert.AreEqual(full, url.ToString());
 		}
+
+		//public void QueryParams
 	}
 }

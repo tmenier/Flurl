@@ -72,7 +72,7 @@ namespace Flurl.Test
 
 		[Test]
 		public void can_parse_string_to_kv() {
-			var kv = "xyz?one=1&two=2&three=foo".ToKeyValuePairs();
+			var kv = "one=1&two=2&three=foo".ToKeyValuePairs();
 
 			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
 				{ "one", "1" },

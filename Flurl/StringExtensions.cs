@@ -56,6 +56,17 @@ namespace Flurl
 		}
 
 		/// <summary>
+		/// Converts string to a Url object and adds a parameter to the query string, overwriting the value if name exists.
+		/// </summary>
+		/// <param name="name">Name of query string parameter</param>
+		/// <param name="value">Value of query string parameter</param>
+		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded (typically false)</param>
+		/// <returns>The Url obect with the query string parameter added</returns>
+		public static Url SetQueryParam(this string url, string name, string value, bool isEncoded) {
+			return new Url(url).SetQueryParam(name, value, isEncoded);
+		}
+
+		/// <summary>
 		/// Converts string to a Url object, parses values object into name/value pairs, and adds them to the query string,
 		/// overwriting any that already exist.
 		/// </summary>

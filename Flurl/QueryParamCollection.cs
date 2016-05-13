@@ -8,46 +8,8 @@ namespace Flurl
 	/// <summary>
 	/// Represents a URL query string as a key-value dictionary. Insertion order is preserved.
 	/// </summary>
-	public class QueryParamCollection : IDictionary<string, object>
+	public class QueryParamCollection : List<QueryParameter>
 	{
-		private readonly Dictionary<string, object> _dict = new Dictionary<string, object>();
- 		private readonly List<string> _orderedKeys = new List<string>();
-
-		/// <summary>
-		/// Parses a query string from a URL to a QueryParamCollection dictionary.
-		/// </summary>
-		/// <param name="queryString">The query string to parse.</param>
-		/// <returns></returns>
-		public static QueryParamCollection Parse(string queryString) {
-			var result = new QueryParamCollection();
-
-			if (string.IsNullOrEmpty(queryString))
-				return result;
-
-			queryString = queryString.TrimStart('?').Split('?').Last();
-
-			var pairs = (
-				from kv in queryString.Split('&')
-				let pair = kv.Split('=')
-				let key = pair[0]
-				let value = pair.Length >= 2 ? Url.DecodeQueryParamValue(pair[1]) : ""
-				group value by key into g
-				select new { Key = g.Key, Values = g.ToArray() });
-
-			foreach (var g in pairs) {
-				if (g.Values.Length == 1)
-					result.Add(g.Key, g.Values[0]);
-				else
-					result.Add(g.Key, g.Values);
-			}
-
-			return result;
-		}
-
-		public IEnumerator<KeyValuePair<string, object>> GetEnumerator() {
-			return _orderedKeys.Select(k => new KeyValuePair<string, object>(k, _dict[k])).GetEnumerator();
-		}
-
 		/// <summary>
 		/// Returns serialized, encoded query string. Insertion order is preserved.
 		/// </summary>
@@ -61,102 +23,76 @@ namespace Flurl
 		/// </summary>
 		/// <returns></returns>
 		public string ToString(bool encodeSpaceAsPlus) {
-			return string.Join("&", GetPairs(encodeSpaceAsPlus));
+			return string.Join("&", this.Select(p => p.ToString(encodeSpaceAsPlus)));
 		}
 
-		private IEnumerable<string> GetPairs(bool encodeSpaceAsPlus) {
-			foreach (var key in _orderedKeys) {
-				var val = this[key];
-				if (val == null)
-					continue;
-
-				if (val is string || !(val is IEnumerable)) {
-					yield return key + "=" + Url.EncodeQueryParamValue(val, encodeSpaceAsPlus);
-				}
-				else {
-					// if value is IEnumerable (other than string), break it into multiple
-					// values with same param name, i.e. x=1&x2&x=3
-					// https://github.com/tmenier/Flurl/issues/15
-					foreach (var subval in val as IEnumerable) {
-						if (subval == null)
-							continue;
-
-						yield return key + "=" + Url.EncodeQueryParamValue(subval, encodeSpaceAsPlus);
-					}
-				}
-			}
-		}
-
-		#region IDictionary<string, object> members
-		IEnumerator IEnumerable.GetEnumerator() {
-			return GetEnumerator();
-		}
-
-		public void Add(KeyValuePair<string, object> item) {
-			Add(item.Key, item.Value);
-		}
-
-		public void Clear() {
-			_dict.Clear();
-			_orderedKeys.Clear();
-		}
-
-		public bool Contains(KeyValuePair<string, object> item) {
-			return _dict.Contains(item);
-		}
-
-		public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex) {
-			((ICollection)_dict).CopyTo(array, arrayIndex);
-		}
-
-		public bool Remove(KeyValuePair<string, object> item) {
-			return Remove(item.Key);
-		}
-
-		public int Count {
-			get { return _dict.Count; }
-		}
-
-		public bool IsReadOnly {
-			get { return false; }
-		}
-
+		/// <summary>
+		/// Adds a new query parameter.
+		/// </summary>
 		public void Add(string key, object value) {
-			_dict.Add(key, value);
-			_orderedKeys.Add(key);
+			Add(new QueryParameter(key, value));
 		}
 
-		public bool ContainsKey(string key) {
-			return _dict.ContainsKey(key);
+		/// <summary>
+		/// Adds a new query parameter, allowing you to specify whether the value is already encoded.
+		/// </summary>
+		public void Add(string key, string value, bool isEncoded) {
+			Add(new QueryParameter(key, value, isEncoded));
 		}
 
-		public bool Remove(string key) {
-			_orderedKeys.Remove(key);
-			return _dict.Remove(key);
+		/// <summary>
+		/// True if the collection contains a query parameter with the given name.
+		/// </summary>
+		public bool ContainsKey(string name) {
+			return this.Any(p => p.Name == name);
 		}
 
-		public bool TryGetValue(string key, out object value) {
-			return _dict.TryGetValue(key, out value);
+		/// <summary>
+		/// Removes all parameters of the given name.
+		/// </summary>
+		/// <returns>The number of parameters that were removed</returns>
+		public int RemoveAll(string name) {
+			return this.RemoveAll(p => p.Name == name);
 		}
 
-		public object this[string key] {
+		public object this[string name] {
 			get {
-				return _dict[key];
+				var all = this.Where(p => p.Name == name).Select(p => p.Value).ToArray();
+				if (all.Length == 0)
+					return null;
+				if (all.Length == 1)
+					return all[0];
+				return all;
 			}
 			set {
-				_dict[key] = value;
-				if (!_orderedKeys.Contains(key))
-					_orderedKeys.Add(key);
+				var parameters = this.Where(p => p.Name == name).ToArray();
+				var values = (value is IEnumerable && !(value is string)) ?
+					(value as IEnumerable).Cast<object>().ToArray() :
+					new[] { value };
+
+				for (int i = 0;; i++) {
+					if (i < parameters.Length && i < values.Length) {
+						if (values[i] == null)
+							Remove(parameters[i]);
+						else if (values[i] is QueryParameter)
+							this[IndexOf(parameters[i])] = (QueryParameter)values[i];
+						else
+							parameters[i].Value = values[i];
+					}
+					else if (i < parameters.Length)
+						Remove(parameters[i]);
+					else if (i < values.Length) {
+						if (values[i] != null) {
+							if (values[i] is QueryParameter)
+								Add((QueryParameter)values[i]);
+							else
+								Add(name, values[i]);
+						}
+					}
+					else
+						break;
+				}
 			}
 		}
-
-		public ICollection<string> Keys {
-			get { return _orderedKeys; }
-		}
-
-		public ICollection<object> Values {
-			get { return _orderedKeys.Select(k => _dict[k]).ToArray(); }
-		}
-		#endregion
 	}
 }

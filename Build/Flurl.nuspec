@@ -40,7 +40,7 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="..\Flurl\bin\Release\Flurl.*" target="lib\portable-net40+sl50+win+wpa81+wp80+MonoAndroid10+MonoTouch10" />
+		<file src="..\Flurl\bin\Release\Flurl.*" target="lib\portable-net40+win+wpa81+wp80+MonoAndroid10+MonoTouch10" />
 		<file src="..\artifacts\bin\Flurl\Release\dotnet5.4\Flurl.*" target="lib\dotnet5.4" />
 	</files>
 </package>
