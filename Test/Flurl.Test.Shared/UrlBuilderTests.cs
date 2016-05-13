@@ -63,6 +63,13 @@ namespace Flurl.Test
 			Assert.AreEqual("http://www.mysite.com/more?y=2&z=4", url.ToString());
 		}
 
+		[Test]
+		public void can_sort_query_params() {
+			var url = new Url("http://www.mysite.com/more?z=1&y=2&x=3");
+			url.QueryParams.Sort((x, y) => x.Name.CompareTo(y.Name));
+			Assert.AreEqual("http://www.mysite.com/more?x=3&y=2&z=1", url.ToString());
+		}
+
 		[Test, ExpectedException(typeof(ArgumentNullException))]
 		public void constructor_requires_nonnull_arg() {
 			new Url(null);
