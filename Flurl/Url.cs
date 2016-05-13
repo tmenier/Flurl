@@ -290,5 +290,13 @@ namespace Flurl
 		public static implicit operator Url(string url) {
 			return new Url(url);
 		}
+
+		/// <summary>
+		/// Implicit conversion from System.Uri to Flurl.Url.
+		/// </summary>
+		/// <returns>The string</returns>
+		public static implicit operator Url(Uri uri) {
+			return new Url(uri.ToString());
+		}
 	}
 }

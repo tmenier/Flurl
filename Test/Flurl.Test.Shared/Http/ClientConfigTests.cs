@@ -189,5 +189,11 @@ namespace Flurl.Test.Http
 			CollectionAssert.IsNotEmpty(client4.GetCookies());
 		}
 
+		[Test]
+		public void can_use_uri_with_WithUrl() {
+			var uri = new System.Uri("http://www.mysite.com/foo?x=1");
+			var fc = new FlurlClient().WithUrl(uri);
+			Assert.AreEqual(uri.ToString(), fc.Url.ToString());
+		}
 	}
 }
