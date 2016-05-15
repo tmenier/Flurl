@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>0.9.0</version>
+		<version>0.10.0-pre</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,6 +13,7 @@
 			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
 		</description>
 		<releaseNotes>
+0.10.0 - Lib updates, including Flurl 2.0 which contains breaking changes: https://github.com/tmenier/Flurl/wiki/Release-Notes
 0.9.0 - BREAKING CHANGES: https://github.com/tmenier/Flurl/wiki/Release-Notes
 0.8.0 - .NET Core support (github #61, thx @kroniak)
 0.7.0 - BREAKING CHANGES: https://github.com/tmenier/Flurl/wiki/Release-Notes
@@ -40,18 +41,18 @@
 		<tags>httpclient rest json http fluent portable url uri tdd assert async</tags>
 		<dependencies>
 			<group targetFramework="net45">
-				<dependency id="Newtonsoft.Json" version="6.0.3" />
-				<dependency id="Flurl" version="1.1.2" />
+				<dependency id="Newtonsoft.Json" version="8.0.3" />
+				<dependency id="Flurl" version="2.0.0" />
 			</group>
 			<group targetFramework="portable-net45+win+wpa81+wp80">
 				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
 				<dependency id="Microsoft.Net.Http" version="2.2.22" />
 				<dependency id="PCLStorage" version="0.9.6" />
-				<dependency id="Newtonsoft.Json" version="6.0.3" />
-				<dependency id="Flurl" version="1.1.2" />
+				<dependency id="Newtonsoft.Json" version="8.0.3" />
+				<dependency id="Flurl" version="2.0.0" />
 			</group>
 			<group targetFramework=".NETPlatform5.4">
-				<dependency id="Flurl" version="1.1.2" />
+				<dependency id="Flurl" version="2.0.0" />
 				<dependency id="Newtonsoft.Json" version="8.0.3" />
 				<dependency id="System.Dynamic.Runtime" version="4.0.10" />
 				<dependency id="System.IO.FileSystem" version="4.0.0" />
