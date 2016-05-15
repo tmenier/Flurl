@@ -226,7 +226,6 @@ namespace Flurl
 		public Url RemoveQueryParams(params string[] names) {
 			foreach(var name in names)
 				QueryParams.RemoveAll(name);
-
 			return this;
 		}
 
@@ -240,6 +239,24 @@ namespace Flurl
 				QueryParams.RemoveAll(name);
 
 			return this;
+		}
+
+		/// <summary>
+		/// Set the URL fragment fluently.
+		/// </summary>
+		/// <param name="fragment">The part of the URL afer #</param>
+		/// <returns>The Url object with the new fragment set</returns>
+		public Url SetFragment(string fragment) {
+			Fragment = fragment ?? "";
+			return this;
+		}
+
+		/// <summary>
+		/// Removes the URL fragment including the #.
+		/// </summary>
+		/// <returns>The Url object with the fragment removed</returns>
+		public Url RemoveFragment() {
+			return SetFragment("");
 		}
 
 		/// <summary>

@@ -218,6 +218,7 @@ namespace Flurl.Test
 		public void can_do_crazy_long_fluent_expression() {
 			var url = "http://www.mysite.com"
 				.SetQueryParams(new { a = 1, b = 2, c = 999 })
+				.SetFragment("fooey")
 				.AppendPathSegment("category")
 				.RemoveQueryParam("c")
 				.SetQueryParam("z", 55)
@@ -225,7 +226,7 @@ namespace Flurl.Test
 				.SetQueryParams(new { n = "hi", m = "bye" })
 				.AppendPathSegment("endpoint");
 
-			Assert.AreEqual("http://www.mysite.com/category/endpoint?b=2&n=hi&m=bye", url.ToString());
+			Assert.AreEqual("http://www.mysite.com/category/endpoint?b=2&n=hi&m=bye#fooey", url.ToString());
 		}
 
 		[Test]
@@ -304,7 +305,23 @@ namespace Flurl.Test
 			Assert.AreEqual(expected, url.ToString());
 		}
 
-		// Support Anchor / Hash URL parts #29
+		// #29
+		[Test]
+		public void can_add_and_remove_fragment_fluently() {
+			var url = "http://www.mysite.com".SetFragment("foo");
+			Assert.AreEqual("http://www.mysite.com#foo", url.ToString());
+			url = "http://www.mysite.com#foo".RemoveFragment();
+			Assert.AreEqual("http://www.mysite.com", url.ToString());
+			url = "http://www.mysite.com"
+				.SetFragment("foo")
+				.SetFragment("bar")
+				.AppendPathSegment("more")
+				.SetQueryParam("x", 1);
+			Assert.AreEqual("http://www.mysite.com/more?x=1#bar", url.ToString());
+			url = "http://www.mysite.com".SetFragment("foo").SetFragment("bar").RemoveFragment();
+			Assert.AreEqual("http://www.mysite.com", url.ToString());
+		}
+
 		[Test]
 		public void has_fragment_after_SetQueryParam() {
 			var expected = "http://www.mysite.com/more?x=1#first";

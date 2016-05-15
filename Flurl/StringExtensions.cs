@@ -95,6 +95,23 @@ namespace Flurl
 		}
 
 		/// <summary>
+		/// Set the URL fragment fluently.
+		/// </summary>
+		/// <param name="fragment">The part of the URL afer #</param>
+		/// <returns>The Url object with the new fragment set</returns>
+		public static Url SetFragment(this string url, string fragment) {
+			return new Url(url).SetFragment(fragment);
+		}
+
+		/// <summary>
+		/// Removes the URL fragment including the #.
+		/// </summary>
+		/// <returns>The Url object with the fragment removed</returns>
+		public static Url RemoveFragment(this string url) {
+			return new Url(url).RemoveFragment();
+		}
+
+		/// <summary>
 		/// Trims the URL to its root, including the scheme, any user info, host, and port (if specified).
 		/// </summary>
 		/// <returns>A Url object.</returns>
