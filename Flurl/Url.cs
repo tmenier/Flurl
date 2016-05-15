@@ -107,7 +107,7 @@ namespace Flurl
 		/// URL-encodes a query string value.
 		/// </summary>
 		/// <param name="value">The query string value to encode.</param>
-		/// <param name="value">If true, spaces will be encoded as + signs. Otherwise, they'll be encoded as %20.</param>
+		/// <param name="encodeSpaceAsPlus">If true, spaces will be encoded as + signs. Otherwise, they'll be encoded as %20.</param>
 		/// <returns></returns>
 		public static string EncodeQueryParamValue(object value, bool encodeSpaceAsPlus) {
 			var result = Uri.EscapeDataString((value ?? "").ToInvariantString());
@@ -133,7 +133,7 @@ namespace Flurl
 		/// <returns>the Url object with the segment appended</returns>
 		public Url AppendPathSegment(object segment) {
 			if (segment == null)
-				throw new ArgumentNullException("segment");
+				throw new ArgumentNullException(nameof(segment));
 
 			if (!Path.EndsWith("/")) Path += "/";
 			Path += CleanSegment(segment.ToInvariantString().TrimStart('/'));
@@ -240,6 +240,21 @@ namespace Flurl
 				QueryParams.RemoveAll(name);
 
 			return this;
+		}
+
+		/// <summary>
+		/// Checks if this URL is a well-formed.
+		/// </summary>
+		/// <returns>true if this is a well-formed URL</returns>
+		public bool IsValid() => IsValid(this.ToString());
+
+		/// <summary>
+		/// Checks if a string is a well-formed URL.
+		/// </summary>
+		/// <param name="url">The string to check</param>
+		/// <returns>true if s is a well-formed URL</returns>
+		public static bool IsValid(string url) {
+			return url != null && Uri.IsWellFormedUriString(url, UriKind.Absolute);
 		}
 
 		/// <summary>

@@ -9,15 +9,6 @@ namespace Flurl
 	public static class StringExtensions
 	{
 		/// <summary>
-		/// Checks if a string is a well-formed URL.
-		/// </summary>
-		/// <param name="s">The string to check</param>
-		/// <returns>true if s is a well-formed URL</returns>
-		public static bool IsUrl(this string s) {
-			return s != null && Uri.IsWellFormedUriString(s, UriKind.Absolute);
-		}
-
-		/// <summary>
 		/// Converts string to a Url object and appends a segment to the URL path, 
 		/// ensuring there is one and only one '/' character as a seperator.
 		/// </summary>

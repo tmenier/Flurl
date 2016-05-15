@@ -17,9 +17,10 @@ namespace Flurl.Test
 		public void extension_methods_consistently_supported() {
 			var urlMethods = typeof(Url).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Where(m => !m.IsSpecialName);
 			var stringExts = ReflectionHelper.GetAllExtensionMethods<string>(typeof(Url).Assembly);
+			var whitelist = new[] { "ToString", "IsValid" }; // cases where string extension of the same name was excluded intentionally
 
 			foreach (var method in urlMethods) {
-				if (method.Name == "ToString")
+				if (whitelist.Contains(method.Name))
 					continue;
 
 				if (!stringExts.Any(m => ReflectionHelper.AreSameMethodSignatures(method, m))) {
@@ -282,16 +283,17 @@ namespace Flurl.Test
 			Assert.AreEqual("http://www.mysite.com?x=1%2B2", url.ToString());
 		}
 
-		[TestCase("http://www.mysite.com/more", Result = true)]
-		[TestCase("http://www.mysite.com/more?x=1&y=2", Result = true)]
-		[TestCase("http://www.mysite.com/more?x=1&y=2#frag", Result = true)]
-		[TestCase("http://www.mysite.com#frag", Result = true)]
-		[TestCase("", Result = false)]
-		[TestCase("blah", Result = false)]
-		[TestCase("http:/www.mysite.com", Result = false)]
-		[TestCase("www.mysite.com", Result = false)]
-		public bool IsUrl_works(string s) {
-			return s.IsUrl();
+		[TestCase("http://www.mysite.com/more", true)]
+		[TestCase("http://www.mysite.com/more?x=1&y=2", true)]
+		[TestCase("http://www.mysite.com/more?x=1&y=2#frag", true)]
+		[TestCase("http://www.mysite.com#frag", true)]
+		[TestCase("", false)]
+		[TestCase("blah", false)]
+		[TestCase("http:/www.mysite.com", false)]
+		[TestCase("www.mysite.com", false)]
+		public void IsUrl_works(string s, bool isValid) {
+			Assert.AreEqual(isValid, Url.IsValid(s));
+			Assert.AreEqual(isValid, new Url(s).IsValid());
 		}
 
 		// #56
