@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl</id>
-		<version>1.1.2</version>
+		<version>2.0.0</version>
 		<title>Flurl</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,6 +13,7 @@
 			A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.
 		</description>
 		<releaseNotes>
+2.0.0 - BREAKING CHANGES: https://github.com/tmenier/Flurl/wiki/Release-Notes
 1.1.2 - Fix net461 target (github #74)
 1.1.1 - Packaging fix
 1.1.0 - .NET Core support (github #61, thx @kroniak)
