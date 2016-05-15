@@ -51,7 +51,7 @@ namespace Flurl
 		/// Removes all parameters of the given name.
 		/// </summary>
 		/// <returns>The number of parameters that were removed</returns>
-		public int RemoveAll(string name) {
+		public int Remove(string name) {
 			return this.RemoveAll(p => p.Name == name);
 		}
 

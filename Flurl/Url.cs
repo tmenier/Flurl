@@ -214,7 +214,7 @@ namespace Flurl
 		/// <param name="name">Query string parameter name to remove</param>
 		/// <returns>The Url object with the query parameter removed</returns>
 		public Url RemoveQueryParam(string name) {
-			QueryParams.RemoveAll(name);
+			QueryParams.Remove(name);
 			return this;
 		}
 
@@ -225,7 +225,7 @@ namespace Flurl
 		/// <returns>The Url object with the query parameters removed</returns>
 		public Url RemoveQueryParams(params string[] names) {
 			foreach(var name in names)
-				QueryParams.RemoveAll(name);
+				QueryParams.Remove(name);
 			return this;
 		}
 
@@ -236,7 +236,7 @@ namespace Flurl
 		/// <returns>The Url object with the query parameters removed</returns>
 		public Url RemoveQueryParams(IEnumerable<string> names) {
 			foreach(var name in names)
-				QueryParams.RemoveAll(name);
+				QueryParams.Remove(name);
 
 			return this;
 		}
