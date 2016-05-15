@@ -1,4 +1,4 @@
-﻿{
+{
 	"version": "1.0.0-*",
 	"description": "PackageTester Console Application",
 	"authors": [ "Todd" ],
@@ -23,7 +23,9 @@
 			}
 		}
 	},
-	"dependencies": {
-		"Flurl.Http": "0.9.0"
-	}
+    "dependencies": {
+        "Flurl.Http": "0.10.0-pre",
+        "System.Linq": "4.0.0",
+        "System.Threading": "4.0.10"
+    }
 }
