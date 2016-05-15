@@ -55,6 +55,12 @@ namespace Flurl
 			return this.RemoveAll(p => p.Name == name);
 		}
 
+		/// <summary>
+		/// Gets or sets a query parameter value by name. A query may contain multiple values of the same name
+		/// (i.e. "x=1&amp;x=2"), in which case the value is an array, which works for both getting and setting.
+		/// </summary>
+		/// <param name="name">The query parameter name</param>
+		/// <returns>The query parameter value or array of values</returns>
 		public object this[string name] {
 			get {
 				var all = this.Where(p => p.Name == name).Select(p => p.Value).ToArray();
