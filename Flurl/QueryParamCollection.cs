@@ -6,7 +6,7 @@ using System.Linq;
 namespace Flurl
 {
 	/// <summary>
-	/// Represents a URL query string as a key-value dictionary. Insertion order is preserved.
+	/// Represents a URL query as a key-value dictionary. Insertion order is preserved.
 	/// </summary>
 	public class QueryParamCollection : List<QueryParameter>
 	{

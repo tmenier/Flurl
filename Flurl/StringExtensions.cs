@@ -9,7 +9,7 @@ namespace Flurl
 	public static class StringExtensions
 	{
 		/// <summary>
-		/// Converts string to a Url object and appends a segment to the URL path, 
+		/// Creates a new Url object from the string and appends a segment to the URL path, 
 		/// ensuring there is one and only one '/' character as a seperator.
 		/// </summary>
 		/// <param name="segment">The segment to append</param>
@@ -37,59 +37,59 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Converts string to a Url object and adds a parameter to the query string, overwriting the value if name exists.
+		/// Creates a new Url object from the string and adds a parameter to the query, overwriting the value if name exists.
 		/// </summary>
-		/// <param name="name">name of query string parameter</param>
-		/// <param name="value">value of query string parameter</param>
-		/// <returns>The Url obect with the query string parameter added</returns>
+		/// <param name="name">name of query parameter</param>
+		/// <param name="value">value of query parameter</param>
+		/// <returns>The Url obect with the query parameter added</returns>
 		public static Url SetQueryParam(this string url, string name, object value) {
 			return new Url(url).SetQueryParam(name, value);
 		}
 
 		/// <summary>
-		/// Converts string to a Url object and adds a parameter to the query string, overwriting the value if name exists.
+		/// Creates a new Url object from the string and adds a parameter to the query, overwriting the value if name exists.
 		/// </summary>
-		/// <param name="name">Name of query string parameter</param>
-		/// <param name="value">Value of query string parameter</param>
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
 		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded (typically false)</param>
-		/// <returns>The Url obect with the query string parameter added</returns>
+		/// <returns>The Url obect with the query parameter added</returns>
 		public static Url SetQueryParam(this string url, string name, string value, bool isEncoded) {
 			return new Url(url).SetQueryParam(name, value, isEncoded);
 		}
 
 		/// <summary>
-		/// Converts string to a Url object, parses values object into name/value pairs, and adds them to the query string,
+		/// Creates a new Url object from the string, parses values object into name/value pairs, and adds them to the query,
 		/// overwriting any that already exist.
 		/// </summary>
 		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
-		/// <returns>The Url object with the query string parameters added</returns>
+		/// <returns>The Url object with the query parameters added</returns>
 		public static Url SetQueryParams(this string url, object values) {
 			return new Url(url).SetQueryParams(values);
 		}
 
 		/// <summary>
-		/// Converts string to a Url object and removes a name/value pair from the query string by name.
+		/// Creates a new Url object from the string and removes a name/value pair from the query by name.
 		/// </summary>
 		/// <param name="name">Query string parameter name to remove</param>
-		/// <returns>The Url object with the query string parameter removed</returns>
+		/// <returns>The Url object with the query parameter removed</returns>
 		public static Url RemoveQueryParam(this string url, string name) {
 			return new Url(url).RemoveQueryParam(name);
 		}
 
 		/// <summary>
-		/// Converts string to a Url object and removes multiple name/value pairs from the query string by name.
+		/// Creates a new Url object from the string and removes multiple name/value pairs from the query by name.
 		/// </summary>
 		/// <param name="names">Query string parameter names to remove</param>
-		/// <returns>The Url object with the query string parameters removed</returns>
+		/// <returns>The Url object with the query parameters removed</returns>
 		public static Url RemoveQueryParams(this string url, params string[] names) {
 			return new Url(url).RemoveQueryParams(names);
 		}
 
 		/// <summary>
-		/// Converts string to a Url object and removes multiple name/value pairs from the query string by name.
+		/// Creates a new Url object from the string and removes multiple name/value pairs from the query by name.
 		/// </summary>
 		/// <param name="names">Query string parameter names to remove</param>
-		/// <returns>The Url object with the query string parameters removed</returns>
+		/// <returns>The Url object with the query parameters removed</returns>
 		public static Url RemoveQueryParams(this string url, IEnumerable<string> names) {
 			return new Url(url).RemoveQueryParams(names);
 		}

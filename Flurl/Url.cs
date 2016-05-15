@@ -11,7 +11,7 @@ namespace Flurl
 	public class Url
 	{
 		/// <summary>
-		/// The full absolute path part of the URL (everthing except the query string and fragment).
+		/// The full absolute path part of the URL (everthing except the query and fragment).
 		/// </summary>
 		public string Path { get; private set; }
 
@@ -49,7 +49,7 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Parses a URL query string to a QueryParamCollection dictionary.
+		/// Parses a URL query to a QueryParamCollection dictionary.
 		/// </summary>
 		/// <param name="queryString">The URL query to parse.</param>
 		/// <returns></returns>
@@ -93,9 +93,9 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Decodes a URL-encoded query string value.
+		/// Decodes a URL-encoded query parameter value.
 		/// </summary>
-		/// <param name="value">The encoded query string value.</param>
+		/// <param name="value">The encoded query parameter value.</param>
 		/// <returns></returns>
 		public static string DecodeQueryParamValue(string value) {
 			// Uri.UnescapeDataString comes closest to doing it right, but famously stumbles on the + sign
@@ -104,9 +104,9 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// URL-encodes a query string value.
+		/// URL-encodes a query parameter value.
 		/// </summary>
-		/// <param name="value">The query string value to encode.</param>
+		/// <param name="value">The query parameter value to encode.</param>
 		/// <param name="encodeSpaceAsPlus">If true, spaces will be encoded as + signs. Otherwise, they'll be encoded as %20.</param>
 		/// <returns></returns>
 		public static string EncodeQueryParamValue(object value, bool encodeSpaceAsPlus) {
@@ -165,11 +165,11 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Adds a parameter to the query string, overwriting the value if name exists.
+		/// Adds a parameter to the query, overwriting the value if name exists.
 		/// </summary>
-		/// <param name="name">Name of query string parameter</param>
-		/// <param name="value">Value of query string parameter</param>
-		/// <returns>The Url obect with the query string parameter added</returns>
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
+		/// <returns>The Url obect with the query parameter added</returns>
 		public Url SetQueryParam(string name, object value) {
 			if (name == null)
 				throw new ArgumentNullException(nameof(name), "Query parameter name cannot be null.");
@@ -179,12 +179,12 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Adds a parameter to the query string, overwriting the value if name exists.
+		/// Adds a parameter to the query, overwriting the value if name exists.
 		/// </summary>
-		/// <param name="name">Name of query string parameter</param>
-		/// <param name="value">Value of query string parameter</param>
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
 		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded (typically false)</param>
-		/// <returns>The Url obect with the query string parameter added</returns>
+		/// <returns>The Url obect with the query parameter added</returns>
 		public Url SetQueryParam(string name, string value, bool isEncoded) {
 			if (name == null)
 				throw new ArgumentNullException(nameof(name), "Query parameter name cannot be null.");
@@ -194,10 +194,10 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Parses values (usually an anonymous object or dictionary) into name/value pairs and adds them to the query string, overwriting any that already exist.
+		/// Parses values (usually an anonymous object or dictionary) into name/value pairs and adds them to the query, overwriting any that already exist.
 		/// </summary>
 		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
-		/// <returns>The Url object with the query string parameters added</returns>
+		/// <returns>The Url object with the query parameters added</returns>
 		public Url SetQueryParams(object values) {
 			if (values == null)
 				return this;
@@ -209,20 +209,20 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Removes a name/value pair from the query string by name.
+		/// Removes a name/value pair from the query by name.
 		/// </summary>
 		/// <param name="name">Query string parameter name to remove</param>
-		/// <returns>The Url object with the query string parameter removed</returns>
+		/// <returns>The Url object with the query parameter removed</returns>
 		public Url RemoveQueryParam(string name) {
 			QueryParams.RemoveAll(name);
 			return this;
 		}
 
 		/// <summary>
-		/// Removes multiple name/value pairs from the query string by name.
+		/// Removes multiple name/value pairs from the query by name.
 		/// </summary>
 		/// <param name="names">Query string parameter names to remove</param>
-		/// <returns>The Url object with the query string parameters removed</returns>
+		/// <returns>The Url object with the query parameters removed</returns>
 		public Url RemoveQueryParams(params string[] names) {
 			foreach(var name in names)
 				QueryParams.RemoveAll(name);
@@ -230,10 +230,10 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Removes multiple name/value pairs from the query string by name.
+		/// Removes multiple name/value pairs from the query by name.
 		/// </summary>
 		/// <param name="names">Query string parameter names to remove</param>
-		/// <returns>The Url object with the query string parameters removed</returns>
+		/// <returns>The Url object with the query parameters removed</returns>
 		public Url RemoveQueryParams(IEnumerable<string> names) {
 			foreach(var name in names)
 				QueryParams.RemoveAll(name);
