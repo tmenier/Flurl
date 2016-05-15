@@ -110,6 +110,5 @@ namespace Flurl
 		public static Url ResetToRoot(this string url) {
 			return new Url(url).ResetToRoot();
 		}
-
 	}
 }

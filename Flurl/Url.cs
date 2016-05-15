@@ -31,7 +31,7 @@ namespace Flurl
 		/// <summary>
 		/// The fragment part of the URL (after the #, RFC 3986).
 		/// </summary>
-		public string Fragment { get; }
+		public string Fragment { get; set; }
 
 		/// <summary>
 		/// Constructs a Url object from a string.
@@ -249,6 +249,7 @@ namespace Flurl
 		public Url ResetToRoot() {
 			Path = GetRoot(Path);
 			QueryParams.Clear();
+			Fragment = "";
 			return this;
 		}
 
