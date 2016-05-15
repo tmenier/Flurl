@@ -23,9 +23,9 @@
 			}
 		}
 	},
-    "dependencies": {
-        "Flurl.Http": "0.10.0-pre",
-        "System.Linq": "4.0.0",
-        "System.Threading": "4.0.10"
-    }
+	"dependencies": {
+		"Flurl.Http": "0.10.0",
+		"System.Linq": "4.0.0",
+		"System.Threading": "4.0.10"
+	}
 }
