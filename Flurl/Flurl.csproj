@@ -53,7 +53,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>if $(ConfigurationName) == Release (
-call $(SolutionDir)Build\publish.cmd $(SolutionDir)Build\ Flurl.nuspec $(SolutionDir)Publish &gt;&gt; $(SolutionDir)Build\publish.log
+call $(SolutionDir)Build\nuget.exe pack $(SolutionDir)Build\Flurl.nuspec  -OutputDirectory $(SolutionDir)Publish &gt;&gt; $(SolutionDir)Build\publish.log
 )</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
