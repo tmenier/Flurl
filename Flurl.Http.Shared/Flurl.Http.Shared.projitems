@@ -27,7 +27,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)HttpCall.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpStatusRangeParser.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Properties\AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpResponseMessageExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Testing\FakeHttpMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Testing\HttpCallAssertException.cs" />

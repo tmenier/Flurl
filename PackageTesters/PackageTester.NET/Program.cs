@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PackageTester
 {
-    public class Program
-    {
+	public class Program
+	{
 		static void Main(string[] args) {
 			Cleanup();
-			new NetCoreTester().DoTestsAsync(Console.WriteLine).Wait();
+			new NetTester().DoTestsAsync(Console.WriteLine).Wait();
 			Cleanup();
 			Console.ReadLine();
 		}

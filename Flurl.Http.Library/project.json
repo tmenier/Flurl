@@ -1,24 +1,23 @@
 ﻿{
-  "version": "1.0.0",
   "title": "Flurl.Http",
+  "version": "1.0.0",
 
   "dependencies": {
-    "Flurl": "2.0.0",
+    "Flurl": "2.1.0",
     "Newtonsoft.Json": "8.0.3"
   },
 
   "buildOptions": {
     "compile": {
-      "include": [ "../Flurl.Http.Shared/**/*.cs", "../Flurl.Http.NET45/**/*.cs" ],
-      "exclude": [ "../**/AssemblyInfo.cs" ]
+      "include": [ "../Flurl.Http.Shared/**/*.cs" ]
     },
-    "xmlDoc": true,
     "optimize": true,
-    "outputName": "Flurl.Http"
+    "outputName": "Flurl.Http",
+    "xmlDoc": true
   },
 
   "frameworks": {
-    "netstandard1.4": {
+    "netstandard1.1": {
       "imports": "dnxcore50",
       "dependencies": {
         "System.Dynamic.Runtime": "4.0.10",

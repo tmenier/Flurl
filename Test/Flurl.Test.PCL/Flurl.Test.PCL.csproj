@@ -70,12 +70,9 @@
       <Project>{4c163dd1-318a-42c0-acf2-9e0d766d8900}</Project>
       <Name>Flurl.Http.PCL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Flurl\Flurl.csproj">
-      <Project>{70a34167-759e-4902-82e0-e6a84c2ce46f}</Project>
-      <Name>Flurl</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="..\Flurl.Test.Shared\Flurl.Test.Shared.projitems" Label="Shared" Condition="Exists('..\Flurl.Test.Shared\Flurl.Test.Shared.projitems')" />
+  <Import Project="..\..\Flurl.Shared\Flurl.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

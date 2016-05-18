@@ -41,20 +41,57 @@
 		</releaseNotes>
 		<tags>httpclient rest json http fluent portable url uri tdd assert async</tags>
 		<dependencies>
-			<group targetFramework="net45">
+			<group>
 				<dependency id="Newtonsoft.Json" version="8.0.3" />
 				<dependency id="Flurl" version="2.1.0" />
 			</group>
-			<group targetFramework="portable-net45+win+wpa81+wp80">
+			<group targetFramework="MonoAndroid1.0">
 				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
 				<dependency id="Microsoft.Net.Http" version="2.2.29" />
 				<dependency id="PCLStorage" version="1.0.2" />
-				<dependency id="Newtonsoft.Json" version="8.0.3" />
-				<dependency id="Flurl" version="2.1.0" />
 			</group>
+			<group targetFramework="MonoTouch1.0">
+				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
+				<dependency id="Microsoft.Net.Http" version="2.2.29" />
+				<dependency id="PCLStorage" version="1.0.2" />
+			</group>
+			<group targetFramework="Windows8.0">
+				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
+				<dependency id="Microsoft.Net.Http" version="2.2.29" />
+				<dependency id="PCLStorage" version="1.0.2" />
+			</group>
+			<group targetFramework="WindowsPhoneApp8.1">
+				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
+				<dependency id="Microsoft.Net.Http" version="2.2.29" />
+				<dependency id="PCLStorage" version="1.0.2" />
+			</group>
+			<group targetFramework="Xamarin.iOS1.0">
+				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
+				<dependency id="Microsoft.Net.Http" version="2.2.29" />
+				<dependency id="PCLStorage" version="1.0.2" />
+			</group>
+			<group targetFramework="Xamarin.Mac2.0">
+				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
+				<dependency id="Microsoft.Net.Http" version="2.2.29" />
+				<dependency id="PCLStorage" version="1.0.2" />
+			</group>
+			<group targetFramework="Xamarin.TVOS1.0">
+				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
+				<dependency id="Microsoft.Net.Http" version="2.2.29" />
+				<dependency id="PCLStorage" version="1.0.2" />
+			</group>
+			<group targetFramework="Xamarin.WatchOS1.0">
+				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
+				<dependency id="Microsoft.Net.Http" version="2.2.29" />
+				<dependency id="PCLStorage" version="1.0.2" />
+			</group>
+			<group targetFramework="portable45-net45+win8+wpa81">
+				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
+				<dependency id="Microsoft.Net.Http" version="2.2.29" />
+				<dependency id="PCLStorage" version="1.0.2" />
+			</group>
+	                <group targetFramework="net45" />
 			<group targetFramework=".NETStandard1.4">
-				<dependency id="Flurl" version="2.1.0" />
-				<dependency id="Newtonsoft.Json" version="8.0.3" />
 				<dependency id="System.Dynamic.Runtime" version="4.0.10" />
 				<dependency id="System.IO.FileSystem" version="4.0.0" />
 				<dependency id="System.Net.Http" version="4.0.0" />
@@ -64,8 +101,7 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="..\Flurl.Http.NET45\bin\Release\Flurl.Http.*" target="lib\net45" />
-		<file src="..\Flurl.Http.PCL\bin\Release\Flurl.Http.*" target="lib\portable-net45+win+wpa81+wp80" />
-		<file src="..\Flurl.Http.NETCore\bin\Release\netstandard1.4\Flurl.Http.*" target="lib\netstandard1.4" />
+		<file src="..\Flurl.Http.PCL\bin\Release\Flurl.Http.*" target="lib\portable-net45+win8+wpa81" />
+		<file src="..\Flurl.Http.Library\bin\Release\**\Flurl.Http.*" target="lib\" />
 	</files>
 </package>

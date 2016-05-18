@@ -7,15 +7,19 @@ using System.Reflection;
 
 namespace Flurl.Util
 {
+	/// <summary>
+	/// CommonExtensions for objects.
+	/// </summary>
 	public static class CommonExtensions
 	{
-		/// <summary>
-		/// Converts an object's public properties to a collection of string-based key-value pairs. If the object happens
-		/// to be an IDictionary, the IDictionary's keys and values converted to strings and returned.
-		/// </summary>
-		/// <param name="obj">The object to parse into key-value pairs</param>
-		/// <returns></returns>
-		public static IEnumerable<KeyValuePair<string, object>> ToKeyValuePairs(this object obj) {
+	    /// <summary>
+	    /// Converts an object's public properties to a collection of string-based key-value pairs. If the object happens
+	    /// to be an IDictionary, the IDictionary's keys and values converted to strings and returned.
+	    /// </summary>
+	    /// <param name="obj">The object to parse into key-value pairs</param>
+	    /// <returns></returns>
+	    /// <exception cref="ArgumentNullException"><paramref name="obj"/> is <see langword="null" />.</exception>
+	    public static IEnumerable<KeyValuePair<string, object>> ToKeyValuePairs(this object obj) {
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
@@ -53,7 +57,7 @@ namespace Flurl.Util
 		}
 
 		private static IEnumerable<KeyValuePair<string, object>> CollectionToKV(IEnumerable col) {
-			// Accepts KeyValuePairs or any aribitray types that contain a property called "Key" or "Name" and a property called "Value".
+			// Accepts KeyValuePairs or any arbitrary types that contain a property called "Key" or "Name" and a property called "Value".
 			foreach (var item in col) {
 				if (item == null)
 					continue;

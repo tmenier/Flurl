@@ -33,11 +33,12 @@ namespace Flurl
 		/// </summary>
 		public string Fragment { get; set; }
 
-		/// <summary>
-		/// Constructs a Url object from a string.
-		/// </summary>
-		/// <param name="baseUrl">The URL to use as a starting point (required)</param>
-		public Url(string baseUrl) {
+	    /// <summary>
+	    /// Constructs a Url object from a string.
+	    /// </summary>
+	    /// <param name="baseUrl">The URL to use as a starting point (required)</param>
+	    /// <exception cref="ArgumentNullException"><paramref name="baseUrl"/> is <see langword="null" />.</exception>
+	    public Url(string baseUrl) {
 			if (baseUrl == null)
 				throw new ArgumentNullException(nameof(baseUrl));
 
@@ -51,8 +52,7 @@ namespace Flurl
 		/// <summary>
 		/// Parses a URL query to a QueryParamCollection dictionary.
 		/// </summary>
-		/// <param name="queryString">The URL query to parse.</param>
-		/// <returns></returns>
+		/// <param name="query">The URL query to parse.</param>
 		public static QueryParamCollection ParseQueryParams(string query) {
 			var result = new QueryParamCollection();
 
@@ -70,16 +70,16 @@ namespace Flurl
 			return result;
 		}
 
-		/// <summary>
-		/// Basically a Path.Combine for URLs. Ensures exactly one '/' character is used to seperate each segment.
-		/// URL-encodes illegal characters but not reserved characters.
-		/// </summary>
-		/// <param name="url">The URL to use as a starting point (required).</param>
-		/// <param name="segments">Paths to combine.</param>
-		/// <returns></returns>
-		public static string Combine(string url, params string[] segments) {
+	    /// <summary>
+	    /// Basically a Path.Combine for URLs. Ensures exactly one '/' character is used to seperate each segment.
+	    /// URL-encodes illegal characters but not reserved characters.
+	    /// </summary>
+	    /// <param name="url">The URL to use as a starting point (required).</param>
+	    /// <param name="segments">Paths to combine.</param>
+	    /// <exception cref="ArgumentNullException"><paramref name="url"/> is <see langword="null" />.</exception>
+	    public static string Combine(string url, params string[] segments) {
 			if (url == null)
-				throw new ArgumentNullException("url");
+				throw new ArgumentNullException(nameof(url));
 
 			return new Url(url).AppendPathSegments(segments).ToString();
 		}
@@ -125,13 +125,13 @@ namespace Flurl
 			return Uri.EscapeUriString(unescaped).Replace("?", "%3F");
 		}
 
-		/// <summary>
-		/// Appends a segment to the URL path, ensuring there is one and only one '/' character as a seperator.
-		/// </summary>
-		/// <param name="segment">The segment to append</param>
-		/// <param name="encode">If true, URL-encode the segment where necessary</param>
-		/// <returns>the Url object with the segment appended</returns>
-		public Url AppendPathSegment(object segment) {
+	    /// <summary>
+	    /// Appends a segment to the URL path, ensuring there is one and only one '/' character as a seperator.
+	    /// </summary>
+	    /// <param name="segment">The segment to append</param>
+	    /// <returns>the Url object with the segment appended</returns>
+	    /// <exception cref="ArgumentNullException"><paramref name="segment"/> is <see langword="null" />.</exception>
+	    public Url AppendPathSegment(object segment) {
 			if (segment == null)
 				throw new ArgumentNullException(nameof(segment));
 
@@ -164,13 +164,14 @@ namespace Flurl
 			return this;
 		}
 
-		/// <summary>
-		/// Adds a parameter to the query, overwriting the value if name exists.
-		/// </summary>
-		/// <param name="name">Name of query parameter</param>
-		/// <param name="value">Value of query parameter</param>
-		/// <returns>The Url obect with the query parameter added</returns>
-		public Url SetQueryParam(string name, object value) {
+	    /// <summary>
+	    /// Adds a parameter to the query, overwriting the value if name exists.
+	    /// </summary>
+	    /// <param name="name">Name of query parameter</param>
+	    /// <param name="value">Value of query parameter</param>
+	    /// <returns>The Url object with the query parameter added</returns>
+	    /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
+	    public Url SetQueryParam(string name, object value) {
 			if (name == null)
 				throw new ArgumentNullException(nameof(name), "Query parameter name cannot be null.");
 
@@ -178,14 +179,15 @@ namespace Flurl
 			return this;
 		}
 
-		/// <summary>
-		/// Adds a parameter to the query, overwriting the value if name exists.
-		/// </summary>
-		/// <param name="name">Name of query parameter</param>
-		/// <param name="value">Value of query parameter</param>
-		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded (typically false)</param>
-		/// <returns>The Url obect with the query parameter added</returns>
-		public Url SetQueryParam(string name, string value, bool isEncoded) {
+	    /// <summary>
+	    /// Adds a parameter to the query, overwriting the value if name exists.
+	    /// </summary>
+	    /// <param name="name">Name of query parameter</param>
+	    /// <param name="value">Value of query parameter</param>
+	    /// <param name="isEncoded">Set to true to indicate the value is already URL-encoded (typically false)</param>
+	    /// <returns>The Url object with the query parameter added</returns>
+	    /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
+	    public Url SetQueryParam(string name, string value, bool isEncoded) {
 			if (name == null)
 				throw new ArgumentNullException(nameof(name), "Query parameter name cannot be null.");
 
@@ -263,7 +265,7 @@ namespace Flurl
 		/// Checks if this URL is a well-formed.
 		/// </summary>
 		/// <returns>true if this is a well-formed URL</returns>
-		public bool IsValid() => IsValid(this.ToString());
+		public bool IsValid() => IsValid(ToString());
 
 		/// <summary>
 		/// Checks if a string is a well-formed URL.
