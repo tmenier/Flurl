@@ -11,10 +11,8 @@ install:
   - ps: .\build\scripts\install.ps1
 
 build_script:
-  - ps: .\build\scripts\show-dotnet-info.ps1
-  # dotnet info
-  - cmd: .\build\build.cmd  
-  - cmd: .\build\pack.flurl.cmd  
+  - cmd: call .\build\build.cmd  
+  - cmd: call .\build\pack.flurl.cmd  
 
 artifacts:
   - path: '**\*.nupkg'
