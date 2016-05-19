@@ -1,3 +1,3 @@
-cd ..\src\Flurl.Library\
-call dotnet restore
-call dotnet build --configuration Release
+set project=..\src\Flurl.Library\
+call dotnet restore %project%
+call dotnet build -c Release %project%
