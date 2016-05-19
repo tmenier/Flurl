@@ -1,7 +1,8 @@
-﻿using System.Linq;
+﻿#if NETSTD
+using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using PCLStorage;
 
 namespace Flurl.Http
 {
@@ -18,8 +19,10 @@ namespace Flurl.Http
 			if (localFileName == null)
 				localFileName = client.Url.Path.Split('/').Last();
 
-			var folder = await EnsureFolderAsync(localFolderPath).ConfigureAwait(false);
-			var file = await folder.CreateFileAsync(localFileName, CreationCollisionOption.ReplaceExisting).ConfigureAwait(false);
+			if (!Directory.Exists(localFolderPath))
+				Directory.CreateDirectory(localFolderPath);
+
+			var filePath = Path.Combine(localFolderPath, localFileName);
 
 			// need to temporarily disable autodispose if set, otherwise reading from stream will fail
 			var autoDispose = client.AutoDispose;
@@ -30,11 +33,11 @@ namespace Flurl.Http
 
 				// http://codereview.stackexchange.com/a/18679
 				using (var httpStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
-				using (var filestream = await file.OpenAsync(FileAccess.ReadAndWrite).ConfigureAwait(false)) {
+				using (var filestream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, useAsync: true)) {
 					await httpStream.CopyToAsync(filestream, bufferSize).ConfigureAwait(false);
 				}
 
-				return PortablePath.Combine(localFolderPath, localFileName);
+				return filePath;
 			}
 			finally {
 				client.AutoDispose = autoDispose;
@@ -63,9 +66,6 @@ namespace Flurl.Http
 		public static Task<string> DownloadFileAsync(this Url url, string localFolderPath, string localFileName = null, int bufferSize = 4096) {
 			return new FlurlClient(url, true).DownloadFileAsync(localFolderPath, localFileName, bufferSize);
 		}
-
-		private static Task<IFolder> EnsureFolderAsync(string path) {
-			return FileSystem.Current.LocalStorage.CreateFolderAsync(path, CreationCollisionOption.OpenIfExists);
-		}
 	}
 }
+#endif

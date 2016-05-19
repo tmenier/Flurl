@@ -4,6 +4,6 @@ namespace Flurl.Http
 {
 	internal static class NoOpTask
 	{
-		public static readonly Task Instance = Task.FromResult(0);
+		public static readonly Task Instance = TaskEx.FromResult(0);
 	}
 }

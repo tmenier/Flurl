@@ -8,7 +8,6 @@
 
   "frameworks": {
     "net45": { },
-    "net461": { },
     "netcoreapp1.0": {
       "imports": "dnxcore50",
       "dependencies": {
@@ -20,7 +19,7 @@
     }
   },
   "dependencies": {
-    "Flurl": "2.1.0",
-    "Flurl.Http": "1.0.0"
+    "Flurl": "2.1.0-beta2",
+    "Flurl.Http": "1.0.0-beta"
   }
 }
