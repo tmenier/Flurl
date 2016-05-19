@@ -49,11 +49,11 @@ namespace Flurl.Test.Http
 			return HttpStatusRangeParser.IsMatch(pattern, value);
 		}
 
-		[TestCase("-100", ExpectedException = typeof(ArgumentException))]
-		[TestCase("100-", ExpectedException = typeof(ArgumentException))]
-		[TestCase("1yy", ExpectedException = typeof(ArgumentException))]
+		[TestCase("-100")]
+		[TestCase("100-")]
+		[TestCase("1yy")]
 		public void parser_throws_on_invalid_pattern(string pattern) {
-			var x = HttpStatusRangeParser.IsMatch(pattern, 100);
+            Assert.Throws<ArgumentException>(() => HttpStatusRangeParser.IsMatch(pattern, 100));
 		}
     }
 }

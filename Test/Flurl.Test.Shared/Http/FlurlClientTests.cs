@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿#if !NETSTD
+using System.Linq;
 using Flurl.Http;
 using NUnit.Framework;
 
@@ -29,3 +30,4 @@ namespace Flurl.Test.Http
 		}
 	}
 }
+#endif

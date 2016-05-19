@@ -98,9 +98,9 @@ namespace Flurl.Test.Http
 			Assert.Greater(bytes.Length, 0);
 		}
 
-		[Test, ExpectedException(typeof(FlurlHttpException))]
-		public async Task fails_on_non_success_status() {
-			await "http://httpbin.org/status/418".GetAsync();
+		[Test]
+		public void fails_on_non_success_status() {
+			Assert.ThrowsAsync<FlurlHttpException>(async () => await "http://httpbin.org/status/418".GetAsync());
 		}
 
 		[Test]

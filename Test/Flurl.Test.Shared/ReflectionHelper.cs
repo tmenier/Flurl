@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETSTD
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -108,3 +109,4 @@ namespace Flurl.Test
 		}
 	}
 }
+#endif
