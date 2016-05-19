@@ -1,4 +1,6 @@
 ﻿{
+  "name": "Flurl.Test",
+
   "buildOptions": {
     "compile": {
       "include": [ "../Flurl.Test.Shared/**/*.cs", "../../src/Flurl.Shared/**/*.cs", "../../src/Flurl.Http.Shared/**/*.cs" ]
@@ -6,9 +8,15 @@
     "emitEntryPoint": true
   },
 
+  "commands": {
+    "test": "Flurl.Test"
+  },
+
   "dependencies": {
     "NUnitLite": "3.2.1",
-    "Newtonsoft.Json": "8.0.3"
+    "Newtonsoft.Json": "8.0.3",
+    "System.Reflection": "4.1.0-rc2-*",
+    "System.Runtime.Serialization.Primitives": "4.1.1-rc2-*"
   },
 
   "frameworks": {
@@ -20,7 +28,7 @@
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.0.0-rc2-3002702"
+          "version": "1.0.0-rc2-*"
         }
       }
     }

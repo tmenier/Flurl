@@ -13,6 +13,10 @@ install:
 build_script:
   - cmd: call .\build\build.cmd  
   - cmd: call .\build\pack.flurl.cmd  
+#  - cmd: call .\build\pack.flurl.http.cmd  
+
+test_script:
+  - cmd: .\build\test.cmd
 
 artifacts:
   - path: '**\*.nupkg'

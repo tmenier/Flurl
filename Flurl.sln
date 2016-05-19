@@ -40,14 +40,14 @@ Global
 		Test\Flurl.Test.Shared\Flurl.Test.Shared.projitems*{4c7c0861-84f6-436e-8fa6-4c318b336a7b}*SharedItemsImports = 13
 		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{19c1befd-9df7-4efa-9d7d-37b0dc6eef54}*SharedItemsImports = 13
 		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{49b676ba-5d42-42b4-a8d5-da5c11560c08}*SharedItemsImports = 4
-		Test\Flurl.Test.Shared\Flurl.Test.Shared.projitems*{49cb777f-d13d-401a-9206-48a6b2ecb276}*SharedItemsImports = 4
 		src\Flurl.Shared\Flurl.Shared.projitems*{49cb777f-d13d-401a-9206-48a6b2ecb276}*SharedItemsImports = 4
 		src\Flurl.Http.Shared\Flurl.Http.Shared.projitems*{49cb777f-d13d-401a-9206-48a6b2ecb276}*SharedItemsImports = 4
+		Test\Flurl.Test.Shared\Flurl.Test.Shared.projitems*{49cb777f-d13d-401a-9206-48a6b2ecb276}*SharedItemsImports = 4
 		src\Flurl.Http.Shared\Flurl.Http.Shared.projitems*{734e6962-97e2-4318-9a2d-c87e76921afb}*SharedItemsImports = 13
 		src\Flurl.Shared\Flurl.Shared.projitems*{ed944c76-9613-474e-9861-54e41a3e77cd}*SharedItemsImports = 13
-		Test\Flurl.Test.Shared\Flurl.Test.Shared.projitems*{3f6be828-fa29-429e-99e1-f1fcdfdc1205}*SharedItemsImports = 4
 		src\Flurl.Shared\Flurl.Shared.projitems*{3f6be828-fa29-429e-99e1-f1fcdfdc1205}*SharedItemsImports = 4
 		src\Flurl.Http.Shared\Flurl.Http.Shared.projitems*{3f6be828-fa29-429e-99e1-f1fcdfdc1205}*SharedItemsImports = 4
+		Test\Flurl.Test.Shared\Flurl.Test.Shared.projitems*{3f6be828-fa29-429e-99e1-f1fcdfdc1205}*SharedItemsImports = 4
 		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{e593c013-23c2-40a2-b4e5-984f13005a52}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
