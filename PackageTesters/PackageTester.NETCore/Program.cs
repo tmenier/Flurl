@@ -1,22 +1,16 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
 
-namespace PackageTester.NET461
+namespace PackageTester
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-            TestAllPlatformsAsync().Wait();
+            Cleanup();
+            new NetCoreTester().DoTestsAsync(Console.WriteLine).Wait();
+            Cleanup();
             Console.ReadLine();
-        }
-
-        private static async Task TestAllPlatformsAsync()
-        {
-            Cleanup();
-            await new Net461Tester().DoTestsAsync(Console.WriteLine);
-            Cleanup();
         }
 
         private static void Cleanup()

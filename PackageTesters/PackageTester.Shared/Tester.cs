@@ -17,7 +17,7 @@ namespace PackageTester
 				log("^-- fake response");
 			}
 
-			var path = await "http://www.google.com".DownloadFileAsync("c:\\flurl", "google.txt");
+			var path = await "http://www.google.com".DownloadFileAsync("c:\\", "google.txt");
 			log("dowloaded google source to " + path);
 			log("done");
 		}

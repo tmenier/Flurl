@@ -1,11 +1,13 @@
-﻿#if NETSTD
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Flurl.Http
 {
-	internal static class NoOpTask
-	{
-		public static readonly Task Instance = Task.FromResult(0);
-	}
-}
+    internal static class NoOpTask
+    {
+#if NETSTD
+        public static readonly Task Instance = Task.FromResult(0);
+#elif PORTABLE
+        public static readonly Task Instance = TaskEx.FromResult(0);
 #endif
+    }
+}

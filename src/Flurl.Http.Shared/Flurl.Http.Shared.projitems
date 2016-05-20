@@ -22,7 +22,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Content\CapturedStringContent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CookieExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DownloadExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DownloadExtensionsPCL.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlurlClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlurlHttp.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlurlHttpException.cs" />
@@ -31,7 +30,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)HttpStatusRangeParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpResponseMessageExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NoOpTask.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)NoOpTaskPCL.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Testing\FakeHttpMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Testing\HttpCallAssertException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Testing\HttpCallAssertion.cs" />
