@@ -1,0 +1,52 @@
+﻿{
+  "title": "Flurl.Http",
+  "version": "1.0.0-beta2",
+
+  "dependencies": {
+    "Flurl": "2.1.0-beta2",
+    "Newtonsoft.Json": "8.0.3"
+  },
+
+  "buildOptions": {
+    "compile": {
+      "include": [ "../Flurl.Http.Shared/**/*.cs" ]
+    },
+    "optimize": true,
+    "outputName": "Flurl.Http",
+    "xmlDoc": true
+  },
+
+  "frameworks": {
+    "portable45-net45+win8+wpa81": {
+      "buildOptions": { 
+        "define": [ "PORTABLE" ] },
+      "dependencies": {
+        "Microsoft.Bcl.Async": "1.0.168",
+        "Microsoft.Net.Http": "2.2.29",
+        "PCLStorage": "1.0.2"
+      },
+      "frameworkAssemblies": {
+        "System.Collections": "4.0.0.0",
+        "System.Dynamic.Runtime": "4.0.0.0",
+        "System.Linq": "4.0.0.0",
+        "System.Runtime.Extensions": "4.0.0.0",
+        "System.Text.Encoding": "4.0.0.0",
+        "System.Text.RegularExpressions": "4.0.0.0",
+        "System.Threading": "4.0.0.0"
+      }
+    },
+    "netstandard1.4": {
+      "buildOptions": { 
+        "define": [ "NETSTD" ] },
+      "imports": "dnxcore50",
+      "dependencies": {
+        "System.Dynamic.Runtime": "4.0.10",
+        "System.IO.FileSystem": "4.0.0",
+        "System.Net.Http": "4.0.0",
+        "System.Runtime.Serialization.Primitives": "4.0.10",
+        "System.Text.RegularExpressions": "4.0.10",
+        "System.Threading": "4.0.10"
+      }
+    }
+  }
+}

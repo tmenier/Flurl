@@ -1,0 +1,24 @@
+{
+  "title": "Flurl",
+  "version": "2.1.0-beta2",
+
+  "buildOptions": {
+    "compile": {
+      "include": "../Flurl.Shared/**/*.cs"
+    },
+    "optimize": true,
+    "outputName": "Flurl",
+    "xmlDoc": true
+  },
+
+  "frameworks": {
+    "net40": { },
+    "netstandard1.1": {
+      "imports": "dotnet51",
+      "dependencies": {
+        "System.Linq": "4.0.0",
+        "System.Reflection.TypeExtensions": "4.0.0"
+      }
+    }
+  }
+}

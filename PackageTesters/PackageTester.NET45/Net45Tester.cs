@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PackageTester
+﻿namespace PackageTester.NET45
 {
-	class Net45Tester : Tester { }
+	public class Net45Tester : Tester { }
 }

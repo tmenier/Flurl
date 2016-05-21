@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Flurl.Http.Testing;
@@ -19,7 +17,7 @@ namespace PackageTester
 				log("^-- fake response");
 			}
 
-			var path = await "http://www.google.com".DownloadFileAsync("c:\\flurl", "google.txt");
+			var path = await "http://www.google.com".DownloadFileAsync("c:\\", "google.txt");
 			log("dowloaded google source to " + path);
 			log("done");
 		}

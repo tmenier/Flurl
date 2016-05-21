@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using NUnit.Framework;
 using Flurl.Util;
 
 namespace Flurl.Test
 {
 	[TestFixture]
-    public class CommonExtensionsTests
-    {
+	public class CommonExtensionsTests
+	{
 		[Test]
-		public void can_parse_object_to_kv() {
+		public void can_parse_object_to_kv()
+		{
 			var kv = new { one = 1, two = 2, three = "foo" }.ToKeyValuePairs();
 			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
 				{ "one", 1 },
@@ -21,7 +21,8 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void can_parse_dictionary_to_kv() {
+		public void can_parse_dictionary_to_kv()
+		{
 			var kv = new Dictionary<string, object> {
 				{ "one", 1 },
 				{ "two", 2 },
@@ -36,7 +37,8 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void can_parse_collection_of_kvp_to_kv() {
+		public void can_parse_collection_of_kvp_to_kv()
+		{
 			var kv = new[] {
 				new KeyValuePair<object, object>("one", 1),
 				new KeyValuePair<object, object>("two", 2),
@@ -51,7 +53,8 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void can_parse_collection_of_conventional_objects_to_kv() {
+		public void can_parse_collection_of_conventional_objects_to_kv()
+		{
 			// convention is to accept collection of any arbitrary type that contains
 			// a property called Key or Name and a property called Value
 			var kv = new object[] {
@@ -71,7 +74,8 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void can_parse_string_to_kv() {
+		public void can_parse_string_to_kv()
+		{
 			var kv = "one=1&two=2&three=foo".ToKeyValuePairs();
 
 			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
@@ -81,18 +85,21 @@ namespace Flurl.Test
 			}, kv);
 		}
 
-		[Test, ExpectedException(typeof(ArgumentNullException))]
-		public void cannot_parse_null_to_kv() {
+		[Test]
+		public void cannot_parse_null_to_kv()
+		{
 			object obj = null;
-			var kv = obj.ToKeyValuePairs();
+			Assert.Throws<ArgumentNullException>(() => obj.ToKeyValuePairs());
 		}
 
-		[Test, ExpectedException(typeof(ArgumentException))]
-		public void cannot_parse_unknown_collection_to_kv() {
+		[Test]
+		public void cannot_parse_unknown_collection_to_kv()
+		{
 			var kv = new object[] {
 				new { Key = "one", Value = 1 },
 				new { Foo = "two", value = 2 }
-			}.ToKeyValuePairs().ToList(); // need to force it to iterate for the exception to be thrown
+			};
+			Assert.Throws<ArgumentException>(() => kv.ToKeyValuePairs().ToList());// need to force it to iterate for the exception to be thrown
 		}
 	}
 }

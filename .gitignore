@@ -8,3 +8,4 @@ packages
 .vs
 *.lock.json
 *.log
+.vscode
