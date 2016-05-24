@@ -15,12 +15,27 @@ namespace Flurl.Http
 		/// </summary>
 		public HttpCall Call { get; private set; }
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlHttpException"/> class.
+		/// </summary>
+		/// <param name="call">The call.</param>
+		/// <param name="message">The message.</param>
+		/// <param name="inner">The inner.</param>
 		public FlurlHttpException(HttpCall call, string message, Exception inner) : base(message, inner) {
 			this.Call = call;
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlHttpException"/> class.
+		/// </summary>
+		/// <param name="call">The call.</param>
+		/// <param name="inner">The inner.</param>
 		public FlurlHttpException(HttpCall call, Exception inner) : this(call, BuildMessage(call, inner), inner) { }
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlHttpException"/> class.
+		/// </summary>
+		/// <param name="call">The call.</param>
 		public FlurlHttpException(HttpCall call) : this(call, BuildMessage(call, null), null) { }
 
 		private static string BuildMessage(HttpCall call, Exception inner) {
@@ -30,7 +45,7 @@ namespace Flurl.Http
 					(int) call.Response.StatusCode,
 					call.Response.ReasonPhrase);
 			}
-			else if (inner != null) {
+			if (inner != null) {
 				return string.Format("Request to {0} failed. {1}",
 					call.Request.RequestUri.AbsoluteUri, inner.Message);
 			}
@@ -43,7 +58,7 @@ namespace Flurl.Http
 		/// Gets the response body of the failed call.
 		/// </summary>
 		public string GetResponseString() {
-			return (Call == null) ? null : Call.ErrorResponseBody;
+			return Call?.ErrorResponseBody;
 		}
 
 		/// <summary>
@@ -72,6 +87,11 @@ namespace Flurl.Http
 	/// </summary>
 	public class FlurlHttpTimeoutException : FlurlHttpException
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlHttpTimeoutException"/> class.
+		/// </summary>
+		/// <param name="call">The call.</param>
+		/// <param name="inner">The inner.</param>
 		public FlurlHttpTimeoutException(HttpCall call, Exception inner) : base(call, BuildMessage(call), inner) { }
 
 		private static string BuildMessage(HttpCall call) {

@@ -10,7 +10,18 @@ namespace Flurl.Http.Configuration
 	/// </summary>
 	public interface IHttpClientFactory
 	{
+		/// <summary>
+		/// Creates the client.
+		/// </summary>
+		/// <param name="url">The URL.</param>
+		/// <param name="handler">The handler.</param>
+		/// <returns></returns>
 		HttpClient CreateClient(Url url, HttpMessageHandler handler);
+		
+		/// <summary>
+		/// Creates the message handler.
+		/// </summary>
+		/// <returns></returns>
 		HttpMessageHandler CreateMessageHandler();
 	}
 }

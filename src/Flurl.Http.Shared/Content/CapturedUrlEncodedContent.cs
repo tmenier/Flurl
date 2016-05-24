@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 
 namespace Flurl.Http.Content
 {
@@ -10,8 +8,12 @@ namespace Flurl.Http.Content
 	/// </summary>
 	public class CapturedUrlEncodedContent : CapturedStringContent
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CapturedUrlEncodedContent"/> class.
+		/// </summary>
+		/// <param name="data">The data.</param>
 		public CapturedUrlEncodedContent(string data) : base(data) {
-			this.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+			Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 		}
 	}
 }

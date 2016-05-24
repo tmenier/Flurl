@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace Flurl.Http.CodeGen
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        internal static void Main(string[] args)
         {
             if (args.Length == 0)
             {
@@ -31,6 +31,9 @@ namespace Flurl.Http.CodeGen
                         .WriteLine("")
                         .WriteLine("namespace Flurl.Http")
                         .WriteLine("{")
+                        .WriteLine("    /// <summary>")
+                        .WriteLine("/// Http extensions for Flurl Client.")
+                        .WriteLine("/// </summary>")
                         .WriteLine("public static class HttpExtensions")
                         .WriteLine("{");
 
@@ -63,6 +66,12 @@ namespace Flurl.Http.CodeGen
                 writer.WriteLine("/// </summary>");
                 if (xm.BodyType != null)
                     writer.WriteLine("/// <param name=\"data\">Contents of the request body.</param>");
+                if (xm.ExtentionOfType == "FlurlClient")
+                    writer.WriteLine("/// <param name=\"client\">The Flurl client.</param>");
+                if (xm.ExtentionOfType == "Url")
+                    writer.WriteLine("/// <param name=\"url\">The URL.</param>");
+                if (xm.ExtentionOfType == "string")
+                    writer.WriteLine("/// <param name=\"url\">The URL.</param>");
                 if (xm.HasCancelationToken)
                     writer.WriteLine("/// <param name=\"cancellationToken\">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>");
                 writer.WriteLine("/// <returns>A Task whose result is @0.</returns>", xm.ReturnTypeDescription);

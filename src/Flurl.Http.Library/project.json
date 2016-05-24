@@ -1,6 +1,6 @@
 ﻿{
   "title": "Flurl.Http",
-  "version": "1.0.0-beta2",
+  "version": "1.0.0-beta3",
 
   "dependencies": {
     "Flurl": "2.1.0-beta2",
@@ -43,7 +43,7 @@
         "System.Dynamic.Runtime": "4.0.10",
         "System.IO.FileSystem": "4.0.0",
         "System.Net.Http": "4.0.0",
-        "System.Runtime.Serialization.Primitives": "4.0.10",
+        "System.Runtime.Serialization.Primitives": "4.1.0",
         "System.Text.RegularExpressions": "4.0.10",
         "System.Threading": "4.0.10"
       }

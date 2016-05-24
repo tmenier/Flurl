@@ -18,7 +18,11 @@ namespace Flurl.Http.Testing
 			Content = new StringContent("")
 		};
 
-		public HttpTest() {
+	    /// <summary>
+	    /// Initializes a new instance of the <see cref="HttpTest"/> class.
+	    /// </summary>
+	    /// <exception cref="Exception">A delegate callback throws an exception.</exception>
+	    public HttpTest() {
 			FlurlHttp.Configure(settings => {
 				settings.HttpClientFactory = new TestHttpClientFactory(this);
 				settings.AfterCall = call => CallLog.Add(call);
@@ -66,7 +70,6 @@ namespace Flurl.Http.Testing
 		/// <summary>
 		/// Adds a simulated timeout response to the response queue.
 		/// </summary>
-		/// <returns></returns>
 		public HttpTest SimulateTimeout() {
 			ResponseQueue.Enqueue(new TimeoutResponseMessage());
 			return this;
@@ -91,7 +94,7 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		/// <param name="urlPattern">URL that should have been called. Can include * wildcard character.</param>
 		public HttpCallAssertion ShouldHaveCalled(string urlPattern) {
-			return new HttpCallAssertion(this.CallLog, false).WithUrlPattern(urlPattern);
+			return new HttpCallAssertion(CallLog).WithUrlPattern(urlPattern);
 		}
 
 		/// <summary>
@@ -99,9 +102,12 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		/// <param name="urlPattern">URL that should not have been called. Can include * wildcard character.</param>
 		public HttpCallAssertion ShouldNotHaveCalled(string urlPattern) {
-			return new HttpCallAssertion(this.CallLog, true).WithUrlPattern(urlPattern);
+			return new HttpCallAssertion(CallLog, true).WithUrlPattern(urlPattern);
 		}
 
+		/// <summary>
+		/// Releases unmanaged and - optionally - managed resources.
+		/// </summary>
 		public void Dispose() {
 			FlurlHttp.GlobalSettings.ResetDefaults();
 		}

@@ -23,9 +23,10 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// Provides thread-safe accesss to Flurl.Http's global configuration settings. Should only be called once at application startup.
+		/// Provides thread-safe access to Flurl.Http's global configuration settings. Should only be called once at application startup.
 		/// </summary>
 		/// <param name="configAction"></param>
+		/// <exception cref="Exception">A delegate callback throws an exception.</exception>
 		public static void Configure(Action<FlurlHttpSettings> configAction) {
 			lock (_configLock) {
 				configAction(GlobalSettings);
@@ -65,5 +66,21 @@ namespace Flurl.Http
 		}
 	}
 
-	public enum FlurlEventType { BeforeCall, AfterCall, OnError }
+	/// <summary>
+	/// Flurl event types/
+	/// </summary>
+	public enum FlurlEventType {
+		/// <summary>
+		/// The before call
+		/// </summary>
+		BeforeCall,
+		/// <summary>
+		/// The after call
+		/// </summary>
+		AfterCall,
+		/// <summary>
+		/// The on error
+		/// </summary>
+		OnError
+	}
 }

@@ -15,7 +15,7 @@
   "dependencies": {
     "NUnitLite": "3.2.1",
     "Newtonsoft.Json": "8.0.3",
-    "System.Runtime.Serialization.Primitives": "4.0.10"
+    "System.Runtime.Serialization.Primitives": "4.1.0"
   },
 
   "frameworks": {
