@@ -1,5 +1,11 @@
 version: 1.0.0-{branch}-{build}
 
+branches:
+  # whitelist
+  only:
+    - master
+    - dev
+
 pull_requests:
   do_not_increment_build_number: true
 
