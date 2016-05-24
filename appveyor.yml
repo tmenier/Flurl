@@ -10,10 +10,10 @@ install:
 
 build_script:
   - ps: .\build\scripts\show-dotnet-info.ps1
-  - cmd: call cmd /k "cd .\build & pack.flurl.cmd & pack.flurl.http.cmd"  
+  - cmd: call cmd /C "cd .\build & pack.flurl.cmd & pack.flurl.http.cmd"  
 
 test_script:
-  - cmd: call test.cmd
+  - cmd: call cmd /C "cd .\build & test.cmd"
 
 artifacts:
   - path: '**\*.nupkg'
