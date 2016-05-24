@@ -13,7 +13,7 @@ build_script:
   - cmd: call cmd /k "cd .\build & pack.flurl.cmd & pack.flurl.http.cmd"  
 
 test_script:
-  - cmd: call cmd /k "cd .\build & test.cmd"
+  - cmd: call test.cmd
 
 artifacts:
   - path: '**\*.nupkg'
