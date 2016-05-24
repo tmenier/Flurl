@@ -1,22 +1,25 @@
 version: 1.0.0-{branch}-{build}
 
+branches:
+  # whitelist
+  only:
+    - master
+    - dev
+
 pull_requests:
   do_not_increment_build_number: true
 
 os: Visual Studio 2015
 
 install:
-  - ps: .\build\scripts\show-dotnet-info.ps1
-  # Download install script to install .NET cli in .dotnet dir
   - ps: .\build\scripts\install.ps1
 
 build_script:
-  - ps: .\build\scripts\show-dotnet-info.ps1  
-  - cmd: call .\build\pack.flurl.cmd  
-  - cmd: call .\build\pack.flurl.http.cmd  
+  - ps: .\build\scripts\show-dotnet-info.ps1
+  - cmd: call cmd /C "cd .\build & pack.flurl.cmd & pack.flurl.http.cmd"  
 
 test_script:
-  - cmd: .\build\test.cmd
+  - cmd: call cmd /C "cd .\build & test.cmd"
 
 artifacts:
   - path: '**\*.nupkg'
