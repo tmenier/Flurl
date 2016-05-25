@@ -13,7 +13,7 @@ namespace Flurl.Http.Testing
 	/// </summary>
 	public class HttpTest : IDisposable
 	{
-		private static readonly HttpResponseMessage _emptyResponse = new HttpResponseMessage {
+		private static readonly HttpResponseMessage EmptyResponse = new HttpResponseMessage {
 			StatusCode = HttpStatusCode.OK,
 			Content = new StringContent("")
 		};
@@ -81,7 +81,7 @@ namespace Flurl.Http.Testing
 		public Queue<HttpResponseMessage> ResponseQueue { get; set; }
 
 		internal HttpResponseMessage GetNextResponse() {
-			return ResponseQueue.Any() ? ResponseQueue.Dequeue() : _emptyResponse;
+			return ResponseQueue.Any() ? ResponseQueue.Dequeue() : EmptyResponse;
 		}
 
 		/// <summary>

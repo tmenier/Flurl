@@ -6,6 +6,7 @@ namespace Flurl.Http.Testing
 	/// <summary>
 	/// An exception thrown by HttpTest's assertion methods to indicate that the assertion failed.
 	/// </summary>
+	[Serializable]
 	public class HttpCallAssertException : Exception
 	{
 		/// <summary>

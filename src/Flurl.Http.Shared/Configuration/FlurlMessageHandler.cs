@@ -58,7 +58,9 @@ namespace Flurl.Http.Configuration
 			if (call.Exception != null && !call.ExceptionHandled)
 				throw call.Exception;
 
-			call.Response.RequestMessage = request;
+			if (call.Response != null)
+				call.Response.RequestMessage = request;
+	
 			return call.Response;
 		}
 	}
