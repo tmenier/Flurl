@@ -9,3 +9,4 @@ packages
 *.lock.json
 *.log
 .vscode
+publish
