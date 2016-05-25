@@ -6,12 +6,16 @@ namespace Flurl.Http.CodeGen
 {
     internal class Program
     {
-        internal static void Main(string[] args)
+        internal static int Main(string[] args)
         {
+            Console.BackgroundColor = ConsoleColor.Black;
+
             if (args.Length == 0)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Must provide a path to the.cs output file.");
+                Console.WriteLine("ERROR: Must provide a path to the.cs output file.");
+                Console.ResetColor();
+                return 2;
             }
 
             var codePath = args[0];
@@ -45,15 +49,18 @@ namespace Flurl.Http.CodeGen
                 }
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("File write without any errors!");
+                Console.WriteLine("File writing succeeded.");
             }
             catch (Exception exception)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Exception! {exception.Message}");
+                Console.WriteLine($"ERROR: {exception.Message}");
+                Console.ResetColor();
+                return 2;
             }
 
             Console.ResetColor();
+            return 0;
         }
 
         private static void WriteExtensionMethods(CodeWriter writer)
