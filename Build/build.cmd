@@ -1,4 +1,4 @@
-call dotnet --info
+@call dotnet --info
 
 @call build.flurl.cmd
 @if ERRORLEVEL 1 (

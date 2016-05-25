@@ -4,17 +4,13 @@ using System.Linq;
 
 namespace Flurl.Http.CodeGen
 {
-    internal class Program
+    class Program
     {
-        internal static int Main(string[] args)
+        static int Main(string[] args)
         {
-            Console.BackgroundColor = ConsoleColor.Black;
-
             if (args.Length == 0)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("ERROR: Must provide a path to the.cs output file.");
-                Console.ResetColor();
                 return 2;
             }
 
@@ -48,18 +44,14 @@ namespace Flurl.Http.CodeGen
                         .WriteLine("}");
                 }
 
-                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("File writing succeeded.");
             }
             catch (Exception exception)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"ERROR: {exception.Message}");
-                Console.ResetColor();
                 return 2;
             }
 
-            Console.ResetColor();
             return 0;
         }
 
