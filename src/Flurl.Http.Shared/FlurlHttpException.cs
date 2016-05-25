@@ -8,7 +8,6 @@ namespace Flurl.Http
 	/// An exception that is thrown when an HTTP call made by Flurl.Http fails, including when the response
 	/// indicates an unsuccessful HTTP status code.
 	/// </summary>
-	[Serializable]
 	public class FlurlHttpException : HttpRequestException
 	{
 		/// <summary>
