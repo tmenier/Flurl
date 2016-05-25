@@ -84,10 +84,32 @@ namespace Flurl
 			return new Url(url).AppendPathSegments(segments).ToString();
 		}
 
-		/// <summary>
-		/// Returns the root URL of the given full URL, including the scheme, any user info, host, and port (if specified).
-		/// </summary>
-		public static string GetRoot(string url) {
+        /// <summary>
+        /// Basically a Path.Combine for URLs. Ensures exactly one '/' character is used to separate each segment.
+        /// URL-encodes illegal characters but not reserved characters.
+        /// Combines and preserves query parameters of both URLs.
+        /// </summary>
+        /// <param name="url">The URL to use as a starting point (required).</param>
+        /// <param name="otherUrl">Other URL to combine.</param>
+        /// <returns></returns>
+        public static string Combine(string url, Url otherUrl) {
+            if (url == null)
+                throw new ArgumentNullException(nameof(url));
+
+            var result = new Url(url);
+            var queryParams = result.QueryParams;
+            queryParams.AddRange(otherUrl.QueryParams);
+            result.SetQueryParams(queryParams);
+
+            return result
+                .AppendPathSegments(otherUrl.Path)
+                .ToString();
+        }
+
+        /// <summary>
+        /// Returns the root URL of the given full URL, including the scheme, any user info, host, and port (if specified).
+        /// </summary>
+        public static string GetRoot(string url) {
 			// http://stackoverflow.com/a/27473521/62600
 			return new Uri(url).GetComponents(UriComponents.SchemeAndServer | UriComponents.UserInfo, UriFormat.Unescaped);
 		}
