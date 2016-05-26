@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,21 +11,47 @@ namespace Flurl.Http
 	/// </summary>
 	public class FlurlClient : IDisposable
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
+		/// </summary>
+		/// <param name="url">The URL.</param>
+		/// <param name="autoDispose">if set to <c>true</c> [automatic dispose].</param>
 		public FlurlClient(Url url, bool autoDispose) {
-			this.Url = url;
-			this.AutoDispose = autoDispose;
-			this.Settings = FlurlHttp.GlobalSettings.Clone();
+			Url = url;
+			AutoDispose = autoDispose;
+			Settings = FlurlHttp.GlobalSettings.Clone();
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
+		/// </summary>
+		/// <param name="url">The URL.</param>
+		/// <param name="autoDispose">if set to <c>true</c> [automatic dispose].</param>
+		/// <exception cref="ArgumentNullException"><paramref name="url" /> is <see langword="null" />.</exception>
 		public FlurlClient(string url, bool autoDispose) : this(new Url(url), autoDispose) { }
+		
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
+		/// </summary>
+		/// <param name="url">The URL.</param>
 		public FlurlClient(Url url) : this(url, false) { }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
+		/// </summary>
+		/// <param name="url">The URL.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="url" /> is <see langword="null" />.</exception>
 		public FlurlClient(string url) : this(new Url(url), false) { }
+		
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
+		/// </summary>
 		public FlurlClient() : this((Url)null, false) { }
 
 		/// <summary>
 		/// Creates a copy of this FlurlClient with a shared instance of HttpClient and HttpMessageHandler
 		/// </summary>
-		/// <returns></returns>
+
 		public FlurlClient Clone() {
 			return new FlurlClient {
 				_httpClient = _httpClient,
@@ -78,15 +101,15 @@ namespace Flurl.Http
 			return _httpClient;
 		}
 
-		/// <summary>
-		/// Creates and asynchronously sends an HttpRequestMethod, disposing HttpClient if AutoDispose it true.
-		/// Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
-		/// </summary>
-		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
-		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
+	    /// <summary>
+	    /// Creates and asynchronously sends an HttpRequestMethod, disposing HttpClient if AutoDispose it true.
+	    /// Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
+	    /// </summary>
+	    /// <returns>A Task whose result is the received HttpResponseMessage.</returns>
+	    public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			try {
-				var request = new HttpRequestMessage(verb, this.Url) { Content = content };
-				HttpCall.Set(request, this.Settings);
+				var request = new HttpRequestMessage(verb, Url) { Content = content };
+				HttpCall.Set(request, Settings);
 				return await HttpClient.SendAsync(request, completionOption, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
 			}
 			finally {

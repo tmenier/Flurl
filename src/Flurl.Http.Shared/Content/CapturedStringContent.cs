@@ -18,14 +18,29 @@ namespace Flurl.Http.Content
 			get { return _content; }
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CapturedStringContent"/> class.
+		/// </summary>
+		/// <param name="content">The content.</param>
 		public CapturedStringContent(string content) : base(content) {
 			_content = content;
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CapturedStringContent"/> class.
+		/// </summary>
+		/// <param name="content">The content.</param>
+		/// <param name="encoding">The encoding.</param>
 		public CapturedStringContent(string content, Encoding encoding) : base(content, encoding) {
 			_content = content;
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CapturedStringContent"/> class.
+		/// </summary>
+		/// <param name="content">The content.</param>
+		/// <param name="encoding">The encoding.</param>
+		/// <param name="mediaType">Type of the media.</param>
 		public CapturedStringContent(string content, Encoding encoding, string mediaType) : base(content, encoding, mediaType) {
 			_content = content;
 		}

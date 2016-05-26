@@ -11,8 +11,17 @@ namespace Flurl.Http.Configuration
 	/// </summary>
 	public class FlurlMessageHandler : DelegatingHandler
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlMessageHandler"/> class.
+		/// </summary>
+		/// <param name="innerHandler">The inner handler.</param>
 		public FlurlMessageHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
 
+		/// <summary>
+		/// Send request asynchronous.
+		/// </summary>
+		/// <param name="request">The request.</param>
+		/// <param name="cancellationToken">The cancellation token.</param>
 		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
 			var call = HttpCall.Get(request);
 
@@ -49,7 +58,9 @@ namespace Flurl.Http.Configuration
 			if (call.Exception != null && !call.ExceptionHandled)
 				throw call.Exception;
 
-			call.Response.RequestMessage = request;
+			if (call.Response != null)
+				call.Response.RequestMessage = request;
+	
 			return call.Response;
 		}
 	}

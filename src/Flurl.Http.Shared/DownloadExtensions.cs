@@ -10,11 +10,15 @@ using System.Threading.Tasks;
 namespace Flurl.Http
 {
 #if NETSTD
+	/// <summary>
+	/// Download extensions for the Flurl Client.
+	/// </summary>
 	public static class DownloadExtensions
 	{
 		/// <summary>
 		/// Asynchronously downloads a file at the specified URL.
 		/// </summary>
+		/// <param name="client">The flurl client.</param>
 		/// <param name="localFolderPath">Path of local folder where file is to be downloaded.</param>
 		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
 		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
@@ -52,6 +56,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Asynchronously downloads a file at the specified URL.
 		/// </summary>
+		/// <param name="url">The Url.</param>
 		/// <param name="localFolderPath">Path of local folder where file is to be downloaded.</param>
 		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
 		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
@@ -63,6 +68,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Asynchronously downloads a file at the specified URL.
 		/// </summary>
+		/// <param name="url">The Url.</param>
 		/// <param name="localFolderPath">Path of local folder where file is to be downloaded.</param>
 		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
 		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
@@ -73,11 +79,15 @@ namespace Flurl.Http
 	}
 
 #elif PORTABLE
+	/// <summary>
+	/// Download extensions for the Flurl Client.
+	/// </summary>
 	public static class DownloadExtensions
 	{
 		/// <summary>
 		/// Asynchronously downloads a file at the specified URL.
 		/// </summary>
+		/// <param name="client">The flurl client.</param>
 		/// <param name="localFolderPath">Path of local folder where file is to be downloaded.</param>
 		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
 		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
@@ -118,6 +128,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Asynchronously downloads a file at the specified URL.
 		/// </summary>
+		/// <param name="url">The Url.</param>
 		/// <param name="localFolderPath">Path of local folder where file is to be downloaded.</param>
 		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
 		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
@@ -130,6 +141,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Asynchronously downloads a file at the specified URL.
 		/// </summary>
+		/// <param name="url">The Url.</param>
 		/// <param name="localFolderPath">Path of local folder where file is to be downloaded.</param>
 		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
 		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>

@@ -47,12 +47,13 @@ namespace Flurl
 			return this.Any(p => p.Name == name);
 		}
 
-		/// <summary>
-		/// Removes all parameters of the given name.
-		/// </summary>
-		/// <returns>The number of parameters that were removed</returns>
-		public int Remove(string name) {
-			return this.RemoveAll(p => p.Name == name);
+	    /// <summary>
+	    /// Removes all parameters of the given name.
+	    /// </summary>
+	    /// <returns>The number of parameters that were removed</returns>
+	    /// <exception cref="ArgumentNullException"><paramref name="name" /> is null.</exception>
+	    public int Remove(string name) {
+			return RemoveAll(p => p.Name == name);
 		}
 
 		/// <summary>

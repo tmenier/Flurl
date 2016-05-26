@@ -8,6 +8,10 @@ namespace Flurl.Http.Content
 	/// </summary>
 	public class CapturedJsonContent : CapturedStringContent
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CapturedJsonContent"/> class.
+		/// </summary>
+		/// <param name="json">The json.</param>
 		public CapturedJsonContent(string json) : base(json, Encoding.UTF8, "application/json") { }
 	}
 }

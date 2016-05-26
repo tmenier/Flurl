@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>1.0.0-beta2</version>
+		<version>1.0.0-beta3</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -91,7 +91,7 @@
 				<dependency id="System.Dynamic.Runtime" version="4.0.10" />
 				<dependency id="System.IO.FileSystem" version="4.0.0" />
 				<dependency id="System.Net.Http" version="4.0.0" />
-				<dependency id="System.Runtime.Serialization.Primitives" version="4.0.10" />
+				<dependency id="System.Runtime.Serialization.Primitives" version="4.1.0" />
 				<dependency id="System.Text.RegularExpressions" version="4.0.10" />
 				<dependency id="System.Threading" version="4.0.10" />
 			</group>

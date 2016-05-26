@@ -6,12 +6,12 @@ namespace Flurl.Http.CodeGen
 {
     class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             if (args.Length == 0)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Must provide a path to the.cs output file.");
+                Console.WriteLine("ERROR: Must provide a path to the.cs output file.");
+                return 2;
             }
 
             var codePath = args[0];
@@ -31,6 +31,9 @@ namespace Flurl.Http.CodeGen
                         .WriteLine("")
                         .WriteLine("namespace Flurl.Http")
                         .WriteLine("{")
+                        .WriteLine("    /// <summary>")
+                        .WriteLine("/// Http extensions for Flurl Client.")
+                        .WriteLine("/// </summary>")
                         .WriteLine("public static class HttpExtensions")
                         .WriteLine("{");
 
@@ -41,16 +44,15 @@ namespace Flurl.Http.CodeGen
                         .WriteLine("}");
                 }
 
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("File write without any errors!");
+                Console.WriteLine("File writing succeeded.");
             }
             catch (Exception exception)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Exception! {exception.Message}");
+                Console.WriteLine($"ERROR: {exception.Message}");
+                return 2;
             }
 
-            Console.ResetColor();
+            return 0;
         }
 
         private static void WriteExtensionMethods(CodeWriter writer)
@@ -63,6 +65,12 @@ namespace Flurl.Http.CodeGen
                 writer.WriteLine("/// </summary>");
                 if (xm.BodyType != null)
                     writer.WriteLine("/// <param name=\"data\">Contents of the request body.</param>");
+                if (xm.ExtentionOfType == "FlurlClient")
+                    writer.WriteLine("/// <param name=\"client\">The Flurl client.</param>");
+                if (xm.ExtentionOfType == "Url")
+                    writer.WriteLine("/// <param name=\"url\">The URL.</param>");
+                if (xm.ExtentionOfType == "string")
+                    writer.WriteLine("/// <param name=\"url\">The URL.</param>");
                 if (xm.HasCancelationToken)
                     writer.WriteLine("/// <param name=\"cancellationToken\">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>");
                 writer.WriteLine("/// <returns>A Task whose result is @0.</returns>", xm.ReturnTypeDescription);

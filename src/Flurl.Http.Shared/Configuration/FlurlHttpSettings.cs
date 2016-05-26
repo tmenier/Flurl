@@ -9,6 +9,9 @@ namespace Flurl.Http.Configuration
 	/// </summary>
 	public class FlurlHttpSettings
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlHttpSettings"/> class.
+		/// </summary>
 		public FlurlHttpSettings() {
 			ResetDefaults();
 		}
@@ -92,8 +95,11 @@ namespace Flurl.Http.Configuration
 			OnErrorAsync = null;
 		}
 
+		/// <summary>
+		/// Clones this instance.
+		/// </summary>
 		public FlurlHttpSettings Clone() {
-			return (FlurlHttpSettings)this.MemberwiseClone();
+			return (FlurlHttpSettings)MemberwiseClone();
 		}
 	}
 }

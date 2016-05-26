@@ -25,13 +25,13 @@ namespace Flurl.Http.Testing
 			_negate = negate;
 		}
 
-		/// <summary>
-		/// Assert whether calls matching specified criteria were made a specific number of times. (When not specified,
-		/// assertions verify whether any calls matching criteria were made.)
-		/// </summary>
-		/// <param name="expectedCount">Exact numnber of expected calls</param>
-		/// <returns></returns>
-		public void Times(int expectedCount) {
+	    /// <summary>
+	    /// Assert whether calls matching specified criteria were made a specific number of times. (When not specified,
+	    /// assertions verify whether any calls matching criteria were made.)
+	    /// </summary>
+	    /// <param name="expectedCount">Exact number of expected calls</param>
+	    /// <exception cref="ArgumentException"><paramref name="expectedCount"/> must be greater than or equal to 0.</exception>
+	    public void Times(int expectedCount) {
 			if (expectedCount < 0)
 				throw new ArgumentException("expectedCount must be greater than or equal to 0.");
 
@@ -42,9 +42,8 @@ namespace Flurl.Http.Testing
 		/// Asserts whether calls were made matching given URL or URL pattern.
 		/// </summary>
 		/// <param name="urlPattern">Can contain * wildcard.</param>
-		/// <returns></returns>
 		public HttpCallAssertion WithUrlPattern(string urlPattern) {
-			_urlPattern = urlPattern; // this'll land in the exception message when we assert, which is the only reason for capturing it
+			_urlPattern = urlPattern; // this will land in the exception message when we assert, which is the only reason for capturing it
 			return With(c => MatchesPattern(c.Request.RequestUri.AbsoluteUri, urlPattern));
 		}
 
@@ -52,7 +51,6 @@ namespace Flurl.Http.Testing
 		/// Asserts whether calls were made containing given request body or request body pattern.
 		/// </summary>
 		/// <param name="bodyPattern">Can contain * wildcard.</param>
-		/// <returns></returns>
 		public HttpCallAssertion WithRequestBody(string bodyPattern) {
 			return With(c => MatchesPattern(c.RequestBody, bodyPattern));
 		}
@@ -61,7 +59,6 @@ namespace Flurl.Http.Testing
 		/// Asserts whether calls were made containing given request body.
 		/// </summary>
 		/// <param name="body"></param>
-		/// <returns></returns>
 		public HttpCallAssertion WithRequestJson(object body) {
 			var serializedBody = FlurlHttp.GlobalSettings.JsonSerializer.Serialize(body);
 			return WithRequestBody(serializedBody);
@@ -70,7 +67,6 @@ namespace Flurl.Http.Testing
 		/// <summary>
 		/// Asserts whether calls were made with given HTTP verb.
 		/// </summary>
-		/// <returns></returns>
 		public HttpCallAssertion WithVerb(HttpMethod httpMethod) {
 			return With(c => c.Request.Method == httpMethod);
 		}
@@ -78,7 +74,6 @@ namespace Flurl.Http.Testing
 		/// <summary>
 		/// Asserts whether calls were made with a request body of the given content (MIME) type.
 		/// </summary>
-		/// <returns></returns>
 		public HttpCallAssertion WithContentType(string contentType) {
 			return With(c => c.Request.Content.Headers.ContentType.MediaType == contentType);
 		}
@@ -87,7 +82,6 @@ namespace Flurl.Http.Testing
 		/// Asserts whether calls were made matching a given predicate function.
 		/// </summary>
 		/// <param name="match">Predicate (usually a lambda expression) that tests an HttpCall and returns a bool.</param>
-		/// <returns></returns>
 		public HttpCallAssertion With(Func<HttpCall, bool> match) {
 			_calls = _calls.Where(match).ToList();
 			Assert();
