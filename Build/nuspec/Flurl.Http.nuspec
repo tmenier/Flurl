@@ -14,6 +14,7 @@
 		</description>
 		<releaseNotes>
 1.0.0 - .NET Core RC2 support. Target .NET Platform Standard 1.4
+0.10.1 - DLL version fix (github #90)
 0.10.0 - Lib updates, including Flurl 2.0 which contains breaking changes: https://github.com/tmenier/Flurl/wiki/Release-Notes
 0.9.0 - BREAKING CHANGES: https://github.com/tmenier/Flurl/wiki/Release-Notes
 0.8.0 - .NET Core support (github #61, thx @kroniak)
