@@ -1,6 +1,6 @@
 {
   "title": "Flurl",
-  "version": "2.1.0-beta2",
+  "version": "2.1.0-beta3-update1",
 
   "buildOptions": {
     "compile": {
@@ -12,12 +12,21 @@
   },
 
   "frameworks": {
-    "net40": { },
-    "netstandard1.1": {
-      "imports": "dotnet51",
+    "portable40-net40+win8+wpa81": {
+      "frameworkAssemblies": {
+        "mscorlib": "2.0.5.0",
+        "System": "2.0.5.0",
+        "System.Core": "2.0.5.0"
+      }
+    },
+    "netstandard1.3": {
+      "buildOptions": {
+        "define": [ "NETSTD" ]
+      },
       "dependencies": {
-        "System.Linq": "4.0.0",
-        "System.Reflection.TypeExtensions": "4.0.0"
+        "System.Globalization": "4.0.11-rc2-24027",
+        "System.Linq": "4.1.0-rc2-24027",
+        "System.Reflection.TypeExtensions": "4.1.0-rc2-24027"
       }
     }
   }
