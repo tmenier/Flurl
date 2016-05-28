@@ -1,4 +1,4 @@
-﻿#if NETSTD
+﻿#if NETSTANDARD1_4 || NET45
 using System.IO;
 #elif PORTABLE
 using PCLStorage;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Flurl.Http
 {
-#if NETSTD
+#if NETSTANDARD1_4 || NET45
 	/// <summary>
 	/// Download extensions for the Flurl Client.
 	/// </summary>

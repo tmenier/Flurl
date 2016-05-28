@@ -4,7 +4,7 @@ namespace Flurl.Http
 {
     internal static class NoOpTask
     {
-#if NETSTD
+#if NETSTANDARD1_4 || NET45
         public static readonly Task Instance = Task.FromResult(0);
 #elif PORTABLE
         public static readonly Task Instance = TaskEx.FromResult(0);

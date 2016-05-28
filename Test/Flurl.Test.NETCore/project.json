@@ -3,7 +3,7 @@
 
   "buildOptions": {
     "compile": {
-      "include": [ "../Flurl.Test.Shared/**/*.cs", "../../src/Flurl.Shared/**/*.cs", "../../src/Flurl.Http.Shared/**/*.cs" ]
+      "include": [ "../Flurl.Test.Shared/**/*.cs" ]
     },
     "emitEntryPoint": true
   },
@@ -14,15 +14,14 @@
 
   "dependencies": {
     "NUnitLite": "3.2.1",
-    "Newtonsoft.Json": "8.0.3",
-    "System.Runtime.Serialization.Primitives": "4.1.0"
+    "Flurl.Http.Library": {
+      "version": "",
+      "target": "project"
+    }
   },
 
   "frameworks": {
     "netcoreapp1.0": {
-      "buildOptions": {
-        "define": [ "NETSTD" ]
-      },
       "imports": "dnxcore50",
       "dependencies": {
         "Microsoft.NETCore.App": {
