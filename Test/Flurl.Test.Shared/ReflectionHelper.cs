@@ -1,4 +1,4 @@
-﻿#if !NETSTD
+﻿#if !NETCOREAPP1_0
 using System;
 using System.Linq;
 using System.Reflection;

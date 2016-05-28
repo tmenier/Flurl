@@ -5,7 +5,9 @@
       "include": [ "../PackageTester.Shared/**/*.cs" ]
     }
   },
-
+  "dependencies": {
+    "Flurl.Http": "1.0.0-beta4"
+  },
   "frameworks": {
     "netcoreapp1.0": {
       "imports": "dnxcore50",
@@ -16,9 +18,5 @@
         }
       }
     }
-  },
-
-  "dependencies": {
-    "Flurl.Http": "1.0.0-beta3"
   }
 }

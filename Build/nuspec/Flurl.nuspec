@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl</id>
-		<version>2.1.0-beta3-update1</version>
+		<version>2.1.0-beta3-update3</version>
 		<title>Flurl</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -35,20 +35,16 @@
 		</releaseNotes>
 		<tags>fluent portable url uri querystring builder</tags>
 		<dependencies>
-			<group targetFramework="MonoAndroid1.0" />
-			<group targetFramework="MonoTouch1.0" />
 			<group targetFramework="net40" />
-			<group targetFramework="net45" />
-			<group targetFramework="net46" />
+			<group targetFramework="win8" />
+			<group targetFramework="wpa81" />
+			<group targetFramework="xamarin.ios" />
+			<group targetFramework="xamarin.mac" />
+			<group targetFramework="monotouch" />
+			<group targetFramework="monoandroid" />
 			<group targetFramework="uap10" />
 			<group targetFramework="portable40-net40+win8+wpa81" />
-			<group targetFramework="Windows8.0" />
-			<group targetFramework="WindowsPhoneApp8.1" />
-			<group targetFramework="Xamarin.iOS1.0" />
-			<group targetFramework="Xamarin.Mac2.0" />
-			<group targetFramework="Xamarin.TVOS1.0" />
-			<group targetFramework="Xamarin.WatchOS1.0" />
-			<group targetFramework=".NETStandard1.3">
+			<group targetFramework="netstandard1.4">
 				<dependency id="System.Globalization" version= "4.0.11-rc2-24027" />
 				<dependency id="System.Linq" version="4.1.0-rc2-24027" />
 				<dependency id="System.Reflection.TypeExtensions" version="4.1.0-rc2-24027" />
@@ -56,8 +52,7 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="..\..\src\Flurl.Library\bin\Release\portable40-net40+win8+wpa81\Flurl.*" target="lib\portable40-net40+win8+wpa81" />
-		<file src="..\..\src\Flurl.Library\bin\Release\portable40-net40+win8+wpa81\Flurl.*" target="lib\MonoAndroid10" />
-		<file src="..\..\src\Flurl.Library\bin\Release\netstandard1.3\Flurl.*" target="lib\netstandard1.3" />
+		<file src="..\..\src\Flurl.Library\bin\Release\portable40-net40+win8+wpa81\Flurl.*" target="lib\portable-net40+win8+wpa81+monoandroid+monotouch+xamarin.ios+xamarin.mac" />
+		<file src="..\..\src\Flurl.Library\bin\Release\netstandard1.4\Flurl.*" target="lib\netstandard1.4" />
 	</files>
 </package>

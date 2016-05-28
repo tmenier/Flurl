@@ -13,7 +13,7 @@ namespace Flurl.Test
     public class UrlBuilderTests
     {
 
-#if !NETSTD
+#if !NETCOREAPP1_0
         [Test]
         // check that for every Url method, we have an equivalent string extension
         public void extension_methods_consistently_supported()
@@ -233,7 +233,7 @@ namespace Flurl.Test
             Assert.AreEqual("http://www.mysite.com/more", url.ToString());
         }
 
-#if !NETSTD
+#if !NETCOREAPP1_0
         [Test]
         public void url_ToString_uses_invariant_culture()
         {

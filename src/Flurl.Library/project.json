@@ -1,6 +1,6 @@
 {
   "title": "Flurl",
-  "version": "2.1.0-beta3-update1",
+  "version": "2.1.0-beta3-update3",
 
   "buildOptions": {
     "compile": {
@@ -19,10 +19,7 @@
         "System.Core": "2.0.5.0"
       }
     },
-    "netstandard1.3": {
-      "buildOptions": {
-        "define": [ "NETSTD" ]
-      },
+    "netstandard1.4": {
       "dependencies": {
         "System.Globalization": "4.0.11-rc2-24027",
         "System.Linq": "4.1.0-rc2-24027",
