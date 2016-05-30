@@ -1,9 +1,9 @@
 {
   "title": "Flurl.Http",
-  "version": "1.0.0-beta4",
+  "version": "1.0.0-beta5",
 
   "dependencies": {
-    "Flurl": "2.1.0-beta3-update3",
+    "Flurl": "2.1.0-beta5",
     "Newtonsoft.Json": "8.0.3"
   },
 
@@ -23,6 +23,7 @@
       },
       "dependencies": {
         "Microsoft.Bcl.Async": "1.0.168",
+        "Microsoft.Bcl.Build": "1.0.21",
         "Microsoft.Net.Http": "2.2.29",
         "PCLStorage": "1.0.2"
       },

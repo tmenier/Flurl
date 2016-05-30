@@ -6,7 +6,7 @@
     }
   },
   "dependencies": {
-    "Flurl.Http": "1.0.0-beta4"
+    "Flurl.Http": "1.0.0-beta5"
   },
   "frameworks": {
     "netcoreapp1.0": {
