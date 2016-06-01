@@ -1,15 +1,16 @@
 ﻿{
-  "name": "Flurl.Test",
+  "name": "Flurl.Test.NETCore",
 
   "buildOptions": {
     "compile": {
       "include": [ "../Flurl.Test.Shared/**/*.cs" ]
     },
-    "emitEntryPoint": true
+    "emitEntryPoint": true,
+    "optimize": true
   },
 
   "commands": {
-    "test": "Flurl.Test"
+    "test": "Flurl.Test.NETCore"
   },
 
   "dependencies": {
@@ -22,7 +23,7 @@
 
   "frameworks": {
     "netcoreapp1.0": {
-      "imports": "dnxcore50",
+      "imports": [ "dnxcore50", "dotnet" ],
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
