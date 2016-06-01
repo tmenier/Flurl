@@ -1,5 +1,4 @@
-﻿#if !NETCOREAPP1_0
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -12,7 +11,7 @@ namespace Flurl.Test
 			// http://stackoverflow.com/a/299526/62600
 			return (
 				from type in asm.GetTypes()
-				where type.IsSealed && !type.IsGenericType && !type.IsNested
+				where type.GetTypeInfo().IsSealed && !type.GetTypeInfo().IsGenericType && !type.GetTypeInfo().IsNested
 				from method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
 				where method.IsDefined(typeof(ExtensionAttribute), false)
 				where method.GetParameters()[0].ParameterType == typeof(T)
@@ -56,9 +55,9 @@ namespace Flurl.Test
 		public static bool IsExtensionMethod(MethodInfo method) {
 			var type = method.DeclaringType;
 			return
-				type.IsSealed &&
-				!type.IsGenericType &&
-				!type.IsNested &&
+				type.GetTypeInfo().IsSealed &&
+				!type.GetTypeInfo().IsGenericType &&
+				!type.GetTypeInfo().IsNested &&
 				method.IsStatic &&
 				method.IsDefined(typeof(ExtensionAttribute), false);
 		}
@@ -74,8 +73,9 @@ namespace Flurl.Test
 
 		public static bool AreSameType(Type a, Type b) {
 			if (a.IsGenericParameter && b.IsGenericParameter) {
-				var constraintsA = a.GetGenericParameterConstraints();
-				var constraintsB = b.GetGenericParameterConstraints();
+
+				var constraintsA = a.GetTypeInfo().GetGenericParameterConstraints();
+				var constraintsB = b.GetTypeInfo().GetGenericParameterConstraints();
 
 				if (constraintsA.Length != constraintsB.Length)
 					return false;
@@ -87,7 +87,8 @@ namespace Flurl.Test
 				return true;
 			}
 
-			if (a.IsGenericType && b.IsGenericType) {
+			if (a.GetTypeInfo().IsGenericType && b.GetTypeInfo().IsGenericType) {
+
 				if (a.GetGenericTypeDefinition() != b.GetGenericTypeDefinition())
 					return false;
 
@@ -109,4 +110,3 @@ namespace Flurl.Test
 		}
 	}
 }
-#endif

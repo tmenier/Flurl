@@ -1,5 +1,5 @@
-﻿#if !NETCOREAPP1_0
-using System.Linq;
+﻿using System.Linq;
+using System.Reflection;
 using Flurl.Http;
 using NUnit.Framework;
 
@@ -11,9 +11,9 @@ namespace Flurl.Test.Http
 		[Test]
 		// check that for every FlurlClient extension method, we have an equivalent Url and string extension
 		public void extension_methods_consistently_supported() {
-			var fcExts = ReflectionHelper.GetAllExtensionMethods<FlurlClient>(typeof(FlurlClient).Assembly);
-			var urlExts = ReflectionHelper.GetAllExtensionMethods<Url>(typeof(FlurlClient).Assembly);
-			var stringExts = ReflectionHelper.GetAllExtensionMethods<string>(typeof(FlurlClient).Assembly);
+			var fcExts = ReflectionHelper.GetAllExtensionMethods<FlurlClient>(typeof(FlurlClient).GetTypeInfo().Assembly);
+			var urlExts = ReflectionHelper.GetAllExtensionMethods<Url>(typeof(FlurlClient).GetTypeInfo().Assembly);
+			var stringExts = ReflectionHelper.GetAllExtensionMethods<string>(typeof(FlurlClient).GetTypeInfo().Assembly);
 			var whitelist = new[] { "GetCookies", "WithUrl" }; // cases where Url method of the same name was excluded intentionally
 
 			foreach (var method in fcExts) {
@@ -30,4 +30,3 @@ namespace Flurl.Test.Http
 		}
 	}
 }
-#endif
