@@ -5,8 +5,7 @@
     "compile": {
       "include": [ "../Flurl.Test.Shared/**/*.cs" ]
     },
-    "emitEntryPoint": true,
-    "optimize": true
+    "emitEntryPoint": true
   },
 
   "commands": {
