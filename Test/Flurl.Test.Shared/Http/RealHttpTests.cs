@@ -15,7 +15,7 @@ namespace Flurl.Test.Http
 	[TestFixture]
 	public class RealHttpTests
 	{
-#if NET45 || NETCORE
+#if NET45 || NETCOREAPP1_0
 		[Test]
 		public async Task can_download_file() {
 			var path = await "http://www.google.com".DownloadFileAsync(@"c:\a\b", "google.txt");

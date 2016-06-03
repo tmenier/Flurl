@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Net.Http;
+#if NETSTANDARD1_4
+using System.Text;
+#endif
 using System.Threading.Tasks;
 
 namespace Flurl.Http
@@ -15,9 +18,10 @@ namespace Flurl.Http
 		/// <summary>
 		/// Deserializes JSON-formatted HTTP response body to object of type T. Intended to chain off an async HTTP.
 		/// </summary>
- 		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
+		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
 		/// <returns>A Task whose result is an object containing data in the response body.</returns>
 		/// <example>x = await url.PostAsync(data).ReceiveJson&lt;T&gt;()</example>
+		/// <exception cref="FlurlHttpException">Condition.</exception>
 		public static async Task<T> ReceiveJson<T>(this Task<HttpResponseMessage> response) {
 			var resp = await response.ConfigureAwait(false);
 			var call = HttpCall.Get(resp.RequestMessage);
@@ -27,7 +31,7 @@ namespace Flurl.Http
 			}
 			catch (Exception ex) {
 				call.Exception = ex;
-				throw new FlurlHttpException(call);
+				throw new FlurlHttpException(call, ex);
 			}
 		}
 
@@ -36,6 +40,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is a dynamic object containing data in the response body.</returns>
 		/// <example>d = await url.PostAsync(data).ReceiveJson()</example>
+		/// <exception cref="FlurlHttpException">Condition.</exception>
 		public static async Task<dynamic> ReceiveJson(this Task<HttpResponseMessage> response) {
 			return await response.ReceiveJson<ExpandoObject>().ConfigureAwait(false);
 		}
@@ -45,6 +50,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is a list of dynamic objects containing data in the response body.</returns>
 		/// <example>d = await url.PostAsync(data).ReceiveJsonList()</example>
+		/// <exception cref="FlurlHttpException">Condition.</exception>
 		public static async Task<IList<dynamic>> ReceiveJsonList(this Task<HttpResponseMessage> response) {
 			dynamic[] d = await response.ReceiveJson<ExpandoObject[]>().ConfigureAwait(false);
 			return d;
@@ -56,6 +62,9 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is the response body as a string.</returns>
 		/// <example>s = await url.PostAsync(data).ReceiveString()</example>
 		public static async Task<string> ReceiveString(this Task<HttpResponseMessage> response) {
+#if NETSTANDARD1_4
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+#endif
 			return await (await response.ConfigureAwait(false)).Content.ReadAsStringAsync().ConfigureAwait(false);
 		}
 
