@@ -15,7 +15,6 @@ namespace Flurl.Test.Http
 	[TestFixture]
 	public class RealHttpTests
 	{
-#if NET45 || NETCOREAPP1_0
 		[Test]
 		public async Task can_download_file() {
 			var path = await "http://www.google.com".DownloadFileAsync(@"c:\a\b", "google.txt");
@@ -24,16 +23,7 @@ namespace Flurl.Test.Http
 			File.Delete(path);
 			Directory.Delete(@"c:\a", true);
 		}
-#elif PORTABLE
-		[Test]
-		public async Task can_download_file() {
-			var path = await "http://www.google.com".DownloadFileAsync(@"c:\b\a", "google.txt");
-			Assert.AreEqual(@"c:\b\a\google.txt", path);
-			Assert.That(File.Exists(path));
-			File.Delete(path);
-			Directory.Delete(@"c:\b", true);
-		}
-#endif
+
 		[Test]
 		public async Task can_set_cookies() {
 			var resp = await "http://httpbin.org/cookies".WithCookies(new { x = 1, y = 2 }).GetJsonAsync();
