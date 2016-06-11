@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -116,6 +118,34 @@ namespace Flurl.Test.Http
 			}
 			catch (FlurlHttpException ex) {
 				Assert.IsNotNull(ex.InnerException as TaskCanceledException);
+			}
+		}
+
+		[Test]
+		public async Task can_post_multipart() {
+			var path1 = @"c:\flurl-multipart-test1.txt";
+			File.WriteAllText(path1, "file contents 1");
+			var path2 = @"c:\flurl-multipart-test2.txt";
+			File.WriteAllText(path2, "file contents 2");
+			try {
+				var content = new MultipartFormDataContent();
+				content.Add(new StringContent("hello!"), "DataField");
+				using (var stream1 = File.OpenRead(path1))
+				using (var stream2 = File.OpenRead(path2)) {
+					content.Add(new StreamContent(stream1), "FileField1", Path.GetFileName(path1));
+					content.Add(new StreamContent(stream2), "FileField2", Path.GetFileName(path2));
+					var resp = await new FlurlClient("http://httpbin.org/post")
+						.SendAsync(HttpMethod.Post, content)
+						.ReceiveJson();
+
+					Assert.AreEqual("hello!", resp.data.DataField);
+					Assert.AreEqual("file contents 1", resp.files.FileField1);
+					Assert.AreEqual("file contents 2", resp.files.FileField2);
+				}
+			}
+			finally {
+				File.Delete(path1);
+				File.Delete(path2);
 			}
 		}
 	}
