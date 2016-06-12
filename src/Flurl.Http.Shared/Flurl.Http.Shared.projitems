@@ -6,7 +6,7 @@
     <SharedGUID>734e6962-97e2-4318-9a2d-c87e76921afb</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>Flurl.Http.Shared</Import_RootNamespace>
+    <Import_RootNamespace>Flurl.Http</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)ClientConfigExtensions.cs" />
@@ -23,11 +23,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)Content\CapturedStringContent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CookieExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DownloadExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlurlClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlurlHttp.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlurlHttpException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpCall.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HttpFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpStatusRangeParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpResponseMessageExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MultipartExtensions.cs" />

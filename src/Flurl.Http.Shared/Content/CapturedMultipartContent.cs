@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Flurl.Util;
 
 namespace Flurl.Http.Content
@@ -15,14 +17,14 @@ namespace Flurl.Http.Content
 		/// <summary>
 		/// Represents all text-based values added to the multipart content.
 		/// </summary>
-		public IDictionary<string, string> Data { get; }
+		public IDictionary<string, string> Data { get; } = new Dictionary<string, string>();
 
 		/// <summary>
 		/// Represents all files added to the multipart content.
 		/// </summary>
-		public IDictionary<string, HttpFile> Files { get; }
+		public IDictionary<string, HttpFile> Files { get; } = new Dictionary<string, HttpFile>();
 
-		private readonly List<Stream> _streams = new List<Stream>();
+		private readonly List<Stream> _openStreams = new List<Stream>();
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CapturedMultipartContent"/> class.
@@ -36,7 +38,7 @@ namespace Flurl.Http.Content
 
 				var file = kv.Value as HttpFile;
 				if (file != null)
-					AddFile(kv.Key, file);
+					Files.Add(kv.Key, file);
 				else
 					AddTextField(kv.Key, kv.Value);
 			}
@@ -44,9 +46,9 @@ namespace Flurl.Http.Content
 
 		protected override void Dispose(bool disposing) {
 			if (disposing) {
-				foreach (var stream in _streams)
+				foreach (var stream in _openStreams)
 					stream.Dispose();
-				_streams.Clear();
+				_openStreams.Clear();
 			}
 			base.Dispose(disposing);
 		}
@@ -56,18 +58,8 @@ namespace Flurl.Http.Content
 		/// </summary>
 		/// <returns>this CapturedMultipartContent instance.</returns>
 		public CapturedMultipartContent AddFile(string fieldName, string filePath, string contentType = null) {
-			AddFile(fieldName, new HttpFile(filePath, contentType));
+			Files.Add(fieldName, new HttpFile(filePath, contentType));
 			return this;
-		}
-
-		private void AddFile(string fieldName, HttpFile file) {
-			var stream = File.OpenRead(file.Path);
-			_streams.Add(stream);
-			var content = new StreamContent(stream);
-			if (file.ContentTye != null)
-				content.Headers.ContentType.MediaType = file.ContentTye;
-			Add(content, fieldName);
-			Files.Add(fieldName, file);
 		}
 
 		/// <summary>
@@ -76,32 +68,31 @@ namespace Flurl.Http.Content
 		/// <returns>this CapturedMultipartContent instance.</returns>
 		public CapturedMultipartContent AddTextField(string fieldName, object value) {
 			var s = value?.ToInvariantString();
-			Add(new StringContent(s), fieldName);
 			Data.Add(fieldName, s);
 			return this;
 		}
-	}
 
-	/// <summary>
-	/// Represents a file to be uploaded via multipart POST.
-	/// </summary>
-	public class HttpFile
-	{
-		/// <param name="path">The local file path.</param>
-		/// <param name="contentType">The content-type header associated with the file (optional).</param>
-		public HttpFile(string path, string contentType = null) {
-			Path = path;
-			ContentTye = contentType;
+		protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context) {
+			foreach (var kv in this.Data) {
+				Add(new StringContent(kv.Value), kv.Key);
+			}
+
+			foreach (var kv in this.Files) {
+				var file = kv.Value;
+				var fs = await FileUtil.OpenStreamAsync(file.Path).ConfigureAwait(false);
+				_openStreams.Add(fs);
+				var content = new StreamContent(fs);
+				if (file.ContentTye != null)
+					content.Headers.ContentType.MediaType = file.ContentTye;
+				Add(content, kv.Key, FileUtil.GetFileName(file.Path));
+			}
+			await base.SerializeToStreamAsync(stream, context).ConfigureAwait(false);
 		}
 
-		/// <summary>
-		/// The local file path.
-		/// </summary>
-		public string Path { get; set; }
-
-		/// <summary>
-		/// The content-type header associated with the file.
-		/// </summary>
-		public string ContentTye { get; set; }
+		// https://blogs.msdn.microsoft.com/henrikn/2012/02/16/push-and-pull-streams-using-httpclient/
+		protected override bool TryComputeLength(out long length) {
+			length = -1;
+			return false;
+		}
 	}
 }

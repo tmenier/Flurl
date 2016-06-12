@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http.Content;
 
-namespace Flurl.Http.Shared
+namespace Flurl.Http
 {
     public static class MultipartExtensions
     {
