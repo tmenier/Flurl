@@ -79,7 +79,7 @@ namespace Flurl.Http.Content
 
 			foreach (var kv in this.Files) {
 				var file = kv.Value;
-				var fs = await FileUtil.OpenStreamAsync(file.Path).ConfigureAwait(false);
+				var fs = await FileUtil.OpenReadAsync(file.Path, 4096).ConfigureAwait(false);
 				_openStreams.Add(fs);
 				var content = new StreamContent(fs);
 				if (file.ContentTye != null)
