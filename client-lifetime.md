@@ -33,7 +33,7 @@ The 2 methods result in equivalent behavior. The first is more suitable if you'r
 One scenario where this comes in handy is simulating a browser session, where cookies set on the server need to be present in each successive call.
 
 ````c#
-using (var fc = new FlurlClient().EnableCookies())
+using (var fc = new FlurlClient(url).EnableCookies())
 {
     await url
         .AppendPathSegment("login")
