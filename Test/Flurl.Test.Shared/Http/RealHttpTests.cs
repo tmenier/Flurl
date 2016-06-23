@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,11 +18,12 @@ namespace Flurl.Test.Http
 	{
 		[Test]
 		public async Task can_download_file() {
-			var path = await "http://www.google.com".DownloadFileAsync(@"c:\a\b", "google.txt");
-			Assert.AreEqual(@"c:\a\b\google.txt", path);
+			var folder = "c:\\" + Guid.NewGuid(); // random so parallel tests don't trip over each other
+			var path = await "http://www.google.com".DownloadFileAsync(folder, "google.txt");
+			Assert.AreEqual($@"{folder}\google.txt", path);
 			Assert.That(File.Exists(path));
 			File.Delete(path);
-			Directory.Delete(@"c:\a", true);
+			Directory.Delete(folder, true);
 		}
 
 		[Test]
