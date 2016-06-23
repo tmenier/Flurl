@@ -1,22 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Flurl.Http.CodeGen
 {
     class Program
     {
-        static int Main(string[] args)
-        {
-            if (args.Length == 0)
-            {
-                Console.WriteLine("ERROR: Must provide a path to the.cs output file.");
-                return 2;
-            }
+        static int Main(string[] args) {
+	        var codePath = (args.Length > 0) ? args[0] : @"..\Flurl.Http.Shared\HttpExtensions.cs";
 
-            var codePath = args[0];
-            try
-            {
+			if (!File.Exists(codePath)) {
+				Console.WriteLine("File not found: " +  Path.GetFullPath(codePath));
+				return 2;
+			}
+
+			try {
                 using (var writer = new CodeWriter(codePath))
                 {
                     writer

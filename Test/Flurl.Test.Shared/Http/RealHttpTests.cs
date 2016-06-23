@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,25 +16,16 @@ namespace Flurl.Test.Http
 	[TestFixture]
 	public class RealHttpTests
 	{
-#if NET45 || NETCOREAPP1_0
 		[Test]
 		public async Task can_download_file() {
-			var path = await "http://www.google.com".DownloadFileAsync(@"c:\a\b", "google.txt");
-			Assert.AreEqual(@"c:\a\b\google.txt", path);
+			var folder = "c:\\" + Guid.NewGuid(); // random so parallel tests don't trip over each other
+			var path = await "http://www.google.com".DownloadFileAsync(folder, "google.txt");
+			Assert.AreEqual($@"{folder}\google.txt", path);
 			Assert.That(File.Exists(path));
 			File.Delete(path);
-			Directory.Delete(@"c:\a", true);
+			Directory.Delete(folder, true);
 		}
-#elif PORTABLE
-		[Test]
-		public async Task can_download_file() {
-			var path = await "http://www.google.com".DownloadFileAsync(@"c:\b\a", "google.txt");
-			Assert.AreEqual(@"c:\b\a\google.txt", path);
-			Assert.That(File.Exists(path));
-			File.Delete(path);
-			Directory.Delete(@"c:\b", true);
-		}
-#endif
+
 		[Test]
 		public async Task can_set_cookies() {
 			var resp = await "http://httpbin.org/cookies".WithCookies(new { x = 1, y = 2 }).GetJsonAsync();
@@ -126,6 +118,31 @@ namespace Flurl.Test.Http
 			}
 			catch (FlurlHttpException ex) {
 				Assert.IsNotNull(ex.InnerException as TaskCanceledException);
+			}
+		}
+
+		[Test]
+		public async Task can_post_multipart() {
+			var path1 = @"c:\flurl-multipart-test1.txt";
+			File.WriteAllText(path1, "file contents 1");
+			var path2 = @"c:\flurl-multipart-test2.txt";
+			File.WriteAllText(path2, "file contents 2");
+			try {
+				var resp = await new FlurlClient("http://httpbin.org/post")
+					.PostMultipartAsync(new {
+						DataField = "hello!",
+						File1 = new HttpFile(path1),
+						File2 = new HttpFile(path2)
+					})//.ReceiveString();
+					.ReceiveJson();
+
+				Assert.AreEqual("hello!", resp.form.DataField);
+				Assert.AreEqual("file contents 1", resp.files.File1);
+				Assert.AreEqual("file contents 2", resp.files.File2);
+			}
+			finally {
+				File.Delete(path1);
+				File.Delete(path2);
 			}
 		}
 	}
