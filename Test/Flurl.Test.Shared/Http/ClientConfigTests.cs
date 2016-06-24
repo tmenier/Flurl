@@ -94,7 +94,7 @@ namespace Flurl.Test.Http
         {
             using (var test = new HttpTest())
             {
-                test.RespondWith(404, "Nothing to see here");
+                test.RespondWith("Nothing to see here", 404);
                 // no exception = pass
                 await "http://www.api.com"
                     .AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound)
@@ -107,7 +107,7 @@ namespace Flurl.Test.Http
         {
             using (var test = new HttpTest())
             {
-                test.RespondWith(418, "I'm a teapot");
+                test.RespondWith("I'm a teapot", 418);
                 // allow 4xx
                 var client = "http://www.api.com".AllowHttpStatus("4xx");
                 // but then disallow it
@@ -121,7 +121,7 @@ namespace Flurl.Test.Http
         {
             using (var test = new HttpTest())
             {
-                test.RespondWith(500, "epic fail");
+                test.RespondWith("epic fail", 500);
                 try
                 {
                     var result = await "http://www.api.com".AllowAnyHttpStatus().GetAsync();
@@ -140,7 +140,7 @@ namespace Flurl.Test.Http
             using (var test = new HttpTest())
             {
                 FlurlHttp.GlobalSettings.AllowedHttpStatusRange = "*";
-                test.RespondWith(500, "epic fail");
+                test.RespondWith("epic fail", 500);
                 Assert.ThrowsAsync<FlurlHttpException>(async () => await "http://www.api.com".ConfigureClient(c => c.AllowedHttpStatusRange = "2xx").GetAsync());
             }
         }
@@ -153,9 +153,9 @@ namespace Flurl.Test.Http
             var client3 = client1.WithUrl("http://www.api.com/for-client3");
             var client4 = client2.WithUrl("http://www.api.com/for-client4");
 
-            CollectionAssert.AreEquivalent(client1.GetCookies(), client2.GetCookies());
-            CollectionAssert.AreEquivalent(client1.GetCookies(), client3.GetCookies());
-            CollectionAssert.AreEquivalent(client1.GetCookies(), client4.GetCookies());
+            CollectionAssert.AreEquivalent(client1.Cookies, client2.Cookies);
+            CollectionAssert.AreEquivalent(client1.Cookies, client3.Cookies);
+            CollectionAssert.AreEquivalent(client1.Cookies, client4.Cookies);
             var urls = new[] { client1, client2, client3, client4 }.Select(c => c.Url.ToString());
             CollectionAssert.AllItemsAreUnique(urls);
         }
@@ -171,11 +171,11 @@ namespace Flurl.Test.Http
             client2.Dispose();
             client3.Dispose();
 
-            CollectionAssert.IsEmpty(client2.GetCookies());
-            CollectionAssert.IsEmpty(client3.GetCookies());
+			CollectionAssert.IsEmpty(client2.Cookies);
+			CollectionAssert.IsEmpty(client3.Cookies);
 
-            CollectionAssert.IsNotEmpty(client1.GetCookies());
-            CollectionAssert.IsNotEmpty(client4.GetCookies());
+			CollectionAssert.IsNotEmpty(client1.Cookies);
+            CollectionAssert.IsNotEmpty(client4.Cookies);
         }
 
         [Test]
@@ -186,9 +186,9 @@ namespace Flurl.Test.Http
             var client3 = "http://www.api.com/for-client3".WithClient(client1);
             var client4 = "http://www.api.com/for-client4".WithClient(client1);
 
-            CollectionAssert.AreEquivalent(client1.GetCookies(), client2.GetCookies());
-            CollectionAssert.AreEquivalent(client1.GetCookies(), client3.GetCookies());
-            CollectionAssert.AreEquivalent(client1.GetCookies(), client4.GetCookies());
+            CollectionAssert.AreEquivalent(client1.Cookies, client2.Cookies);
+            CollectionAssert.AreEquivalent(client1.Cookies, client3.Cookies);
+            CollectionAssert.AreEquivalent(client1.Cookies, client4.Cookies);
             var urls = new[] { client1, client2, client3, client4 }.Select(c => c.Url.ToString());
             CollectionAssert.AllItemsAreUnique(urls);
         }
@@ -204,11 +204,11 @@ namespace Flurl.Test.Http
             client2.Dispose();
             client3.Dispose();
 
-            CollectionAssert.IsEmpty(client2.GetCookies());
-            CollectionAssert.IsEmpty(client3.GetCookies());
+			CollectionAssert.IsEmpty(client2.Cookies);
+			CollectionAssert.IsEmpty(client3.Cookies);
 
-            CollectionAssert.IsNotEmpty(client1.GetCookies());
-            CollectionAssert.IsNotEmpty(client4.GetCookies());
+            CollectionAssert.IsNotEmpty(client1.Cookies);
+            CollectionAssert.IsNotEmpty(client4.Cookies);
         }
 
         [Test]

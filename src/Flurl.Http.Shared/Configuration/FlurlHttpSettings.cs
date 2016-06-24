@@ -29,6 +29,11 @@ namespace Flurl.Http.Configuration
 		public string AllowedHttpStatusRange { get; set; }
 
 		/// <summary>
+		/// Gets or sets a value indicating whether cookies should be sent/received with each HTTP request.
+		/// </summary>
+		public bool CookiesEnabled { get; set; }
+
+		/// <summary>
 		/// Gets or sets a factory used to create HttpClient object used in Flurl HTTP calls. Default value
 		/// is an instance of DefaultHttpClientFactory. Custom factory implementations should generally
 		/// inherit from DefaultHttpClientFactory, call base.CreateClient, and manipulate the returned HttpClient,
@@ -84,6 +89,7 @@ namespace Flurl.Http.Configuration
 		public void ResetDefaults() {
 			DefaultTimeout = new HttpClient().Timeout;
 			AllowedHttpStatusRange = null;
+			CookiesEnabled = false;
 			HttpClientFactory = new DefaultHttpClientFactory();
 			JsonSerializer = new NewtonsoftJsonSerializer(null);
 			UrlEncodedSerializer = new DefaultUrlEncodedSerializer();

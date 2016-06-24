@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -59,6 +62,7 @@ namespace Flurl.Http
 				_parent = this,
 				Settings = Settings,
 				Url = Url,
+				Cookies = Cookies,
 				AutoDispose = AutoDispose
 			};
 		}
@@ -76,6 +80,11 @@ namespace Flurl.Http
 		/// Gets or sets the URL to be called.
 		/// </summary>
 		public Url Url { get; set; }
+
+		/// <summary>
+		/// Collection of HttpCookies sent and received.
+		/// </summary>
+		public IDictionary<string, Cookie> Cookies { get; private set; } = new Dictionary<string, Cookie>();
 
 		/// <summary>
 		/// Gets a value indicating whether the underlying HttpClient
@@ -109,12 +118,57 @@ namespace Flurl.Http
 	    public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			try {
 				var request = new HttpRequestMessage(verb, Url) { Content = content };
+				if (Settings.CookiesEnabled)
+					WriteRequestCookies(request);
 				HttpCall.Set(request, Settings);
-				return await HttpClient.SendAsync(request, completionOption, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+				var resp = await HttpClient.SendAsync(request, completionOption, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+				if (Settings.CookiesEnabled)
+					ReadResponseCookies(resp);
+				return resp;
 			}
 			finally {
 				if (AutoDispose) Dispose();
 			}
+		}
+
+		private void WriteRequestCookies(HttpRequestMessage request) {
+			if (!Cookies.Any()) return;
+			var uri = request.RequestUri;
+			var cookieHandler = HttpMessageHandler as HttpClientHandler;
+
+			// if the inner handler is an HttpClientHandler (which it usually is), put the cookies in the CookieContainer.
+			if (cookieHandler != null) {
+				if (cookieHandler.CookieContainer == null)
+					cookieHandler.CookieContainer = new CookieContainer();
+				foreach (var cookie in Cookies.Values)
+					cookieHandler.CookieContainer.Add(uri, cookie);
+			}
+			else {
+				// http://stackoverflow.com/a/15588878/62600
+				request.Headers.TryAddWithoutValidation("Cookie", string.Join("; ", Cookies.Values));
+			}
+		}
+
+		private void ReadResponseCookies(HttpResponseMessage response) {
+			var uri = response.RequestMessage.RequestUri;
+
+			// if the inner handler is an HttpClientHandler (which it usually is), it's already plucked the
+			// cookies out of the headers and put them in the CookieContainer.
+			var jar = (HttpMessageHandler as HttpClientHandler)?.CookieContainer;
+			if (jar == null) {
+				// http://stackoverflow.com/a/15588878/62600
+				IEnumerable<string> cookieHeaders;
+				if (!response.Headers.TryGetValues("Set-Cookie", out cookieHeaders))
+					return;
+
+				jar = new CookieContainer();
+				foreach (string header in cookieHeaders) {
+					jar.SetCookies(uri, header);
+				}
+			}
+
+			foreach (var cookie in jar.GetCookies(uri).Cast<Cookie>())
+				Cookies[cookie.Name] = cookie;
 		}
 
 		/// <summary>
@@ -142,6 +196,7 @@ namespace Flurl.Http
 			_httpClient?.Dispose();
 			_httpMessageHandler = null;
 			_httpClient = null;
+			Cookies = new Dictionary<string, Cookie>();
 		}
 	}
 }

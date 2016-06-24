@@ -27,7 +27,7 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task can_set_cookies() {
+		public async Task can_set_request_cookies() {
 			var resp = await "http://httpbin.org/cookies".WithCookies(new { x = 1, y = 2 }).GetJsonAsync();
 
 			// httpbin returns json representation of cookies that were set on the server.
@@ -36,14 +36,28 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public async Task can_set_cookies_before_setting_url() {
+			var fc = new FlurlClient().WithCookie("z", "999");
+			var resp = await fc.WithUrl("http://httpbin.org/cookies").GetJsonAsync();
+			Assert.AreEqual("999", resp.cookies.z);
+		}
+
+		[Test]
+		public async Task can_get_response_cookies() {
+			var fc = new FlurlClient().EnableCookies();
+			await fc.WithUrl("https://httpbin.org/cookies/set?z=999").HeadAsync();
+			Assert.AreEqual("999", fc.Cookies["z"].Value);
+		}
+
+		[Test]
 		public async Task cant_persist_cookies_without_resuing_client() {
 			var fc = "http://httpbin.org/cookies".WithCookie("z", 999);
 			// cookie should be set
-			Assert.AreEqual("999", fc.GetCookies()["z"].Value);
+			Assert.AreEqual("999", fc.Cookies["z"].Value);
 
 			await fc.HeadAsync();
 			// FlurlClient was auto-disposed, so cookie should be gone
-			Assert.IsFalse(fc.GetCookies().ContainsKey("z"));
+			CollectionAssert.IsEmpty(fc.Cookies);
 
 			// httpbin returns json representation of cookies that were set on the server.
 			var resp = await "http://httpbin.org/cookies".GetJsonAsync();
@@ -55,13 +69,13 @@ namespace Flurl.Test.Http
 			using (var fc = new FlurlClient()) {
 				var fc2 = "http://httpbin.org/cookies".WithClient(fc).WithCookie("z", 999);
 				// cookie should be set
-				Assert.AreEqual("999", fc.GetCookies()["z"].Value);
-				Assert.AreEqual("999", fc2.GetCookies()["z"].Value);
+				Assert.AreEqual("999", fc.Cookies["z"].Value);
+				Assert.AreEqual("999", fc2.Cookies["z"].Value);
 
 				await fc2.HeadAsync();
 				// FlurlClient should be re-used, so cookie should stick
-				Assert.AreEqual("999", fc.GetCookies()["z"].Value);
-				Assert.AreEqual("999", fc2.GetCookies()["z"].Value);
+				Assert.AreEqual("999", fc.Cookies["z"].Value);
+				Assert.AreEqual("999", fc2.Cookies["z"].Value);
 
 				// httpbin returns json representation of cookies that were set on the server.
 				var resp = await "http://httpbin.org/cookies".WithClient(fc).GetJsonAsync();

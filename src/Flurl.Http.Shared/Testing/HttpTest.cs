@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using Flurl.Http.Content;
+using Flurl.Util;
 
 namespace Flurl.Http.Testing
 {
@@ -32,39 +33,55 @@ namespace Flurl.Http.Testing
 		}
 
 		/// <summary>
-		/// Adds an HttpResponseMessage to the response queue with the given HTTP status code and content body.
+		/// Adds an HttpResponseMessage to the response queue.
 		/// </summary>
-		public HttpTest RespondWith(int status, string body) {
-			ResponseQueue.Enqueue(new HttpResponseMessage {
+		/// <param name="body">The simulated response body string.</param>
+		/// <param name="status">The simulated HTTP status. Default is 200.</param>
+		/// <param name="headers">The simulated response headers (optional).</param>
+		/// <param name="cookies">The simulated response cookies (optional).</param>
+		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
+		public HttpTest RespondWith(string body, int status = 200, object headers = null, object cookies = null) {
+			return RespondWith(new StringContent(body), status, headers, cookies);
+		}
+
+		/// <summary>
+		/// Adds an HttpResponseMessage to the response queue with the given data serialized to JSON as the content body.
+		/// </summary>
+		/// <param name="body">The object to be JSON-serialized and used as the simulated response body.</param>
+		/// <param name="status">The simulated HTTP status. Default is 200.</param>
+		/// <param name="headers">The simulated response headers (optional).</param>
+		/// <param name="cookies">The simulated response cookies (optional).</param>
+		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
+		public HttpTest RespondWithJson(object body, int status = 200, object headers = null, object cookies = null) {
+			var content = new CapturedJsonContent(FlurlHttp.GlobalSettings.JsonSerializer.Serialize(body));
+			return RespondWith(content, status, headers, cookies);
+		}
+
+		/// <summary>
+		/// Adds an HttpResponseMessage to the response queue.
+		/// </summary>
+		/// <param name="content">The simulated response body content (optional).</param>
+		/// <param name="status">The simulated HTTP status. Default is 200.</param>
+		/// <param name="headers">The simulated response headers (optional).</param>
+		/// <param name="cookies">The simulated response cookies (optional).</param>
+		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
+		public HttpTest RespondWith(HttpContent content = null, int status = 200, object headers = null, object cookies = null) {
+			var response = new HttpResponseMessage {
 				StatusCode = (HttpStatusCode)status,
-				Content = new StringContent(body)
-			});
+				Content = content
+			};
+			if (headers != null) {
+				foreach (var kv in headers.ToKeyValuePairs())
+					response.Headers.Add(kv.Key, kv.Value.ToInvariantString());
+			}
+			if (cookies != null) {
+				foreach (var kv in cookies.ToKeyValuePairs()) {
+					var value = new Cookie(kv.Key, kv.Value.ToInvariantString()).ToString();
+					response.Headers.Add("Set-Cookie", value);
+				}
+			}
+			ResponseQueue.Enqueue(response);
 			return this;
-		}
-
-		/// <summary>
-		/// Adds an HttpResponseMessage to the response queue with a 200 (OK) status code and the given content body.
-		/// </summary>
-		public HttpTest RespondWith(string body) {
-			return RespondWith(200, body);
-		}
-
-		/// <summary>
-		/// Adds an HttpResponseMessage to the response queue with the given HTTP status code and the given data serialized to JSON as the content body.
-		/// </summary>
-		public HttpTest RespondWithJson(int status, object data) {
-			ResponseQueue.Enqueue(new HttpResponseMessage {
-				StatusCode = (HttpStatusCode)status,
-				Content = new CapturedJsonContent(FlurlHttp.GlobalSettings.JsonSerializer.Serialize(data))
-			});
-			return this;
-		}
-
-		/// <summary>
-		/// Adds an HttpResponseMessage to the response queue with a 200 (OK) status code and the given data serialized to JSON as the content body.
-		/// </summary>
-		public HttpTest RespondWithJson(object data) {
-			return RespondWithJson(200, data);
 		}
 
 		/// <summary>

@@ -12,18 +12,14 @@ namespace Flurl.Http
 	/// </summary>
 	public static class CookieExtensions
 	{
-		/// <summary>
-		/// Gets a collection of cookies that will be sent in calls using this client. (Use FlurlClient.WithCookie/WithCookies to set cookies.)
-		/// </summary>
-		public static Dictionary<string, Cookie> GetCookies(this FlurlClient client) {
-			return GetCookieContainer(client)?.GetCookies(client.HttpClient.BaseAddress).Cast<Cookie>().ToDictionary(c => c.Name, c => c);
-		}
+
+
 
 		/// <summary>
 		/// Allows cookies to be sent and received in calls made with this client. Not necessary to call when setting cookies via WithCookie/WithCookies.
 		/// </summary>
 		public static FlurlClient EnableCookies(this FlurlClient client) {
-			GetCookieContainer(client); // ensures the container has been created
+			client.Settings.CookiesEnabled = true;
 			return client;
 		}
 
@@ -49,7 +45,8 @@ namespace Flurl.Http
 		/// <returns>The modified FlurlClient.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="cookie" /> is null.</exception>
 		public static FlurlClient WithCookie(this FlurlClient client, Cookie cookie) {
-			GetCookieContainer(client).Add(client.HttpClient.BaseAddress, cookie);
+			client.Settings.CookiesEnabled = true;
+			client.Cookies[cookie.Name] = cookie;
 			return client;
 		}
 
@@ -75,7 +72,6 @@ namespace Flurl.Http
 			return new FlurlClient(url, true).WithCookie(cookie);
 		}
 
-
 		/// <summary>
 		/// Sets an HTTP cookie to be sent with all requests made with this FlurlClient.
 		/// </summary>
@@ -86,7 +82,8 @@ namespace Flurl.Http
 		/// <returns>The modified FlurlClient.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="value" /> is null.</exception>
 		public static FlurlClient WithCookie(this FlurlClient client, string name, object value, DateTime? expires = null) {
-			return client.WithCookie(new Cookie(name, value?.ToInvariantString()) { Expires = expires ?? DateTime.MinValue });
+			var cookie = new Cookie(name, value?.ToInvariantString()) { Expires = expires ?? DateTime.MinValue };
+			return client.WithCookie(cookie);
 		}
 
 	    /// <summary>
@@ -155,17 +152,6 @@ namespace Flurl.Http
 	    /// <exception cref="ArgumentNullException"><paramref name="cookies" /> is null.</exception>
 	    public static FlurlClient WithCookies(this string url, object cookies, DateTime? expires = null) {
 			return new FlurlClient(url, true).WithCookies(cookies);
-		}
-
-		private static CookieContainer GetCookieContainer(FlurlClient client) {
-			var handler = client.HttpMessageHandler as HttpClientHandler;
-			if (handler == null)
-				return null;
-
-			if (client.HttpClient.BaseAddress == null)
-				client.HttpClient.BaseAddress = new Uri(Url.GetRoot(client.Url));
-
-			return handler.CookieContainer ?? (handler.CookieContainer = new CookieContainer());
 		}
 	}
 }

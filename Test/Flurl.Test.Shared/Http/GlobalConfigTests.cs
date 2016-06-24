@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -41,7 +40,7 @@ namespace Flurl.Test.Http
 		public async Task can_allow_non_success_status() {
 			using (var test = new HttpTest()) {
 				GetSettings().AllowedHttpStatusRange = "4xx";
-				test.RespondWith(418, "I'm a teapot");
+				test.RespondWith("I'm a teapot", 418);
 				try {
 					var result = await GetClient().GetAsync();
 					Assert.IsFalse(result.IsSuccessStatusCode);
@@ -87,7 +86,7 @@ namespace Flurl.Test.Http
 		public async Task can_set_error_callback(bool markExceptionHandled) {
 			var callbackCalled = false;
 			using (var test = new HttpTest()) {
-				test.RespondWith(500, "server error");
+				test.RespondWith("server error", 500);
 				GetSettings().OnError = call => {
 					CollectionAssert.IsEmpty(test.ResponseQueue); // verifies that callback is running after HTTP call is made
 					callbackCalled = true;
@@ -112,7 +111,7 @@ namespace Flurl.Test.Http
 				GetSettings().OnError = call => {
 					call.ExceptionHandled = true;
 				};
-				test.RespondWith(500, "server error");
+				test.RespondWith("server error", 500);
 				try {
 					var result = await GetClient().GetAsync();
 					Assert.IsFalse(result.IsSuccessStatusCode);

@@ -85,7 +85,7 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task failure_throws_detailed_exception() {
-			HttpTest.RespondWith(500, "bad job");
+			HttpTest.RespondWith("bad job", status: 500);
 
 			try {
 				await "http://api.com".GetStringAsync();
@@ -101,7 +101,7 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_get_error_json_typed() {
-			HttpTest.RespondWithJson(500, new { code = 999, message = "our server crashed" });
+			HttpTest.RespondWithJson(new { code = 999, message = "our server crashed" }, 500);
 
 			try {
 				await "http://api.com".GetStringAsync();
@@ -116,7 +116,7 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_get_error_json_untyped() {
-			HttpTest.RespondWithJson(500, new { code = 999, message = "our server crashed" });
+			HttpTest.RespondWithJson(new { code = 999, message = "our server crashed" }, 500);
 
 			try {
 				await "http://api.com".GetStringAsync();
