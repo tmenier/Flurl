@@ -137,7 +137,7 @@ namespace Flurl.Http
 			var cookieHandler = HttpMessageHandler as HttpClientHandler;
 
 			// if the inner handler is an HttpClientHandler (which it usually is), put the cookies in the CookieContainer.
-			if (cookieHandler != null) {
+			if (cookieHandler != null && cookieHandler.UseCookies) {
 				if (cookieHandler.CookieContainer == null)
 					cookieHandler.CookieContainer = new CookieContainer();
 				foreach (var cookie in Cookies.Values)

@@ -142,7 +142,7 @@ namespace Flurl.Test.Http
 			var path2 = @"c:\flurl-multipart-test2.txt";
 			File.WriteAllText(path2, "file contents 2");
 			try {
-				var resp = await new FlurlClient("http://httpbin.org/post")
+				var resp = await "http://httpbin.org/post"
 					.PostMultipartAsync(new {
 						DataField = "hello!",
 						File1 = new HttpFile(path1),
