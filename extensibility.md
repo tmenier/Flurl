@@ -2,11 +2,11 @@
 layout: default
 ---
 
-##Extensibility
+## Extensibility
 
 Since most of Flurl's functionality is provided through extension methods, it is very easy to extend using the same patterns that Flurl itself uses.
 
-###Extending the URL builder
+### Extending the URL builder
 
 Chainable URL builder methods generally come in pairs of overloads - one extending `Flurl.Url` and the other extending `String`, both of which should return the modified `Flurl.Url` object:
 
@@ -30,7 +30,7 @@ url = "http://api.com"
     .DoMyThing(); // uses Url extension
 ````
 
-###Extending Flurl.Http
+### Extending Flurl.Http
 
 Chainable Flurl.Http methods generally come in threes - one extending `Flurl.Url`, one extending `string`, and one extending `FlurlClient`, which is just a wrapper around a Flurl.Url and an HttpClient. All return a `FlurlClient`.
 
@@ -66,7 +66,7 @@ result = "http://api.com"
     .GetAsync();
 ````
 
-###Providing a custom HttpClient factory
+### Providing a custom HttpClient factory
 
 For advanced scenarios, you can customize the way Flurl.Http constructs HttpClient instances. Although it is only required that your custom factory implements `Flurl.Http.Configuration.IHttpClientFactory`, it is strongly advised to inherit from `DefaultHttpClientFactory` and extend the client returned by the base implementation. Much of Flurl's functionality, including callbacks, enhanced exceptions, and testability hooks, are dependent on the default factory and could break if you do not use the default as a starting point.
 

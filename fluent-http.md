@@ -2,7 +2,7 @@
 layout: default
 ---
 
-##Fluent HTTP
+## Fluent HTTP
 
 Flurl allows you to perform many common HTTP tasks directly off the fluent URL builder chain. Barely under the hood is [HttpClient](http://blogs.msdn.com/b/henrikn/archive/2012/02/11/httpclient-is-here.aspx) and related classes. As you'll see, Flurl enhances HttpClient with convenience methods and fluent goodness but doesn't try to abstract it away completely.
 
@@ -75,7 +75,7 @@ dynamic d = await url.PostUrlEncodedAsync(data).ReceiveJson();
 string s = await url.PostUrlEncodedAsync(data).ReceiveString();
 ````
 
-###Configuring Client Calls
+### Configuring Client Calls
 
 There are a variety of ways to set up HTTP calls without breaking the fluent chain.
 

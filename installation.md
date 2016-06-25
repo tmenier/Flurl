@@ -2,7 +2,7 @@
 layout: default
 ---
 
-##Installation
+## Installation
 
 Flurl is [available on NuGet](https://www.nuget.org/packages?q=flurl) in two flavors. For all the fluent URL and testable HTTP goodness described on this site:
 

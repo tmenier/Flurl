@@ -2,7 +2,7 @@
 layout: default
 ---
 
-##Fluent URL Building
+## Fluent URL Building
 
 Flurl's URL builder is best explained with an example:
 
@@ -37,7 +37,7 @@ var url = Url.Combine("http://foo.com/", "/too/", "/many/", "too", "few");
 // result: "http://www.foo.com/too/many/too/few"
 ````
 
-###Encoding
+### Encoding
 
 Flurl takes care of encoding characters in URLs but takes a different approach with path segments than it does with query string values. The assumption is that query string values are highly variable (such as from user input), whereas path segments tend to be more "fixed" and may already be encoded, in which case you don't want to double-encode. Here are the rules Flurl follows:
 
@@ -46,7 +46,7 @@ Flurl takes care of encoding characters in URLs but takes a different approach w
 - For path segments, *illegal* characters such as spaces are encoded.
 - For path segments, the `?` character is encoded, since query strings get special treatment.
 
-###Url API
+### Url API
 
 The `Url` API is small, discoverable, and fairly self-explanatory. For completeness, here are all public methods and properties:
 

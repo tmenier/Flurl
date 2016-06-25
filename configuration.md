@@ -2,7 +2,7 @@
 layout: default
 ---
 
-##Configuration
+## Configuration
 
 Flurl.Http supports a variety of global configuration options.
 
@@ -69,7 +69,7 @@ public class HttpCall
 
 The final global configuration option is `HttpClientFactory`, which allows you to change the way HttpClient instances are created. Normally you won't need to set this, and care should be taken when doing so. More details in the [Extensibility]({{ site.baseurl }}/extensibility) section.
 
-###Reverting Config Changes
+### Reverting Config Changes
 
 Although not very common, you can easily undo all customizations and revert back to the default configuration:
 

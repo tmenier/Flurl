@@ -2,7 +2,7 @@
 layout: default
 ---
 
-##Testable HTTP
+## Testable HTTP
 
 Flurl.Http provides a set of testing features that make isolated arrange-act-assert style testing dead simple. At its core is `HttpTest`, the creation of which kicks Flurl into test mode, where all HTTP activity in the test subject is automatically faked and recorded. No need for wrapper interfaces or injected mocks.
 
@@ -39,7 +39,7 @@ public void Test_Some_Http_Calling_Method() {
 }
 ````
 
-###Arrange
+### Arrange
 
 By default, fake HTTP calls return a 200 (OK) status with an empty body. Of course you'll likely want to test your code against other responses.
 
@@ -80,7 +80,7 @@ var response = new HttpResponseMessage { ... };
 httpTest.ResponseQueue.Enqueue(response);
 ````
 
-###Assert
+### Assert
 
 As HTTP methods are faked, they are automatically recorded, allowing you to assert that certain calls were made. Assertions are test framework-agnostic; they throw an exception at any point when a match is not found as specified, signaling a test failure in virtually all testing frameworks.
 
