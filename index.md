@@ -3,7 +3,7 @@ layout: default
 title: Home
 ---
 
-###Flurl is a modern, fluent, asynchronous, testable, portable, buzzword-laden URL builder and HTTP client library.
+### Flurl is a modern, fluent, asynchronous, testable, portable, buzzword-laden URL builder and HTTP client library.
 
 ````c#
 var result = await "https://api.mysite.com"
@@ -16,7 +16,7 @@ var result = await "https://api.mysite.com"
 
 With a discoverable API, [extensibility](extensibility) at every turn, and a nifty set of [testing features](testable-http), Flurl is intended to make building and calling URLs easy and downright fun.
 
-##Documentation
+## Documentation
 
 - [Installation](installation)
 - [Fluent URL building](fluent-url)
