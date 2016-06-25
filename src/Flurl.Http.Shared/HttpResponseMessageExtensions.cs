@@ -65,7 +65,7 @@ namespace Flurl.Http
 #if NETSTANDARD1_4
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 #endif
-			return await (await response.ConfigureAwait(false)).Content.ReadAsStringAsync().ConfigureAwait(false);
+			return await (await response.ConfigureAwait(false)).Content.StripCharsetQuotes().ReadAsStringAsync().ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -84,6 +84,14 @@ namespace Flurl.Http
 		/// <example>bytes = await url.PostAsync(data).ReceiveBytes()</example>
 		public static async Task<byte[]> ReceiveBytes(this Task<HttpResponseMessage> response) {
 			return await (await response.ConfigureAwait(false)).Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+		}
+
+		// https://github.com/tmenier/Flurl/pull/76, https://github.com/dotnet/corefx/issues/5014
+		internal static HttpContent StripCharsetQuotes(this HttpContent content) {
+			var header = content?.Headers?.ContentType;
+			if (header?.CharSet != null)
+				header.CharSet = header.CharSet.Trim().TrimStart('"').TrimEnd('"');
+			return content;
 		}
 	}
 }
