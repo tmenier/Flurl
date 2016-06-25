@@ -259,7 +259,7 @@ namespace Flurl.Http
 		/// <returns>The modified FlurlClient.</returns>
 		public static FlurlClient WithBasicAuth(this FlurlClient client, string username, string password) {
 			// http://stackoverflow.com/questions/14627399/setting-authorization-header-of-httpclient
-			var value = Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Format("{0}:{1}", username, password)));
+			var value = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}"));
 			client.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", value);
 			return client;
 		}
