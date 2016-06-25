@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Flurl.Http.Testing
@@ -76,6 +77,30 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		public HttpCallAssertion WithContentType(string contentType) {
 			return With(c => c.Request.Content.Headers.ContentType.MediaType == contentType);
+		}
+
+		/// <summary>
+		/// Asserts whether the Authorization header was set with OAuth.
+		/// </summary>
+		/// <param name="token">Expected token value</param>
+		/// <returns></returns>
+		public HttpCallAssertion WithOAuthBearerToken(string token)
+		{
+			return With(c => c.Request.Headers.Authorization?.Scheme == "Bearer"
+				&& c.Request.Headers.Authorization?.Parameter == token);
+		}
+
+		/// <summary>
+		/// Asserts whether the Authorization header was set with basic auth.
+		/// </summary>
+		/// <param name="username">Expected username</param>
+		/// <param name="password">Expected password</param>
+		/// <returns></returns>
+		public HttpCallAssertion WithBasicAuth(string username, string password)
+		{
+			var value = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}"));
+			return With(c => c.Request.Headers.Authorization?.Scheme == "Basic"
+				&& c.Request.Headers.Authorization?.Parameter == value);
 		}
 
 		/// <summary>
