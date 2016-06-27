@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CommonExtensionsTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HttpResponseMessageExtensionsTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\ClientConfigTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\ClientLifetimeTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\HttpStatusRangeParserTests.cs" />
