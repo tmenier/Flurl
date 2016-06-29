@@ -10,4 +10,4 @@ exit /b 1
 echo Restoring dependicies was successful.
 )
 
-call dotnet run -c Release -p %project%
+call dotnet test -c Release %project%

@@ -30,6 +30,7 @@ namespace Flurl.Http.Content
 		/// Initializes a new instance of the <see cref="CapturedStringContent"/> class.
 		/// </summary>
 		/// <param name="content">The content.</param>
+		/// <param name="encoding">The encoding.</param>
 		/// <param name="mediaType">Type of the media.</param>
 		public CapturedStringContent(string content, Encoding encoding, string mediaType) : base(content, encoding, mediaType) {
 			_content = content;

@@ -122,24 +122,23 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task can_cancel_request() {
-			try {
+		public void can_cancel_request() {
+			var ex = Assert.ThrowsAsync<FlurlHttpException>(async () =>
+			{
 				var cts = new CancellationTokenSource();
 				var task = "http://www.google.com".GetStringAsync(cts.Token);
 				cts.Cancel();
 				await task;
-				Assert.Fail("Should have thrown exception on cancelation");
-			}
-			catch (FlurlHttpException ex) {
-				Assert.IsNotNull(ex.InnerException as TaskCanceledException);
-			}
+			});
+
+			Assert.IsNotNull(ex.InnerException as TaskCanceledException);
 		}
 
 		[Test]
 		public async Task can_post_multipart() {
-			var path1 = @"c:\flurl-multipart-test1.txt";
+			var path1 = "c:\\flurl-multipart-test-" + Guid.NewGuid()+".txt"; // random so parallel tests don't trip over each other
 			File.WriteAllText(path1, "file contents 1");
-			var path2 = @"c:\flurl-multipart-test2.txt";
+			var path2 = "c:\\flurl-multipart-test-" + Guid.NewGuid() + ".txt"; // random so parallel tests don't trip over each other
 			File.WriteAllText(path2, "file contents 2");
 			try {
 				var resp = await "http://httpbin.org/post"

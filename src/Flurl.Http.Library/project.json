@@ -1,10 +1,10 @@
 {
   "title": "Flurl.Http",
-  "version": "1.0.0-beta6-update3",
+  "version": "1.0.0-pre",
 
   "dependencies": {
-    "Flurl": "2.1.0-beta6",
-    "Newtonsoft.Json": "8.0.3"
+    "Flurl": "2.1.0-pre",
+    "Newtonsoft.Json": "9.0.1"
   },
 
   "buildOptions": {
@@ -38,16 +38,11 @@
       }
     },
     "netstandard1.4": {
-      "imports": "dnxcore50",
+      "imports": "dotnet",
       "dependencies": {
-        "System.Dynamic.Runtime": "4.0.10",
-        "System.IO.FileSystem": "4.0.0",
-        "System.Net.Http": "4.0.0",
-        "System.Runtime.Extensions": "4.0.10",
-        "System.Runtime.Serialization.Primitives": "4.0.10",
-        "System.Text.Encoding.CodePages": "4.0.0",
-        "System.Text.RegularExpressions": "4.0.10",
-        "System.Threading": "4.0.10"
+        "System.IO.FileSystem": "4.0.1",
+        "System.Net.Http": "4.1.0",
+        "System.Text.Encoding.CodePages": "4.0.1"
       }
     }
   }

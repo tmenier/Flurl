@@ -44,6 +44,10 @@ namespace Flurl.Http.Content
 			}
 		}
 
+		/// <summary>
+		/// Releases unmanaged and - optionally - managed resources.
+		/// </summary>
+		/// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
 		protected override void Dispose(bool disposing) {
 			if (disposing) {
 				foreach (var stream in _openStreams)
@@ -72,12 +76,17 @@ namespace Flurl.Http.Content
 			return this;
 		}
 
+		/// <summary>
+		/// Serializes to stream asynchronous.
+		/// </summary>
+		/// <param name="stream">The stream.</param>
+		/// <param name="context">The context.</param>
 		protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context) {
-			foreach (var kv in this.Data) {
+			foreach (var kv in Data) {
 				Add(new StringContent(kv.Value), kv.Key);
 			}
 
-			foreach (var kv in this.Files) {
+			foreach (var kv in Files) {
 				var file = kv.Value;
 				var fs = await FileUtil.OpenReadAsync(file.Path, 4096).ConfigureAwait(false);
 				_openStreams.Add(fs);
@@ -90,6 +99,10 @@ namespace Flurl.Http.Content
 		}
 
 		// https://blogs.msdn.microsoft.com/henrikn/2012/02/16/push-and-pull-streams-using-httpclient/
+		/// <summary>
+		/// Tries the length of the compute.
+		/// </summary>
+		/// <param name="length">The length.</param>
 		protected override bool TryComputeLength(out long length) {
 			length = -1;
 			return false;

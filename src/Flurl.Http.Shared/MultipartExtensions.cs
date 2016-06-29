@@ -5,8 +5,11 @@ using Flurl.Http.Content;
 
 namespace Flurl.Http
 {
-    public static class MultipartExtensions
-    {
+	/// <summary>
+	/// MultipartExtensions
+	/// </summary>
+	public static class MultipartExtensions
+	{
 		/// <summary>
 		/// Sends an asynchronous POST request.
 		/// </summary>

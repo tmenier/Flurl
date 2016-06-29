@@ -6,15 +6,14 @@
     }
   },
   "dependencies": {
-    "Flurl.Http": "1.0.0-beta6-update3"
+    "Flurl.Http": "1.0.0-pre"
   },
   "frameworks": {
     "netcoreapp1.0": {
-      "imports": "dnxcore50",
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.0.0-rc2-*"
+          "version": "1.0.0"
         }
       }
     }
