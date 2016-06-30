@@ -12,12 +12,12 @@
   },
 
   "dependencies": {
-    "dotnet-test-nunit": "3.4.0-alpha-2",
+    "dotnet-test-nunit": "3.4.0-beta-1",
     "Flurl.Http.Library": {
       "version": "",
       "target": "project"
     },
-    "NUnit": "3.4.0"
+    "NUnit": "3.4.1"
   },
 
   "testRunner": "nunit",
