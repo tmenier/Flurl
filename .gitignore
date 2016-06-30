@@ -10,4 +10,4 @@ packages
 *.log
 .vscode
 publish
-*.xml
+TestResult.xml
