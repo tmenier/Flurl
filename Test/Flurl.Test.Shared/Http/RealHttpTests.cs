@@ -122,16 +122,17 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public void can_cancel_request() {
-			var ex = Assert.ThrowsAsync<FlurlHttpException>(async () =>
-			{
+		public async Task can_cancel_request() {
+			try {
 				var cts = new CancellationTokenSource();
 				var task = "http://www.google.com".GetStringAsync(cts.Token);
 				cts.Cancel();
 				await task;
-			});
-
-			Assert.IsNotNull(ex.InnerException as TaskCanceledException);
+				Assert.Fail("Should have thrown exception on cancelation");
+			}
+			catch (FlurlHttpException ex) {
+				Assert.IsNotNull(ex.InnerException as TaskCanceledException);
+			}
 		}
 
 		[Test]
