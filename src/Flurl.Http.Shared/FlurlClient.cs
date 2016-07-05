@@ -110,26 +110,45 @@ namespace Flurl.Http
 			return _httpClient;
 		}
 
-	    /// <summary>
-	    /// Creates and asynchronously sends an HttpRequestMethod, disposing HttpClient if AutoDispose it true.
-	    /// Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
-	    /// </summary>
-	    /// <returns>A Task whose result is the received HttpResponseMessage.</returns>
-	    public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
-			try {
-				var request = new HttpRequestMessage(verb, Url) { Content = content };
-				if (Settings.CookiesEnabled)
-					WriteRequestCookies(request);
-				HttpCall.Set(request, Settings);
-				var resp = await HttpClient.SendAsync(request, completionOption, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-				if (Settings.CookiesEnabled)
-					ReadResponseCookies(resp);
-				return resp;
+		/// <summary>
+		/// Creates and asynchronously sends an HttpRequestMethod, disposing HttpClient if AutoDispose it true.
+		/// Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
+		/// </summary>
+		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
+		/// <exception cref="FlurlHttpException">Condition.</exception>
+		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
+	    {
+			var request = new HttpRequestMessage(verb, Url) { Content = content };
+			try
+		    {
+			    if (Settings.CookiesEnabled)
+				    WriteRequestCookies(request);
+			    HttpCall.Set(request, Settings);
+			    var resp =
+				    await
+					    HttpClient.SendAsync(request, completionOption, cancellationToken ?? CancellationToken.None)
+						    .ConfigureAwait(false);
+			    if (Settings.CookiesEnabled)
+				    ReadResponseCookies(resp);
+			    return resp;
+		    }
+			catch (OperationCanceledException)
+		    {
+				throw new FlurlHttpException(HttpCall.Get(request), new TaskCanceledException());
+		    }
+			catch (InvalidOperationException invalidOperationException)
+			{
+				throw new FlurlHttpException(HttpCall.Get(request), invalidOperationException);
 			}
-			finally {
-				if (AutoDispose) Dispose();
+			catch (ArgumentNullException argumentNullException)
+			{
+				throw new FlurlHttpException(HttpCall.Get(request), argumentNullException);
 			}
-		}
+			finally
+		    {
+			    if (AutoDispose) Dispose();
+		    }
+	    }
 
 		private void WriteRequestCookies(HttpRequestMessage request) {
 			if (!Cookies.Any()) return;
