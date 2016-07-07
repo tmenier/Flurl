@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Dynamic;
-using System.Net.Http;
 
 namespace Flurl.Http
 {
@@ -8,7 +7,7 @@ namespace Flurl.Http
 	/// An exception that is thrown when an HTTP call made by Flurl.Http fails, including when the response
 	/// indicates an unsuccessful HTTP status code.
 	/// </summary>
-	public class FlurlHttpException : HttpRequestException
+	public class FlurlHttpException : Exception
 	{
 		/// <summary>
 		/// An object containing details about the failed HTTP call
