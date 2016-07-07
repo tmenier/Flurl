@@ -18,7 +18,7 @@ namespace Flurl.Test.Http
 	{
 		[Test]
 		public async Task can_download_file() {
-			var folder = "c:\\" + Guid.NewGuid(); // random so parallel tests don't trip over each other
+			var folder = "c:\\flurl-test-" + Guid.NewGuid(); // random so parallel tests don't trip over each other
 			var path = await "http://www.google.com".DownloadFileAsync(folder, "google.txt");
 			Assert.AreEqual($@"{folder}\google.txt", path);
 			Assert.That(File.Exists(path));
@@ -136,10 +136,14 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_post_multipart() {
-			var path1 = "c:\\flurl-multipart-test-" + Guid.NewGuid()+".txt"; // random so parallel tests don't trip over each other
+			var folder = "c:\\flurl-test-" + Guid.NewGuid(); // random so parallel tests don't trip over each other
+			Directory.CreateDirectory(folder);
+
+			var path1 = Path.Combine(folder, "upload1.txt");
 			File.WriteAllText(path1, "file contents 1");
-			var path2 = "c:\\flurl-multipart-test-" + Guid.NewGuid() + ".txt"; // random so parallel tests don't trip over each other
+			var path2 = Path.Combine(folder, "upload2.txt");
 			File.WriteAllText(path2, "file contents 2");
+
 			try {
 				var resp = await "http://httpbin.org/post"
 					.PostMultipartAsync(new {
@@ -154,8 +158,7 @@ namespace Flurl.Test.Http
 				Assert.AreEqual("file contents 2", resp.files.File2);
 			}
 			finally {
-				File.Delete(path1);
-				File.Delete(path2);
+				Directory.Delete(folder, true);
 			}
 		}
 
