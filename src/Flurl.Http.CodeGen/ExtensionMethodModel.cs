@@ -7,33 +7,34 @@ namespace Flurl.Http.CodeGen
 	{
 		public static IEnumerable<ExtensionMethodModel> GetAll() {
 			return
-				from httpVerb in new[] { "Get", "Post", "Head", "Put", "Delete", "Patch" }
+				from httpVerb in new[] { null, "Get", "Post", "Head", "Put", "Delete", "Patch" }
 				from bodyType in new[] { null, "Json", /*"Xml",*/ "String", "UrlEncoded" }
-				where AllowRequestBody(httpVerb) || bodyType == null
+				where AllowRequestBody(httpVerb, bodyType)
 				from extensionType in new[] { "FlurlClient", "Url", "string" }
 				from deserializeType in new[] { null, "Json", "JsonList", /*"Xml",*/ "String", "Stream", "Bytes" }
 				where httpVerb == "Get" || deserializeType == null
 				from isGeneric in new[] { true, false }
 				where AllowDeserializeToGeneric(deserializeType) || !isGeneric
-				from hasCancelationToken in new[] { true, false }
 				select new ExtensionMethodModel {
 					HttpVerb = httpVerb,
 					BodyType = bodyType,
 					ExtentionOfType = extensionType,
 					DeserializeToType = deserializeType,
-					HasCancelationToken = hasCancelationToken,
 					IsGeneric = isGeneric
 				};
 		}
 
-		private static bool AllowRequestBody(string verb) {
+		private static bool AllowRequestBody(string verb, string bodyType) {
 			switch (verb) {
-				case "Get":
-				case "Head":
-				case "Delete":
-					return false;
-				default:
+				case null: // Send
+					return bodyType != null;
+				case "Post":
 					return true;
+				case "Put":
+				case "Patch":
+					return bodyType != "UrlEncoded";
+				default: // Get, Head, Delete
+					return bodyType == null;
 			}
 		}
 
@@ -50,12 +51,9 @@ namespace Flurl.Http.CodeGen
 		public string BodyType { get; set; }
 		public string ExtentionOfType { get; set; }
 		public string DeserializeToType { get; set; }
-		public bool HasCancelationToken { get; set; }
 		public bool IsGeneric { get; set; }
 
-		public string Name {
-			get { return string.Format("{0}{1}Async", HttpVerb, BodyType ?? DeserializeToType); }
-		}
+		public string Name => $"{HttpVerb ?? "Send"}{BodyType ?? DeserializeToType}Async";
 
 		public string TaskArg {
 			get {
