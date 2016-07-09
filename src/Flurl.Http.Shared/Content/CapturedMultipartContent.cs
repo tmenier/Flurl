@@ -36,9 +36,8 @@ namespace Flurl.Http.Content
 				if (kv.Value == null)
 					continue;
 
-				var file = kv.Value as HttpFile;
-				if (file != null)
-					Files.Add(kv.Key, file);
+				if (kv.Value is HttpFile)
+					Files.Add(kv.Key, (HttpFile)kv.Value);
 				else
 					AddTextField(kv.Key, kv.Value);
 			}
@@ -88,12 +87,15 @@ namespace Flurl.Http.Content
 
 			foreach (var kv in Files) {
 				var file = kv.Value;
-				var fs = await FileUtil.OpenReadAsync(file.Path, 4096).ConfigureAwait(false);
-				_openStreams.Add(fs);
+				var fs = file.Stream;
+				if (fs == null) {
+					fs = await FileUtil.OpenReadAsync(file.Path, 4096).ConfigureAwait(false);
+					_openStreams.Add(fs);
+				}
 				var content = new StreamContent(fs);
 				if (file.ContentTye != null)
 					content.Headers.ContentType.MediaType = file.ContentTye;
-				Add(content, kv.Key, FileUtil.GetFileName(file.Path));
+				Add(content, kv.Key, file.Name);
 			}
 			await base.SerializeToStreamAsync(stream, context).ConfigureAwait(false);
 		}

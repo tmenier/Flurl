@@ -145,17 +145,18 @@ namespace Flurl.Test.Http
 			File.WriteAllText(path2, "file contents 2");
 
 			try {
-				var resp = await "http://httpbin.org/post"
-					.PostMultipartAsync(new {
-						DataField = "hello!",
-						File1 = new HttpFile(path1),
-						File2 = new HttpFile(path2)
-					})//.ReceiveString();
-					.ReceiveJson();
-
-				Assert.AreEqual("hello!", resp.form.DataField);
-				Assert.AreEqual("file contents 1", resp.files.File1);
-				Assert.AreEqual("file contents 2", resp.files.File2);
+				using (var stream = File.OpenRead(path2)) {
+					var resp = await "http://httpbin.org/post"
+						.PostMultipartAsync(new {
+							DataField = "hello!",
+							File1 = new HttpFile(path1),
+							File2 = new HttpFile(stream, "foo.txt")
+						})//.ReceiveString();
+						.ReceiveJson();
+					Assert.AreEqual("hello!", resp.form.DataField);
+					Assert.AreEqual("file contents 1", resp.files.File1);
+					Assert.AreEqual("file contents 2", resp.files.File2);
+				}
 			}
 			finally {
 				Directory.Delete(folder, true);
