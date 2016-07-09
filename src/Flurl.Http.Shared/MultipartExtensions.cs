@@ -11,7 +11,7 @@ namespace Flurl.Http
 	public static class MultipartExtensions
 	{
 		/// <summary>
-		/// Sends an asynchronous POST request.
+		/// Sends an asynchronous multipart/form-data POST request.
 		/// </summary>
 		/// <param name="data">Contents of the request body.</param>
 		/// <param name="client">The Flurl client.</param>
@@ -23,7 +23,7 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// Sends an asynchronous POST request.
+		/// Sends an asynchronous multipart/form-data POST request.
 		/// </summary>
 		/// <param name="data">Contents of the request body.</param>
 		/// <param name="client">The Flurl client.</param>
@@ -33,7 +33,7 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// Creates a FlurlClient from the URL and sends an asynchronous POST request.
+		/// Creates a FlurlClient from the URL and sends an asynchronous multipart/form-data POST request.
 		/// </summary>
 		/// <param name="data">Contents of the request body.</param>
 		/// <param name="url">The URL.</param>
@@ -44,7 +44,7 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// Creates a FlurlClient from the URL and sends an asynchronous POST request.
+		/// Creates a FlurlClient from the URL and sends an asynchronous multipart/form-data POST request.
 		/// </summary>
 		/// <param name="data">Contents of the request body.</param>
 		/// <param name="url">The URL.</param>
@@ -54,7 +54,7 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// Creates a FlurlClient from the URL and sends an asynchronous POST request.
+		/// Creates a FlurlClient from the URL and sends an asynchronous multipart/form-data POST request.
 		/// </summary>
 		/// <param name="data">Contents of the request body.</param>
 		/// <param name="url">The URL.</param>
@@ -65,7 +65,7 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// Creates a FlurlClient from the URL and sends an asynchronous POST request.
+		/// Creates a FlurlClient from the URL and sends an asynchronous multipart/form-data POST request.
 		/// </summary>
 		/// <param name="data">Contents of the request body.</param>
 		/// <param name="url">The URL.</param>
