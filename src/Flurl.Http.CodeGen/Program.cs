@@ -13,7 +13,6 @@ namespace Flurl.Http.CodeGen
 			if (!File.Exists(codePath)) {
 				Console.ForegroundColor = ConsoleColor.Red;
 				Console.WriteLine("Code file not found: " + Path.GetFullPath(codePath));
-				Console.ReadLine();
 				return 2;
 			}
 
@@ -47,13 +46,11 @@ namespace Flurl.Http.CodeGen
                 }
 
                 Console.WriteLine("File writing succeeded.");
-				Console.ReadLine();
 				return 0;
             }
             catch (Exception ex) {
 	            Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(ex);
-	            Console.ReadLine();
                 return 2;
             }
         }
