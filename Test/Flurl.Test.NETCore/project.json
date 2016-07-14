@@ -13,10 +13,7 @@
 
   "dependencies": {
     "dotnet-test-nunit": "3.4.0-beta-1",
-    "Flurl.Http.Library": {
-      "version": "",
-      "target": "project"
-    },
+    "Flurl.Http.Library": { "target": "project" },
     "NUnit": "3.4.1"
   },
 
