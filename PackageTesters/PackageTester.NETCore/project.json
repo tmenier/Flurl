@@ -5,9 +5,9 @@
       "include": [ "../PackageTester.Shared/**/*.cs" ]
     }
   },
-  "dependencies": {
-    "Flurl.Http": "1.0.0-beta7"
-  },
+    "dependencies": {
+        "Flurl.Http": "1.0.0-beta8"
+    },
   "frameworks": {
     "netcoreapp1.0": {
       "dependencies": {
