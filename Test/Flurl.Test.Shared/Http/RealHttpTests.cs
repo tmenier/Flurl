@@ -140,19 +140,23 @@ namespace Flurl.Test.Http
 			Directory.CreateDirectory(folder);
 
 			var path1 = Path.Combine(folder, "upload1.txt");
-			File.WriteAllText(path1, "file contents 1");
 			var path2 = Path.Combine(folder, "upload2.txt");
+
+			File.WriteAllText(path1, "file contents 1");
 			File.WriteAllText(path2, "file contents 2");
 
 			try {
 				using (var stream = File.OpenRead(path2)) {
 					var resp = await "http://httpbin.org/post"
-						.PostMultipartAsync(new {
-							DataField = "hello!",
-							File1 = new HttpFile(path1),
-							File2 = new HttpFile(stream, "foo.txt")
-						})//.ReceiveString();
+						.PostMultipartAsync(content => content
+							.AddStringParts(new {a = 1, b = 2})
+							.AddString("DataField", "hello!")
+							.AddFile("File1", path1)
+							.AddFile("File2", stream, "foo.txt"))
+						//.ReceiveString();
 						.ReceiveJson();
+					Assert.AreEqual("1", resp.form.a);
+					Assert.AreEqual("2", resp.form.b);
 					Assert.AreEqual("hello!", resp.form.DataField);
 					Assert.AreEqual("file contents 1", resp.files.File1);
 					Assert.AreEqual("file contents 2", resp.files.File2);

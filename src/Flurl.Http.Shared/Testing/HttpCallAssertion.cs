@@ -75,8 +75,8 @@ namespace Flurl.Http.Testing
 		/// <summary>
 		/// Asserts whether calls were made with a request body of the given content (MIME) type.
 		/// </summary>
-		public HttpCallAssertion WithContentType(string contentType) {
-			return With(c => c.Request.Content.Headers.ContentType.MediaType == contentType);
+		public HttpCallAssertion WithContentType(string mediaType) {
+			return With(c => c.Request.Content.Headers.ContentType.MediaType == mediaType);
 		}
 
 		/// <summary>

@@ -1,6 +1,6 @@
 {
   "title": "Flurl.Http",
-  "version": "1.0.0-beta7",
+  "version": "1.0.0-beta8",
 
   "dependencies": {
     "Flurl": "2.1.0-beta7",

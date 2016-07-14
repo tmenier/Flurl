@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Http\ClientConfigTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\ClientLifetimeTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\HttpStatusRangeParserTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Http\MultipartTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\RealHttpTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\FlurlClientTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\GetTests.cs" />

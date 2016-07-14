@@ -21,7 +21,7 @@ namespace Flurl.Test.Http
 					continue;
 
 				if (!urlExts.Any(m => ReflectionHelper.AreSameMethodSignatures(method, m))) {
-					Assert.Fail("No equivalent URL extension method found for FlurlClient.{0}", method.Name);
+					Assert.Fail("No equivalent Url extension method found for FlurlClient.{0}", method.Name);
 				}
 				if (!stringExts.Any(m => ReflectionHelper.AreSameMethodSignatures(method, m))) {
 					Assert.Fail("No equivalent string extension method found for FlurlClient.{0}", method.Name);

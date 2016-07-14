@@ -17,10 +17,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Configuration\ISerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Configuration\NewtonsoftJsonSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Configuration\DefaultUrlEncodedSerializer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Content\CapturedMultipartContent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Content\CapturedUrlEncodedContent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Content\CapturedJsonContent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Content\CapturedStringContent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Content\FileContent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Content\CapturedMultipartContent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CookieExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DownloadExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileUtil.cs" />
@@ -29,7 +30,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)FlurlHttpException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpCall.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)HttpFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpStatusRangeParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpResponseMessageExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MultipartExtensions.cs" />
