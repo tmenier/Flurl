@@ -114,6 +114,10 @@ namespace Flurl.Http
 		/// Creates and asynchronously sends an HttpRequestMethod, disposing HttpClient if AutoDispose it true.
 		/// Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
 		/// </summary>
+		/// <param name="verb">The HTTP method used to make the request.</param>
+		/// <param name="content">Contents of the request body.</param>
+		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			try {

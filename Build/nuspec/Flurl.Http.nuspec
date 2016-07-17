@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>1.0.0-beta8</version>
+		<version>1.0.0-beta9</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,7 +13,7 @@
 			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
 		</description>
 		<releaseNotes>
-1.0.0 - Many updates and new features: https://github.com/tmenier/Flurl/releases/tag/Flurl.Http.1.0.0
+1.0.0 - Many updates and new features: https://github.com/tmenier/Flurl/releases/tag/Flurl.Http.1.0.0-beta9
 0.10.1 - DLL version fix (github #90)
 0.10.0 - Lib updates, including Flurl 2.0 which contains breaking changes: https://github.com/tmenier/Flurl/wiki/Release-Notes
 0.9.0 - BREAKING CHANGES: https://github.com/tmenier/Flurl/wiki/Release-Notes

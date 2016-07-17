@@ -59,7 +59,7 @@ namespace Flurl.Http.CodeGen
         {
 			string name = null;
             foreach (var xm in ExtensionMethodModel.GetAll()) {
-	            var normallyHasContent = (xm.HttpVerb == "Post" || xm.HttpVerb == "Put" || xm.HttpVerb == "Patch");
+	            var hasRequestBody = (xm.HttpVerb == "Post" || xm.HttpVerb == "Put" || xm.HttpVerb == "Patch" || xm.HttpVerb == null);
 
 				if (xm.Name != name) {
 		            Console.WriteLine($"writing {xm.Name}...");
@@ -72,20 +72,19 @@ namespace Flurl.Http.CodeGen
 				else
 					writer.WriteLine("/// @0 an asynchronous @1 request.", summaryStart, xm.HttpVerb.ToUpperInvariant());
                 writer.WriteLine("/// </summary>");
+				if (xm.ExtentionOfType == "FlurlClient")
+                    writer.WriteLine("/// <param name=\"client\">The Flurl client.</param>");
+                if (xm.ExtentionOfType == "Url" || xm.ExtentionOfType == "string")
+                    writer.WriteLine("/// <param name=\"url\">The URL.</param>");
 				if (xm.HttpVerb == null)
 					writer.WriteLine("/// <param name=\"verb\">The HTTP method used to make the request.</param>");
 				if (xm.BodyType != null)
 					writer.WriteLine("/// <param name=\"data\">Contents of the request body.</param>");
-				else if (normallyHasContent)
+				else if (hasRequestBody)
 					writer.WriteLine("/// <param name=\"content\">Contents of the request body.</param>");
-				if (xm.ExtentionOfType == "FlurlClient")
-                    writer.WriteLine("/// <param name=\"client\">The Flurl client.</param>");
-                if (xm.ExtentionOfType == "Url")
-                    writer.WriteLine("/// <param name=\"url\">The URL.</param>");
-                if (xm.ExtentionOfType == "string")
-                    writer.WriteLine("/// <param name=\"url\">The URL.</param>");
-                writer.WriteLine("/// <param name=\"cancellationToken\">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>");
-                writer.WriteLine("/// <returns>A Task whose result is @0.</returns>", xm.ReturnTypeDescription);
+				writer.WriteLine("/// <param name=\"cancellationToken\">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>");
+				writer.WriteLine("/// <param name=\"completionOption\">The HttpCompletionOption used in the request. Optional.</param>");
+				writer.WriteLine("/// <returns>A Task whose result is @0.</returns>", xm.ReturnTypeDescription);
 
                 var args = new List<string>();
                 args.Add("this " + xm.ExtentionOfType + (xm.ExtentionOfType == "FlurlClient" ? " client" : " url"));
@@ -93,13 +92,14 @@ namespace Flurl.Http.CodeGen
 		            args.Add("HttpMethod verb");
                 if (xm.BodyType != null)
                     args.Add((xm.BodyType == "String" ? "string" : "object") + " data");
-				else if (normallyHasContent)
+				else if (hasRequestBody)
 					args.Add("HttpContent content");
 
 				// http://stackoverflow.com/questions/22359706/default-parameter-for-cancellationtoken
 				args.Add("CancellationToken cancellationToken = default(CancellationToken)");
+	            args.Add("HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead");
 
-                writer.WriteLine("public static Task<@0> @1@2(@3) {", xm.TaskArg, xm.Name, xm.IsGeneric ? "<T>" : "", string.Join(", ", args));
+				writer.WriteLine("public static Task<@0> @1@2(@3) {", xm.TaskArg, xm.Name, xm.IsGeneric ? "<T>" : "", string.Join(", ", args));
 
                 if (xm.ExtentionOfType == "FlurlClient")
                 {
@@ -109,12 +109,13 @@ namespace Flurl.Http.CodeGen
 						xm.HttpVerb == "Patch" ? "new HttpMethod(\"PATCH\")" : // there's no HttpMethod.Patch
 						"HttpMethod." + xm.HttpVerb);
 
-                    if (xm.BodyType != null || normallyHasContent)
+                    if (xm.BodyType != null || hasRequestBody)
                         args.Add("content: content");
 
 					args.Add("cancellationToken: cancellationToken");
+					args.Add("completionOption: completionOption");
 
-	                if (xm.BodyType != null) {
+					if (xm.BodyType != null) {
 		                writer.WriteLine("var content = new Captured@0Content(@1);",
 			                xm.BodyType,
 			                xm.BodyType == "String" ? "data" : string.Format("client.Settings.{0}Serializer.Serialize(data)", xm.BodyType));
