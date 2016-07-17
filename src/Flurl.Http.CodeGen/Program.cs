@@ -59,7 +59,9 @@ namespace Flurl.Http.CodeGen
         {
 			string name = null;
             foreach (var xm in ExtensionMethodModel.GetAll()) {
-	            if (xm.Name != name) {
+	            var normallyHasContent = (xm.HttpVerb == "Post" || xm.HttpVerb == "Put" || xm.HttpVerb == "Patch");
+
+				if (xm.Name != name) {
 		            Console.WriteLine($"writing {xm.Name}...");
 		            name = xm.Name;
 	            }
@@ -73,8 +75,10 @@ namespace Flurl.Http.CodeGen
 				if (xm.HttpVerb == null)
 					writer.WriteLine("/// <param name=\"verb\">The HTTP method used to make the request.</param>");
 				if (xm.BodyType != null)
-                    writer.WriteLine("/// <param name=\"data\">Contents of the request body.</param>");
-                if (xm.ExtentionOfType == "FlurlClient")
+					writer.WriteLine("/// <param name=\"data\">Contents of the request body.</param>");
+				else if (normallyHasContent)
+					writer.WriteLine("/// <param name=\"content\">Contents of the request body.</param>");
+				if (xm.ExtentionOfType == "FlurlClient")
                     writer.WriteLine("/// <param name=\"client\">The Flurl client.</param>");
                 if (xm.ExtentionOfType == "Url")
                     writer.WriteLine("/// <param name=\"url\">The URL.</param>");
@@ -89,6 +93,9 @@ namespace Flurl.Http.CodeGen
 		            args.Add("HttpMethod verb");
                 if (xm.BodyType != null)
                     args.Add((xm.BodyType == "String" ? "string" : "object") + " data");
+				else if (normallyHasContent)
+					args.Add("HttpContent content");
+
 				// http://stackoverflow.com/questions/22359706/default-parameter-for-cancellationtoken
 				args.Add("CancellationToken cancellationToken = default(CancellationToken)");
 
@@ -96,21 +103,22 @@ namespace Flurl.Http.CodeGen
 
                 if (xm.ExtentionOfType == "FlurlClient")
                 {
-                    if (xm.BodyType != null)
-                    {
-                        writer.WriteLine("var content = new Captured@0Content(@1);",
-                            xm.BodyType,
-                            xm.BodyType == "String" ? "data" : string.Format("client.Settings.{0}Serializer.Serialize(data)", xm.BodyType));
-                    }
-
-                    args.Clear();
+	                args.Clear();
                     args.Add(
 						xm.HttpVerb == null ? "verb" :
 						xm.HttpVerb == "Patch" ? "new HttpMethod(\"PATCH\")" : // there's no HttpMethod.Patch
 						"HttpMethod." + xm.HttpVerb);
-                    if (xm.BodyType != null)
+
+                    if (xm.BodyType != null || normallyHasContent)
                         args.Add("content: content");
-                    args.Add("cancellationToken: cancellationToken");
+
+					args.Add("cancellationToken: cancellationToken");
+
+	                if (xm.BodyType != null) {
+		                writer.WriteLine("var content = new Captured@0Content(@1);",
+			                xm.BodyType,
+			                xm.BodyType == "String" ? "data" : string.Format("client.Settings.{0}Serializer.Serialize(data)", xm.BodyType));
+	                }
 
                     var client = (xm.ExtentionOfType == "FlurlClient") ? "client" : "new FlurlClient(url, false)";
                     var receive = (xm.DeserializeToType == null) ? "" : string.Format(".Receive{0}{1}()", xm.DeserializeToType, xm.IsGeneric ? "<T>" : "");
