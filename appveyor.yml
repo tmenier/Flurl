@@ -1,7 +1,6 @@
 version: 1.0.0-{branch}-{build}
 
 branches:
-  # whitelist
   only:
     - master
     - dev
@@ -9,14 +8,8 @@ branches:
 pull_requests:
   do_not_increment_build_number: true
 
-os: Visual Studio 2015
-
-install:
-  - ps: .\build\scripts\install.ps1
-
 build_script:
-  - ps: .\build\scripts\show-dotnet-info.ps1
-  - cmd: call cmd /C "cd .\build & pack.flurl.cmd & pack.flurl.http.cmd"  
+  - cmd: call cmd /C "call dotnet --info & cd .\build & pack.flurl.cmd & pack.flurl.http.cmd"  
 
 test_script:
   - cmd: call cmd /C "cd .\build & test.cmd"

@@ -1,7 +1,5 @@
 @set project=..\test\Flurl.Test.NETCore\
 
-@call dotnet --info
-
 call dotnet restore --verbosity Error %project%
 @if ERRORLEVEL 1 (
 echo Error! Restoring dependicies failed.
