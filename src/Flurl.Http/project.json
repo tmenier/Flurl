@@ -1,9 +1,9 @@
 {
   "title": "Flurl.Http",
-  "version": "1.0.0",
+  "version": "1.0.1-beta",
 
   "dependencies": {
-	"Flurl": "2.1.0",
+    "Flurl": "2.1.0",
     "Newtonsoft.Json": "9.0.1"
   },
 
@@ -11,9 +11,16 @@
     "compile": {
       "include": [ "../Flurl.Http.Shared/**/*.cs" ]
     },
-    "optimize": true,
-    "outputName": "Flurl.Http",
-    "xmlDoc": true
+    "xmlDoc": true,
+    "warningsAsErrors": true
+  },
+
+  "configurations": {
+    "Release": {
+      "buildOptions": {
+        "optimize": true
+      }
+    }
   },
 
   "frameworks": {

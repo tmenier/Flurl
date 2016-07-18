@@ -1,14 +1,21 @@
 {
   "title": "Flurl",
-  "version": "2.1.0",
+  "version": "2.1.1-beta",
 
   "buildOptions": {
     "compile": {
       "include": "../Flurl.Shared/**/*.cs"
     },
-    "optimize": true,
-    "outputName": "Flurl",
+    "warningsAsErrors": true,
     "xmlDoc": true
+  },
+
+  "configurations": {
+    "Release": {
+      "buildOptions": {
+        "optimize": true
+      }
+    }
   },
 
   "frameworks": {
