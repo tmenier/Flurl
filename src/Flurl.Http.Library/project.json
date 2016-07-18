@@ -1,9 +1,9 @@
 {
   "title": "Flurl.Http",
-  "version": "1.0.0-beta9",
+  "version": "1.0.0",
 
   "dependencies": {
-    "Flurl": "2.1.0-beta7",
+	"Flurl": "2.1.0",
     "Newtonsoft.Json": "9.0.1"
   },
 
