@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Http\ClientConfigTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\ClientLifetimeTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\HttpStatusRangeParserTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Http\MultipartTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\RealHttpTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\FlurlClientTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\GetTests.cs" />
@@ -21,6 +22,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Http\HttpTestFixtureBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\PostTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Http\TestingTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PackageTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ReflectionHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UrlBuilderTests.cs" />
   </ItemGroup>

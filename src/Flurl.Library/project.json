@@ -1,0 +1,30 @@
+{
+  "title": "Flurl",
+  "version": "2.1.0",
+
+  "buildOptions": {
+    "compile": {
+      "include": "../Flurl.Shared/**/*.cs"
+    },
+    "optimize": true,
+    "outputName": "Flurl",
+    "xmlDoc": true
+  },
+
+  "frameworks": {
+    "portable40-net40+win8+wpa81": {
+      "frameworkAssemblies": {
+        "mscorlib": "2.0.5.0",
+        "System": "2.0.5.0",
+        "System.Core": "2.0.5.0"
+      }
+    },
+    "netstandard1.4": {
+      "dependencies": {
+        "System.Globalization.Calendars": "4.0.1",
+        "System.Linq": "4.1.0",
+        "System.Reflection.TypeExtensions": "4.1.0"
+      }
+    }
+  }
+}

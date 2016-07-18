@@ -1,0 +1,37 @@
+﻿{
+  "name": "Flurl.Test.NETCore",
+
+  "buildOptions": {
+    "compile": {
+      "include": [ "../Flurl.Test.Shared/**/*.cs" ]
+    }
+  },
+
+  "commands": {
+    "test": "Flurl.Test.NETCore"
+  },
+
+  "dependencies": {
+    "dotnet-test-nunit": "3.4.0-beta-1",
+    "Flurl.Http.Library": { "target": "project" },
+    "NUnit": "3.4.1"
+  },
+
+  "testRunner": "nunit",
+
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": [
+        "dnxcore50",
+        "netcoreapp1.0",
+        "portable-net45+win8"
+      ],
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0"
+        }
+      }
+    }
+  }
+}

@@ -8,3 +8,6 @@ packages
 .vs
 *.lock.json
 *.log
+.vscode
+publish
+TestResult.xml

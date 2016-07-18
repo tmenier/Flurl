@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using PackageTester.PCL;
 
-namespace PackageTester
+namespace PackageTester.NET45
 {
-	class Program
+	public class Program
 	{
-		static void Main(string[] args) {
+		public static void Main(string[] args) {
 			TestAllPlatformsAsync().Wait();
 			Console.ReadLine();
 		}
@@ -23,7 +21,7 @@ namespace PackageTester
 		}
 
 		private static void Cleanup() {
-			var file = "c:\\flurl\\google.txt";
+			var file = "c:\\google.txt";
 			if (File.Exists(file)) File.Delete(file);
 		}
 	}

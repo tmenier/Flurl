@@ -1,0 +1,17 @@
+{
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "optimize": true
+  },
+
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0"
+    }
+  },
+
+  "frameworks": {
+    "netcoreapp1.0": { }
+  }
+}

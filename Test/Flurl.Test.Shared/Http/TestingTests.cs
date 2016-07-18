@@ -75,5 +75,25 @@ namespace Flurl.Test.Http
 				StringAssert.Contains("timed out", ex.Message);
 			}
 		}
+
+		[Test]
+		public async Task can_fake_headers() {
+			HttpTest.RespondWith(headers: new { h1 = "foo" });
+
+			var resp = await "http://www.api.com".GetAsync();
+			Assert.AreEqual(1, resp.Headers.Count());
+			Assert.AreEqual("h1", resp.Headers.First().Key);
+			Assert.AreEqual("foo", resp.Headers.First().Value.First());
+		}
+
+		[Test]
+		public async Task can_fake_cookies() {
+			HttpTest.RespondWith(cookies: new { c1 = "foo" });
+
+			var fc = "http://www.api.com".EnableCookies();
+			await fc.GetAsync();
+			Assert.AreEqual(1, fc.Cookies.Count());
+			Assert.AreEqual("foo", fc.Cookies["c1"].Value);
+		}
 	}
 }
