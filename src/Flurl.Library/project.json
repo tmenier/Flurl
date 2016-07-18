@@ -1,6 +1,6 @@
 {
   "title": "Flurl",
-  "version": "2.1.0-beta7",
+  "version": "2.1.0",
 
   "buildOptions": {
     "compile": {
