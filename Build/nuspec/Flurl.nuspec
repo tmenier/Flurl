@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl</id>
-		<version>2.1.0</version>
+		<version>2.1.1-beta</version>
 		<title>Flurl</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -52,10 +52,10 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="..\..\src\Flurl.Library\bin\Release\portable40-net40+win8+wpa81\Flurl.*" target="lib\monoandroid" />
-		<file src="..\..\src\Flurl.Library\bin\Release\portable40-net40+win8+wpa81\Flurl.*" target="lib\monotouch" />
-		<file src="..\..\src\Flurl.Library\bin\Release\portable40-net40+win8+wpa81\Flurl.*" target="lib\xamarin.ios" />
-		<file src="..\..\src\Flurl.Library\bin\Release\portable40-net40+win8+wpa81\Flurl.*" target="lib\xamarin.mac" />
-		<file src="..\..\src\Flurl.Library\bin\Release\**\Flurl.*" target="lib\" />
+		<file src="..\..\src\Flurl\bin\Release\portable40-net40+win8+wpa81\Flurl.*" target="lib\monoandroid" />
+		<file src="..\..\src\Flurl\bin\Release\portable40-net40+win8+wpa81\Flurl.*" target="lib\monotouch" />
+		<file src="..\..\src\Flurl\bin\Release\portable40-net40+win8+wpa81\Flurl.*" target="lib\xamarin.ios" />
+		<file src="..\..\src\Flurl\bin\Release\portable40-net40+win8+wpa81\Flurl.*" target="lib\xamarin.mac" />
+		<file src="..\..\src\Flurl\bin\Release\**\Flurl.*" target="lib\" />
 	</files>
 </package>

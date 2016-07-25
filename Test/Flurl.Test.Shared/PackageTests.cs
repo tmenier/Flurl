@@ -16,14 +16,14 @@ namespace Flurl.Test
 	{
 		[Test]
 		public void flurl_versions_are_consistent() {
-			var projVer = GetProjectVersion(@"src\Flurl.Library\project.json");
+			var projVer = GetProjectVersion(@"src\Flurl\project.json");
 			var nuspecVer = GetNuspecVersion(@"build\nuspec\Flurl.nuspec");
 			Assert.AreEqual(projVer, nuspecVer);
 		}
 
 		[Test]
 		public void flurlhttp_versions_are_consistent() {
-			var projVer = GetProjectVersion(@"src\Flurl.Http.Library\project.json");
+			var projVer = GetProjectVersion(@"src\Flurl.Http\project.json");
 			var nuspecVer = GetNuspecVersion(@"build\nuspec\Flurl.Http.nuspec");
 			Assert.AreEqual(projVer, nuspecVer);
 		}
