@@ -70,18 +70,43 @@ namespace Flurl
 			return result;
 		}
 
-	    /// <summary>
-	    /// Basically a Path.Combine for URLs. Ensures exactly one '/' character is used to seperate each segment.
-	    /// URL-encodes illegal characters but not reserved characters.
-	    /// </summary>
-	    /// <param name="url">The URL to use as a starting point (required).</param>
-	    /// <param name="segments">Paths to combine.</param>
-	    /// <exception cref="ArgumentNullException"><paramref name="url"/> is <see langword="null" />.</exception>
-	    public static string Combine(string url, params string[] segments) {
-			if (url == null)
-				throw new ArgumentNullException(nameof(url));
+		/// <summary>
+		/// Basically a Path.Combine for URLs. Ensures exactly one '/' seperates each segment,
+		/// and exactly on '&' seperates each query parameter.
+		/// URL-encodes illegal characters but not reserved characters.
+		/// </summary>
+		/// <param name="parts">URL parts to combine.</param>
+		public static string Combine(params string[] parts) {
+			if (parts == null)
+				throw new ArgumentNullException(nameof(parts));
 
-			return new Url(url).AppendPathSegments(segments).ToString();
+			string result = "";
+			bool inQuery = false, inFragment = false;
+
+		    foreach (var part in parts) {
+			    if (string.IsNullOrEmpty(part))
+				    continue;
+
+				if (result.EndsWith("?") || part.StartsWith("?"))
+					result = CombineEnsureSingleSeperator(result, part, '?');
+				else if (result.EndsWith("#") || part.StartsWith("#"))
+					result = CombineEnsureSingleSeperator(result, part, '#');
+				else if (inFragment)
+					result += part;
+				else if (inQuery)
+					result = CombineEnsureSingleSeperator(result, part, '&');
+				else
+					result = CombineEnsureSingleSeperator(result, part, '/');
+
+			    if (part.Contains("#")) {
+					inQuery = false;
+					inFragment = true;
+			    }
+				else if (!inFragment && part.Contains("?")) {
+					inQuery = true;
+				}
+			}
+			return EncodeIllegalCharacters(result);
 		}
 
 		/// <summary>
@@ -115,14 +140,13 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Encodes characters that are illegal in a URL path, including '?'. Does not encode reserved characters, i.e. '/', '+', etc.
+		/// Encodes characters that are illegal in a URL. Does not encode reserved characters, i.e. '/', '+', etc.
 		/// </summary>
-		/// <param name="segment"></param>
-		/// <returns></returns>
-		private static string CleanSegment(string segment) {
+		/// <param name="urlPart">The URL or URL part.</param>
+		public static string EncodeIllegalCharacters(string urlPart) {
 			// http://stackoverflow.com/questions/4669692/valid-characters-for-directory-part-of-a-url-for-short-links
-			var unescaped = Uri.UnescapeDataString(segment);
-			return Uri.EscapeUriString(unescaped).Replace("?", "%3F");
+			var unescaped = Uri.UnescapeDataString(urlPart);
+			return Uri.EscapeUriString(unescaped);
 		}
 
 	    /// <summary>
@@ -135,9 +159,14 @@ namespace Flurl
 			if (segment == null)
 				throw new ArgumentNullException(nameof(segment));
 
-			if (!Path.EndsWith("/")) Path += "/";
-			Path += CleanSegment(segment.ToInvariantString().TrimStart('/'));
+			Path = CombineEnsureSingleSeperator(Path, EncodeIllegalCharacters(segment.ToInvariantString()).Replace("?", "%3F"), '/');
 			return this;
+		}
+
+		private static string CombineEnsureSingleSeperator(string a, string b, char seperator) {
+			if (string.IsNullOrEmpty(a)) return b;
+			if (string.IsNullOrEmpty(b)) return a;
+			return a.TrimEnd(seperator) + seperator + b.TrimStart(seperator);
 		}
 
 		/// <summary>

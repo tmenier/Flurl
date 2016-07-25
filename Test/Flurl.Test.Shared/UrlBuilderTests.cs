@@ -86,10 +86,25 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void Combine_works()
-		{
+		public void Combine_works() {
 			var url = Url.Combine("http://www.foo.com/", "/too/", "/many/", "/slashes/", "too", "few", "one/two/");
 			Assert.AreEqual("http://www.foo.com/too/many/slashes/too/few/one/two/", url);
+		}
+
+		[TestCase("segment?", "foo=bar", "x=1&y=2&")]
+		[TestCase("segment", "?foo=bar&x=1", "y=2&")]
+		[TestCase("segment", "?", "foo=bar&x=1&y=2&")]
+		[TestCase("/segment?foo=bar&", "&x=1&", "&y=2&")]
+		[TestCase(null, "segment?foo=bar&x=1&y=2&", "")]
+		public void Combine_supports_query(string a, string b, string c) {
+			var url = Url.Combine("http://root.com", a, b, c);
+			Assert.AreEqual("http://root.com/segment?foo=bar&x=1&y=2&", url);
+		}
+
+		[Test]
+		public void Combine_encodes_illegal_chars() {
+			var url = Url.Combine("http://www.foo.com", "hi there", "?", "x=hi there", "#", "hi there");
+			Assert.AreEqual("http://www.foo.com/hi%20there?x=hi%20there#hi%20there", url);
 		}
 
 		[Test]
