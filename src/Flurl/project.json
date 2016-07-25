@@ -19,7 +19,7 @@
   },
 
   "frameworks": {
-    "portable40-net40+win8+wpa81": {
+    ".NETPortable4.0-net40+sl50+win+wpa81+wp80": {
       "frameworkAssemblies": {
         "mscorlib": "2.0.5.0",
         "System": "2.0.5.0",

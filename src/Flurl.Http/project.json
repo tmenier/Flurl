@@ -3,7 +3,7 @@
   "version": "1.0.1-beta",
 
   "dependencies": {
-    "Flurl": "2.1.0",
+    "Flurl": "2.1.1-beta",
     "Newtonsoft.Json": "9.0.1"
   },
 
@@ -39,7 +39,7 @@
         "System.Text.Encoding.CodePages": "4.0.1"
       }
     },
-    "portable45-net45+win8+wpa81": {
+    ".NETPortable4.0-net45+sl50+win+wpa81+wp80": {
       "buildOptions": {
         "define": [ "PORTABLE" ]
       },
@@ -48,16 +48,16 @@
         "Microsoft.Bcl.Build": "1.0.21",
         "Microsoft.Net.Http": "2.2.29",
         "PCLStorage": "1.0.2"
-      },
-      "frameworkAssemblies": {
-        "System.Collections": "4.0.0.0",
-        "System.Dynamic.Runtime": "4.0.0.0",
-        "System.Linq": "4.0.0.0",
-        "System.Runtime.Extensions": "4.0.0.0",
-        "System.Text.Encoding": "4.0.0.0",
-        "System.Text.RegularExpressions": "4.0.0.0",
-        "System.Threading": "4.0.0.0"
-      }
+      }//,
+      //"frameworkAssemblies": {
+      //  "System.Collections": "4.0.0.0",
+      //  "System.Dynamic.Runtime": "4.0.0.0",
+      //  "System.Linq": "4.0.0.0",
+      //  "System.Runtime.Extensions": "4.0.0.0",
+      //  "System.Text.Encoding": "4.0.0.0",
+      //  "System.Text.RegularExpressions": "4.0.0.0",
+      //  "System.Threading": "4.0.0.0"
+      //}
     }
   }
 }

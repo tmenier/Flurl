@@ -71,7 +71,7 @@ namespace Flurl
 		}
 
 	    /// <summary>
-	    /// Basically a Path.Combine for URLs. Ensures exactly one '/' character is used to seperate each segment.
+	    /// Basically a Path.Combine for URLs. Ensures exactly one '/' character is used to separate each segment.
 	    /// URL-encodes illegal characters but not reserved characters.
 	    /// </summary>
 	    /// <param name="url">The URL to use as a starting point (required).</param>
