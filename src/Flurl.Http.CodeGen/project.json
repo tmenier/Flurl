@@ -1,7 +1,14 @@
 {
   "buildOptions": {
-    "emitEntryPoint": true,
-    "optimize": true
+    "emitEntryPoint": true
+  },
+
+  "configurations": {
+    "Release": {
+      "buildOptions": {
+        "optimize": true
+      }
+    }
   },
 
   "dependencies": {

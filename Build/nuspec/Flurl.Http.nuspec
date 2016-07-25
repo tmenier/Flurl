@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>1.0.0</version>
+		<version>1.0.1-beta</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -107,10 +107,10 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="..\..\src\Flurl.Http.Library\bin\Release\portable45-net45+win8+wpa81\Flurl.Http.*" target="lib\monoandroid" />
-		<file src="..\..\src\Flurl.Http.Library\bin\Release\portable45-net45+win8+wpa81\Flurl.Http.*" target="lib\monotouch" />
-		<file src="..\..\src\Flurl.Http.Library\bin\Release\portable45-net45+win8+wpa81\Flurl.Http.*" target="lib\xamarin.ios" />
-		<file src="..\..\src\Flurl.Http.Library\bin\Release\portable45-net45+win8+wpa81\Flurl.Http.*" target="lib\xamarin.mac" />
-		<file src="..\..\src\Flurl.Http.Library\bin\Release\**\Flurl.Http.*" target="lib\" />
+		<file src="..\..\src\Flurl.Http\bin\Release\portable45-net45+win8+wpa81\Flurl.Http.*" target="lib\monoandroid" />
+		<file src="..\..\src\Flurl.Http\bin\Release\portable45-net45+win8+wpa81\Flurl.Http.*" target="lib\monotouch" />
+		<file src="..\..\src\Flurl.Http\bin\Release\portable45-net45+win8+wpa81\Flurl.Http.*" target="lib\xamarin.ios" />
+		<file src="..\..\src\Flurl.Http\bin\Release\portable45-net45+win8+wpa81\Flurl.Http.*" target="lib\xamarin.mac" />
+		<file src="..\..\src\Flurl.Http\bin\Release\**\Flurl.Http.*" target="lib\" />
 	</files>
 </package>
