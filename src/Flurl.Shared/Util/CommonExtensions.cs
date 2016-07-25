@@ -48,6 +48,20 @@ namespace Flurl.Util
 			return obj.ToString();
 		}
 
+		/// <summary>
+		/// Needed because full PCL profile doesn't support Split(char[], int) (#119)
+		/// </summary>
+		internal static string[] SplitOnFirstOccurence(this string s, char separator) {
+			if (string.IsNullOrEmpty(s))
+				return new[] { s };
+
+			var i = s.IndexOf(separator);
+			if (i == -1)
+				return new[] { s };
+
+			return new[] { s.Substring(0, i), s.Substring(i + 1) };
+		}
+
 		private static IEnumerable<KeyValuePair<string, object>> StringToKV(string s) {
 			return Url.ParseQueryParams(s).Select(p => new KeyValuePair<string, object>(p.Name, p.Value));
 		}

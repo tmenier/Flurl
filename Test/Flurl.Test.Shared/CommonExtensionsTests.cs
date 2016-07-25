@@ -101,5 +101,14 @@ namespace Flurl.Test
 			};
 			Assert.Throws<ArgumentException>(() => kv.ToKeyValuePairs().ToList());// need to force it to iterate for the exception to be thrown
 		}
+
+// todo: why can't netcore test app find SplitOnFirstOccurence? (making it public doesn't help)
+#if !NETCOREAPP1_0
+		[Test]
+		public void SplitOnFirstOccurence_works() {
+			var result = "hello/how/are/you".SplitOnFirstOccurence('/');
+			Assert.AreEqual(new[] { "hello", "how/are/you" }, result);
+		}
+#endif
 	}
 }

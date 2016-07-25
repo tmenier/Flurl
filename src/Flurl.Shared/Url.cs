@@ -42,9 +42,9 @@ namespace Flurl
 			if (baseUrl == null)
 				throw new ArgumentNullException(nameof(baseUrl));
 
-			var parts = baseUrl.Split(new[] { '#' }, 2);
+			var parts = baseUrl.SplitOnFirstOccurence('#');
 			Fragment = (parts.Length == 2) ? parts[1] : "";
-			parts = parts[0].Split(new[] { '?' }, 2);
+			parts = parts[0].SplitOnFirstOccurence('?');
 			Query = (parts.Length == 2) ? parts[1] : "";
 			Path = parts[0];
 		}
@@ -62,7 +62,7 @@ namespace Flurl
 
 			result.AddRange(
 				from p in query.Split('&')
-				let pair = p.Split(new[] { '=' }, 2)
+				let pair = p.SplitOnFirstOccurence('=')
 				let name = pair[0]
 				let value = (pair.Length == 1) ? "" : pair[1]
 				select new QueryParameter(name, value, true));
