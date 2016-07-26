@@ -1,6 +1,6 @@
 {
   "title": "Flurl.Http",
-  "version": "1.0.1-beta",
+  "version": "1.0.1-beta1",
 
   "dependencies": {
     "Flurl": "2.2.0-beta1",
@@ -39,7 +39,7 @@
         "System.Text.Encoding.CodePages": "4.0.1"
       }
     },
-    ".NETPortable4.0-net45+sl50+win+wpa81+wp80": {
+    "portable40-net45+sl5+win8+wp8+wpa81": {
       "buildOptions": {
         "define": [ "PORTABLE" ]
       },
@@ -48,16 +48,7 @@
         "Microsoft.Bcl.Build": "1.0.21",
         "Microsoft.Net.Http": "2.2.29",
         "PCLStorage": "1.0.2"
-      }//,
-      //"frameworkAssemblies": {
-      //  "System.Collections": "4.0.0.0",
-      //  "System.Dynamic.Runtime": "4.0.0.0",
-      //  "System.Linq": "4.0.0.0",
-      //  "System.Runtime.Extensions": "4.0.0.0",
-      //  "System.Text.Encoding": "4.0.0.0",
-      //  "System.Text.RegularExpressions": "4.0.0.0",
-      //  "System.Threading": "4.0.0.0"
-      //}
+      }
     }
   }
 }

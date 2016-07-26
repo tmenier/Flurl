@@ -44,7 +44,7 @@
 			<group targetFramework="monotouch" />
 			<group targetFramework="monoandroid" />
 			<group targetFramework="uap10" />
-			<group targetFramework="portable40-net40+win8+wpa81" />
+			<group targetFramework="portable40-net40+sl5+win8+wp8+wpa81" />
 			<group targetFramework="netstandard1.4">
 				<dependency id="System.Globalization.Calendars" version="4.0.1" />
 				<dependency id="System.Linq" version="4.1.0" />
@@ -53,10 +53,10 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="..\..\src\Flurl\bin\Release\portable40-net40+win8+wpa81\Flurl.*" target="lib\monoandroid" />
-		<file src="..\..\src\Flurl\bin\Release\portable40-net40+win8+wpa81\Flurl.*" target="lib\monotouch" />
-		<file src="..\..\src\Flurl\bin\Release\portable40-net40+win8+wpa81\Flurl.*" target="lib\xamarin.ios" />
-		<file src="..\..\src\Flurl\bin\Release\portable40-net40+win8+wpa81\Flurl.*" target="lib\xamarin.mac" />
+		<file src="..\..\src\Flurl\bin\Release\portable40-net40+sl5+win8+wp8+wpa81\Flurl.*" target="lib\monoandroid" />
+		<file src="..\..\src\Flurl\bin\Release\portable40-net40+sl5+win8+wp8+wpa81\Flurl.*" target="lib\monotouch" />
+		<file src="..\..\src\Flurl\bin\Release\portable40-net40+sl5+win8+wp8+wpa81\Flurl.*" target="lib\xamarin.ios" />
+		<file src="..\..\src\Flurl\bin\Release\portable40-net40+sl5+win8+wp8+wpa81\Flurl.*" target="lib\xamarin.mac" />
 		<file src="..\..\src\Flurl\bin\Release\**\Flurl.*" target="lib\" />
 	</files>
 </package>
