@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{CF0659E1-9C0D-4D35-8FBA-CC5E94619853}"
 EndProject
@@ -45,18 +45,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuspec", "nuspec", "{E41F60
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{0a32978c-bc48-4dfb-b1f7-b88541b0d686}*SharedItemsImports = 4
+		Test\Flurl.Test.Shared\Flurl.Test.Shared.projitems*{4c7c0861-84f6-436e-8fa6-4c318b336a7b}*SharedItemsImports = 13
 		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{19c1befd-9df7-4efa-9d7d-37b0dc6eef54}*SharedItemsImports = 13
-		src\Flurl.Http.Shared\Flurl.Http.Shared.projitems*{3f6be828-fa29-429e-99e1-f1fcdfdc1205}*SharedItemsImports = 4
-		src\Flurl.Shared\Flurl.Shared.projitems*{3f6be828-fa29-429e-99e1-f1fcdfdc1205}*SharedItemsImports = 4
-		Test\Flurl.Test.Shared\Flurl.Test.Shared.projitems*{3f6be828-fa29-429e-99e1-f1fcdfdc1205}*SharedItemsImports = 4
+		Test\Flurl.Test.Shared\Flurl.Test.Shared.projitems*{49cb777f-d13d-401a-9206-48a6b2ecb276}*SharedItemsImports = 4
 		src\Flurl.Http.Shared\Flurl.Http.Shared.projitems*{49cb777f-d13d-401a-9206-48a6b2ecb276}*SharedItemsImports = 4
 		src\Flurl.Shared\Flurl.Shared.projitems*{49cb777f-d13d-401a-9206-48a6b2ecb276}*SharedItemsImports = 4
-		Test\Flurl.Test.Shared\Flurl.Test.Shared.projitems*{49cb777f-d13d-401a-9206-48a6b2ecb276}*SharedItemsImports = 4
-		Test\Flurl.Test.Shared\Flurl.Test.Shared.projitems*{4c7c0861-84f6-436e-8fa6-4c318b336a7b}*SharedItemsImports = 13
-		src\Flurl.Http.Shared\Flurl.Http.Shared.projitems*{734e6962-97e2-4318-9a2d-c87e76921afb}*SharedItemsImports = 13
 		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{d00a7c13-ab11-46f0-a694-8986dec6ac5d}*SharedItemsImports = 4
+		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{0a32978c-bc48-4dfb-b1f7-b88541b0d686}*SharedItemsImports = 4
+		src\Flurl.Http.Shared\Flurl.Http.Shared.projitems*{734e6962-97e2-4318-9a2d-c87e76921afb}*SharedItemsImports = 13
 		src\Flurl.Shared\Flurl.Shared.projitems*{ed944c76-9613-474e-9861-54e41a3e77cd}*SharedItemsImports = 13
+		Test\Flurl.Test.Shared\Flurl.Test.Shared.projitems*{3f6be828-fa29-429e-99e1-f1fcdfdc1205}*SharedItemsImports = 4
+		src\Flurl.Http.Shared\Flurl.Http.Shared.projitems*{3f6be828-fa29-429e-99e1-f1fcdfdc1205}*SharedItemsImports = 4
+		src\Flurl.Shared\Flurl.Shared.projitems*{3f6be828-fa29-429e-99e1-f1fcdfdc1205}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Ad-Hoc|Any CPU = Ad-Hoc|Any CPU
