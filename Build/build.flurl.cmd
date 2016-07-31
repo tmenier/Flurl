@@ -1,4 +1,4 @@
-@set project=..\src\Flurl.Library\
+@set project=..\src\Flurl\
 
 call dotnet restore --verbosity Error %project%
 @if ERRORLEVEL 1 (

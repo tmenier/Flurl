@@ -14,7 +14,7 @@ echo Error! Generation cs file failed.
 exit /b 1
 )
 
-@set project=..\src\Flurl.Http.Library\
+@set project=..\src\Flurl.Http\
 
 call dotnet restore --verbosity Error %project%
 @if ERRORLEVEL 1 (

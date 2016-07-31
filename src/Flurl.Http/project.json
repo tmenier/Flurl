@@ -1,9 +1,9 @@
 {
   "title": "Flurl.Http",
-  "version": "1.0.0",
+  "version": "1.0.1",
 
   "dependencies": {
-	"Flurl": "2.1.0",
+    "Flurl": "2.2.0",
     "Newtonsoft.Json": "9.0.1"
   },
 
@@ -11,9 +11,16 @@
     "compile": {
       "include": [ "../Flurl.Http.Shared/**/*.cs" ]
     },
-    "optimize": true,
-    "outputName": "Flurl.Http",
-    "xmlDoc": true
+    "xmlDoc": true,
+    "warningsAsErrors": true
+  },
+
+  "configurations": {
+    "Release": {
+      "buildOptions": {
+        "optimize": true
+      }
+    }
   },
 
   "frameworks": {
@@ -32,7 +39,7 @@
         "System.Text.Encoding.CodePages": "4.0.1"
       }
     },
-    "portable45-net45+win8+wpa81": {
+    "portable40-net45+sl5+win8+wp8+wpa81": {
       "buildOptions": {
         "define": [ "PORTABLE" ]
       },
@@ -41,15 +48,6 @@
         "Microsoft.Bcl.Build": "1.0.21",
         "Microsoft.Net.Http": "2.2.29",
         "PCLStorage": "1.0.2"
-      },
-      "frameworkAssemblies": {
-        "System.Collections": "4.0.0.0",
-        "System.Dynamic.Runtime": "4.0.0.0",
-        "System.Linq": "4.0.0.0",
-        "System.Runtime.Extensions": "4.0.0.0",
-        "System.Text.Encoding": "4.0.0.0",
-        "System.Text.RegularExpressions": "4.0.0.0",
-        "System.Threading": "4.0.0.0"
       }
     }
   }

@@ -1,18 +1,25 @@
 {
   "title": "Flurl",
-  "version": "2.1.0",
+  "version": "2.2.0",
 
   "buildOptions": {
     "compile": {
       "include": "../Flurl.Shared/**/*.cs"
     },
-    "optimize": true,
-    "outputName": "Flurl",
+    "warningsAsErrors": true,
     "xmlDoc": true
   },
 
+  "configurations": {
+    "Release": {
+      "buildOptions": {
+        "optimize": true
+      }
+    }
+  },
+
   "frameworks": {
-    "portable40-net40+win8+wpa81": {
+    "portable40-net40+sl5+win8+wp8+wpa81": {
       "frameworkAssemblies": {
         "mscorlib": "2.0.5.0",
         "System": "2.0.5.0",

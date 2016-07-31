@@ -101,5 +101,11 @@ namespace Flurl.Test
 			};
 			Assert.Throws<ArgumentException>(() => kv.ToKeyValuePairs().ToList());// need to force it to iterate for the exception to be thrown
 		}
+
+		[Test]
+		public void SplitOnFirstOccurence_works() {
+			var result = "hello/how/are/you".SplitOnFirstOccurence('/');
+			Assert.AreEqual(new[] { "hello", "how/are/you" }, result);
+		}
 	}
 }
