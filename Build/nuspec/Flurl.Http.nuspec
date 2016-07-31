@@ -13,6 +13,7 @@
 			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
 		</description>
 		<releaseNotes>
+1.0.1 - Updated Flurl dependency to 2.2 https://www.nuget.org/packages/Flurl/2.2.0
 1.0.0 - Many updates and new features: https://github.com/tmenier/Flurl/releases/tag/Flurl.Http.1.0.0
 0.10.1 - DLL version fix (github #90)
 0.10.0 - Lib updates, including Flurl 2.0 which contains breaking changes: https://github.com/tmenier/Flurl/wiki/Release-Notes
