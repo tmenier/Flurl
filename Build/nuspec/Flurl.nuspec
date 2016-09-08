@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl</id>
-		<version>2.2.0</version>
+		<version>2.2.1</version>
 		<title>Flurl</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,6 +13,7 @@
 			A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.
 		</description>
 		<releaseNotes>
+2.2.1 - Fix net461 target (github #128)      
 2.2.0 - Url.Combine enhancements, broader PCL support https://github.com/tmenier/Flurl/releases/tag/Flurl.2.2.0
 2.1.0 - .NET Core 1.0.0 support. Target .NET Platform Standard 1.4
 2.0.0 - BREAKING CHANGES: https://github.com/tmenier/Flurl/wiki/Release-Notes
@@ -37,6 +38,11 @@
 		<tags>fluent portable url uri querystring builder</tags>
 		<dependencies>
 			<group targetFramework="net40" />
+			<group targetFramework="net461">
+				<dependency id="System.Globalization.Calendars" version="4.0.1" />
+				<dependency id="System.Linq" version="4.1.0" />
+				<dependency id="System.Reflection.TypeExtensions" version="4.1.0" />
+			</group>
 			<group targetFramework="win8" />
 			<group targetFramework="wpa81" />
 			<group targetFramework="xamarin.ios" />
