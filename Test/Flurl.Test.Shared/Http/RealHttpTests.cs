@@ -185,5 +185,28 @@ namespace Flurl.Test.Http
 			StringAssert.StartsWith("{", s);
 			StringAssert.EndsWith("}", s);
 		}
+
+		[Test]
+		public async Task can_handle_error() {
+			var handlerCalled = false;
+
+			FlurlHttp.Configure(c => {
+				c.OnError = call => {
+					call.ExceptionHandled = true;
+					handlerCalled = true;
+				};
+			});
+
+			try {
+				await "https://httpbin.org/status/500".GetAsync();
+				Assert.IsTrue(handlerCalled, "error handler shoule have been called.");
+			}
+			catch (FlurlHttpException) {
+				Assert.Fail("exception should have been supressed.");
+			}
+			finally {
+				FlurlHttp.Configure(c => c.ResetDefaults());
+			}
+		}
 	}
 }
