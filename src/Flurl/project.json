@@ -1,6 +1,6 @@
 {
   "title": "Flurl",
-  "version": "2.2.0",
+  "version": "2.2.1",
 
   "buildOptions": {
     "compile": {
@@ -28,7 +28,7 @@
     },
     "netstandard1.4": {
       "dependencies": {
-        "System.Globalization.Calendars": "4.0.1",
+        "System.Globalization": "4.0.11",
         "System.Linq": "4.1.0",
         "System.Reflection.TypeExtensions": "4.1.0"
       }
