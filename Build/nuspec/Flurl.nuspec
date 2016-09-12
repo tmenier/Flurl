@@ -39,7 +39,7 @@
 		<dependencies>
 			<group targetFramework="net40" />
 			<group targetFramework="net461">
-				<dependency id="System.Globalization.Calendars" version="4.0.1" />
+				<dependency id="System.Globalization" version="4.0.11" />
 				<dependency id="System.Linq" version="4.1.0" />
 				<dependency id="System.Reflection.TypeExtensions" version="4.1.0" />
 			</group>
@@ -52,7 +52,7 @@
 			<group targetFramework="uap10" />
 			<group targetFramework="portable40-net40+sl5+win8+wp8+wpa81" />
 			<group targetFramework="netstandard1.4">
-				<dependency id="System.Globalization.Calendars" version="4.0.1" />
+				<dependency id="System.Globalization" version="4.0.11" />
 				<dependency id="System.Linq" version="4.1.0" />
 				<dependency id="System.Reflection.TypeExtensions" version="4.1.0" />
 			</group>
