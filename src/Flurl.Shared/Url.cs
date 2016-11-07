@@ -13,7 +13,7 @@ namespace Flurl
 		/// <summary>
 		/// The full absolute path part of the URL (everthing except the query and fragment).
 		/// </summary>
-		public string Path { get; private set; }
+		public string Path { get; protected set; }
 
 		/// <summary>
 		/// The query part of the URL (after the ?, RFC 3986).
@@ -33,12 +33,12 @@ namespace Flurl
 		/// </summary>
 		public string Fragment { get; set; }
 
-	    /// <summary>
-	    /// Constructs a Url object from a string.
-	    /// </summary>
-	    /// <param name="baseUrl">The URL to use as a starting point (required)</param>
-	    /// <exception cref="ArgumentNullException"><paramref name="baseUrl"/> is <see langword="null" />.</exception>
-	    public Url(string baseUrl) {
+		/// <summary>
+		/// Constructs a Url object from a string.
+		/// </summary>
+		/// <param name="baseUrl">The URL to use as a starting point (required)</param>
+		/// <exception cref="ArgumentNullException"><paramref name="baseUrl"/> is <see langword="null" />.</exception>
+		public Url(string baseUrl) {
 			if (baseUrl == null)
 				throw new ArgumentNullException(nameof(baseUrl));
 
@@ -83,9 +83,9 @@ namespace Flurl
 			string result = "";
 			bool inQuery = false, inFragment = false;
 
-		    foreach (var part in parts) {
-			    if (string.IsNullOrEmpty(part))
-				    continue;
+			foreach (var part in parts) {
+				if (string.IsNullOrEmpty(part))
+					continue;
 
 				if (result.EndsWith("?") || part.StartsWith("?"))
 					result = CombineEnsureSingleSeperator(result, part, '?');
@@ -98,10 +98,10 @@ namespace Flurl
 				else
 					result = CombineEnsureSingleSeperator(result, part, '/');
 
-			    if (part.Contains("#")) {
+				if (part.Contains("#")) {
 					inQuery = false;
 					inFragment = true;
-			    }
+				}
 				else if (!inFragment && part.Contains("?")) {
 					inQuery = true;
 				}
@@ -149,13 +149,13 @@ namespace Flurl
 			return Uri.EscapeUriString(unescaped);
 		}
 
-	    /// <summary>
-	    /// Appends a segment to the URL path, ensuring there is one and only one '/' character as a seperator.
-	    /// </summary>
-	    /// <param name="segment">The segment to append</param>
-	    /// <returns>the Url object with the segment appended</returns>
-	    /// <exception cref="ArgumentNullException"><paramref name="segment"/> is <see langword="null" />.</exception>
-	    public Url AppendPathSegment(object segment) {
+		/// <summary>
+		/// Appends a segment to the URL path, ensuring there is one and only one '/' character as a seperator.
+		/// </summary>
+		/// <param name="segment">The segment to append</param>
+		/// <returns>the Url object with the segment appended</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="segment"/> is <see langword="null" />.</exception>
+		public Url AppendPathSegment(object segment) {
 			if (segment == null)
 				throw new ArgumentNullException(nameof(segment));
 
@@ -163,7 +163,15 @@ namespace Flurl
 			return this;
 		}
 
-		private static string CombineEnsureSingleSeperator(string a, string b, char seperator) {
+		/// <summary>
+		/// Combines two strings ensuring that only a single instance of the specified
+		/// seperator is present in the resulting string.
+		/// </summary>
+		/// <param name="a">The first string to combine.</param>
+		/// <param name="b">The second string to combine.</param>
+		/// <param name="seperator">The separator to use between the two strings.</param>
+		/// <returns>The resultant combined string.</returns>
+		protected static string CombineEnsureSingleSeperator(string a, string b, char seperator) {
 			if (string.IsNullOrEmpty(a)) return b;
 			if (string.IsNullOrEmpty(b)) return a;
 			return a.TrimEnd(seperator) + seperator + b.TrimStart(seperator);
@@ -193,14 +201,14 @@ namespace Flurl
 			return this;
 		}
 
-	    /// <summary>
-	    /// Adds a parameter to the query, overwriting the value if name exists.
-	    /// </summary>
-	    /// <param name="name">Name of query parameter</param>
-	    /// <param name="value">Value of query parameter</param>
-	    /// <returns>The Url object with the query parameter added</returns>
-	    /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
-	    public Url SetQueryParam(string name, object value) {
+		/// <summary>
+		/// Adds a parameter to the query, overwriting the value if name exists.
+		/// </summary>
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
+		public Url SetQueryParam(string name, object value) {
 			if (name == null)
 				throw new ArgumentNullException(nameof(name), "Query parameter name cannot be null.");
 
@@ -208,15 +216,15 @@ namespace Flurl
 			return this;
 		}
 
-	    /// <summary>
-	    /// Adds a parameter to the query, overwriting the value if name exists.
-	    /// </summary>
-	    /// <param name="name">Name of query parameter</param>
-	    /// <param name="value">Value of query parameter</param>
-	    /// <param name="isEncoded">Set to true to indicate the value is already URL-encoded (typically false)</param>
-	    /// <returns>The Url object with the query parameter added</returns>
-	    /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
-	    public Url SetQueryParam(string name, string value, bool isEncoded) {
+		/// <summary>
+		/// Adds a parameter to the query, overwriting the value if name exists.
+		/// </summary>
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
+		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded (typically false)</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
+		public Url SetQueryParam(string name, string value, bool isEncoded) {
 			if (name == null)
 				throw new ArgumentNullException(nameof(name), "Query parameter name cannot be null.");
 

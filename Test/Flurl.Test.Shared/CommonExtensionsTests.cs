@@ -107,5 +107,11 @@ namespace Flurl.Test
 			var result = "hello/how/are/you".SplitOnFirstOccurence('/');
 			Assert.AreEqual(new[] { "hello", "how/are/you" }, result);
 		}
+
+		[Test]
+		public void SplitOnLastOccurence_works() {
+			var result = "hello/how/are/you".SplitOnLastOccurence('/');
+			Assert.AreEqual(new[] { "hello/how/are", "you" }, result);
+		}
 	}
 }

@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)QueryParamCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QueryParameter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SpaUrl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StringExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Url.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\CommonExtensions.cs" />
