@@ -17,7 +17,7 @@ namespace Flurl.Test
 		public void spa_extension_methods_consistently_supported()
 		{
 			var urlMethods = typeof(SpaUrl).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Where(m => !m.IsSpecialName);
-			var stringExts = ReflectionHelper.GetAllExtensionMethods<string>(typeof(Url).GetTypeInfo().Assembly);
+			var stringExts = ReflectionHelper.GetAllExtensionMethods<string>(typeof(SpaUrl).GetTypeInfo().Assembly);
 			var whitelist = new[] { "ToString", "IsValid" }; // cases where string extension of the same name was excluded intentionally
 
 			foreach (var method in urlMethods)

@@ -1,8 +1,6 @@
 ﻿using Flurl.Util;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Flurl
 {
@@ -90,10 +88,10 @@ namespace Flurl
 		/// Checks if a string is a well-formed single page application URL.
 		/// </summary>
 		/// <remarks>
-		/// This check is very opiniated on what an SPA url might look like.
+		/// This check is very opiniated on how a single page application URL looks.
 		/// </remarks>
 		/// <param name="url">The string to check</param>
-		/// <returns>True is string is a well-formed URL</returns>
+		/// <returns>True is string is a well-formed single page applicationURL</returns>
 		public new static bool IsValid(string url)
 		{
 			// Very opinionated removal of # symbols used for routing
@@ -103,9 +101,9 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Checks if this URL is well formed.
+		/// Checks if this URL is well formed single page application.
 		/// </summary>
-		/// <returns>true if the is a well formed URL.</returns>
+		/// <returns>true if the is a well formed single page application URL.</returns>
 		public new bool IsValid() => IsValid(ToString());
 	}
 }
