@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl</id>
-		<version>2.2.1</version>
+		<version>2.3.1</version>
 		<title>Flurl</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,6 +13,7 @@
 			A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.
 		</description>
 		<releaseNotes>
+2.3.1 - Added opinionated support for single page application URLs
 2.2.1 - Fix net461 target (github #128)      
 2.2.0 - Url.Combine enhancements, broader PCL support https://github.com/tmenier/Flurl/releases/tag/Flurl.2.2.0
 2.1.0 - .NET Core 1.0.0 support. Target .NET Platform Standard 1.4
