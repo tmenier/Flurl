@@ -18,44 +18,56 @@ namespace Flurl.Http
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
 		/// </summary>
-		/// <param name="url">The URL.</param>
-		/// <param name="autoDispose">if set to <c>true</c> [automatic dispose].</param>
-		public FlurlClient(Url url, bool autoDispose) {
-			Url = url;
-			AutoDispose = autoDispose;
-			Settings = FlurlHttp.GlobalSettings.Clone();
+		/// <param name="settings">The FlurlHttpSettings associated with this instance.</param>
+		public FlurlClient(FlurlHttpSettings settings = null) {
+			Settings = settings ?? FlurlHttp.GlobalSettings.Clone();
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
 		/// </summary>
-		/// <param name="url">The URL.</param>
-		/// <param name="autoDispose">if set to <c>true</c> [automatic dispose].</param>
-		/// <exception cref="ArgumentNullException"><paramref name="url" /> is <see langword="null" />.</exception>
-		public FlurlClient(string url, bool autoDispose) : this(new Url(url), autoDispose) { }
-		
-		/// <summary>
-		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
-		/// </summary>
-		/// <param name="url">The URL.</param>
-		public FlurlClient(Url url) : this(url, false) { }
+		/// <param name="configure">Action allowing you to overide default settings inline.</param>
+		public FlurlClient(Action<FlurlHttpSettings> configure) : this() {
+			configure(Settings);
+		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
 		/// </summary>
-		/// <param name="url">The URL.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="url" /> is <see langword="null" />.</exception>
-		public FlurlClient(string url) : this(new Url(url), false) { }
-		
+		/// <param name="url">The URL to call with this FlurlClient instance.</param>
+		public FlurlClient(Url url) : this() {
+			Url = url;
+		}
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
 		/// </summary>
-		public FlurlClient() : this((Url)null, false) { }
+		/// <param name="url">The URL to call with this FlurlClient instance.</param>
+		public FlurlClient(string url) : this() {
+			Url = new Url(url);
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
+		/// </summary>
+		/// <param name="url">The URL to call with this FlurlClient instance.</param>
+		/// <param name="autoDispose">Indicates whether to automatically dispose underlying HttpClient immediately after each call.</param>
+		public FlurlClient(Url url, bool autoDispose) : this(url) {
+			Settings.AutoDispose = autoDispose;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
+		/// </summary>
+		/// <param name="url">The URL to call with this FlurlClient instance.</param>
+		/// <param name="autoDispose">Indicates whether to automatically dispose underlying HttpClient immediately after each call.</param>
+		public FlurlClient(string url, bool autoDispose) : this(url) {
+			Settings.AutoDispose = autoDispose;
+		}
 
 		/// <summary>
 		/// Creates a copy of this FlurlClient with a shared instance of HttpClient and HttpMessageHandler
 		/// </summary>
-
 		public FlurlClient Clone() {
 			return new FlurlClient {
 				_httpClient = _httpClient,
@@ -63,8 +75,7 @@ namespace Flurl.Http
 				_parent = this,
 				Settings = Settings,
 				Url = Url,
-				Cookies = Cookies,
-				AutoDispose = AutoDispose
+				Cookies = Cookies
 			};
 		}
 
@@ -86,12 +97,6 @@ namespace Flurl.Http
 		/// Collection of HttpCookies sent and received.
 		/// </summary>
 		public IDictionary<string, Cookie> Cookies { get; private set; } = new Dictionary<string, Cookie>();
-
-		/// <summary>
-		/// Gets a value indicating whether the underlying HttpClient
-		/// should be disposed immediately after the first HTTP call is made.
-		/// </summary>
-		public bool AutoDispose { get; set; }
 
 		/// <summary>
 		/// Gets the HttpClient to be used in subsequent HTTP calls. Creation (when necessary) is delegated
@@ -151,7 +156,7 @@ namespace Flurl.Http
 				return resp;
 			}
 			finally {
-				if (AutoDispose) Dispose();
+				if (Settings.AutoDispose) Dispose();
 			}
 		}
 

@@ -14,8 +14,8 @@ namespace Flurl.Test.Http
 		[Test]
 		public async Task autodispose_true_creates_new_httpclients() {
 			var fac = new TestHttpClientFactoryWithCounter();
-			var fc = new FlurlClient("http://www.mysite.com", true) {
-				Settings = { HttpClientFactory = fac }
+			var fc = new FlurlClient("http://www.mysite.com") {
+				Settings = { HttpClientFactory = fac, AutoDispose = true }
 			};
 			var x = await fc.GetAsync();
 			var y = await fc.GetAsync();
@@ -26,8 +26,8 @@ namespace Flurl.Test.Http
 		[Test]
 		public async Task autodispose_false_reuses_httpclient() {
 			var fac = new TestHttpClientFactoryWithCounter();
-			var fc = new FlurlClient("http://www.mysite.com", false) {
-				Settings = { HttpClientFactory = fac }
+			var fc = new FlurlClient("http://www.mysite.com") {
+				Settings = { HttpClientFactory = fac, AutoDispose = false }
 			};
 			var x = await fc.GetAsync();
 			var y = await fc.GetAsync();

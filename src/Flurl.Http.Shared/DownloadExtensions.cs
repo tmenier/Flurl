@@ -22,8 +22,8 @@ namespace Flurl.Http
 				localFileName = client.Url.Path.Split('/').Last();
 
 			// need to temporarily disable autodispose if set, otherwise reading from stream will fail
-			var autoDispose = client.AutoDispose;
-			client.AutoDispose = false;
+			var autoDispose = client.Settings.AutoDispose;
+			client.Settings.AutoDispose = false;
 
 			try {
 				var response = await client.SendAsync(HttpMethod.Get, completionOption: HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
@@ -37,8 +37,8 @@ namespace Flurl.Http
 				return FileUtil.CombinePath(localFolderPath, localFileName);
 			}
 			finally {
-				client.AutoDispose = autoDispose;
-				if (client.AutoDispose)
+				client.Settings.AutoDispose = autoDispose;
+				if (client.Settings.AutoDispose)
 					client.Dispose();
 			}
 		}

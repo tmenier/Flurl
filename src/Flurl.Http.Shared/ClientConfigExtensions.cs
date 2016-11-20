@@ -25,7 +25,7 @@ namespace Flurl.Http
 			var fc = client.Clone();
 			fc.Url = url;
 			// prevent the new client from automatically disposing the parent's HttpClient
-			fc.AutoDispose = false;
+			fc.Settings.AutoDispose = false;
 			return fc;
 		}
 
