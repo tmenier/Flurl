@@ -120,8 +120,8 @@ namespace Flurl.Http.Testing
 		/// Throws an HttpCallAssertException if a URL matching the given pattern was called.
 		/// </summary>
 		/// <param name="urlPattern">URL that should not have been called. Can include * wildcard character.</param>
-		public HttpCallAssertion ShouldNotHaveCalled(string urlPattern) {
-			return new HttpCallAssertion(CallLog, true).WithUrlPattern(urlPattern);
+		public void ShouldNotHaveCalled(string urlPattern) {
+			new HttpCallAssertion(CallLog, true).WithUrlPattern(urlPattern);
 		}
 
 		/// <summary>

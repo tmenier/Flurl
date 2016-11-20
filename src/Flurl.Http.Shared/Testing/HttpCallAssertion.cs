@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using Flurl.Util;
 
 namespace Flurl.Http.Testing
 {
@@ -45,7 +46,40 @@ namespace Flurl.Http.Testing
 		/// <param name="urlPattern">Can contain * wildcard.</param>
 		public HttpCallAssertion WithUrlPattern(string urlPattern) {
 			_urlPattern = urlPattern; // this will land in the exception message when we assert, which is the only reason for capturing it
-			return With(c => MatchesPattern(c.Request.RequestUri.AbsoluteUri, urlPattern));
+			return With(c => MatchesPattern(c.Url, urlPattern));
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made containing the given query parameter (regardless of its value).
+		/// </summary>
+		/// <param name="name">The query parameter name.</param>
+		/// <returns></returns>
+		public HttpCallAssertion WithQueryParam(string name) {
+			return With(c => new Url(c.Url).QueryParams.Any(q => q.Name == name));
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made containing the given query parameter name/value.
+		/// </summary>
+		/// <param name="name">The query parameter name.</param>
+		/// <param name="value">The query parameter value. Can contain * wildcard.</param>
+		/// <returns></returns>
+		public HttpCallAssertion WithQueryParam(string name, object value) {
+			return With(c => new Url(c.Url).QueryParams.Any(q => q.Name == name && MatchesPattern(q.Value.ToString(), value.ToString())));
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made containing all of the given query parameters.
+		/// </summary>
+		/// <param name="values">Object (usually anonymous) or dictionary that is parsed to name/value query parameters to check for.</param>
+		/// <returns></returns>
+		public HttpCallAssertion WithQueryParams(object values) {
+			return With(c => {
+				var expected = values.ToKeyValuePairs().Select(kv => $"{kv.Key}={kv.Value}");
+				var actual = new Url(c.Url).QueryParams.Select(q => $"{q.Name}={q.Value}");
+				//http://stackoverflow.com/a/333034/62600
+				return !expected.Except(actual).Any();
+			});
 		}
 
 		/// <summary>
