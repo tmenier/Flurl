@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Flurl.Http;
-using Flurl.Http.Testing;
 using NUnit.Framework;
 
 namespace Flurl.Test.Http

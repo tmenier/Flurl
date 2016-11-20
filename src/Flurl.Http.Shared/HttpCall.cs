@@ -21,12 +21,12 @@ namespace Flurl.Http
 		/// <summary>
 		/// FlurlHttpSettings used for this call.
 		/// </summary>
-		public FlurlHttpSettings Settings { get; private set; }
+		public FlurlHttpSettings Settings { get; }
 
 		/// <summary>
 		/// HttpRequestMessage associated with this call.
 		/// </summary>
-		public HttpRequestMessage Request { get; private set; }
+		public HttpRequestMessage Request { get; }
 
 		/// <summary>
 		/// Captured request body. More reliably available than HttpRequestMessage.Content, which is a forward-only, read-once stream.
@@ -62,42 +62,28 @@ namespace Flurl.Http
 		/// <summary>
 		/// Total duration of the call if it completed, otherwise null.
 		/// </summary>
-		public TimeSpan? Duration {
-			get { return EndedUtc - StartedUtc; }
-		}
+		public TimeSpan? Duration => EndedUtc - StartedUtc;
 
 		/// <summary>
 		/// Absolute URI being called.
 		/// </summary>
-		public string Url {
-			get { return Request.RequestUri.AbsoluteUri; }
-		}
+		public string Url => Request.RequestUri.AbsoluteUri;
 
 		/// <summary>
 		/// True if a response was received, regardless of whether it is an error status.
 		/// </summary>
-		public bool Completed {
-			get { return Response != null; }
-		}
+		public bool Completed => Response != null;
 
 		/// <summary>
 		/// True if a response with a successful HTTP status was received.
 		/// </summary>
-		public bool Succeeded {
-			get {
-				return
-					!Completed ? false :
-					Response.IsSuccessStatusCode ? true :
-					HttpStatusRangeParser.IsMatch(Settings.AllowedHttpStatusRange, Response.StatusCode);
-			}
-		}
+		public bool Succeeded => Completed && 
+			(Response.IsSuccessStatusCode || HttpStatusRangeParser.IsMatch(Settings.AllowedHttpStatusRange, Response.StatusCode));
 
 		/// <summary>
 		/// HttpStatusCode of the response if the call completed, otherwise null.
 		/// </summary>
-		public HttpStatusCode? HttpStatus {
-			get { return Completed ? (HttpStatusCode?)Response.StatusCode : null; }
-		}
+		public HttpStatusCode? HttpStatus => Completed ? (HttpStatusCode?)Response.StatusCode : null;
 
 		/// <summary>
 		/// Body of the HTTP response if unsuccessful, otherwise null. (Successful responses are not captured as strings, mainly for performance reasons.)
@@ -115,7 +101,7 @@ namespace Flurl.Http
 		/// </summary>
 		public static HttpCall GetFlurlHttpCall(this HttpRequestMessage request) {
 			object obj;
-			if (request != null && request.Properties != null && request.Properties.TryGetValue("FlurlHttpCall", out obj) && obj is HttpCall)
+			if (request?.Properties != null && request.Properties.TryGetValue("FlurlHttpCall", out obj) && obj is HttpCall)
 				return (HttpCall)obj;
 			return null;
 		}

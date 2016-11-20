@@ -118,7 +118,7 @@ namespace Flurl.Http.CodeGen
 					if (xm.BodyType != null) {
 		                writer.WriteLine("var content = new Captured@0Content(@1);",
 			                xm.BodyType,
-			                xm.BodyType == "String" ? "data" : string.Format("client.Settings.{0}Serializer.Serialize(data)", xm.BodyType));
+			                xm.BodyType == "String" ? "data" : $"client.Settings.{xm.BodyType}Serializer.Serialize(data)");
 	                }
 
                     var client = (xm.ExtentionOfType == "FlurlClient") ? "client" : "new FlurlClient(url, false)";
