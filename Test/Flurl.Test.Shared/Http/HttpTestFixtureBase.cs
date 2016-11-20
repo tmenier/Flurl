@@ -6,6 +6,7 @@ using NUnit.Framework;
 
 namespace Flurl.Test.Http
 {
+	[Parallelizable]
 	public abstract class HttpTestFixtureBase
 	{
 		protected HttpTest HttpTest { get; private set; }

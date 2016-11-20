@@ -13,19 +13,9 @@ namespace Flurl.Http
 	/// </summary>
 	public class HttpCall
 	{
-		/// <summary>
-		/// Gets the Flurl HttpCall that was set for the given request, or null if Flurl.Http was not used to make the request
-		/// </summary>
-		public static HttpCall Get(HttpRequestMessage request) {
-			object obj;
-			if (request != null && request.Properties != null && request.Properties.TryGetValue("FlurlHttpCall", out obj) && obj is HttpCall)
-				return (HttpCall)obj;
-			return null;
-		}
-
-		internal static void Set(HttpRequestMessage request, FlurlHttpSettings settings) {
-			if (request != null && request.Properties != null)
-				request.Properties["FlurlHttpCall"] = new HttpCall { Request = request, Settings = settings };
+		internal HttpCall(HttpRequestMessage request, FlurlHttpSettings settings) {
+			Request = request;
+			Settings = settings;
 		}
 
 		/// <summary>
@@ -113,5 +103,26 @@ namespace Flurl.Http
 		/// Body of the HTTP response if unsuccessful, otherwise null. (Successful responses are not captured as strings, mainly for performance reasons.)
 		/// </summary>
 		public string ErrorResponseBody { get; set; }
+	}
+
+	/// <summary>
+	/// Flurl extensions to HttpRequestMessage
+	/// </summary>
+	public static class HttpRequestMessageExtensions
+	{
+		/// <summary>
+		/// Gets the Flurl HttpCall that was set for the given request, or null if Flurl.Http was not used to make the request
+		/// </summary>
+		public static HttpCall GetFlurlHttpCall(this HttpRequestMessage request) {
+			object obj;
+			if (request != null && request.Properties != null && request.Properties.TryGetValue("FlurlHttpCall", out obj) && obj is HttpCall)
+				return (HttpCall)obj;
+			return null;
+		}
+
+		internal static void SetFlurlHttpCall(this HttpRequestMessage request, FlurlHttpSettings settings) {
+			if (request?.Properties != null)
+				request.Properties["FlurlHttpCall"] = new HttpCall(request, settings);
+		}
 	}
 }

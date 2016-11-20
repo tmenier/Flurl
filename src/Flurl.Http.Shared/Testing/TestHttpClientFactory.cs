@@ -8,22 +8,12 @@ namespace Flurl.Http.Testing
 	/// </summary>
 	public class TestHttpClientFactory : DefaultHttpClientFactory
 	{
-		private readonly HttpTest _test;
-
 		/// <summary>
-		/// Initializes a new instance of the <see cref="TestHttpClientFactory"/> class.
-		/// </summary>
-		/// <param name="test">The test.</param>
-		public TestHttpClientFactory(HttpTest test) {
-			_test = test;
-		}
-
-		/// <summary>
-		/// Creates the message handler.
+		/// Creates an instance of FakeHttpMessageHander, which prevents actual HTTP calls from being made.
 		/// </summary>
 		/// <returns></returns>
 		public override HttpMessageHandler CreateMessageHandler() {
-			return new FakeHttpMessageHandler(_test.GetNextResponse);
+			return new FakeHttpMessageHandler();
 		}
 	}
 }

@@ -14,6 +14,11 @@ namespace Flurl.Http.Testing
 	/// </summary>
 	public class HttpTest : IDisposable
 	{
+		/// <summary>
+		/// Gets the current HttpTest from the logical (async) call context
+		/// </summary>
+		public static HttpTest Current => GetCurrentTest();
+
 		private static readonly HttpResponseMessage EmptyResponse = new HttpResponseMessage {
 			StatusCode = HttpStatusCode.OK,
 			Content = new StringContent("")
@@ -24,13 +29,10 @@ namespace Flurl.Http.Testing
 	    /// </summary>
 	    /// <exception cref="Exception">A delegate callback throws an exception.</exception>
 	    public HttpTest() {
-			FlurlHttp.Configure(settings => {
-				settings.HttpClientFactory = new TestHttpClientFactory(this);
-				settings.AfterCall = call => CallLog.Add(call);
-			});
 			ResponseQueue = new Queue<HttpResponseMessage>();
 			CallLog = new List<HttpCall>();
-		}
+		    SetCurrentTest(this);
+	    }
 
 		/// <summary>
 		/// Adds an HttpResponseMessage to the response queue.
@@ -126,7 +128,21 @@ namespace Flurl.Http.Testing
 		/// Releases unmanaged and - optionally - managed resources.
 		/// </summary>
 		public void Dispose() {
+			SetCurrentTest(null);
 			FlurlHttp.GlobalSettings.ResetDefaults();
 		}
+
+#if PORTABLE
+		private static HttpTest _test;
+		private static void SetCurrentTest(HttpTest test) => _test = test;
+		private static HttpTest GetCurrentTest() => _test;
+#elif NET45
+		private static void SetCurrentTest(HttpTest test) => System.Runtime.Remoting.Messaging.CallContext.LogicalSetData("FlurlHttpTest", test);
+		private static HttpTest GetCurrentTest() => System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("FlurlHttpTest") as HttpTest;
+#else
+		private static System.Threading.AsyncLocal<HttpTest> _test = new System.Threading.AsyncLocal<HttpTest>();
+		private static void SetCurrentTest(HttpTest test) => _test.Value = test;
+		private static HttpTest GetCurrentTest() => _test.Value;
+#endif
 	}
 }

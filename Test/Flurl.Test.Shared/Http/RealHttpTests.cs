@@ -13,7 +13,7 @@ namespace Flurl.Test.Http
 	/// http://httpbin.org. One important aspect these verify is that AutoDispose behavior is not preventing us from getting
 	/// stuff out of the response (i.e. that we're not disposing too early).
 	/// </summary>
-	[TestFixture]
+	[TestFixture, Parallelizable]
 	public class RealHttpTests
 	{
 		[Test]

@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http.Configuration;
+using Flurl.Http.Testing;
 
 namespace Flurl.Http
 {
@@ -98,6 +99,12 @@ namespace Flurl.Http
 		/// </summary>
 		public HttpClient HttpClient => EnsureHttpClient();
 
+		/// <summary>
+		/// Gets the HttpMessageHandler to be used in subsequent HTTP calls. Creation (when necessary) is delegated
+		/// to FlurlHttp.HttpClientFactory.
+		/// </summary>
+		public HttpMessageHandler HttpMessageHandler => EnsureHttpMessageHandler();
+
 		private HttpClient EnsureHttpClient(HttpClient hc = null) {
 			if (_httpClient == null) {
 				if (hc == null) {
@@ -108,6 +115,19 @@ namespace Flurl.Http
 				_parent?.EnsureHttpClient(hc);
 			}
 			return _httpClient;
+		}
+
+		private HttpMessageHandler EnsureHttpMessageHandler(HttpMessageHandler handler = null) {
+			if (_httpMessageHandler == null) {
+				if (handler == null) {
+					handler = (HttpTest.Current == null) ?
+						Settings.HttpClientFactory.CreateMessageHandler() :
+						new FakeHttpMessageHandler();
+				}
+				_httpMessageHandler = handler;
+				_parent?.EnsureHttpMessageHandler(handler);
+			}
+			return _httpMessageHandler;
 		}
 
 		/// <summary>
@@ -124,7 +144,7 @@ namespace Flurl.Http
 				var request = new HttpRequestMessage(verb, Url) { Content = content };
 				if (Settings.CookiesEnabled)
 					WriteRequestCookies(request);
-				HttpCall.Set(request, Settings);
+				request.SetFlurlHttpCall(Settings);
 				var resp = await HttpClient.SendAsync(request, completionOption, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
 				if (Settings.CookiesEnabled)
 					ReadResponseCookies(resp);
@@ -173,22 +193,6 @@ namespace Flurl.Http
 
 			foreach (var cookie in jar.GetCookies(uri).Cast<Cookie>())
 				Cookies[cookie.Name] = cookie;
-		}
-
-		/// <summary>
-		/// Gets the HttpMessageHandler to be used in subsequent HTTP calls. Creation (when necessary) is delegated
-		/// to FlurlHttp.HttpClientFactory.
-		/// </summary>
-		public HttpMessageHandler HttpMessageHandler => EnsureHttpMessageHandler();
-
-		private HttpMessageHandler EnsureHttpMessageHandler(HttpMessageHandler hmh = null) {
-			if (_httpMessageHandler == null) {
-				if (hmh == null)
-					hmh = Settings.HttpClientFactory.CreateMessageHandler();
-				_httpMessageHandler = hmh;
-				_parent?.EnsureHttpMessageHandler(hmh);
-			}
-			return _httpMessageHandler;
 		}
 
 		/// <summary>
