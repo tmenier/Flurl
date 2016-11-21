@@ -12,7 +12,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// An object containing details about the failed HTTP call
 		/// </summary>
-		public HttpCall Call { get; private set; }
+		public HttpCall Call { get; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlHttpException"/> class.
@@ -41,16 +41,15 @@ namespace Flurl.Http
 			if (call.Response != null && !call.Succeeded) {
 				return string.Format("Request to {0} failed with status code {1} ({2}).",
 					call.Request.RequestUri.AbsoluteUri,
-					(int) call.Response.StatusCode,
+					(int)call.Response.StatusCode,
 					call.Response.ReasonPhrase);
 			}
 			if (inner != null) {
-				return string.Format("Request to {0} failed. {1}",
-					call.Request.RequestUri.AbsoluteUri, inner.Message);
+				return $"Request to {call.Request.RequestUri.AbsoluteUri} failed. {inner.Message}";
 			}
 
 			// in theory we should never get here.
-			return string.Format("Request to {0} failed.", call.Request.RequestUri.AbsoluteUri);
+			return $"Request to {call.Request.RequestUri.AbsoluteUri} failed.";
 		}
 
 		/// <summary>
@@ -94,7 +93,7 @@ namespace Flurl.Http
 		public FlurlHttpTimeoutException(HttpCall call, Exception inner) : base(call, BuildMessage(call), inner) { }
 
 		private static string BuildMessage(HttpCall call) {
-			return string.Format("Request to {0} timed out.", call);
+			return $"Request to {call} timed out.";
 		}
 	}
 }

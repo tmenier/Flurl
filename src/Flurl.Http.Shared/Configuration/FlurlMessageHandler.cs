@@ -23,7 +23,7 @@ namespace Flurl.Http.Configuration
 		/// <param name="request">The request.</param>
 		/// <param name="cancellationToken">The cancellation token.</param>
 		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
-			var call = HttpCall.Get(request);
+			var call = request.GetFlurlHttpCall();
 
 			var stringContent = request.Content as CapturedStringContent;
 			if (stringContent != null)

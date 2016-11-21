@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace Flurl.Test.Http
 {
-	[TestFixture]
+	[TestFixture, Parallelizable]
     public class HttpStatusRangeParserTests
     {
 		[TestCase("4**", 399, ExpectedResult = false)]

@@ -17,13 +17,13 @@ namespace Flurl.Http
 		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
 		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
 		/// <returns>A Task whose result is the local path of the downloaded file.</returns>
-		public static async Task<string> DownloadFileAsync(this FlurlClient client, string localFolderPath, string localFileName = null, int bufferSize = 4096) {
+		public static async Task<string> DownloadFileAsync(this IFlurlClient client, string localFolderPath, string localFileName = null, int bufferSize = 4096) {
 			if (localFileName == null)
 				localFileName = client.Url.Path.Split('/').Last();
 
 			// need to temporarily disable autodispose if set, otherwise reading from stream will fail
-			var autoDispose = client.AutoDispose;
-			client.AutoDispose = false;
+			var autoDispose = client.Settings.AutoDispose;
+			client.Settings.AutoDispose = false;
 
 			try {
 				var response = await client.SendAsync(HttpMethod.Get, completionOption: HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
@@ -37,8 +37,8 @@ namespace Flurl.Http
 				return FileUtil.CombinePath(localFolderPath, localFileName);
 			}
 			finally {
-				client.AutoDispose = autoDispose;
-				if (client.AutoDispose)
+				client.Settings.AutoDispose = autoDispose;
+				if (client.Settings.AutoDispose)
 					client.Dispose();
 			}
 		}

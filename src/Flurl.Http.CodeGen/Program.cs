@@ -66,14 +66,14 @@ namespace Flurl.Http.CodeGen
 		            name = xm.Name;
 	            }
 	            writer.WriteLine("/// <summary>");
-                var summaryStart = (xm.ExtentionOfType == "FlurlClient") ? "Sends" : "Creates a FlurlClient from the URL and sends";
+                var summaryStart = (xm.ExtentionOfType == "IFlurlClient") ? "Sends" : "Creates a FlurlClient from the URL and sends";
 				if (xm.HttpVerb == null)
 					writer.WriteLine("/// @0 an asynchronous request.", summaryStart);
 				else
 					writer.WriteLine("/// @0 an asynchronous @1 request.", summaryStart, xm.HttpVerb.ToUpperInvariant());
                 writer.WriteLine("/// </summary>");
-				if (xm.ExtentionOfType == "FlurlClient")
-                    writer.WriteLine("/// <param name=\"client\">The Flurl client.</param>");
+				if (xm.ExtentionOfType == "IFlurlClient")
+                    writer.WriteLine("/// <param name=\"client\">The IFlurlClient instance.</param>");
                 if (xm.ExtentionOfType == "Url" || xm.ExtentionOfType == "string")
                     writer.WriteLine("/// <param name=\"url\">The URL.</param>");
 				if (xm.HttpVerb == null)
@@ -87,7 +87,7 @@ namespace Flurl.Http.CodeGen
 				writer.WriteLine("/// <returns>A Task whose result is @0.</returns>", xm.ReturnTypeDescription);
 
                 var args = new List<string>();
-                args.Add("this " + xm.ExtentionOfType + (xm.ExtentionOfType == "FlurlClient" ? " client" : " url"));
+                args.Add("this " + xm.ExtentionOfType + (xm.ExtentionOfType == "IFlurlClient" ? " client" : " url"));
 	            if (xm.HttpVerb == null)
 		            args.Add("HttpMethod verb");
                 if (xm.BodyType != null)
@@ -101,7 +101,7 @@ namespace Flurl.Http.CodeGen
 
 				writer.WriteLine("public static Task<@0> @1@2(@3) {", xm.TaskArg, xm.Name, xm.IsGeneric ? "<T>" : "", string.Join(", ", args));
 
-                if (xm.ExtentionOfType == "FlurlClient")
+                if (xm.ExtentionOfType == "IFlurlClient")
                 {
 	                args.Clear();
                     args.Add(
@@ -118,10 +118,10 @@ namespace Flurl.Http.CodeGen
 					if (xm.BodyType != null) {
 		                writer.WriteLine("var content = new Captured@0Content(@1);",
 			                xm.BodyType,
-			                xm.BodyType == "String" ? "data" : string.Format("client.Settings.{0}Serializer.Serialize(data)", xm.BodyType));
+			                xm.BodyType == "String" ? "data" : $"client.Settings.{xm.BodyType}Serializer.Serialize(data)");
 	                }
 
-                    var client = (xm.ExtentionOfType == "FlurlClient") ? "client" : "new FlurlClient(url, false)";
+                    var client = (xm.ExtentionOfType == "IFlurlClient") ? "client" : "new FlurlClient(url, false)";
                     var receive = (xm.DeserializeToType == null) ? "" : string.Format(".Receive{0}{1}()", xm.DeserializeToType, xm.IsGeneric ? "<T>" : "");
                     writer.WriteLine("return @0.SendAsync(@1)@2;", client, string.Join(", ", args), receive);
                 }

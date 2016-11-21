@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>1.0.3</version>
+		<version>1.1.0-pre</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,6 +13,7 @@
 			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
 		</description>
 		<releaseNotes>
+1.1.0 - Parallel testing (github #67), better DI/IoC/mocking support (github #146), assert query params (github #102)
 1.0.3 - .NET Core 1.0.1, fixed assembly references (github #131)
 1.0.2 - Updated Flurl dependency to 2.2.1 https://www.nuget.org/packages/Flurl/2.2.1   
 1.0.1 - Updated Flurl dependency to 2.2 https://www.nuget.org/packages/Flurl/2.2.0

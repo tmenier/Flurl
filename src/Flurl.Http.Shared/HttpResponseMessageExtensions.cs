@@ -24,7 +24,7 @@ namespace Flurl.Http
 		/// <exception cref="FlurlHttpException">Condition.</exception>
 		public static async Task<T> ReceiveJson<T>(this Task<HttpResponseMessage> response) {
 			var resp = await response.ConfigureAwait(false);
-			var call = HttpCall.Get(resp.RequestMessage);
+			var call = resp.RequestMessage.GetFlurlHttpCall();
 			try {
 				using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false))
 					return call.Settings.JsonSerializer.Deserialize<T>(stream);

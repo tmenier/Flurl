@@ -17,6 +17,11 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets value indicating whether to automatically dispose underlying HttpClient immediately after each call.
+		/// </summary>
+		public bool AutoDispose { get; set; }
+
+		/// <summary>
 		/// Gets or sets the default timeout for every HTTP request.
 		/// </summary>
 		public TimeSpan DefaultTimeout { get; set; }
@@ -87,6 +92,7 @@ namespace Flurl.Http.Configuration
 		/// Clear all custom global options and set default values.
 		/// </summary>
 		public void ResetDefaults() {
+			AutoDispose = false;
 			DefaultTimeout = new HttpClient().Timeout;
 			AllowedHttpStatusRange = null;
 			CookiesEnabled = false;

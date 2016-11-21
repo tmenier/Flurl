@@ -11,24 +11,15 @@ namespace Flurl.Http.Testing
 	/// </summary>
 	public class FakeHttpMessageHandler : HttpMessageHandler
 	{
-		private readonly Func<HttpResponseMessage> _responseFactory;
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="FakeHttpMessageHandler"/> class.
-		/// </summary>
-		/// <param name="responseFactory">The response factory.</param>
-		public FakeHttpMessageHandler(Func<HttpResponseMessage> responseFactory) {
-			_responseFactory = responseFactory;
-		}
-
 		/// <summary>
 		/// Sends the request asynchronous.
 		/// </summary>
 		/// <param name="request">The request.</param>
 		/// <param name="cancellationToken">The cancellation token.</param>
 		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
-			var resp = _responseFactory();
+			HttpTest.Current?.CallLog.Add(request.GetFlurlHttpCall());
 			var tcs = new TaskCompletionSource<HttpResponseMessage>();
+			var resp = HttpTest.Current?.GetNextResponse() ?? new HttpResponseMessage();
 			if (resp is TimeoutResponseMessage)
 				tcs.SetCanceled();
 			else

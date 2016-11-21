@@ -1,8 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http;
+using Flurl.Http.Testing;
 using NUnit.Framework;
 
 namespace Flurl.Test.Http
@@ -64,6 +66,25 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public async Task can_assert_query_params() {
+			await "http://www.api.com?x=111&y=222&z=333".GetAsync();
+
+			HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParam("x");
+			HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParam("y", 222);
+			HttpTest.ShouldHaveCalled("*").WithQueryParam("z", "*3");
+			HttpTest.ShouldHaveCalled("*").WithQueryParams(new { z = 333, y = 222 });
+
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParam("w"));
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParam("y", 223));
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveCalled("*").WithQueryParam("z", "*4"));
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveCalled("*").WithQueryParams(new { x = 111, y = 666 }));
+		}
+
+		[Test]
 		public async Task can_simulate_timeout() {
 			HttpTest.SimulateTimeout();
 			try {
@@ -94,6 +115,30 @@ namespace Flurl.Test.Http
 			await fc.GetAsync();
 			Assert.AreEqual(1, fc.Cookies.Count());
 			Assert.AreEqual("foo", fc.Cookies["c1"].Value);
+		}
+
+// parallel testing not supported in PCL
+#if !PORTABLE
+		[Test]
+		public async Task can_test_in_parallel() {
+			await Task.WhenAll(
+				CallAndAssertCountAsync(7),
+				CallAndAssertCountAsync(5),
+				CallAndAssertCountAsync(3),
+				CallAndAssertCountAsync(4),
+				CallAndAssertCountAsync(6));
+		}
+#endif
+
+		private async Task CallAndAssertCountAsync(int calls) {
+			using (var test = new HttpTest()) {
+				for (int i = 0; i < calls; i++) {
+					await "http://www.api.com".GetAsync();
+					await Task.Delay(100);
+				}
+				test.ShouldHaveCalled("http://www.api.com").Times(calls);
+				//Console.WriteLine($"{calls} calls expected, {test.CallLog.Count} calls made");
+			}
 		}
 	}
 }
