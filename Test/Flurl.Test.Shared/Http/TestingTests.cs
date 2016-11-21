@@ -68,10 +68,20 @@ namespace Flurl.Test.Http
 		[Test]
 		public async Task can_assert_query_params() {
 			await "http://www.api.com?x=111&y=222&z=333".GetAsync();
+
 			HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParam("x");
 			HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParam("y", 222);
 			HttpTest.ShouldHaveCalled("*").WithQueryParam("z", "*3");
 			HttpTest.ShouldHaveCalled("*").WithQueryParams(new { z = 333, y = 222 });
+
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParam("w"));
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParam("y", 223));
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveCalled("*").WithQueryParam("z", "*4"));
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveCalled("*").WithQueryParams(new { x = 111, y = 666 }));
 		}
 
 		[Test]
