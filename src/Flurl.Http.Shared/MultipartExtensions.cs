@@ -18,7 +18,7 @@ namespace Flurl.Http
 		/// <param name="client">The Flurl client.</param>
 		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
-		public static Task<HttpResponseMessage> PostMultipartAsync(this FlurlClient client, Action<CapturedMultipartContent> buildContent, CancellationToken cancellationToken = default(CancellationToken)) {
+		public static Task<HttpResponseMessage> PostMultipartAsync(this IFlurlClient client, Action<CapturedMultipartContent> buildContent, CancellationToken cancellationToken = default(CancellationToken)) {
 			var cmc = new CapturedMultipartContent(client.Settings);
 			buildContent(cmc);
 			return client.SendAsync(HttpMethod.Post, cmc, cancellationToken);

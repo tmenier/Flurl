@@ -11,9 +11,57 @@ using Flurl.Http.Testing;
 namespace Flurl.Http
 {
 	/// <summary>
+	/// Interface defining FlurlClient's contract (useful for mocking and DI)
+	/// </summary>
+	public interface IFlurlClient : IDisposable {
+		/// <summary>
+		/// Creates a copy of this FlurlClient with a shared instance of HttpClient and HttpMessageHandler
+		/// </summary>
+		FlurlClient Clone();
+
+		/// <summary>
+		/// Gets or sets the FlurlHttpSettings object used by this client.
+		/// </summary>
+		FlurlHttpSettings Settings { get; set; }
+
+		/// <summary>
+		/// Gets or sets the URL to be called.
+		/// </summary>
+		Url Url { get; set; }
+
+		/// <summary>
+		/// Collection of HttpCookies sent and received.
+		/// </summary>
+		IDictionary<string, Cookie> Cookies { get; }
+
+		/// <summary>
+		/// Gets the HttpClient to be used in subsequent HTTP calls. Creation (when necessary) is delegated
+		/// to FlurlHttp.HttpClientFactory. Reused for the life of the FlurlClient.
+		/// </summary>
+		HttpClient HttpClient { get; }
+
+		/// <summary>
+		/// Gets the HttpMessageHandler to be used in subsequent HTTP calls. Creation (when necessary) is delegated
+		/// to FlurlHttp.HttpClientFactory.
+		/// </summary>
+		HttpMessageHandler HttpMessageHandler { get; }
+
+		/// <summary>
+		/// Creates and asynchronously sends an HttpRequestMethod, disposing HttpClient if AutoDispose it true.
+		/// Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
+		/// </summary>
+		/// <param name="verb">The HTTP method used to make the request.</param>
+		/// <param name="content">Contents of the request body.</param>
+		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
+		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
+		Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead);
+	}
+
+	/// <summary>
 	/// A chainable wrapper around HttpClient and Flurl.Url.
 	/// </summary>
-	public class FlurlClient : IDisposable
+	public class FlurlClient : IFlurlClient
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlClient"/> class.

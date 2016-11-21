@@ -17,7 +17,7 @@ namespace Flurl.Http
 		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
 		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
 		/// <returns>A Task whose result is the local path of the downloaded file.</returns>
-		public static async Task<string> DownloadFileAsync(this FlurlClient client, string localFolderPath, string localFileName = null, int bufferSize = 4096) {
+		public static async Task<string> DownloadFileAsync(this IFlurlClient client, string localFolderPath, string localFileName = null, int bufferSize = 4096) {
 			if (localFileName == null)
 				localFileName = client.Url.Path.Split('/').Last();
 

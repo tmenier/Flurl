@@ -9,7 +9,7 @@ namespace Flurl.Http.CodeGen
 			return
 				from httpVerb in new[] { null, "Get", "Post", "Head", "Put", "Delete", "Patch" }
 				from bodyType in new[] { null, "Json", /*"Xml",*/ "String", "UrlEncoded" }
-				from extensionType in new[] { "FlurlClient", "Url", "string" }
+				from extensionType in new[] { "IFlurlClient", "Url", "string" }
 				where SupportedCombo(httpVerb, bodyType, extensionType)
 				from deserializeType in new[] { null, "Json", "JsonList", /*"Xml",*/ "String", "Stream", "Bytes" }
 				where httpVerb == "Get" || deserializeType == null
@@ -27,7 +27,7 @@ namespace Flurl.Http.CodeGen
 		private static bool SupportedCombo(string verb, string bodyType, string extensionType) {
 			switch (verb) {
 				case null: // Send
-					return bodyType != null || extensionType != "FlurlClient";
+					return bodyType != null || extensionType != "IFlurlClient";
 				case "Post":
 					return true;
 				case "Put":
