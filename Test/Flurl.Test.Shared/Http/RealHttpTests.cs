@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
+using Flurl.Http.Testing;
 using NUnit.Framework;
 
 namespace Flurl.Test.Http
@@ -207,6 +208,17 @@ namespace Flurl.Test.Http
 			finally {
 				FlurlHttp.Configure(c => c.ResetDefaults());
 			}
+		}
+
+		[Test]
+		public async Task can_comingle_real_and_fake_tests() {
+			// do a fake call while a real call is running
+			var realTask = "https://www.google.com/".GetStringAsync();
+			using (new HttpTest()) {
+				var fake = await "https://www.google.com/".GetStringAsync();
+				Assert.AreEqual("", fake);
+			}
+			Assert.AreNotEqual("", await realTask);
 		}
 	}
 }
