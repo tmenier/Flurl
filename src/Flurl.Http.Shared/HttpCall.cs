@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using Flurl.Http.Configuration;
@@ -13,9 +11,12 @@ namespace Flurl.Http
 	/// </summary>
 	public class HttpCall
 	{
+		private readonly Lazy<Url> _url;
+
 		internal HttpCall(HttpRequestMessage request, FlurlHttpSettings settings) {
 			Request = request;
 			Settings = settings;
+			_url = new Lazy<Url>(() => new Url(Request.RequestUri.AbsoluteUri));
 		}
 
 		/// <summary>
@@ -65,9 +66,9 @@ namespace Flurl.Http
 		public TimeSpan? Duration => EndedUtc - StartedUtc;
 
 		/// <summary>
-		/// Absolute URI being called.
+		/// The URL being called.
 		/// </summary>
-		public string Url => Request.RequestUri.AbsoluteUri;
+		public Url Url => _url.Value;
 
 		/// <summary>
 		/// True if a response was received, regardless of whether it is an error status.

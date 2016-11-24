@@ -51,6 +51,8 @@ namespace Flurl.Test.Http
 				.RespondWith("two")
 				.RespondWith("three");
 
+			HttpTest.ShouldNotHaveMadeACall();
+
 			await "http://www.api.com/1".GetAsync();
 			await "http://www.api.com/2".GetAsync();
 			await "http://www.api.com/3".GetAsync();
@@ -61,27 +63,64 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("two", await calls[1].Response.Content.ReadAsStringAsync());
 			Assert.AreEqual("three", await calls[2].Response.Content.ReadAsStringAsync());
 
+			HttpTest.ShouldHaveMadeACall();
 			HttpTest.ShouldHaveCalled("http://www.api.com/*").WithVerb(HttpMethod.Get).Times(3);
 			HttpTest.ShouldNotHaveCalled("http://www.otherapi.com/*");
 		}
 
 		[Test]
 		public async Task can_assert_query_params() {
-			await "http://www.api.com?x=111&y=222&z=333".GetAsync();
+			await "http://www.api.com?x=111&y=222&z=333#abcd".GetAsync();
 
-			HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParam("x");
-			HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParam("y", 222);
-			HttpTest.ShouldHaveCalled("*").WithQueryParam("z", "*3");
-			HttpTest.ShouldHaveCalled("*").WithQueryParams(new { z = 333, y = 222 });
+			HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParams();
+			HttpTest.ShouldHaveMadeACall().WithQueryParam("x");
+			HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParams("z", "y");
+			HttpTest.ShouldHaveMadeACall().WithQueryParamValue("y", 222);
+			HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParamValue("z", "*3");
+			HttpTest.ShouldHaveMadeACall().WithQueryParamValues(new { z = 333, y = 222 });
+
+			// without
+			HttpTest.ShouldHaveCalled("http://www.api.com*").WithoutQueryParam("w");
+			HttpTest.ShouldHaveMadeACall().WithoutQueryParams("t", "u", "v");
+			HttpTest.ShouldHaveCalled("http://www.api.com*").WithoutQueryParamValue("x", 112);
+			HttpTest.ShouldHaveMadeACall().WithoutQueryParamValues(new { x = 112, y = 223, z = 666 });
+
+			// failures
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithQueryParam("w"));
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithQueryParamValue("y", 223));
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithQueryParamValue("z", "*4"));
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithQueryParamValues(new { x = 111, y = 666 }));
 
 			Assert.Throws<HttpCallAssertException>(() =>
-				HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParam("w"));
+				HttpTest.ShouldHaveMadeACall().WithoutQueryParams());
 			Assert.Throws<HttpCallAssertException>(() =>
-				HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParam("y", 223));
+				HttpTest.ShouldHaveMadeACall().WithoutQueryParam("x"));
 			Assert.Throws<HttpCallAssertException>(() =>
-				HttpTest.ShouldHaveCalled("*").WithQueryParam("z", "*4"));
+				HttpTest.ShouldHaveMadeACall().WithoutQueryParams("z", "y"));
 			Assert.Throws<HttpCallAssertException>(() =>
-				HttpTest.ShouldHaveCalled("*").WithQueryParams(new { x = 111, y = 666 }));
+				HttpTest.ShouldHaveMadeACall().WithoutQueryParamValue("y", 222));
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithoutQueryParamValue("z", "*3"));
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithoutQueryParamValues(new { z = 333, y = 222 }));
+		}
+
+		[Test]
+		public async Task can_assert_multiple_occurances_of_query_param() {
+			await "http://www.api.com?x=1&x=2&x=3&y=4#abcd".GetAsync();
+
+			HttpTest.ShouldHaveMadeACall().WithQueryParam("x");
+			HttpTest.ShouldHaveMadeACall().WithQueryParamValue("x", new[] { 2, 1 }); // order shouldn't matter
+			HttpTest.ShouldHaveMadeACall().WithQueryParamValues(new { x = new[] { 3, 2, 1 } }); // order shouldn't matter
+
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithQueryParamValue("x", new[] { 1, 2, 4 }));
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithQueryParamValues(new { x = new[] { 1, 2, 4 } }));
 		}
 
 		[Test]
