@@ -109,7 +109,7 @@ namespace Flurl.Http.Testing
 		public List<HttpCall> CallLog { get; private set; }
 
 		/// <summary>
-		/// Throws an HttpCallAssertException if a URL matching the given pattern was not called.
+		/// Asserts whether matching URL was called, throwing HttpCallAssertException if it wasn't.
 		/// </summary>
 		/// <param name="urlPattern">URL that should have been called. Can include * wildcard character.</param>
 		public HttpCallAssertion ShouldHaveCalled(string urlPattern) {
@@ -117,11 +117,25 @@ namespace Flurl.Http.Testing
 		}
 
 		/// <summary>
-		/// Throws an HttpCallAssertException if a URL matching the given pattern was called.
+		/// Asserts whether matching URL was NOT called, throwing HttpCallAssertException if it was.
 		/// </summary>
 		/// <param name="urlPattern">URL that should not have been called. Can include * wildcard character.</param>
 		public void ShouldNotHaveCalled(string urlPattern) {
 			new HttpCallAssertion(CallLog, true).WithUrlPattern(urlPattern);
+		}
+
+		/// <summary>
+		/// Asserts whether any HTTP call was made, throwing HttpCallAssertException if none were.
+		/// </summary>
+		public HttpCallAssertion ShouldHaveMadeACall() {
+			return new HttpCallAssertion(CallLog).WithUrlPattern("*");
+		}
+
+		/// <summary>
+		/// Asserts whether no HTTP calls were made, throwing HttpCallAssertException if any were.
+		/// </summary>
+		public void ShouldNotHaveMadeACall() {
+			new HttpCallAssertion(CallLog, true).WithUrlPattern("*");
 		}
 
 		/// <summary>
