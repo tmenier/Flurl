@@ -327,8 +327,9 @@ namespace Flurl
 		/// <summary>
 		/// Converts this Url object to its string representation.
 		/// </summary>
+		/// <param name="encodeSpaceAsPlus">Indicates whether to encode spaces with the "+" character instead of "%20"</param>
 		/// <returns></returns>
-		public string ToString(bool encodeStringAsPlus) {
+		public string ToString(bool encodeSpaceAsPlus) {
 			var sb = new System.Text.StringBuilder(Path);
 			if (Query.Length > 0)
 				sb.Append("?").Append(Query);

@@ -1,30 +1,19 @@
 version: 1.0.0-{branch}-{build}
 
-os: Visual Studio 2015
-
-environment:
-  matrix:
-    - CLI_VERSION: 1.0.0-preview2-003131
-
-install:
-   - ps: $url = "https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/$($env:CLI_VERSION)/dotnet-dev-win-x64.$($env:CLI_VERSION.ToLower()).zip"
-   - ps: $env:DOTNET_INSTALL_DIR = "$pwd\.dotnetsdk"
-   - ps: mkdir $env:DOTNET_INSTALL_DIR -Force | Out-Null
-   - ps: $tempFile = [System.IO.Path]::GetTempFileName()
-   - ps: (New-Object System.Net.WebClient).DownloadFile($url, $tempFile)
-   - ps: Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory($tempFile, $env:DOTNET_INSTALL_DIR)
-   - ps: $env:Path = "$env:DOTNET_INSTALL_DIR;$env:Path"
-
 branches:
   only:
     - master
     - dev
 
+image: Visual Studio 2015  
+
+init:
+  - dotnet --version
+
 pull_requests:
   do_not_increment_build_number: true
 
 build_script:
-  - cmd: dotnet --info
   - cmd: call cmd /C "cd .\build & pack.flurl.cmd & pack.flurl.http.cmd"  
 
 test_script:
