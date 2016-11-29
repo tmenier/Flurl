@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Http\TestingTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PackageTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ReflectionHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SpaUrlBuilderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UrlBuilderTests.cs" />
   </ItemGroup>
 </Project>

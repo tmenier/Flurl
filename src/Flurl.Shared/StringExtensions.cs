@@ -8,6 +8,16 @@ namespace Flurl
 	public static class StringExtensions
 	{
 		/// <summary>
+		/// Creates a new SpaUrl object from the string in cases where the SPA routes
+		/// requests using the anchor tag '#'.
+		/// </summary>
+		/// <param name="url">The URL.</param>
+		/// <returns>The resulting SpaUrl object.</returns>
+		public static SpaUrl AsSinglePageApplication(this string url) {
+			return new SpaUrl(url);
+		}
+
+		/// <summary>
 		/// Creates a new Url object from the string and appends a segment to the URL path,
 		/// ensuring there is one and only one '/' character as a separator.
 		/// </summary>

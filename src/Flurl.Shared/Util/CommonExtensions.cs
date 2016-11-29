@@ -66,6 +66,25 @@ namespace Flurl.Util
 			return new[] { s.Substring(0, i), s.Substring(i + 1) };
 		}
 
+		/// <summary>
+		/// Splits at the last occurrence of the given separator
+		/// </summary>
+		/// <param name="s">The string to split.</param>
+		/// <param name="separator">The separator to split on.</param>
+		/// <returns>Array of at most 2 strings. (1 if separator is not found.)</returns>
+		public static string[] SplitOnLastOccurence(this string s, char separator)
+		{
+			// Needed because full PCL profile doesn't support Split(char[], int) (#119)
+			if (string.IsNullOrEmpty(s))
+				return new[] { s };
+
+			var i = s.LastIndexOf(separator);
+			if (i == -1)
+				return new[] { s };
+
+			return new[] { s.Substring(0, i), s.Substring(i + 1) };
+		}
+
 		private static IEnumerable<KeyValuePair<string, object>> StringToKV(string s) {
 			return Url.ParseQueryParams(s).Select(p => new KeyValuePair<string, object>(p.Name, p.Value));
 		}
