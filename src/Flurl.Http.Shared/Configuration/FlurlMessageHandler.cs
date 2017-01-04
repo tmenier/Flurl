@@ -41,6 +41,7 @@ namespace Flurl.Http.Configuration
 				call.Exception = (cancellationToken.IsCancellationRequested) ?
 					new FlurlHttpException(call, ex) :
 					new FlurlHttpTimeoutException(call, ex);
+					call.Response = new HttpResponseMessage(HttpStatusCode.RequestTimeout);
 			}
 			catch (Exception ex) {
 				call.Exception =  new FlurlHttpException(call, ex);
