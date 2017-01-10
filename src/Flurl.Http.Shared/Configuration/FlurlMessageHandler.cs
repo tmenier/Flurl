@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,11 +42,12 @@ namespace Flurl.Http.Configuration
 				call.Exception = (cancellationToken.IsCancellationRequested) ?
 					new FlurlHttpException(call, ex) :
 					new FlurlHttpTimeoutException(call, ex);
-					call.Response = new HttpResponseMessage(HttpStatusCode.RequestTimeout);
+					call.Response = new HttpResponseMessage(HttpStatusCode.GatewayTimeout);
 			}
 			catch (Exception ex) {
 				call.Exception =  new FlurlHttpException(call, ex);
-			}
+                call.Response = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+            }
 
 			if (call.Response != null && !call.Succeeded) {
 				if (call.Response.Content != null)
