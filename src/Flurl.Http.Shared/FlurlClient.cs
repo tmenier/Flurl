@@ -192,9 +192,11 @@ namespace Flurl.Http
 		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
-		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
+		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
+		{
+		    HttpRequestMessage request  = null;
 			try {
-				var request = new HttpRequestMessage(verb, Url) { Content = content };
+				request = new HttpRequestMessage(verb, Url) { Content = content };
 				if (Settings.CookiesEnabled)
 					WriteRequestCookies(request);
 				request.SetFlurlHttpCall(Settings);
@@ -202,8 +204,13 @@ namespace Flurl.Http
 				if (Settings.CookiesEnabled)
 					ReadResponseCookies(resp);
 				return resp;
-			}
-			finally {
+            }
+            catch(InvalidOperationException)
+            {
+                if (request.GetFlurlHttpCall().ExceptionHandled) return null;
+                throw;
+            }
+		    finally {
 				if (Settings.AutoDispose) Dispose();
 			}
 		}

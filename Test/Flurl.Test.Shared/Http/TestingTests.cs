@@ -136,7 +136,18 @@ namespace Flurl.Test.Http
 			}
 		}
 
-		[Test]
+	    [Test]
+	    public async Task can_simulate_timeout_with_exception_handled()
+	    {
+	        HttpTest.SimulateTimeout();
+
+	        var result = await "http://www.api.com"
+	            .ConfigureClient(c => c.OnError = call => call.ExceptionHandled = true)
+	            .GetAsync();
+	        Assert.IsNull(result);
+	    }
+
+	    [Test]
 		public async Task can_fake_headers() {
 			HttpTest.RespondWith(headers: new { h1 = "foo" });
 
