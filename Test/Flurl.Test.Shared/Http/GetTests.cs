@@ -128,7 +128,16 @@ namespace Flurl.Test.Http
 			}
 		}
 
-		private class TestData
+        [Test]
+        public async Task can_get_null_json_when_timeout_and_exception_handled() {
+            HttpTest.SimulateTimeout();
+            var data = await "http://api.com"
+                .ConfigureClient(c => c.OnError = call => call.ExceptionHandled = true)
+                .GetJsonAsync<TestData>();
+            Assert.IsNull(data);
+        }
+
+        private class TestData
 		{
 			public int id { get; set; }
 			public string name { get; set; }

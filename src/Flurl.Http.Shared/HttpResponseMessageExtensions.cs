@@ -22,9 +22,11 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is an object containing data in the response body.</returns>
 		/// <example>x = await url.PostAsync(data).ReceiveJson&lt;T&gt;()</example>
 		/// <exception cref="FlurlHttpException">Condition.</exception>
-		public static async Task<T> ReceiveJson<T>(this Task<HttpResponseMessage> response) {
+		public static async Task<T> ReceiveJson<T>(this Task<HttpResponseMessage> response)
+		{
 			var resp = await response.ConfigureAwait(false);
-			var call = resp.RequestMessage.GetFlurlHttpCall();
+            if (resp == null) return default(T);
+            var call = resp.RequestMessage.GetFlurlHttpCall();
 			try {
 				using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false))
 					return call.Settings.JsonSerializer.Deserialize<T>(stream);
