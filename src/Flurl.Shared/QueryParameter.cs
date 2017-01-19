@@ -13,6 +13,7 @@ namespace Flurl
 	{
 		private object _value;
 		private string _encodedValue;
+	    private readonly bool _isWithoutValue = false;
 
 		/// <summary>
 		/// Creates a new instance of a query parameter.
@@ -37,17 +38,26 @@ namespace Flurl
 			}
 		}
 
-		/// <summary>
-		/// The name (left side) of the query parameter.
-		/// </summary>
-		public string Name { get; set; }
+        /// <summary>
+        /// Creates a new instance of a query parameter without a value.
+        /// </summary>
+        public QueryParameter(string name) {
+            Name = name;
+            Value = "";
+            _isWithoutValue = true;
+        }
+
+        /// <summary>
+        /// The name (left side) of the query parameter.
+        /// </summary>
+        public string Name { get; set; }
 
 		/// <summary>
 		/// The value (right side) of the query parameter.
 		/// </summary>
 		public object Value
-		{
-			get { return _value; }
+        {
+			get { return _isWithoutValue ? true : _value; }
 			set
 			{
 				_value = value;
@@ -61,13 +71,16 @@ namespace Flurl
 		/// <param name="encodeSpaceAsPlus">Indicates whether to encode space characters with "+" instead of "%20".</param>
 		/// <returns></returns>
 		public string ToString(bool encodeSpaceAsPlus) {
-			if (Value is IEnumerable && !(Value is string)) {
-				return string.Join("&",
-					from v in (Value as IEnumerable).Cast<object>()
-					where v != null
-					let encoded = Url.EncodeQueryParamValue(v, encodeSpaceAsPlus)
-					select $"{Name}={encoded}");
-			}
+		    if (Value is IEnumerable && !(Value is string)) {
+		        return string.Join("&",
+		            from v in (Value as IEnumerable).Cast<object>()
+		            where v != null
+		            let encoded = Url.EncodeQueryParamValue(v, encodeSpaceAsPlus)
+		            select $"{Name}={encoded}");
+		    }
+		    else if (_isWithoutValue) {
+		        return $"{Name}";
+		    }
 			else {
 				var encoded = _encodedValue ?? Url.EncodeQueryParamValue(_value, encodeSpaceAsPlus);
 				return $"{Name}={encoded}";

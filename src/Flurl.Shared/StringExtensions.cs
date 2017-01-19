@@ -57,17 +57,30 @@ namespace Flurl
 			return new Url(url).SetQueryParam(name, value);
 		}
 
-		/// <summary>
-		/// Creates a new Url object from the string and adds a parameter to the query, overwriting the value if name exists.
-		/// </summary>
-		/// <param name="url">The URL.</param>
-		/// <param name="name">Name of query parameter</param>
-		/// <param name="value">Value of query parameter</param>
-		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded (typically false)</param>
-		/// <returns>
-		/// The Url object with the query parameter added
-		/// </returns>
-		public static Url SetQueryParam(this string url, string name, string value, bool isEncoded) {
+        /// <summary>
+        /// Creates a new Url object from the string and adds a parameter without a value to the query.
+        /// </summary>
+        /// <param name="url">The URL.</param>
+        /// <param name="name">name of query parameter</param>
+        /// <returns>
+        /// The Url object with the query parameter added
+        /// </returns>
+        public static Url SetQueryParam(this string url, string name)
+        {
+            return new Url(url).SetQueryParam(name);
+        }
+
+        /// <summary>
+        /// Creates a new Url object from the string and adds a parameter to the query, overwriting the value if name exists.
+        /// </summary>
+        /// <param name="url">The URL.</param>
+        /// <param name="name">Name of query parameter</param>
+        /// <param name="value">Value of query parameter</param>
+        /// <param name="isEncoded">Set to true to indicate the value is already URL-encoded (typically false)</param>
+        /// <returns>
+        /// The Url object with the query parameter added
+        /// </returns>
+        public static Url SetQueryParam(this string url, string name, string value, bool isEncoded) {
 			return new Url(url).SetQueryParam(name, value, isEncoded);
 		}
 
