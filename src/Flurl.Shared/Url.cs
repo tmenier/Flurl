@@ -65,7 +65,7 @@ namespace Flurl
 				let pair = p.SplitOnFirstOccurence('=')
 				let name = pair[0]
 				let value = (pair.Length == 1) ? "" : pair[1]
-				select new QueryParameter(name, value, true));
+				select value == "" ? new QueryParameter(name) : new QueryParameter(name, value, true));
 
 			return result;
 		}
@@ -208,15 +208,29 @@ namespace Flurl
 			return this;
 		}
 
-	    /// <summary>
-	    /// Adds a parameter to the query, overwriting the value if name exists.
-	    /// </summary>
-	    /// <param name="name">Name of query parameter</param>
-	    /// <param name="value">Value of query parameter</param>
-	    /// <param name="isEncoded">Set to true to indicate the value is already URL-encoded (typically false)</param>
-	    /// <returns>The Url object with the query parameter added</returns>
-	    /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
-	    public Url SetQueryParam(string name, string value, bool isEncoded) {
+        /// <summary>
+        /// Adds a parameter without a value to the query.
+        /// </summary>
+        /// <param name="name">Name of query parameter</param>
+        /// <returns>The Url object with the query parameter added</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
+        public Url SetQueryParam(string name) {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name), "Query parameter name cannot be null.");
+
+            QueryParams.Add(name);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a parameter to the query, overwriting the value if name exists.
+        /// </summary>
+        /// <param name="name">Name of query parameter</param>
+        /// <param name="value">Value of query parameter</param>
+        /// <param name="isEncoded">Set to true to indicate the value is already URL-encoded (typically false)</param>
+        /// <returns>The Url object with the query parameter added</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
+        public Url SetQueryParam(string name, string value, bool isEncoded) {
 			if (name == null)
 				throw new ArgumentNullException(nameof(name), "Query parameter name cannot be null.");
 

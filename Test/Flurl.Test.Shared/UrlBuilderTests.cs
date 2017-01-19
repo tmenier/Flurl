@@ -157,11 +157,13 @@ namespace Flurl.Test
 		[Test]
 		public void can_add_query_param_without_value()
 		{
-			var url = new Url("http://example.com?123456");
+		    string urlString = "http://example.com?123456";
+            var url = new Url(urlString);
 			Assert.AreEqual("http://example.com", url.Path);
 			Assert.AreEqual(1, url.QueryParams.Count);
-			Assert.AreEqual(string.Empty, url.QueryParams["123456"]);
-		}
+			Assert.AreEqual(true, url.QueryParams["123456"]);
+            Assert.AreEqual(urlString, url.ToString());
+        }
 
 		[Test]
 		public void can_change_query_param()

@@ -40,10 +40,17 @@ namespace Flurl
 			Add(new QueryParameter(key, value, isEncoded));
 		}
 
-		/// <summary>
-		/// True if the collection contains a query parameter with the given name.
-		/// </summary>
-		public bool ContainsKey(string name) {
+        /// <summary>
+        /// Adds a new query parameter without a value.
+        /// </summary>
+        public void Add(string key) {
+            Add(new QueryParameter(key));
+        }
+
+        /// <summary>
+        /// True if the collection contains a query parameter with the given name.
+        /// </summary>
+        public bool ContainsKey(string name) {
 			return this.Any(p => p.Name == name);
 		}
 
