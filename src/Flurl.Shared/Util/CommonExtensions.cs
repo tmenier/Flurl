@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 #if NETSTANDARD1_4
 using System.Reflection;
 #endif
@@ -71,10 +72,37 @@ namespace Flurl.Util
 		}
 
 		private static IEnumerable<KeyValuePair<string, object>> ObjectToKV(object obj) {
-			return from prop in obj.GetType().GetProperties() 
-				   let val = prop.GetValue(obj, null) 
-				   select new KeyValuePair<string, object>(prop.Name, val);
-		}
+            //return from prop in obj.GetType().GetProperties()
+            //       let val = prop.GetValue(obj, null)
+            //       select new KeyValuePair<string, object>(prop.Name, val);
+            JToken token = obj as JToken;
+            if (token == null)
+            {
+                return ObjectToKV(JObject.FromObject(obj));
+            }
+
+            if (token.HasValues)
+            {
+                var contentData = new Dictionary<string, object>();
+                foreach (var child in token.Children().ToList())
+                {
+                    contentData = contentData.Concat(ObjectToKV(child)).ToDictionary(k => k.Key, v => v.Value);
+                }
+
+                return contentData;
+            }
+
+            var value = token as JValue;
+            switch (value?.Type)
+            {
+                case null:
+                    return new Dictionary<string, object> { { token.Path, null } };
+                case JTokenType.Date:
+                    return new Dictionary<string, object> { { token.Path, value.ToString("o") } };
+                default:
+                    return new Dictionary<string, object> { { token.Path, value.ToString() } };
+            }
+        }
 
 		private static IEnumerable<KeyValuePair<string, object>> CollectionToKV(IEnumerable col) {
 			// Accepts KeyValuePairs or any arbitrary types that contain a property called "Key" or "Name" and a property called "Value".
