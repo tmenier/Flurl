@@ -92,16 +92,8 @@ namespace Flurl.Util
                 return contentData;
             }
 
-            var value = token as JValue;
-            switch (value?.Type)
-            {
-                case null:
-                    return new Dictionary<string, object> { { token.Path, null } };
-                case JTokenType.Date:
-                    return new Dictionary<string, object> { { token.Path, value.ToString("o") } };
-                default:
-                    return new Dictionary<string, object> { { token.Path, value.ToString() } };
-            }
+            var jValue = token as JValue;
+            return new Dictionary<string, object> { { token.Path, jValue?.Value } };
         }
 
 		private static IEnumerable<KeyValuePair<string, object>> CollectionToKV(IEnumerable col) {

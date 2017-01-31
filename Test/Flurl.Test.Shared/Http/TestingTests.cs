@@ -115,7 +115,8 @@ namespace Flurl.Test.Http
 
 			HttpTest.ShouldHaveMadeACall().WithQueryParam("x");
 			HttpTest.ShouldHaveMadeACall().WithQueryParamValue("x", new[] { 2, 1 }); // order shouldn't matter
-			HttpTest.ShouldHaveMadeACall().WithQueryParamValues(new { x = new[] { 3, 2, 1 } }); // order shouldn't matter
+            HttpTest.ShouldHaveMadeACall().WithQueryParamValue("x", new[] { 3, 2, 1 }); // order shouldn't matter
+            //HttpTest.ShouldHaveMadeACall().WithQueryParamValues(new { x = new[] { 3, 2, 1 } }); // order shouldn't matter
 
 			Assert.Throws<HttpCallAssertException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithQueryParamValue("x", new[] { 1, 2, 4 }));
