@@ -13,7 +13,7 @@ namespace Flurl
 		/// <summary>
 		/// The full absolute path part of the URL (everthing except the query and fragment).
 		/// </summary>
-		public string Path { get; private set; }
+		public string Path { get; set; }
 
 		/// <summary>
 		/// The query part of the URL (after the ?, RFC 3986).
@@ -24,14 +24,14 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Query parsed to name/value pairs.
-		/// </summary>
-		public QueryParamCollection QueryParams { get; private set; }
-
-		/// <summary>
 		/// The fragment part of the URL (after the #, RFC 3986).
 		/// </summary>
 		public string Fragment { get; set; }
+
+		/// <summary>
+		/// Query parsed to name/value pairs.
+		/// </summary>
+		public QueryParamCollection QueryParams { get; private set; }
 
 	    /// <summary>
 	    /// Constructs a Url object from a string.
@@ -332,7 +332,7 @@ namespace Flurl
 		public string ToString(bool encodeSpaceAsPlus) {
 			var sb = new System.Text.StringBuilder(Path);
 			if (Query.Length > 0)
-				sb.Append("?").Append(Query);
+				sb.Append("?").Append(QueryParams.ToString(encodeSpaceAsPlus));
 			if (Fragment.Length > 0)
 				sb.Append("#").Append(Fragment);
 			return sb.ToString();
