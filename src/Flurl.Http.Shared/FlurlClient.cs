@@ -193,23 +193,22 @@ namespace Flurl.Http
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
-		    HttpRequestMessage request  = null;
+			var request = new HttpRequestMessage(verb, Url) { Content = content };
+			var call = new HttpCall(request, Settings);
+
 			try {
-				request = new HttpRequestMessage(verb, Url) { Content = content };
 				if (Settings.CookiesEnabled)
 					WriteRequestCookies(request);
-				request.SetFlurlHttpCall(Settings);
-				var resp = await HttpClient.SendAsync(request, completionOption, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+				return await HttpClient.SendAsync(request, completionOption, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+            }
+			catch (Exception) when (call.ExceptionHandled) {
+				return call.Response;
+			}
+			finally {
 				if (Settings.CookiesEnabled)
-					ReadResponseCookies(resp);
-				return resp;
-            }
-            catch(InvalidOperationException) {
-                if (request.GetFlurlHttpCall().ExceptionHandled) return null;
-                throw;
-            }
-		    finally {
-				if (Settings.AutoDispose) Dispose();
+					ReadResponseCookies(call.Response);
+				if (Settings.AutoDispose)
+					Dispose();
 			}
 		}
 

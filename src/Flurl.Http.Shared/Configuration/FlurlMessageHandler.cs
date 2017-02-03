@@ -23,48 +23,45 @@ namespace Flurl.Http.Configuration
 		/// <param name="request">The request.</param>
 		/// <param name="cancellationToken">The cancellation token.</param>
 		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
-			var call = request.GetFlurlHttpCall();
+			var call = HttpCall.Get(request);
 
 			var stringContent = request.Content as CapturedStringContent;
 			if (stringContent != null)
 				call.RequestBody = stringContent.Content;
 
 			await FlurlHttp.RaiseEventAsync(request, FlurlEventType.BeforeCall).ConfigureAwait(false);
-
 			call.StartedUtc = DateTime.UtcNow;
-
 			try {
-				call.Response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
-				call.EndedUtc = DateTime.UtcNow;
-			}
-			catch (OperationCanceledException ex) {
-				call.Exception = (cancellationToken.IsCancellationRequested) ?
-					new FlurlHttpException(call, ex) :
-					new FlurlHttpTimeoutException(call, ex);
-			}
-			catch (Exception ex) {
-				call.Exception =  new FlurlHttpException(call, ex);
-			}
+				call.Response = await InnerSendAsync(call, request, cancellationToken).ConfigureAwait(false);
+				call.Response.RequestMessage = request;
+				if (call.Succeeded)
+					return call.Response;
 
-			if (call.Response != null && !call.Succeeded) {
 				if (call.Response.Content != null)
 					call.ErrorResponseBody = await call.Response.Content.StripCharsetQuotes().ReadAsStringAsync().ConfigureAwait(false);
-
-				call.Exception = new FlurlHttpException(call, null);
+				throw new FlurlHttpException(call, null);
 			}
-
-			if (call.Exception != null)
+			catch (Exception ex) {
+				call.Exception = ex;
 				await FlurlHttp.RaiseEventAsync(request, FlurlEventType.OnError).ConfigureAwait(false);
+				throw;
+			}
+			finally {
+				call.EndedUtc = DateTime.UtcNow;
+				await FlurlHttp.RaiseEventAsync(request, FlurlEventType.AfterCall).ConfigureAwait(false);
+			}
+		}
 
-			await FlurlHttp.RaiseEventAsync(request, FlurlEventType.AfterCall).ConfigureAwait(false);
-
-			if (call.Exception != null && !call.ExceptionHandled)
-				throw call.Exception;
-
-			if (call.Response != null)
-				call.Response.RequestMessage = request;
-	
-			return call.Response;
+		private async Task<HttpResponseMessage> InnerSendAsync(HttpCall call, HttpRequestMessage request, CancellationToken cancellationToken) {
+			try {
+				return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+			}
+			catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested) {
+				throw new FlurlHttpTimeoutException(call, ex);
+			}
+			catch (Exception ex) {
+				throw new FlurlHttpException(call, ex);
+			}
 		}
 	}
 }

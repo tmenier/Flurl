@@ -37,11 +37,9 @@ namespace Flurl.Http
 		/// Triggers the specified sync and async event handlers, usually defined on 
 		/// </summary>
 		public static Task RaiseEventAsync(HttpRequestMessage request, FlurlEventType eventType) {
-			var call = request.GetFlurlHttpCall();
-			if (call == null)
-				return NoOpTask.Instance;
+			var call = HttpCall.Get(request);
+			var settings = call?.Settings;
 
-			var settings = call.Settings;
 			if (settings == null)
 				return NoOpTask.Instance;
 

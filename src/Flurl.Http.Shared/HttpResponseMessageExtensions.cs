@@ -22,11 +22,11 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is an object containing data in the response body.</returns>
 		/// <example>x = await url.PostAsync(data).ReceiveJson&lt;T&gt;()</example>
 		/// <exception cref="FlurlHttpException">Condition.</exception>
-		public static async Task<T> ReceiveJson<T>(this Task<HttpResponseMessage> response)
-		{
+		public static async Task<T> ReceiveJson<T>(this Task<HttpResponseMessage> response) {
 			var resp = await response.ConfigureAwait(false);
-            if (resp == null) return default(T);
-            var call = resp.RequestMessage.GetFlurlHttpCall();
+			if (resp == null) return default(T);
+
+			var call = HttpCall.Get(resp.RequestMessage);
 			try {
 				using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false))
 					return call.Settings.JsonSerializer.Deserialize<T>(stream);
@@ -67,7 +67,10 @@ namespace Flurl.Http
 #if NETSTANDARD1_4
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 #endif
-			return await (await response.ConfigureAwait(false)).Content.StripCharsetQuotes().ReadAsStringAsync().ConfigureAwait(false);
+			var resp = await response.ConfigureAwait(false);
+			if (resp == null) return null;
+
+			return await resp.Content.StripCharsetQuotes().ReadAsStringAsync().ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -76,7 +79,10 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is the response body as a stream.</returns>
 		/// <example>stream = await url.PostAsync(data).ReceiveStream()</example>
 		public static async Task<Stream> ReceiveStream(this Task<HttpResponseMessage> response) {
-			return await (await response.ConfigureAwait(false)).Content.ReadAsStreamAsync().ConfigureAwait(false);
+			var resp = await response.ConfigureAwait(false);
+			if (resp == null) return null;
+
+			return await resp.Content.ReadAsStreamAsync().ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -85,7 +91,10 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is the response body as a byte array.</returns>
 		/// <example>bytes = await url.PostAsync(data).ReceiveBytes()</example>
 		public static async Task<byte[]> ReceiveBytes(this Task<HttpResponseMessage> response) {
-			return await (await response.ConfigureAwait(false)).Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+			var resp = await response.ConfigureAwait(false);
+			if (resp == null) return null;
+
+			return await resp.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
 		}
 
 		// https://github.com/tmenier/Flurl/pull/76, https://github.com/dotnet/corefx/issues/5014
