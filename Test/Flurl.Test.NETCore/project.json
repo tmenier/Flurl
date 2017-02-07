@@ -1,4 +1,4 @@
-﻿{
+{
   "buildOptions": {
     "compile": {
       "include": [ "../Flurl.Test.Shared/**/*.cs" ]

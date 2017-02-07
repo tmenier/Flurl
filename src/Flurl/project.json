@@ -1,7 +1,6 @@
 {
   "title": "Flurl",
   "version": "2.2.1",
-
   "buildOptions": {
     "compile": {
       "include": "../Flurl.Shared/**/*.cs"
@@ -9,7 +8,6 @@
     "warningsAsErrors": true,
     "xmlDoc": true
   },
-
   "configurations": {
     "Release": {
       "buildOptions": {
@@ -17,7 +15,6 @@
       }
     }
   },
-
   "frameworks": {
     "portable40-net40+sl5+win8+wp8+wpa81": {
       "frameworkAssemblies": {
@@ -33,5 +30,8 @@
         "System.Reflection.TypeExtensions": "4.1.0"
       }
     }
+  },
+  "dependencies": {
+    "Newtonsoft.Json": "9.0.1"
   }
 }

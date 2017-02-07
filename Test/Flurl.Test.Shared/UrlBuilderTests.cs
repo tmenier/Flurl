@@ -194,19 +194,19 @@ namespace Flurl.Test
 				z = new[] { 3, 4 },
 				exclude_me = (string)null
 			});
-			Assert.AreEqual("http://www.mysite.com?x=1&y=2&z=3&z=4", url.ToString());
+			Assert.AreEqual("http://www.mysite.com?x=1&y=2&z[0]=3&z[1]=4", url.ToString());
 		}
 
 		[Test]
 		public void can_change_multiple_query_params_from_anon_object()
 		{
-			var url = "http://www.mysite.com?x=1&y=2&z=3".SetQueryParams(new
+			var url = "http://www.mysite.com?x=1&y[0]=2&z=3".SetQueryParams(new
 			{
 				x = 8,
 				y = new[] { "a", "b" },
 				z = (int?)null
 			});
-			Assert.AreEqual("http://www.mysite.com?x=8&y=a&y=b", url.ToString());
+			Assert.AreEqual("http://www.mysite.com?x=8&y[0]=a&y[1]=b", url.ToString());
 		}
 
 		[Test]
