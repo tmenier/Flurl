@@ -64,7 +64,7 @@ namespace Flurl
 				from p in query.Split('&')
 				let pair = p.SplitOnFirstOccurence('=')
 				let name = pair[0]
-				let value = (pair.Length == 1) ? "" : pair[1]
+				let value = (pair.Length == 1) ? null : pair[1]
 				select new QueryParameter(name, value, true));
 
 			return result;
@@ -193,50 +193,83 @@ namespace Flurl
 			return this;
 		}
 
-	    /// <summary>
-	    /// Adds a parameter to the query, overwriting the value if name exists.
-	    /// </summary>
-	    /// <param name="name">Name of query parameter</param>
-	    /// <param name="value">Value of query parameter</param>
-	    /// <returns>The Url object with the query parameter added</returns>
-	    /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
-	    public Url SetQueryParam(string name, object value) {
-			if (name == null)
-				throw new ArgumentNullException(nameof(name), "Query parameter name cannot be null.");
-
-			QueryParams[name] = value;
+		/// <summary>
+		/// Adds a parameter to the query, overwriting the value if name exists.
+		/// </summary>
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		public Url SetQueryParam(string name, object value, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			SetQueryParamInternal(name, value, false, nullValueHandling);
 			return this;
 		}
 
-	    /// <summary>
-	    /// Adds a parameter to the query, overwriting the value if name exists.
-	    /// </summary>
-	    /// <param name="name">Name of query parameter</param>
-	    /// <param name="value">Value of query parameter</param>
-	    /// <param name="isEncoded">Set to true to indicate the value is already URL-encoded (typically false)</param>
-	    /// <returns>The Url object with the query parameter added</returns>
-	    /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
-	    public Url SetQueryParam(string name, string value, bool isEncoded) {
-			if (name == null)
-				throw new ArgumentNullException(nameof(name), "Query parameter name cannot be null.");
-
-			QueryParams[name] = new QueryParameter(name, value, isEncoded);
+		/// <summary>
+		/// Adds a parameter to the query, overwriting the value if name exists.
+		/// </summary>
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
+		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
+		public Url SetQueryParam(string name, string value, bool isEncoded = false, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			SetQueryParamInternal(name, value, isEncoded, nullValueHandling);
 			return this;
+		}
+
+		/// <summary>
+		/// Adds a parameter without a value to the query, removing any existing value.
+		/// </summary>
+		/// <param name="name">Name of query parameter</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		public Url SetQueryParam(string name) {
+			SetQueryParamInternal(name, null, false, NullValueHandling.NameOnly);
+			return this;
+		}
+
+		private void SetQueryParamInternal(string name, object value, bool isEncoded, NullValueHandling nullValueHandling) {
+			if (value != null || nullValueHandling == NullValueHandling.NameOnly)
+				QueryParams[name] = new QueryParameter(name, value, isEncoded);
+			else if (nullValueHandling == NullValueHandling.Remove)
+				RemoveQueryParam(name);
 		}
 
 		/// <summary>
 		/// Parses values (usually an anonymous object or dictionary) into name/value pairs and adds them to the query, overwriting any that already exist.
 		/// </summary>
 		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
 		/// <returns>The Url object with the query parameters added</returns>
-		public Url SetQueryParams(object values) {
+		public Url SetQueryParams(object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
 			if (values == null)
 				return this;
 
 			foreach (var kv in values.ToKeyValuePairs())
-				SetQueryParam(kv.Key, kv.Value);
+				SetQueryParamInternal(kv.Key, kv.Value, false, nullValueHandling);
 
 			return this;
+		}
+
+		/// <summary>
+		/// Adds multiple parameters without values to the query.
+		/// </summary>
+		/// <param name="names">Names of query parameters.</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		public Url SetQueryParams(IEnumerable<string> names) {
+			foreach (var name in names.Where(n => n != null))
+				SetQueryParam(name);
+			return this;
+		}
+
+		/// <summary>
+		/// Adds multiple parameters without values to the query.
+		/// </summary>
+		/// <param name="names">Names of query parameters</param>
+		/// <returns>The Url object with the query parameter added.</returns>
+		public Url SetQueryParams(params string[] names) {
+			return SetQueryParams(names as IEnumerable<string>);
 		}
 
 		/// <summary>

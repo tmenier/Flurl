@@ -21,10 +21,12 @@ namespace Flurl.Test.Http
 					continue;
 
 				if (!urlExts.Any(m => ReflectionHelper.AreSameMethodSignatures(method, m))) {
-					Assert.Fail("No equivalent Url extension method found for FlurlClient.{0}", method.Name);
+					var args = string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name));
+					Assert.Fail($"No equivalent Url extension method found for FlurlClient.{method.Name}({args})");
 				}
 				if (!stringExts.Any(m => ReflectionHelper.AreSameMethodSignatures(method, m))) {
-					Assert.Fail("No equivalent string extension method found for FlurlClient.{0}", method.Name);
+					var args = string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name));
+					Assert.Fail($"No equivalent string extension method found for FlurlClient.{method.Name}({args})");
 				}
 			}
 		}

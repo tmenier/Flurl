@@ -48,13 +48,12 @@ namespace Flurl
 		/// Creates a new Url object from the string and adds a parameter to the query, overwriting the value if name exists.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="name">name of query parameter</param>
-		/// <param name="value">value of query parameter</param>
-		/// <returns>
-		/// The Url object with the query parameter added
-		/// </returns>
-		public static Url SetQueryParam(this string url, string name, object value) {
-			return new Url(url).SetQueryParam(name, value);
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		public static Url SetQueryParam(this string url, string name, object value, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			return new Url(url).SetQueryParam(name, value, nullValueHandling);
 		}
 
 		/// <summary>
@@ -63,12 +62,23 @@ namespace Flurl
 		/// <param name="url">The URL.</param>
 		/// <param name="name">Name of query parameter</param>
 		/// <param name="value">Value of query parameter</param>
-		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded (typically false)</param>
+		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded. Defaults to false.</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing).</param>
 		/// <returns>
 		/// The Url object with the query parameter added
 		/// </returns>
-		public static Url SetQueryParam(this string url, string name, string value, bool isEncoded) {
-			return new Url(url).SetQueryParam(name, value, isEncoded);
+		public static Url SetQueryParam(this string url, string name, string value, bool isEncoded = false, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			return new Url(url).SetQueryParam(name, value, isEncoded, nullValueHandling);
+		}
+
+		/// <summary>
+		/// Creates a new Url object from the string and adds a parameter without a value to the query, removing any existing value.
+		/// </summary>
+		/// <param name="url">The URL.</param>
+		/// <param name="name">Name of query parameter</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		public static Url SetQueryParam(this string url, string name) {
+			return new Url(url).SetQueryParam(name);
 		}
 
 		/// <summary>
@@ -77,11 +87,32 @@ namespace Flurl
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
 		/// <returns>
 		/// The Url object with the query parameters added
 		/// </returns>
-		public static Url SetQueryParams(this string url, object values) {
-			return new Url(url).SetQueryParams(values);
+		public static Url SetQueryParams(this string url, object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			return new Url(url).SetQueryParams(values, nullValueHandling);
+		}
+
+		/// <summary>
+		/// Creates a new Url object from the string and adds multiple parameters without values to the query.
+		/// </summary>
+		/// <param name="url">The URL.</param>
+		/// <param name="names">Names of query parameters.</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		public static Url SetQueryParams(this string url, IEnumerable<string> names) {
+			return new Url(url).SetQueryParams(names);
+		}
+
+		/// <summary>
+		/// Creates a new Url object from the string and adds multiple parameters without values to the query.
+		/// </summary>
+		/// <param name="url">The URL.</param>
+		/// <param name="names">Names of query parameters</param>
+		/// <returns>The Url object with the query parameter added.</returns>
+		public static Url SetQueryParams(this string url, params string[] names) {
+			return new Url(url).SetQueryParams(names);
 		}
 
 		/// <summary>

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -25,39 +24,55 @@ namespace Flurl.Test
 				if (whitelist.Contains(method.Name))
 					continue;
 
-				if (!stringExts.Any(m => ReflectionHelper.AreSameMethodSignatures(method, m)))
-				{
-					Assert.Fail("No equivalent string extension method found for Url.{0}", method.Name);
+				if (!stringExts.Any(m => ReflectionHelper.AreSameMethodSignatures(method, m))) {
+					var args = string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name));
+					Assert.Fail($"No equivalent string extension method found for Url.{method.Name}({args})");
 				}
 			}
 		}
 
 		[Test]
-		public void Path_returns_everything_but_querystring()
-		{
-			var path = new Url("http://www.mysite.com/more?x=1&y=2").Path;
-			Assert.AreEqual("http://www.mysite.com/more", path);
+		public void can_parse_url_parts() {
+			var url = new Url("http://www.mysite.com/more?x=1&y=2#foo");
+			Assert.AreEqual("http://www.mysite.com/more", url.Path);
+			Assert.AreEqual("x=1&y=2", url.Query);
+			Assert.AreEqual("foo", url.Fragment);
 		}
 
 		[Test]
-		public void query_params_parse_correctly()
+		public void can_parse_query_params()
 		{
-			// y has 2 values, which should be grouped into an array
-			var q = new Url("http://www.mysite.com/more?x=1&y=2&z=3&y=4").QueryParams;
+			var q = new Url("http://www.mysite.com/more?x=1&y=2&z=3&y=4&abc&xyz&foo=&=bar&y=6").QueryParams;
+
+			Assert.AreEqual(9, q.Count);
+			Assert.AreEqual(new[] { "x", "y", "z", "y", "abc", "xyz", "foo", "", "y", }, q.Select(p => p.Name));
+			Assert.AreEqual(new[] { "1", "2", "3", "4", null, null, "", "bar", "6", }, q.Select(p => p.Value));
+
 			Assert.AreEqual("1", q["x"]);
-			CollectionAssert.AreEqual(new[] { "2", "4" }, q["y"] as IEnumerable);
+			Assert.AreEqual(new[] { "2", "4", "6" }, q["y"]); // group values of same name into array
 			Assert.AreEqual("3", q["z"]);
+			Assert.AreEqual(null, q["abc"]);
+			Assert.AreEqual(null, q["xyz"]);
+			Assert.AreEqual("", q["foo"]);
+			Assert.AreEqual("bar", q[""]);
 		}
 
 		[Test]
-		public void can_get_query_param_array()
-		{
-			var url = new Url("http://www.mysite.com/more?x=1&y=2&x=3&z=4&x=5");
-			CollectionAssert.AreEqual(new[] { "1", "3", "5" }, url.QueryParams["x"] as object[]);
+		public void can_set_query_params() {
+			var url = "http://www.mysite.com/more"
+				.SetQueryParam("x", 1)
+				.SetQueryParam("y", new[] { "2", "4", "6" })
+				.SetQueryParam("z", 3)
+				.SetQueryParam("abc")
+				.SetQueryParam("xyz")
+				.SetQueryParam("foo", "")
+				.SetQueryParam("", "bar");
+
+			Assert.AreEqual("http://www.mysite.com/more?x=1&y=2&y=4&y=6&z=3&abc&xyz&foo=&=bar", url.ToString());
 		}
 
 		[Test]
-		public void can_set_query_param_array()
+		public void can_modify_query_param_array()
 		{
 			var url = new Url("http://www.mysite.com/more?x=1&y=2&x=2&z=4");
 			// go from 2 values to 3, order should be preserved
@@ -72,11 +87,101 @@ namespace Flurl.Test
 		}
 
 		[Test]
+		public void can_change_query_param() {
+			var url = "http://www.mysite.com?x=1".SetQueryParam("x", 2);
+			Assert.AreEqual("http://www.mysite.com?x=2", url.ToString());
+		}
+
+		[Test]
+		public void enumerable_query_param_is_split_into_multiple() {
+			var url = "http://www.mysite.com".SetQueryParam("x", new[] { "a", "b", null, "c" });
+			Assert.AreEqual("http://www.mysite.com?x=a&x=b&x&x=c", url.ToString());
+		}
+
+		[Test]
+		public void can_set_multiple_query_params_from_anon_object() {
+			var url = "http://www.mysite.com".SetQueryParams(new {
+				x = 1,
+				y = 2,
+				z = new[] { 3, 4 },
+				exclude_me = (string)null
+			});
+			Assert.AreEqual("http://www.mysite.com?x=1&y=2&z=3&z=4", url.ToString());
+		}
+
+		[Test]
+		public void can_replace_query_params_from_anon_object() {
+			var url = "http://www.mysite.com?x=1&y=2&z=3".SetQueryParams(new {
+				x = 8,
+				y = new[] { "a", "b" },
+				z = (int?)null
+			});
+			Assert.AreEqual("http://www.mysite.com?x=8&y=a&y=b", url.ToString());
+		}
+
+		[Test]
+		public void can_set_multiple_query_params_from_dictionary() {
+			// let's challenge it a little with non-string keys
+			var url = "http://www.mysite.com".SetQueryParams(new Dictionary<int, string> { { 1, "x" }, { 2, "y" } });
+			Assert.AreEqual("http://www.mysite.com?1=x&2=y", url.ToString());
+		}
+
+		private IEnumerable<string> GetQueryParamNames() {
+			yield return "abc";
+			yield return "123";
+			yield return null;
+			yield return "456";
+		}
+
+		[Test]
+		public void can_set_multiple_no_value_query_params_from_enumerable_string() {
+			var url = "http://www.mysite.com".SetQueryParams(GetQueryParamNames());
+			Assert.AreEqual("http://www.mysite.com?abc&123&456", url.ToString());
+		}
+
+		[Test]
+		public void can_set_multiple_no_value_query_params_from_params() {
+			var url = "http://www.mysite.com".SetQueryParams("abc", "123", null, "456");
+			Assert.AreEqual("http://www.mysite.com?abc&123&456", url.ToString());
+		}
+
+		[Test]
+		public void can_remove_query_param() {
+			var url = "http://www.mysite.com/more?x=1&y=2".RemoveQueryParam("x");
+			Assert.AreEqual("http://www.mysite.com/more?y=2", url.ToString());
+		}
+
+		[Test]
+		public void can_remove_query_params_by_multi_args() {
+			var url = "http://www.mysite.com/more?x=1&y=2".RemoveQueryParams("x", "y");
+			Assert.AreEqual("http://www.mysite.com/more", url.ToString());
+		}
+
+		[Test]
+		public void can_remove_query_params_by_enumerable() {
+			var url = "http://www.mysite.com/more?x=1&y=2&z=3".RemoveQueryParams(new[] { "x", "z" });
+			Assert.AreEqual("http://www.mysite.com/more?y=2", url.ToString());
+		}
+
+		[Test]
+		public void removing_nonexisting_query_params_is_ignored() {
+			var url = "http://www.mysite.com/more".RemoveQueryParams("x", "y");
+			Assert.AreEqual("http://www.mysite.com/more", url.ToString());
+		}
+
+		[Test]
 		public void can_sort_query_params()
 		{
 			var url = new Url("http://www.mysite.com/more?z=1&y=2&x=3");
 			url.QueryParams.Sort((x, y) => x.Name.CompareTo(y.Name));
 			Assert.AreEqual("http://www.mysite.com/more?x=3&y=2&z=1", url.ToString());
+		}
+
+		[TestCase(NullValueHandling.Ignore, ExpectedResult = "http://www.mysite.com?y=2&x=1&z=foo")]
+		[TestCase(NullValueHandling.NameOnly, ExpectedResult = "http://www.mysite.com?y&x=1&z=foo")]
+		[TestCase(NullValueHandling.Remove, ExpectedResult = "http://www.mysite.com?x=1&z=foo")]
+		public string can_control_null_value_behavior_in_query_params(NullValueHandling nullValueHandling) {
+			return "http://www.mysite.com?y=2".SetQueryParams(new { x = 1, y = (string)null, z = "foo" }, nullValueHandling).ToString();
 		}
 
 		[Test]
@@ -145,104 +250,6 @@ namespace Flurl.Test
 			IEnumerable<string> segments = new[] { "/category/", "endpoint" };
 			var url = "http://www.mysite.com".AppendPathSegments(segments);
 			Assert.AreEqual("http://www.mysite.com/category/endpoint", url.ToString());
-		}
-
-		[Test]
-		public void can_add_query_param()
-		{
-			var url = "http://www.mysite.com".SetQueryParam("x", 1);
-			Assert.AreEqual("http://www.mysite.com?x=1", url.ToString());
-		}
-
-		[Test]
-		public void can_add_query_param_without_value()
-		{
-			var url = new Url("http://example.com?123456");
-			Assert.AreEqual("http://example.com", url.Path);
-			Assert.AreEqual(1, url.QueryParams.Count);
-			Assert.AreEqual(string.Empty, url.QueryParams["123456"]);
-		}
-
-		[Test]
-		public void can_change_query_param()
-		{
-			var url = "http://www.mysite.com?x=1".SetQueryParam("x", 2);
-			Assert.AreEqual("http://www.mysite.com?x=2", url.ToString());
-		}
-
-		[Test]
-		public void null_query_param_is_excluded()
-		{
-			var url = "http://www.mysite.com".SetQueryParam("x", null);
-			Assert.AreEqual("http://www.mysite.com", url.ToString());
-		}
-
-		[Test]
-		public void enumerable_query_param_is_split_into_multiple()
-		{
-			var url = "http://www.mysite.com".SetQueryParam("x", new[] { "a", "b", null, "c" });
-			Assert.AreEqual("http://www.mysite.com?x=a&x=b&x=c", url.ToString());
-		}
-
-		[Test]
-		public void can_add_multiple_query_params_from_anon_object()
-		{
-			var url = "http://www.mysite.com".SetQueryParams(new
-			{
-				x = 1,
-				y = 2,
-				z = new[] { 3, 4 },
-				exclude_me = (string)null
-			});
-			Assert.AreEqual("http://www.mysite.com?x=1&y=2&z=3&z=4", url.ToString());
-		}
-
-		[Test]
-		public void can_change_multiple_query_params_from_anon_object()
-		{
-			var url = "http://www.mysite.com?x=1&y=2&z=3".SetQueryParams(new
-			{
-				x = 8,
-				y = new[] { "a", "b" },
-				z = (int?)null
-			});
-			Assert.AreEqual("http://www.mysite.com?x=8&y=a&y=b", url.ToString());
-		}
-
-		[Test]
-		public void can_add_multiple_query_params_from_dictionary()
-		{
-			// let's challenge it a little with non-string keys
-			var url = "http://www.mysite.com".SetQueryParams(new Dictionary<int, string> { { 1, "x" }, { 2, "y" } });
-			Assert.AreEqual("http://www.mysite.com?1=x&2=y", url.ToString());
-		}
-
-		[Test]
-		public void can_remove_query_param()
-		{
-			var url = "http://www.mysite.com/more?x=1&y=2".RemoveQueryParam("x");
-			Assert.AreEqual("http://www.mysite.com/more?y=2", url.ToString());
-		}
-
-		[Test]
-		public void can_remove_query_params_by_multi_args()
-		{
-			var url = "http://www.mysite.com/more?x=1&y=2".RemoveQueryParams("x", "y");
-			Assert.AreEqual("http://www.mysite.com/more", url.ToString());
-		}
-
-		[Test]
-		public void can_remove_query_params_by_enumerable()
-		{
-			var url = "http://www.mysite.com/more?x=1&y=2&z=3".RemoveQueryParams(new[] { "x", "z" });
-			Assert.AreEqual("http://www.mysite.com/more?y=2", url.ToString());
-		}
-
-		[Test]
-		public void removing_nonexisting_query_params_is_ignored()
-		{
-			var url = "http://www.mysite.com/more".RemoveQueryParams("x", "y");
-			Assert.AreEqual("http://www.mysite.com/more", url.ToString());
 		}
 
 #if !NETCOREAPP1_0
@@ -405,7 +412,5 @@ namespace Flurl.Test
 			Assert.AreEqual(fragment, url.Fragment);
 			Assert.AreEqual(full, url.ToString());
 		}
-
-		//public void QueryParams
 	}
 }

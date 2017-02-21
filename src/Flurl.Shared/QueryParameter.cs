@@ -15,20 +15,12 @@ namespace Flurl
 		private string _encodedValue;
 
 		/// <summary>
-		/// Creates a new instance of a query parameter.
-		/// </summary>
-		public QueryParameter(string name, object value) {
-			Name = name;
-			Value = value;
-		}
-
-		/// <summary>
 		/// Creates a new instance of a query parameter. Allows specifying whether string value provided has
 		/// already been URL-encoded.
 		/// </summary>
-		public QueryParameter(string name, string value, bool isEncoded) {
+		public QueryParameter(string name, object value, bool isEncoded = false) {
 			Name = name;
-			if (isEncoded) {
+			if (isEncoded && value != null) {
 				_encodedValue = value as string;
 				_value = Url.DecodeQueryParamValue(_encodedValue);
 			}
@@ -45,11 +37,9 @@ namespace Flurl
 		/// <summary>
 		/// The value (right side) of the query parameter.
 		/// </summary>
-		public object Value
-		{
+		public object Value {
 			get { return _value; }
-			set
-			{
+			set {
 				_value = value;
 				_encodedValue = null;
 			}
@@ -61,17 +51,21 @@ namespace Flurl
 		/// <param name="encodeSpaceAsPlus">Indicates whether to encode space characters with "+" instead of "%20".</param>
 		/// <returns></returns>
 		public string ToString(bool encodeSpaceAsPlus) {
-			if (Value is IEnumerable && !(Value is string)) {
+			if (_encodedValue != null) {
+				return $"{Name}={_encodedValue}";
+			}
+			if (_value is IEnumerable && !(_value is string)) {
 				return string.Join("&",
-					from v in (Value as IEnumerable).Cast<object>()
-					where v != null
-					let encoded = Url.EncodeQueryParamValue(v, encodeSpaceAsPlus)
-					select $"{Name}={encoded}");
+					from v in (_value as IEnumerable).Cast<object>()
+					select BuildPair(Name, v, encodeSpaceAsPlus));
 			}
 			else {
-				var encoded = _encodedValue ?? Url.EncodeQueryParamValue(_value, encodeSpaceAsPlus);
-				return $"{Name}={encoded}";
+				return BuildPair(Name, Value, encodeSpaceAsPlus);
 			}
+		}
+
+		private static string BuildPair(string name, object value, bool encodeSpaceAsPlus) {
+			return (value == null) ? name : $"{name}={Url.EncodeQueryParamValue(value, encodeSpaceAsPlus)}";
 		}
 	}
 }

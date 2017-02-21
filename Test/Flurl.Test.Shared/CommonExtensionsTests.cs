@@ -12,11 +12,16 @@ namespace Flurl.Test
 		[Test]
 		public void can_parse_object_to_kv()
 		{
-			var kv = new { one = 1, two = 2, three = "foo" }.ToKeyValuePairs();
+			var kv = new {
+				one = 1,
+				two = "foo",
+				three = (string)null
+			}.ToKeyValuePairs();
+
 			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
 				{ "one", 1 },
-				{ "two", 2 },
-				{ "three", "foo" }
+				{ "two", "foo" },
+				{ "three", null }
 			}, kv);
 		}
 
@@ -25,14 +30,14 @@ namespace Flurl.Test
 		{
 			var kv = new Dictionary<string, object> {
 				{ "one", 1 },
-				{ "two", 2 },
-				{ "three", "foo" }
+				{ "two", "foo" },
+				{ "three", null }
 			}.ToKeyValuePairs();
 
 			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
 				{ "one", 1 },
-				{ "two", 2 },
-				{ "three", "foo" }
+				{ "two", "foo" },
+				{ "three", null }
 			}, kv);
 		}
 
@@ -41,14 +46,15 @@ namespace Flurl.Test
 		{
 			var kv = new[] {
 				new KeyValuePair<object, object>("one", 1),
-				new KeyValuePair<object, object>("two", 2),
-				new KeyValuePair<object, object>("three", "foo"),
+				new KeyValuePair<object, object>("two", "foo"),
+				new KeyValuePair<object, object>("three", null),
+				new KeyValuePair<object, object>(null, "four"),
 			}.ToKeyValuePairs();
 
 			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
 				{ "one", 1 },
-				{ "two", 2 },
-				{ "three", "foo" }
+				{ "two", "foo" },
+				{ "three", null }
 			}, kv);
 		}
 
@@ -59,16 +65,16 @@ namespace Flurl.Test
 			// a property called Key or Name and a property called Value
 			var kv = new object[] {
 				new { Key = "one", Value = 1 },
-				new { key = "two", value = 2 }, // lower-case should work too
+				new { key = "two", value = "foo" }, // lower-case should work too
 				new { Key = (string)null, Value = 3 }, // null keys should get skipped
-				new { Name = "three", Value = "foo" },
+				new { Name = "three", Value = (string)null },
 				new { name = "four", value = "bar" } // lower-case should work too
-			}.ToKeyValuePairs();
+			}.ToKeyValuePairs().ToList();
 
 			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
 				{ "one", 1 },
-				{ "two", 2 },
-				{ "three", "foo" },
+				{ "two", "foo" },
+				{ "three", null },
 				{ "four", "bar" }
 			}, kv);
 		}
@@ -76,12 +82,12 @@ namespace Flurl.Test
 		[Test]
 		public void can_parse_string_to_kv()
 		{
-			var kv = "one=1&two=2&three=foo".ToKeyValuePairs();
+			var kv = "one=1&two=foo&three".ToKeyValuePairs();
 
 			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
 				{ "one", "1" },
-				{ "two", "2" },
-				{ "three", "foo" }
+				{ "two", "foo" },
+				{ "three", null }
 			}, kv);
 		}
 
@@ -90,16 +96,6 @@ namespace Flurl.Test
 		{
 			object obj = null;
 			Assert.Throws<ArgumentNullException>(() => obj.ToKeyValuePairs());
-		}
-
-		[Test]
-		public void cannot_parse_unknown_collection_to_kv()
-		{
-			var kv = new object[] {
-				new { Key = "one", Value = 1 },
-				new { Foo = "two", value = 2 }
-			};
-			Assert.Throws<ArgumentException>(() => kv.ToKeyValuePairs().ToList());// need to force it to iterate for the exception to be thrown
 		}
 
 		[Test]

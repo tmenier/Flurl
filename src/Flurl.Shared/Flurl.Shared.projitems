@@ -9,6 +9,7 @@
     <Import_RootNamespace>Flurl</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)NullValueHandling.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QueryParamCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QueryParameter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StringExtensions.cs" />

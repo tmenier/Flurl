@@ -72,7 +72,7 @@ namespace Flurl.Util
 
 		private static IEnumerable<KeyValuePair<string, object>> ObjectToKV(object obj) {
 			return from prop in obj.GetType().GetProperties() 
-				   let val = prop.GetValue(obj, null) 
+				   let val = prop.GetValue(obj, null)
 				   select new KeyValuePair<string, object>(prop.Name, val);
 		}
 
@@ -82,21 +82,24 @@ namespace Flurl.Util
 				if (item == null)
 					continue;
 
+				string key;
+				object val;
+
 				var type = item.GetType();
 				var keyProp = type.GetProperty("Key") ?? type.GetProperty("key") ?? type.GetProperty("Name") ?? type.GetProperty("name");
-				if (keyProp == null)
-					throw new ArgumentException("Cannot parse " + type.Name + " to key-value pair. Type must contain a property called 'Key' or 'Name'.");
-
 				var valProp = type.GetProperty("Value") ?? type.GetProperty("value");
-				if (valProp == null)
-					throw new ArgumentException("Cannot parse " + type.Name + " to key-value pair. Type must contain a property called 'Value'.");
 
-				var key = keyProp.GetValue(item, null);
-				if (key == null)
-					continue;
+				if (keyProp != null && valProp != null) {
+					key = keyProp.GetValue(item, null)?.ToInvariantString();
+					val = valProp.GetValue(item, null);
+				}
+				else {
+					key = item.ToInvariantString();
+					val = null;
+				}
 
-				var val = valProp.GetValue(item, null);
-				yield return new KeyValuePair<string, object>(key.ToInvariantString(), val);
+				if (key != null)
+					yield return new KeyValuePair<string, object>(key, val);
 			}
 		}
 	}

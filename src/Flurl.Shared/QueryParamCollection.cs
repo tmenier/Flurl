@@ -72,6 +72,10 @@ namespace Flurl
 				return all;
 			}
 			set {
+				// This covers some complex edge cases involving multiple values of the same name.
+				// example: x has values at positions 2 and 4 in the query string, then we set x to
+				// an array of 4 values. We want to replace the values at positions 2 and 4 with the
+				// first 2 values of the new array, then append the remaining 2 values to the end.
 				var parameters = this.Where(p => p.Name == name).ToArray();
 				var values = (value is IEnumerable && !(value is string)) ?
 					(value as IEnumerable).Cast<object>().ToArray() :
@@ -89,12 +93,10 @@ namespace Flurl
 					else if (i < parameters.Length)
 						Remove(parameters[i]);
 					else if (i < values.Length) {
-						if (values[i] != null) {
-							if (values[i] is QueryParameter)
-								Add((QueryParameter)values[i]);
-							else
-								Add(name, values[i]);
-						}
+						if (values[i] is QueryParameter)
+							Add((QueryParameter)values[i]);
+						else
+							Add(name, values[i]);
 					}
 					else
 						break;
