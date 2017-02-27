@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using Flurl.Http.Configuration;
+using Flurl.Http.Content;
 
 namespace Flurl.Http
 {
@@ -40,9 +41,16 @@ namespace Flurl.Http
 		public HttpRequestMessage Request { get; }
 
 		/// <summary>
-		/// Captured request body. More reliably available than HttpRequestMessage.Content, which is a forward-only, read-once stream.
+		/// Captured request body. Available only if Request.Content is a Flurl.Http.Content.CapturedStringContent.
 		/// </summary>
-		public string RequestBody { get; set; }
+		public string RequestBody {
+			get {
+				var csc = Request.Content as CapturedStringContent;
+				if (csc == null)
+					throw new FlurlHttpException(this, "RequestBody is only available when Request.Content derives from Flurl.Http.Content.CapturedStringContent.", null);
+				return csc.Content;
+			}
+		}
 
 		/// <summary>
 		/// HttpResponseMessage associated with the call if the call completed, otherwise null.
