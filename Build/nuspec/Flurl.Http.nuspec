@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>1.1.1</version>
+		<version>1.1.2</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,6 +13,7 @@
 			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
 		</description>
 		<releaseNotes>
+1.1.2 - Minor bug fixes (github #159 &amp; #169), up'd Flurl dependency to 2.3.0
 1.1.1 - More query param assert variations (github #102), HttpCall.Url now a Flurl.Url instance
 1.1.0 - Parallel testing (github #67), better DI/IoC/mocking support (github #146), assert query params (github #102)
 1.0.3 - .NET Core 1.0.1, fixed assembly references (github #131)
@@ -49,18 +50,18 @@
 		<dependencies>
 			<group targetFramework="net45">
 				<dependency id="Newtonsoft.Json" version="9.0.1" />
-				<dependency id="Flurl" version="2.2.1" />
+				<dependency id="Flurl" version="2.3.0" />
 			</group>
 			<group targetFramework="net461">
 				<dependency id="Newtonsoft.Json" version="9.0.1" />
-				<dependency id="Flurl" version="2.2.1" />
+				<dependency id="Flurl" version="2.3.0" />
 				<dependency id="System.IO.FileSystem" version="4.0.1" />
 				<dependency id="System.Net.Http" version="4.1.0" />
 				<dependency id="System.Text.Encoding.CodePages" version="4.0.1" />
 			</group>  
 			<group targetFramework="monoandroid">
 				<dependency id="Newtonsoft.Json" version="9.0.1" />
-				<dependency id="Flurl" version="2.2.1" />
+				<dependency id="Flurl" version="2.3.0" />
 				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
 				<dependency id="Microsoft.Bcl.Build" version="1.0.21" />
 				<dependency id="Microsoft.Net.Http" version="2.2.29" />
@@ -68,7 +69,7 @@
 			</group>
 			<group targetFramework="monotouch">
 				<dependency id="Newtonsoft.Json" version="9.0.1" />
-				<dependency id="Flurl" version="2.2.1" />
+				<dependency id="Flurl" version="2.3.0" />
 				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
 				<dependency id="Microsoft.Bcl.Build" version="1.0.21" />
 				<dependency id="Microsoft.Net.Http" version="2.2.29" />
@@ -76,7 +77,7 @@
 			</group>
 			<group targetFramework="xamarin.ios">
 				<dependency id="Newtonsoft.Json" version="9.0.1" />
-				<dependency id="Flurl" version="2.2.1" />
+				<dependency id="Flurl" version="2.3.0" />
 				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
 				<dependency id="Microsoft.Bcl.Build" version="1.0.21" />
 				<dependency id="Microsoft.Net.Http" version="2.2.29" />
@@ -84,7 +85,7 @@
 			</group>
 			<group targetFramework="xamarin.mac">
 				<dependency id="Newtonsoft.Json" version="9.0.1" />
-				<dependency id="Flurl" version="2.2.1" />
+				<dependency id="Flurl" version="2.3.0" />
 				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
 				<dependency id="Microsoft.Bcl.Build" version="1.0.21" />
 				<dependency id="Microsoft.Net.Http" version="2.2.29" />
@@ -92,7 +93,7 @@
 			</group>
 			<group targetFramework="portable40-net45+sl5+win8+wp8+wpa81">
 				<dependency id="Newtonsoft.Json" version="9.0.1" />
-				<dependency id="Flurl" version="2.2.1" />
+				<dependency id="Flurl" version="2.3.0" />
 				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
 				<dependency id="Microsoft.Bcl.Build" version="1.0.21" />
 				<dependency id="Microsoft.Net.Http" version="2.2.29" />
@@ -100,11 +101,11 @@
 			</group>
 			<group targetFramework="uap10">
 				<dependency id="Newtonsoft.Json" version="9.0.1" />
-				<dependency id="Flurl" version="2.2.1" />
+				<dependency id="Flurl" version="2.3.0" />
 			</group>
 			<group targetFramework="netstandard1.4">
 				<dependency id="Newtonsoft.Json" version="9.0.1" />
-				<dependency id="Flurl" version="2.2.1" />
+				<dependency id="Flurl" version="2.3.0" />
 				<dependency id="System.IO.FileSystem" version="4.0.1" />
 				<dependency id="System.Net.Http" version="4.1.0" />
 				<dependency id="System.Text.Encoding.CodePages" version="4.0.1" />

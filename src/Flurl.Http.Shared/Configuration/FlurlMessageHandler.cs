@@ -25,10 +25,6 @@ namespace Flurl.Http.Configuration
 		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
 			var call = HttpCall.Get(request);
 
-			var stringContent = request.Content as CapturedStringContent;
-			if (stringContent != null)
-				call.RequestBody = stringContent.Content;
-
 			await FlurlHttp.RaiseEventAsync(request, FlurlEventType.BeforeCall).ConfigureAwait(false);
 			call.StartedUtc = DateTime.UtcNow;
 			try {

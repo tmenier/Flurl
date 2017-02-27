@@ -246,7 +246,7 @@ namespace Flurl.Http.Testing
 
 		private bool MatchesPattern(string textToCheck, string pattern) {
 			var regex = Regex.Escape(pattern).Replace("\\*", "(.*)");
-			return Regex.IsMatch(textToCheck, regex);
+			return Regex.IsMatch(textToCheck ?? "", regex);
 		}
 	}
 }
