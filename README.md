@@ -1,8 +1,8 @@
 #Flurl
 
 [![Build status](https://ci.appveyor.com/api/projects/status/hec8ioqg0j07ttg5/branch/master?svg=true)](https://ci.appveyor.com/project/kroniak/flurl/branch/master)
-[![NuGet](https://img.shields.io/nuget/v/Flurl.Http.svg?maxAge=3600)](https://www.nuget.org/packages/Flurl.Http/)
-[![MyGet PreRelease](https://img.shields.io/myget/flurl/vpre/Flurl.Http.svg?maxAge=3600)](https://www.myget.org/feed/flurl/package/nuget/Flurl.Http)
+[![Flurl](https://img.shields.io/nuget/v/Flurl.svg?maxAge=3600)](https://www.nuget.org/packages/Flurl/)
+[![Flurl.Http](https://img.shields.io/nuget/v/Flurl.Http.svg?maxAge=3600)](https://www.nuget.org/packages/Flurl.Http/)
 
 Flurl is a modern, fluent, asynchronous, testable, portable, buzzword-laden URL builder and HTTP client library.
 
