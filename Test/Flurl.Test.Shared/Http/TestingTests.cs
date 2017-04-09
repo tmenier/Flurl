@@ -183,7 +183,19 @@ namespace Flurl.Test.Http
 			}
 		}
 
-// parallel testing not supported in PCL
+		// https://github.com/tmenier/Flurl/issues/175
+		[Test]
+		public async Task can_deserialize_default_response_more_than_once() {
+			var resp = await "http://www.api.com".GetJsonAsync();
+			Assert.IsNull(resp);
+			// bug: couldn't deserialize here due to reading stream twice
+			resp = await "http://www.api.com".GetJsonAsync();
+			Assert.IsNull(resp);
+			resp = await "http://www.api.com".GetJsonAsync();
+			Assert.IsNull(resp);
+		}
+
+		// parallel testing not supported in PCL
 #if !PORTABLE
 		[Test]
 		public async Task can_test_in_parallel() {
