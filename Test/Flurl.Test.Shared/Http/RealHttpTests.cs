@@ -168,25 +168,6 @@ namespace Flurl.Test.Http
 			}
 		}
 
-		// https://github.com/tmenier/Flurl/pull/76
-		// quotes around charset value is technically legal but there's a bug in .NET we want to avoid: https://github.com/dotnet/corefx/issues/5014
-		[Test]
-		public async Task supports_quoted_charset() {
-			// Respond with header Content-Type: text/javascript; charset="UTF-8"
-			var url = "https://httpbin.org/response-headers?Content-Type=text/javascript;%20charset=%22UTF-8%22";
-
-			// confirm thart repsonse has quoted charset value
-			var resp = await url.GetAsync();
-			Assert.AreEqual("\"UTF-8\"", resp.Content.Headers.ContentType.CharSet);
-
-			// GetStringAsync is where we need to work around the .NET bug
-			var s = await url.GetStringAsync();
-			// not throwing should be enough, but do a little more for good measure..
-			s = s.Trim();
-			StringAssert.StartsWith("{", s);
-			StringAssert.EndsWith("}", s);
-		}
-
 		[Test]
 		public async Task can_handle_error() {
 			var handlerCalled = false;
