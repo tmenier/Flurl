@@ -149,11 +149,16 @@ namespace Flurl.Test.Http
 			try {
 				using (var stream = File.OpenRead(path2)) {
 					var resp = await "http://httpbin.org/post"
-						.PostMultipartAsync(content => content
-							.AddStringParts(new {a = 1, b = 2})
-							.AddString("DataField", "hello!")
-							.AddFile("File1", path1)
-							.AddFile("File2", stream, "foo.txt"))
+						.PostMultipartAsync(content => {
+							content
+								.AddStringParts(new { a = 1, b = 2 })
+								.AddString("DataField", "hello!")
+								.AddFile("File1", path1)
+								.AddFile("File2", stream, "foo.txt");
+
+							// hack to deal with #179, remove when this is fixed: https://github.com/kennethreitz/httpbin/issues/340
+							content.Headers.ContentLength = 735;
+						})
 						//.ReceiveString();
 						.ReceiveJson();
 					Assert.AreEqual("1", resp.form.a);
