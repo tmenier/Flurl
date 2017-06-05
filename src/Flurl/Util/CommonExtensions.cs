@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-#if NETSTANDARD1_4
+#if NETSTANDARD1_3
 using System.Reflection;
 #endif
 
@@ -48,13 +48,13 @@ namespace Flurl.Util
 			return obj.ToString();
 		}
 
-		/// <summary>
-		/// Splits at the first occurence of the given seperator.
-		/// </summary>
-		/// <param name="s">The string to split.</param>
-		/// <param name="separator">The separator to split on.</param>
-		/// <returns>Array of at most 2 strings. (1 if separator is not found.)</returns>
-		public static string[] SplitOnFirstOccurence(this string s, char separator) {
+        /// <summary>
+        /// Splits at the first occurence of the given seperator.
+        /// </summary>
+        /// <param name="s">The string to split.</param>
+        /// <param name="separator">The separator to split on.</param>
+        /// <returns>Array of at most 2 strings. (1 if separator is not found.)</returns>
+        public static string[] SplitOnFirstOccurence(this string s, char separator) {
 			// Needed because full PCL profile doesn't support Split(char[], int) (#119)
 			if (string.IsNullOrEmpty(s))
 				return new[] { s };
