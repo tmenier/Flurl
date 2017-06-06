@@ -1,3 +1,3 @@
-@set project=..\test\Flurl.Test.NETCore\
+@cd ..\test\Flurl.Test\
 
-@call dotnet test -c Release %project%
+@call dotnet test -c Release
