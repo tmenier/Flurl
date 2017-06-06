@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
+#if PORTABLE344
+using System.Net;
+#endif
 using Flurl.Util;
 
 namespace Flurl.Http
@@ -12,10 +12,7 @@ namespace Flurl.Http
 	/// </summary>
 	public static class CookieExtensions
 	{
-
-
-
-		/// <summary>
+        /// <summary>
 		/// Allows cookies to be sent and received in calls made with this client. Not necessary to call when setting cookies via WithCookie/WithCookies.
 		/// </summary>
 		public static IFlurlClient EnableCookies(this IFlurlClient client) {
