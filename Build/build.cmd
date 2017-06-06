@@ -28,6 +28,7 @@ exit /b 1
 
 @set project=..\src\Flurl.Http\
 
+@call dotnet restore -v m %project% 
 @call dotnet build -c Release %project%
 
 @if ERRORLEVEL 1 (
