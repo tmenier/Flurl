@@ -4,12 +4,8 @@ image: Visual Studio 2017
 
 configuration: Release
 
-build:
-  parallel: false
-  project: Flurl.sln 
-
-before_build:
-  - cmd: dotnet restore -v m
+build_scripts:
+  - cmd: msbuild /t:restore Flurl.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" && msbuild /t:pack Flurl.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 test_script:
   - cmd: call cmd /C "cd .\build & test.cmd"

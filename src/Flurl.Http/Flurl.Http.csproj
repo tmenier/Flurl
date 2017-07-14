@@ -93,7 +93,6 @@
     <PackageReference Include="Microsoft.Bcl.Build" Version="1.0.21" />
     <PackageReference Include="Microsoft.Net.Http" Version="2.2.29" />
     <PackageReference Include="PCLStorage" Version="1.0.2" />
-    <!--<PackageReference Include="Microsoft.NETCore.Portable.Compatibility" Version="1.0.1" />-->
   </ItemGroup>
 
   <ItemGroup>
