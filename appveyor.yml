@@ -1,15 +1,12 @@
 version: 1.0.0-{branch}-{build}
 
-image: Visual Studio 2017  
+image: Visual Studio 2017
 
-init:
-  - dotnet --version
+configuration: Release
 
-pull_requests:
-  do_not_increment_build_number: true
-
-build_script:
-  - cmd: call cmd /C "cd .\build & build.cmd"  
+build:
+  parallel: true
+  project: Flurl.sln 
 
 test_script:
   - cmd: call cmd /C "cd .\build & test.cmd"
