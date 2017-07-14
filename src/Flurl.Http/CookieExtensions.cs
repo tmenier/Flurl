@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Net;
-#if PORTABLE344
-using System.Net;
-#endif
 using Flurl.Util;
 
 namespace Flurl.Http

@@ -9,15 +9,6 @@ exit /b 1
 echo Restoring dependicies was successful.
 )
 
-@set project=..\src\Flurl\
-
-@call dotnet build -c Release %project%
-
-@if ERRORLEVEL 1 (
-echo Error! Build Flurl failed.
-exit /b 1
-)
-
 @set project=..\src\Flurl.Http.CodeGen\Flurl.Http.CodeGen.csproj
 
 @call dotnet run -c Release -p %project% ..\src\Flurl.Http\HttpExtensions.cs
@@ -28,7 +19,6 @@ exit /b 1
 
 @set project=..\src\Flurl.Http\
 
-@call dotnet restore -v m %project% 
 @call dotnet build -c Release %project%
 
 @if ERRORLEVEL 1 (

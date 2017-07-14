@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-#if NETSTANDARD1_3
+#if NETSTANDARD
 using System.Reflection;
 #endif
 
