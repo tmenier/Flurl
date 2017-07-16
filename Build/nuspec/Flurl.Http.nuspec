@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>Flurl.Http</id>
-		<version>1.1.2</version>
+		<version>1.1.3</version>
 		<title>Flurl.Http</title>
 		<authors>Todd Menier</authors>
 		<projectUrl>http://tmenier.github.io/Flurl</projectUrl>
@@ -13,6 +13,7 @@
 			A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.
 		</description>
 		<releaseNotes>
+1.1.3 - Minor fixes (github #175, #182, #186)
 1.1.2 - Minor bug fixes (github #159 &amp; #169), up'd Flurl dependency to 2.3.0
 1.1.1 - More query param assert variations (github #102), HttpCall.Url now a Flurl.Url instance
 1.1.0 - Parallel testing (github #67), better DI/IoC/mocking support (github #146), assert query params (github #102)
