@@ -1,11 +1,15 @@
 version: 1.0.0-{branch}-{build}
 
-image: Visual Studio 2017
+image: Visual Studio 2017  
 
-configuration: Release
+init:
+  - dotnet --version
+
+pull_requests:
+  do_not_increment_build_number: true
 
 build_script:
-  - cmd: msbuild /t:restore Flurl.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" && msbuild /t:pack Flurl.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cmd: call cmd /C "cd .\build & build.cmd"  
 
 test_script:
   - cmd: call cmd /C "cd .\build & test.cmd"
