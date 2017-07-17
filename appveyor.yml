@@ -1,11 +1,6 @@
 version: 1.0.0-{branch}-{build}
 
-branches:
-  only:
-    - master
-    - dev
-
-image: Visual Studio 2015  
+image: Visual Studio 2017  
 
 init:
   - dotnet --version
@@ -14,7 +9,7 @@ pull_requests:
   do_not_increment_build_number: true
 
 build_script:
-  - cmd: call cmd /C "cd .\build & pack.flurl.cmd & pack.flurl.http.cmd"  
+  - cmd: call cmd /C "cd .\build & build.cmd"  
 
 test_script:
   - cmd: call cmd /C "cd .\build & test.cmd"
