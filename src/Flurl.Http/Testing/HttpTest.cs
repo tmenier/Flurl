@@ -19,11 +19,6 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		public static HttpTest Current => GetCurrentTest();
 
-		private static readonly HttpResponseMessage EmptyResponse = new HttpResponseMessage {
-			StatusCode = HttpStatusCode.OK,
-			Content = new StringContent("")
-		};
-
 	    /// <summary>
 	    /// Initializes a new instance of the <see cref="HttpTest"/> class.
 	    /// </summary>
@@ -100,7 +95,10 @@ namespace Flurl.Http.Testing
 		public Queue<HttpResponseMessage> ResponseQueue { get; set; }
 
 		internal HttpResponseMessage GetNextResponse() {
-			return ResponseQueue.Any() ? ResponseQueue.Dequeue() : EmptyResponse;
+			return ResponseQueue.Any() ? ResponseQueue.Dequeue() : new HttpResponseMessage {
+				StatusCode = HttpStatusCode.OK,
+				Content = new StringContent("")
+			};
 		}
 
 		/// <summary>

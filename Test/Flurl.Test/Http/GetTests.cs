@@ -137,7 +137,20 @@ namespace Flurl.Test.Http
             Assert.IsNull(data);
         }
 
-        private class TestData
+		// https://github.com/tmenier/Flurl/pull/76
+		// quotes around charset value is technically legal but there's a bug in .NET we want to avoid: https://github.com/dotnet/corefx/issues/5014
+		[Test]
+		public async Task can_get_string_with_quoted_charset_header() {
+			var content = new StringContent("foo");
+			content.Headers.Clear();
+			content.Headers.Add("Content-Type", "text/javascript; charset=\"UTF-8\"");
+			HttpTest.RespondWith(content);
+
+			var resp = await "http://api.com".GetStringAsync(); // without StripCharsetQuotes, this fails
+			Assert.AreEqual("foo", resp);
+		}
+
+		private class TestData
 		{
 			public int id { get; set; }
 			public string name { get; set; }

@@ -14,6 +14,11 @@ namespace Flurl.Http.Configuration
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlMessageHandler"/> class.
 		/// </summary>
+		public FlurlMessageHandler() { }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlMessageHandler"/> class with a specific inner handler.
+		/// </summary>
 		/// <param name="innerHandler">The inner handler.</param>
 		public FlurlMessageHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
 

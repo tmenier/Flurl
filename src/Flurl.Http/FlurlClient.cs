@@ -17,7 +17,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Creates a copy of this FlurlClient with a shared instance of HttpClient and HttpMessageHandler
 		/// </summary>
-		FlurlClient Clone();
+		IFlurlClient Clone();
 
 		/// <summary>
 		/// Gets or sets the FlurlHttpSettings object used by this client.
@@ -116,7 +116,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Creates a copy of this FlurlClient with a shared instance of HttpClient and HttpMessageHandler
 		/// </summary>
-		public FlurlClient Clone() {
+		public IFlurlClient Clone() {
 			return new FlurlClient {
 				_httpClient = _httpClient,
 				_httpMessageHandler = _httpMessageHandler,
