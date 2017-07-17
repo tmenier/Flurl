@@ -14,6 +14,7 @@
     <PackageTags>httpclient rest json http fluent portable url uri tdd assert async</PackageTags>
     <PackageReleaseNotes>
       1.2.0 - Migrate to VS2017 csproj, up'd Flurl dependency to 2.4.0
+      1.1.3 - Minor fixes (github #175, #182, #186)
       1.1.2 - Minor bug fixes (github #159 &amp; #169), up'd Flurl dependency to 2.3.0
       1.1.1 - More query param assert variations (github #102), HttpCall.Url now a Flurl.Url instance
       1.1.0 - Parallel testing (github #67), better DI/IoC/mocking support (github #146), assert query params (github #102)
