@@ -66,6 +66,5 @@
       <Name>PackageTester.PCL</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="..\PackageTester.Shared\PackageTester.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

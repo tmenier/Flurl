@@ -29,7 +29,7 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PackageTester.Shared", "Pac
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageTester.NET461", "PackageTesters\PackageTester.NET461\PackageTester.NET461.csproj", "{84FB572A-8B77-4B09-B825-2A240BCE1B7A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageTester.NETCore", "PackageTesters\PackageTester.NETCore\PackageTester.NETCore.csproj", "{0231607B-9CA3-4277-9F19-9925694D22E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTester.NETCore", "PackageTesters\PackageTester.NETCore\PackageTester.NETCore.csproj", "{0231607B-9CA3-4277-9F19-9925694D22E0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageTester.NET45", "PackageTesters\PackageTester.NET45\PackageTester.NET45.csproj", "{AA8792B6-E0FA-46BA-BA03-C7971745F577}"
 EndProject
@@ -39,7 +39,6 @@ Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{7018b9e0-ad5b-42e4-ad35-59f324ed8e56}*SharedItemsImports = 4
 		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{84fb572a-8b77-4b09-b825-2a240bce1b7a}*SharedItemsImports = 4
-		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{aa8792b6-e0fa-46ba-ba03-c7971745f577}*SharedItemsImports = 4
 		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{d4717aa7-5549-4bad-81c5-406844a12990}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
