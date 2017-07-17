@@ -47,6 +47,7 @@
       0.2.0 - Added .NET 4.5 specific version with fewer dependencies.
       0.1.3 - Added support for HEAD requests via HeadAsync (thanks to @benb1n).
     </PackageReleaseNotes>
+	  <IncludeProjectPriFile>false</IncludeProjectPriFile>
   </PropertyGroup>
 
   <PropertyGroup>

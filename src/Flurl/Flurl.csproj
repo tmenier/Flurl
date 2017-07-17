@@ -37,6 +37,7 @@
       0.2.1 - Fixed a couple string extensions whose names were inconsistent with their Flurl.Url equivalent.
       0.2.0 - Added PCL support.
     </PackageReleaseNotes>
+	  <IncludeProjectPriFile>false</IncludeProjectPriFile>
   </PropertyGroup>
 
   <PropertyGroup>
