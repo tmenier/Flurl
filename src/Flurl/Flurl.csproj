@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net40;netstandard1.3;portable-net40+win8+wpa81+wp8+sl5</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>2.4.0</Version>
+    <Version>2.4.0-pre</Version>
     <Authors>Todd Menier</Authors>
     <Description>A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.</Description>
     <PackageProjectUrl>http://tmenier.github.io/Flurl</PackageProjectUrl>
@@ -13,7 +13,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>fluent portable url uri querystring builder</PackageTags>
     <PackageReleaseNotes>
-      2.4.0 - Added NET40 target and fix github #176
+      2.4.0 - Up'd solution to VS2017, platform targeting fixes (github #176)
       2.3.0 - First-class support for name-only query parameters (github #164), NullValueHandling config enum
       2.2.1 - Fix net461 target (github #128)
       2.2.0 - Url.Combine enhancements, broader PCL support https://github.com/tmenier/Flurl/releases/tag/Flurl.2.2.0
