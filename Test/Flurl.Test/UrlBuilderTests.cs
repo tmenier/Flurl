@@ -252,7 +252,7 @@ namespace Flurl.Test
 			Assert.AreEqual("http://www.mysite.com/category/endpoint", url.ToString());
 		}
 
-#if !NETCOREAPP1_0
+#if !NETCOREAPP1_1
 		[Test]
 		public void url_ToString_uses_invariant_culture()
 		{
