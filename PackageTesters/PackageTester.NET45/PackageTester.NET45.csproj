@@ -50,7 +50,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Net45Tester.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup>

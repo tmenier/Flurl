@@ -52,7 +52,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Net461Tester.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup>
