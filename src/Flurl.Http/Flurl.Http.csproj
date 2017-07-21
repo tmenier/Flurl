@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net45;netstandard1.3;portable-net45+win8+wpa81+wp8</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.2.0-pre</Version>
+    <Version>1.2.0</Version>
     <Authors>Todd Menier</Authors>
     <Description>A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.</Description>
     <PackageProjectUrl>http://tmenier.github.io/Flurl</PackageProjectUrl>
@@ -61,7 +61,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="Flurl" Version="2.4.0-pre" />
+    <PackageReference Include="Flurl" Version="2.4.0" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
