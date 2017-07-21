@@ -30,20 +30,6 @@ namespace PackageTester
 				}
 			});
 
-			// Reproduce https://github.com/tmenier/Flurl/issues/128
-			await Test("Testing net461 issue (#128)...", async () => {
-				using (var test = new HttpTest()) {
-					test.RespondWithJson(new TestResponse { TestString = "Test string" });
-
-					var fake = await new Url("http://www.google.com")
-						.WithBasicAuth("test_username", "test_secret")
-						.PostUrlEncodedAsync(new { test = "" })
-						.ReceiveJson<TestResponse>();
-
-					Assert(fake.TestString == "Test string", $"Fake response doesn't look right: {fake.TestString}");
-				}
-			});
-
 			await Test("Testing file download...", async () => {
 				var path = "c:\\google.txt";
 				if (File.Exists(path)) File.Delete(path);
