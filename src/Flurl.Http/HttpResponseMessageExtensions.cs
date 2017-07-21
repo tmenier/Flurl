@@ -65,7 +65,7 @@ namespace Flurl.Http
 		/// <example>s = await url.PostAsync(data).ReceiveString()</example>
 		public static async Task<string> ReceiveString(this Task<HttpResponseMessage> response) {
 #if NETSTANDARD1_3
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 #endif
 			var resp = await response.ConfigureAwait(false);
 			if (resp == null) return null;

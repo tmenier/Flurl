@@ -39,13 +39,13 @@ namespace Flurl.Util
 
 #if !NETSTANDARD1_0
             var c = obj as IConvertible;
-			if (c != null) 
-				return c.ToString(CultureInfo.InvariantCulture);
+            if (c != null) 
+                return c.ToString(CultureInfo.InvariantCulture);
 #endif
             var f = obj as IFormattable;
             if (f != null)
                 return f.ToString(null, CultureInfo.InvariantCulture);
-
+            
             return obj.ToString();
         }
 

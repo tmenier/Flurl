@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 
 namespace Flurl.Http.Content
 {
-    /// <summary>
-    /// Represents HTTP content based on a local file. Typically used with PostMultipartAsync for uploading files.
-    /// </summary>
-    public class FileContent : HttpContent
+	/// <summary>
+	/// Represents HTTP content based on a local file. Typically used with PostMultipartAsync for uploading files.
+	/// </summary>
+	public class FileContent : HttpContent
 	{
 		/// <summary>
 		/// The local file path.
@@ -27,24 +27,24 @@ namespace Flurl.Http.Content
 			_bufferSize = bufferSize;
 		}
 
-        /// <summary>
-        /// Serializes to stream asynchronous.
-        /// </summary>
-        /// <param name="stream">The stream.</param>
-        /// <param name="context">The context.</param>
-        /// <returns></returns>
-        protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context) {
+		/// <summary>
+		/// Serializes to stream asynchronous.
+		/// </summary>
+		/// <param name="stream">The stream.</param>
+		/// <param name="context">The context.</param>
+		/// <returns></returns>
+		protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context) {
 			using (var source = await FileUtil.OpenReadAsync(Path, _bufferSize).ConfigureAwait(false)) {
 				await source.CopyToAsync(stream, _bufferSize).ConfigureAwait(false);
 			}
 		}
 
-        /// <summary>
-        /// Tries the length of the compute.
-        /// </summary>
-        /// <param name="length">The length.</param>
-        /// <returns></returns>
-        protected override bool TryComputeLength(out long length) {
+		/// <summary>
+		/// Tries the length of the compute.
+		/// </summary>
+		/// <param name="length">The length.</param>
+		/// <returns></returns>
+		protected override bool TryComputeLength(out long length) {
 			length = -1;
 			return false;
 		}

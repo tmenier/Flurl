@@ -156,5 +156,5 @@ namespace Flurl.Http.Testing
 		private static void SetCurrentTest(HttpTest test) => _test = test;
 		private static HttpTest GetCurrentTest() => _test;
 #endif
-    }
+	}
 }
