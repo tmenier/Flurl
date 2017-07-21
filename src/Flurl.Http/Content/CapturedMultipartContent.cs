@@ -109,7 +109,6 @@ namespace Flurl.Http.Content
 			return AddInternal(name, content, fileName);
 		}
 
-#if !NETSTANDARD1_1
         /// <summary>
         /// Adds a file to the multipart request from a local path.
         /// </summary>
@@ -125,7 +124,7 @@ namespace Flurl.Http.Content
 				content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
 			return AddInternal(name, content, fileName);
 		}
-#endif
+
         private CapturedMultipartContent AddInternal(string name, HttpContent content, string fileName) {
 			if (string.IsNullOrWhiteSpace(name))
 				throw new ArgumentException("name must not be empty", nameof(name));

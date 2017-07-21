@@ -49,7 +49,7 @@
       0.2.0 - Added .NET 4.5 specific version with fewer dependencies.
       0.1.3 - Added support for HEAD requests via HeadAsync (thanks to @benb1n).
     </PackageReleaseNotes>
-	  <IncludeProjectPriFile>false</IncludeProjectPriFile>
+    <IncludeProjectPriFile>false</IncludeProjectPriFile>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -67,14 +67,17 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
-    <PackageReference Include="System.Net.Http" Version="4.3.2" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
-    <PackageReference Include="System.Net.Http" Version="4.3.2" />
+    <PackageReference Include="PCLStorage" Version="1.0.2" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <PackageTargetFallback Condition="'$(TargetFramework)'=='netstandard1.1'">portable-net45+win8+wp8</PackageTargetFallback>
+  </PropertyGroup>
+  
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
     <Reference Include="System.Net.Http" />
   </ItemGroup>

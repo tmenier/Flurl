@@ -2,7 +2,6 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-#if !NETSTANDARD1_1
 namespace Flurl.Http
 {
 	/// <summary>
@@ -69,4 +68,3 @@ namespace Flurl.Http
 		}
 	}
 }
-#endif

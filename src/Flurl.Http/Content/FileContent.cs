@@ -3,7 +3,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-#if !NETSTANDARD1_1
 namespace Flurl.Http.Content
 {
     /// <summary>
@@ -51,4 +50,3 @@ namespace Flurl.Http.Content
 		}
 	}
 }
-#endif
