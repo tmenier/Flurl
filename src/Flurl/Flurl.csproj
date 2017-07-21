@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net40;netstandard1.3;portable-net40+win8+wpa81+wp8+sl5</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>2.4.0-pre</Version>
+    <Version>2.4.0</Version>
     <Authors>Todd Menier</Authors>
     <Description>A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.</Description>
     <PackageProjectUrl>http://tmenier.github.io/Flurl</PackageProjectUrl>

@@ -5,10 +5,10 @@
     <TargetFramework>netcoreapp1.1</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Flurl.Http" Version="1.1.2" />
-  </ItemGroup>
-
   <Import Project="..\PackageTester.Shared\PackageTester.Shared.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <PackageReference Include="Flurl.Http" Version="1.2.0-pre" />
+  </ItemGroup>
 
 </Project>
