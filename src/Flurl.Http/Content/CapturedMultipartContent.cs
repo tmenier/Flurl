@@ -109,23 +109,24 @@ namespace Flurl.Http.Content
 			return AddInternal(name, content, fileName);
 		}
 
-		/// <summary>
-		/// Adds a file to the multipart request from a local path.
-		/// </summary>
-		/// <param name="name">The control name of the part.</param>
-		/// <param name="path">The local path to the file.</param>
-		/// <param name="mediaType">The media type of the file.</param>
-		/// <param name="bufferSize">The buffer size of the stream upload in bytes. Defaults to 4096.</param>
-		/// <returns>This CapturedMultipartContent instance (supports method chaining).</returns>
-		public CapturedMultipartContent AddFile(string name, string path, string mediaType = null, int bufferSize = 4096) {
+#if !NETSTANDARD1_1
+        /// <summary>
+        /// Adds a file to the multipart request from a local path.
+        /// </summary>
+        /// <param name="name">The control name of the part.</param>
+        /// <param name="path">The local path to the file.</param>
+        /// <param name="mediaType">The media type of the file.</param>
+        /// <param name="bufferSize">The buffer size of the stream upload in bytes. Defaults to 4096.</param>
+        /// <returns>This CapturedMultipartContent instance (supports method chaining).</returns>
+        public CapturedMultipartContent AddFile(string name, string path, string mediaType = null, int bufferSize = 4096) {
 			var fileName = FileUtil.GetFileName(path);
 			var content = new FileContent(path, bufferSize);
 			if (mediaType != null)
 				content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
 			return AddInternal(name, content, fileName);
 		}
-
-		private CapturedMultipartContent AddInternal(string name, HttpContent content, string fileName) {
+#endif
+        private CapturedMultipartContent AddInternal(string name, HttpContent content, string fileName) {
 			if (string.IsNullOrWhiteSpace(name))
 				throw new ArgumentException("name must not be empty", nameof(name));
 

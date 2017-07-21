@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 
+#if !NETSTANDARD1_1
 namespace Flurl.Http
 {
 	internal static class FileUtil
@@ -13,7 +14,7 @@ namespace Flurl.Http
 			return Path.Combine(paths);
 		}
 
-		internal static Task<Stream> OpenReadAsync(string path, int bufferSize) {
+        internal static Task<Stream> OpenReadAsync(string path, int bufferSize) {
 			return Task.FromResult<Stream>(new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync: true));
 		}
 
@@ -22,5 +23,6 @@ namespace Flurl.Http
 			var filePath = Path.Combine(folderPath, fileName);
 			return Task.FromResult<Stream>(new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, useAsync: true));
 		}
-	}
+    }
 }
+#endif
