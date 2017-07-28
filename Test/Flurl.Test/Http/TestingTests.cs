@@ -196,7 +196,7 @@ namespace Flurl.Test.Http
 		}
 
 		// parallel testing not supported in PCL
-#if !PORTABLE
+
 		[Test]
 		public async Task can_test_in_parallel() {
 			await Task.WhenAll(
@@ -206,7 +206,6 @@ namespace Flurl.Test.Http
 				CallAndAssertCountAsync(4),
 				CallAndAssertCountAsync(6));
 		}
-#endif
 
 		private async Task CallAndAssertCountAsync(int calls) {
 			using (var test = new HttpTest()) {
