@@ -11,6 +11,7 @@ namespace Flurl.Http
 	public static class FlurlHttp
 	{
 		private static readonly object _configLock = new object();
+		private static readonly Task _completedTask = Task.FromResult(0);
 
 		private static Lazy<FlurlHttpSettings> _settings = 
 			new Lazy<FlurlHttpSettings>(() => new FlurlHttpSettings());
@@ -41,7 +42,7 @@ namespace Flurl.Http
 			var settings = call?.Settings;
 
 			if (settings == null)
-				return NoOpTask.Instance;
+				return _completedTask;
 
 			switch (eventType) {
 				case FlurlEventType.BeforeCall:
@@ -51,7 +52,7 @@ namespace Flurl.Http
 				case FlurlEventType.OnError:
 					return HandleEventAsync(settings.OnError, settings.OnErrorAsync, call);
 				default:
-					return NoOpTask.Instance;
+					return _completedTask;
 			}
 		}
 
@@ -60,7 +61,7 @@ namespace Flurl.Http
 				syncHandler(call);
 			if (asyncHandler != null)
 				return asyncHandler(call);
-			return NoOpTask.Instance;
+			return _completedTask;
 		}
 	}
 
