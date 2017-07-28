@@ -30,5 +30,21 @@ namespace Flurl.Test.Http
 				}
 			}
 		}
+
+		[Test]
+		public void clone_default_shares_settings() {
+			var client = new FlurlClient();
+			var clone = client.Clone();
+			Assert.AreNotSame(client, clone);
+			Assert.AreSame(client.Settings, clone.Settings);
+		}
+
+		[Test]
+		public void clone_configure_copies_settings() {
+			var client = new FlurlClient();
+			var clone = client.Clone(settings => { });
+			Assert.AreNotSame(client, clone);
+			Assert.AreNotSame(client.Settings, clone.Settings);
+		}
 	}
 }

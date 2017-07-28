@@ -17,7 +17,8 @@ namespace Flurl.Http
 		/// <summary>
 		/// Creates a copy of this FlurlClient with a shared instance of HttpClient and HttpMessageHandler
 		/// </summary>
-		IFlurlClient Clone();
+		/// <param name="configure">Action allowing you to override copied settings inline. Optional.</param>
+		IFlurlClient Clone(Action<FlurlHttpSettings> configure = null);
 
 		/// <summary>
 		/// Gets or sets the FlurlHttpSettings object used by this client.
@@ -116,12 +117,19 @@ namespace Flurl.Http
 		/// <summary>
 		/// Creates a copy of this FlurlClient with a shared instance of HttpClient and HttpMessageHandler
 		/// </summary>
-		public IFlurlClient Clone() {
+		/// <param name="configure">Action allowing you to override copied settings inline. Optional.</param>
+		public IFlurlClient Clone(Action<FlurlHttpSettings> configure = null)
+		{
+			var settings = Settings;
+			if (configure != null) {
+				settings = Settings.Clone();
+				configure(settings);
+			}
 			return new FlurlClient {
 				_httpClient = _httpClient,
 				_httpMessageHandler = _httpMessageHandler,
 				_parent = this,
-				Settings = Settings,
+				Settings = settings,
 				Url = Url,
 				Cookies = Cookies
 			};
