@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flurl", "src\Flurl\Flurl.csproj", "{117B6C6E-53F9-45AE-9439-F4FB7E21B116}"
 EndProject
@@ -33,12 +33,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTester.NETCore", "Pa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageTester.NET45", "PackageTesters\PackageTester.NET45\PackageTester.NET45.csproj", "{AA8792B6-E0FA-46BA-BA03-C7971745F577}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageTester.PCL", "PackageTesters\PackageTester.PCL\PackageTester.PCL.csproj", "{7018B9E0-AD5B-42E4-AD35-59F324ED8E56}"
-EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{7018b9e0-ad5b-42e4-ad35-59f324ed8e56}*SharedItemsImports = 4
 		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{84fb572a-8b77-4b09-b825-2a240bce1b7a}*SharedItemsImports = 4
+		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{aa8792b6-e0fa-46ba-ba03-c7971745f577}*SharedItemsImports = 4
 		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{d4717aa7-5549-4bad-81c5-406844a12990}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -74,10 +72,6 @@ Global
 		{AA8792B6-E0FA-46BA-BA03-C7971745F577}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA8792B6-E0FA-46BA-BA03-C7971745F577}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA8792B6-E0FA-46BA-BA03-C7971745F577}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7018B9E0-AD5B-42E4-AD35-59F324ED8E56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7018B9E0-AD5B-42E4-AD35-59F324ED8E56}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7018B9E0-AD5B-42E4-AD35-59F324ED8E56}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7018B9E0-AD5B-42E4-AD35-59F324ED8E56}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,6 +85,5 @@ Global
 		{84FB572A-8B77-4B09-B825-2A240BCE1B7A} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
 		{0231607B-9CA3-4277-9F19-9925694D22E0} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
 		{AA8792B6-E0FA-46BA-BA03-C7971745F577} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
-		{7018B9E0-AD5B-42E4-AD35-59F324ED8E56} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
 	EndGlobalSection
 EndGlobal

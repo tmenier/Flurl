@@ -1,12 +1,14 @@
 ﻿using System.IO;
+#if NETSTANDARD1_1
 using System.Linq;
+#endif
 using System.Threading.Tasks;
 
 namespace Flurl.Http
 {
 	internal static class FileUtil
 	{
-#if PORTABLE
+#if NETSTANDARD1_1
 		internal static string GetFileName(string path) {
 			return path?.Split(PCLStorage.PortablePath.DirectorySeparatorChar).Last();
 		}
