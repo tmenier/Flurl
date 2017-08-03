@@ -36,7 +36,17 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("2", resp.cookies.y);
 		}
 
-		[Test]
+        [Test]
+        public async Task can_set_request_cookies_with_a_delegating_handler()
+        {
+            var resp = await "http://httpbin.org/cookies".ConfigureClient(settings=> settings.HttpClientFactory = new DelegatingHandlerHttpClientFactory()).WithCookies(new { x = 1, y = 2 }).GetJsonAsync();
+
+            // httpbin returns json representation of cookies that were set on the server.
+            Assert.AreEqual("1", resp.cookies.x);
+            Assert.AreEqual("2", resp.cookies.y);
+        }
+
+        [Test]
 		public async Task can_set_cookies_before_setting_url() {
 			var fc = new FlurlClient().WithCookie("z", "999");
 			var resp = await fc.WithUrl("http://httpbin.org/cookies").GetJsonAsync();
@@ -50,7 +60,15 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("999", fc.Cookies["z"].Value);
 		}
 
-		[Test]
+        [Test]
+        public async Task can_get_response_cookies_with_a_delegating_handler()
+        {
+            var fc = new FlurlClient().ConfigureClient(settings=> settings.HttpClientFactory = new DelegatingHandlerHttpClientFactory()).EnableCookies();
+            await fc.WithUrl("https://httpbin.org/cookies/set?z=999").HeadAsync();
+            Assert.AreEqual("999", fc.Cookies["z"].Value);
+        }
+
+        [Test]
 		public async Task cant_persist_cookies_without_resuing_client() {
 			var fc = "http://httpbin.org/cookies".WithCookie("z", 999);
 			// cookie should be set
