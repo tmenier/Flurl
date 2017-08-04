@@ -10,9 +10,7 @@ using NUnit.Framework;
 namespace Flurl.Test.Http
 {
 	/// <summary>
-	/// Most HTTP tests in this project are with Flurl in fake mode. These are some real ones, mostly using the handy site 
-	/// http://httpbin.org. One important aspect these verify is that AutoDispose behavior is not preventing us from getting
-	/// stuff out of the response (i.e. that we're not disposing too early).
+	/// Most HTTP tests in this project are with Flurl in fake mode. These are some real ones, mostly using http://httpbin.org.
 	/// </summary>
 	[TestFixture, Parallelizable]
 	public class RealHttpTests
@@ -51,32 +49,17 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task cant_persist_cookies_without_resuing_client() {
-			var fc = "http://httpbin.org/cookies".WithCookie("z", 999);
-			// cookie should be set
-			Assert.AreEqual("999", fc.Cookies["z"].Value);
-
-			await fc.HeadAsync();
-			// FlurlClient was auto-disposed, so cookie should be gone
-			CollectionAssert.IsEmpty(fc.Cookies);
-
-			// httpbin returns json representation of cookies that were set on the server.
-			var resp = await "http://httpbin.org/cookies".GetJsonAsync();
-			Assert.IsFalse((resp.cookies as IDictionary<string, object>).ContainsKey("z"));
-		}
-
-		[Test]
 		public async Task can_persist_cookies() {
 			using (var fc = new FlurlClient()) {
-				var fc2 = "http://httpbin.org/cookies".WithClient(fc).WithCookie("z", 999);
+				var req = "http://httpbin.org/cookies".WithClient(fc).WithCookie("z", 999);
 				// cookie should be set
 				Assert.AreEqual("999", fc.Cookies["z"].Value);
-				Assert.AreEqual("999", fc2.Cookies["z"].Value);
+				Assert.AreEqual("999", req.Cookies["z"].Value);
 
-				await fc2.HeadAsync();
+				await req.HeadAsync();
 				// FlurlClient should be re-used, so cookie should stick
 				Assert.AreEqual("999", fc.Cookies["z"].Value);
-				Assert.AreEqual("999", fc2.Cookies["z"].Value);
+				Assert.AreEqual("999", req.Cookies["z"].Value);
 
 				// httpbin returns json representation of cookies that were set on the server.
 				var resp = await "http://httpbin.org/cookies".WithClient(fc).GetJsonAsync();
@@ -177,22 +160,17 @@ namespace Flurl.Test.Http
 		public async Task can_handle_error() {
 			var handlerCalled = false;
 
-			FlurlHttp.Configure(c => {
-				c.OnError = call => {
-					call.ExceptionHandled = true;
-					handlerCalled = true;
-				};
-			});
-
 			try {
-				await "https://httpbin.org/status/500".GetAsync();
+				await "https://httpbin.org/status/500".WithSettings(c => {
+					c.OnError = call => {
+						call.ExceptionHandled = true;
+						handlerCalled = true;
+					};
+				}).GetAsync();
 				Assert.IsTrue(handlerCalled, "error handler shoule have been called.");
 			}
 			catch (FlurlHttpException) {
 				Assert.Fail("exception should have been supressed.");
-			}
-			finally {
-				FlurlHttp.Configure(c => c.ResetDefaults());
 			}
 		}
 
@@ -200,11 +178,12 @@ namespace Flurl.Test.Http
 		public async Task can_comingle_real_and_fake_tests() {
 			// do a fake call while a real call is running
 			var realTask = "https://www.google.com/".GetStringAsync();
-			using (new HttpTest()) {
+			using (var test = new HttpTest()) {
+				test.RespondWith("fake!");
 				var fake = await "https://www.google.com/".GetStringAsync();
-				Assert.AreEqual("", fake);
+				Assert.AreEqual("fake!", fake);
 			}
-			Assert.AreNotEqual("", await realTask);
+			Assert.AreNotEqual("fake!", await realTask);
 		}
 	}
 }

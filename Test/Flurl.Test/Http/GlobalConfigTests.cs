@@ -17,24 +17,17 @@ namespace Flurl.Test.Http
 	{
 		protected abstract FlurlHttpSettings GetSettings();
 
-		private FlurlClient _client;
-		protected FlurlClient GetClient() {
-			if (_client == null)
-				_client = new FlurlClient("http://www.api.com");
-			return _client;
-		}
-
 		[TearDown]
 		public void ResetDefaults() {
 			GetSettings().ResetDefaults();
-			_client = null;
 		}
 
 		[Test]
-		public void can_provide_custom_httpclient_factory() {
-			GetSettings().HttpClientFactory = new SomeCustomHttpClientFactory();
-			Assert.IsInstanceOf<SomeCustomHttpClient>(GetClient().HttpClient);
-			Assert.IsInstanceOf<SomeCustomMessageHandler>(GetClient().HttpMessageHandler);
+		public void can_provide_custom_client_factory() {
+			GetSettings().FlurlClientFactory = new SomeCustomFlurlClientFactory();
+			var client = new FlurlClient();
+			Assert.IsInstanceOf<SomeCustomHttpClient>(client.HttpClient);
+			Assert.IsInstanceOf<SomeCustomMessageHandler>(client.HttpMessageHandler);
 		}
 
 		[Test]
@@ -43,7 +36,7 @@ namespace Flurl.Test.Http
 				GetSettings().AllowedHttpStatusRange = "4xx";
 				test.RespondWith("I'm a teapot", 418);
 				try {
-					var result = await GetClient().GetAsync();
+					var result = await "http://www.api.com".GetAsync();
 					Assert.IsFalse(result.IsSuccessStatusCode);
 				}
 				catch (Exception) {
@@ -62,7 +55,7 @@ namespace Flurl.Test.Http
 					callbackCalled = true;
 				};
 				Assert.IsFalse(callbackCalled);
-				await GetClient().GetAsync();
+				await "http://www.api.com".GetAsync();
 				Assert.IsTrue(callbackCalled);
 			}
 		}
@@ -77,7 +70,7 @@ namespace Flurl.Test.Http
 					callbackCalled = true;
 				};
 				Assert.IsFalse(callbackCalled);
-				await GetClient().GetAsync();
+				await "http://www.api.com".GetAsync();
 				Assert.IsTrue(callbackCalled);				
 			}
 		}
@@ -95,7 +88,7 @@ namespace Flurl.Test.Http
 				};
 				Assert.IsFalse(callbackCalled);
 				try {
-					await GetClient().GetAsync();
+					await "http://www.api.com".GetAsync();
 					Assert.IsTrue(callbackCalled, "OnError was never called");
 					Assert.IsTrue(markExceptionHandled, "ExceptionHandled was marked false in callback, but exception was not propagated.");
 				}
@@ -114,7 +107,7 @@ namespace Flurl.Test.Http
 				};
 				test.RespondWith("server error", 500);
 				try {
-					var result = await GetClient().GetAsync();
+					var result = await "http://www.api.com".GetAsync();
 					Assert.IsFalse(result.IsSuccessStatusCode);
 				}
 				catch (FlurlHttpException) {
@@ -123,14 +116,18 @@ namespace Flurl.Test.Http
 			}
 		}
 
-		private class SomeCustomHttpClientFactory : IHttpClientFactory
+		private class SomeCustomFlurlClientFactory : IFlurlClientFactory
 		{
-			public HttpClient CreateClient(Url url, HttpMessageHandler handler) {
+			public HttpClient CreateHttpClient(HttpMessageHandler handler) {
 				return new SomeCustomHttpClient();
 			}
 
 			public HttpMessageHandler CreateMessageHandler() {
 				return new SomeCustomMessageHandler();
+			}
+
+			public IFlurlClient GetClient(Url url) {
+				return new FlurlClient();
 			}
 		}
 
@@ -138,11 +135,11 @@ namespace Flurl.Test.Http
 		private class SomeCustomMessageHandler : HttpClientHandler { }
 	}
 
-	[TestFixture]
-	public class GlobalConfigTestsBase : ConfigTestsBase
-	{
-		protected override FlurlHttpSettings GetSettings() {
-			return FlurlHttp.GlobalSettings;
-		}
-	}
+	//[TestFixture]
+	//public class GlobalConfigTestsBase : ConfigTestsBase
+	//{
+	//	protected override FlurlHttpSettings GetSettings() {
+	//		return FlurlHttp.GlobalSettings;
+	//	}
+	//}
 }

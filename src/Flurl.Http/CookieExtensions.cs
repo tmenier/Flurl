@@ -1,43 +1,34 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 using Flurl.Util;
 
 namespace Flurl.Http
 {
 	/// <summary>
-	/// Cookie extension for Flurl Client.
+	/// Fluent extension methods for working with HTTP cookies.
 	/// </summary>
 	public static class CookieExtensions
 	{
-        /// <summary>
-		/// Allows cookies to be sent and received in calls made with this client. Not necessary to call when setting cookies via WithCookie/WithCookies.
+		/// <summary>
+		/// Allows cookies to be sent and received. Not necessary to call when setting cookies via WithCookie/WithCookies.
 		/// </summary>
+		/// <param name="client">The IFlurlClient.</param>
+		/// <returns>This IFlurlClient.</returns>
 		public static IFlurlClient EnableCookies(this IFlurlClient client) {
 			client.Settings.CookiesEnabled = true;
 			return client;
 		}
 
 		/// <summary>
-		/// Allows cookies to be sent and received in calls made to this Url. Not necessary to call when setting cookies via WithCookie/WithCookies.
+		/// Sets an HTTP cookie to be sent with all requests made with this IFlurlClient.
 		/// </summary>
-		public static IFlurlClient EnableCookies(this Url url) {
-			return new FlurlClient(url).EnableCookies();
-		}
-
-		/// <summary>
-		/// Allows cookies to be sent and received in calls made to this Url. Not necessary to call when setting cookies via WithCookie/WithCookies.
-		/// </summary>
-		public static IFlurlClient EnableCookies(this string url) {
-			return new FlurlClient(url).EnableCookies();
-		}
-
-		/// <summary>
-		/// Sets an HTTP cookie to be sent with all requests made with this FlurlClient.
-		/// </summary>
-		/// <param name="client">The client.</param>
+		/// <param name="client">The IFlurlClient.</param>
 		/// <param name="cookie">The cookie to set.</param>
-		/// <returns>The modified FlurlClient.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="cookie" /> is null.</exception>
+		/// <returns>This IFlurlClient.</returns>
 		public static IFlurlClient WithCookie(this IFlurlClient client, Cookie cookie) {
 			client.Settings.CookiesEnabled = true;
 			client.Cookies[cookie.Name] = cookie;
@@ -45,76 +36,26 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// Creates a FlurlClient from the URL and sets an HTTP cookie to be sent with all requests made with this FlurlClient.
+		/// Sets an HTTP cookie to be sent with all requests made with this IFlurlClient.
 		/// </summary>
-		/// <param name="url">The URL.</param>
-		/// <param name="cookie">the cookie to set.</param>
-		/// <returns>The modified FlurlClient.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="cookie" /> is null.</exception>
-		public static IFlurlClient WithCookie(this string url, Cookie cookie) {
-			return new FlurlClient(url, true).WithCookie(cookie);
-		}
-
-		/// <summary>
-		/// Creates a FlurlClient from the URL and sets an HTTP cookie to be sent with all requests made with this FlurlClient.
-		/// </summary>
-		/// <param name="url">The URL.</param>
-		/// <param name="cookie">the cookie to set.</param>
-		/// <returns>The modified FlurlClient.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="cookie" /> is null.</exception>
-		public static IFlurlClient WithCookie(this Url url, Cookie cookie) {
-			return new FlurlClient(url, true).WithCookie(cookie);
-		}
-
-		/// <summary>
-		/// Sets an HTTP cookie to be sent with all requests made with this FlurlClient.
-		/// </summary>
-		/// <param name="client">The client.</param>
-		/// <param name="name">cookie name.</param>
-		/// <param name="value">cookie value.</param>
-		/// <param name="expires">cookie expiration (optional). If excluded, cookie only lives for duration of session.</param>
-		/// <returns>The modified FlurlClient.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="value" /> is null.</exception>
+		/// <param name="client">The IFlurlClient.</param>
+		/// <param name="name">The cookie name.</param>
+		/// <param name="value">The cookie value.</param>
+		/// <param name="expires">The cookie expiration (optional). If excluded, cookie only lives for duration of session.</param>
+		/// <returns>This IFlurlClient.</returns>
 		public static IFlurlClient WithCookie(this IFlurlClient client, string name, object value, DateTime? expires = null) {
 			var cookie = new Cookie(name, value?.ToInvariantString()) { Expires = expires ?? DateTime.MinValue };
 			return client.WithCookie(cookie);
 		}
 
-	    /// <summary>
-	    /// Creates a FlurlClient from the URL and sets an HTTP cookie to be sent with all requests made with this FlurlClient.
-	    /// </summary>
-	    /// <param name="url">The URL.</param>
-	    /// <param name="name">cookie name.</param>
-	    /// <param name="value">cookie value.</param>
-	    /// <param name="expires">cookie expiration (optional). If excluded, cookie only lives for duration of session.</param>
-	    /// <returns>The modified FlurlClient.</returns>
-	    /// <exception cref="ArgumentNullException"><paramref name="value" /> is null.</exception>
-	    public static IFlurlClient WithCookie(this string url, string name, object value, DateTime? expires = null) {
-			return new FlurlClient(url, true).WithCookie(name, value, expires);
-		}
-
-	    /// <summary>
-	    /// Creates a FlurlClient from the URL and sets an HTTP cookie to be sent with all requests made with this FlurlClient.
-	    /// </summary>
-	    /// <param name="url">The URL.</param>
-	    /// <param name="name">cookie name.</param>
-	    /// <param name="value">cookie value.</param>
-	    /// <param name="expires">cookie expiration (optional). If excluded, cookie only lives for duration of session.</param>
-	    /// <returns>The modified FlurlClient.</returns>
-	    /// <exception cref="ArgumentNullException"><paramref name="value" /> is null.</exception>
-	    public static IFlurlClient WithCookie(this Url url, string name, object value, DateTime? expires = null) {
-			return new FlurlClient(url, true).WithCookie(name, value, expires);
-		}
-
-	    /// <summary>
-	    /// Sets HTTP cookies based on property names/values of the provided object, or keys/values if object is a dictionary, to be sent with all requests made with this FlurlClient.
-	    /// </summary>
-	    /// <param name="client">The client.</param>
-	    /// <param name="cookies">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
-	    /// <param name="expires">Expiration for all cookies (optional). If excluded, cookies only live for duration of session.</param>
-	    /// <returns>The modified FlurlClient.</returns>
-	    /// <exception cref="ArgumentNullException"><paramref name="cookies" /> is null.</exception>
-	    public static IFlurlClient WithCookies(this IFlurlClient client, object cookies, DateTime? expires = null) {
+		/// <summary>
+		/// Sets HTTP cookies to be sent with all requests made with this IFlurlClient, based on property names/values of the provided object, or keys/values if object is a dictionary.
+		/// </summary>
+		/// <param name="client">The IFlurlClient.</param>
+		/// <param name="cookies">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
+		/// <param name="expires">Expiration for all cookies (optional). If excluded, cookies only live for duration of session.</param>
+		/// <returns>This IFlurlClient.</returns>
+		public static IFlurlClient WithCookies(this IFlurlClient client, object cookies, DateTime? expires = null) {
 			if (cookies == null)
 				return client;
 
@@ -124,28 +65,51 @@ namespace Flurl.Http
 			return client;
 		}
 
-	    /// <summary>
-	    /// Creates a FlurlClient from the URL and sets HTTP cookies based on property names/values of the provided object, or keys/values if object is a dictionary, to be sent with all requests made with this FlurlClient.
-	    /// </summary>
-	    /// <param name="url">The URL.</param>
-	    /// <param name="cookies">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
-	    /// <param name="expires">Expiration for all cookies (optional). If excluded, cookies only live for duration of session.</param>
-	    /// <returns>The modified FlurlClient.</returns>
-	    /// <exception cref="ArgumentNullException"><paramref name="cookies" /> is null.</exception>
-	    public static IFlurlClient WithCookies(this Url url, object cookies, DateTime? expires = null) {
-			return new FlurlClient(url, true).WithCookies(cookies);
+		/// <summary>
+		/// Allows cookies to be sent and received with this request's IFlurlClient. Not necessary to call when setting cookies via WithCookie/WithCookies.
+		/// </summary>
+		/// <param name="request">The IFlurlRequest.</param>
+		/// <returns>This IFlurlRequest.</returns>
+		public static IFlurlRequest EnableCookies(this IFlurlRequest request) {
+			request.Settings.CookiesEnabled = true; // a little awkward to have this at both the client and request.
+			request.Client.EnableCookies();
+			return request;
 		}
 
-	    /// <summary>
-	    /// Creates a FlurlClient from the URL and sets HTTP cookies based on property names/values of the provided object, or keys/values if object is a dictionary, to be sent with all requests made with this FlurlClient.
-	    /// </summary>
-	    /// <param name="url">The URL.</param>
-	    /// <param name="cookies">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
-	    /// <param name="expires">Expiration for all cookies (optional). If excluded, cookies only live for duration of session.</param>
-	    /// <returns>The modified FlurlClient.</returns>
-	    /// <exception cref="ArgumentNullException"><paramref name="cookies" /> is null.</exception>
-	    public static IFlurlClient WithCookies(this string url, object cookies, DateTime? expires = null) {
-			return new FlurlClient(url, true).WithCookies(cookies);
+		/// <summary>
+		/// Sets an HTTP cookie to be sent with this request's IFlurlClient.
+		/// </summary>
+		/// <param name="request">The IFlurlRequest.</param>
+		/// <param name="cookie">The cookie to set.</param>
+		/// <returns>This IFlurlRequest.</returns>
+		public static IFlurlRequest WithCookie(this IFlurlRequest request, Cookie cookie) {
+			request.Client.WithCookie(cookie);
+			return request;
+		}
+
+		/// <summary>
+		/// Sets an HTTP cookie to be sent with this request's IFlurlClient.
+		/// </summary>
+		/// <param name="request">The IFlurlRequest.</param>
+		/// <param name="name">The cookie name.</param>
+		/// <param name="value">The cookie value.</param>
+		/// <param name="expires">The cookie expiration (optional). If excluded, cookie only lives for duration of session.</param>
+		/// <returns>This IFlurlRequest.</returns>
+		public static IFlurlRequest WithCookie(this IFlurlRequest request, string name, object value, DateTime? expires = null) {
+			request.Client.WithCookie(name, value, expires);
+			return request;
+		}
+
+		/// <summary>
+		/// Sets HTTP cookies to be sent with this request's IFlurlClient, based on property names/values of the provided object, or keys/values if object is a dictionary.
+		/// </summary>
+		/// <param name="request">The IFlurlRequest.</param>
+		/// <param name="cookies">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
+		/// <param name="expires">Expiration for all cookies (optional). If excluded, cookies only live for duration of session.</param>
+		/// <returns>This IFlurlRequest.</returns>
+		public static IFlurlRequest WithCookies(this IFlurlRequest request, object cookies, DateTime? expires = null) {
+			request.Client.WithCookies(cookies, expires);
+			return request;
 		}
 	}
 }

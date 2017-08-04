@@ -140,7 +140,7 @@ namespace Flurl.Test.Http
 	    public async Task can_simulate_timeout_with_exception_handled() {
 	        HttpTest.SimulateTimeout();
 	        var result = await "http://www.api.com"
-	            .ConfigureClient(c => c.OnError = call => call.ExceptionHandled = true)
+	            .WithSettings(c => c.OnError = call => call.ExceptionHandled = true)
 	            .GetAsync();
 	        Assert.IsNull(result);
 	    }
@@ -159,10 +159,10 @@ namespace Flurl.Test.Http
 		public async Task can_fake_cookies() {
 			HttpTest.RespondWith(cookies: new { c1 = "foo" });
 
-			var fc = "http://www.api.com".EnableCookies();
-			await fc.GetAsync();
-			Assert.AreEqual(1, fc.Cookies.Count());
-			Assert.AreEqual("foo", fc.Cookies["c1"].Value);
+			var rec = "http://www.api.com".EnableCookies();
+			await rec.GetAsync();
+			Assert.AreEqual(1, rec.Cookies.Count());
+			Assert.AreEqual("foo", rec.Cookies["c1"].Value);
 		}
 
 		// https://github.com/tmenier/Flurl/issues/169

@@ -19,9 +19,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Globally configured Flurl.Http settings. Should normally be written to by calling FlurlHttp.Configure once application at startup.
 		/// </summary>
-		public static FlurlHttpSettings GlobalSettings {
-			get { return _settings.Value; }
-		}
+		public static FlurlHttpSettings GlobalSettings => _settings.Value;
 
 		/// <summary>
 		/// Provides thread-safe access to Flurl.Http's global configuration settings. Should only be called once at application startup.
@@ -57,8 +55,7 @@ namespace Flurl.Http
 		}
 
 		private static Task HandleEventAsync(Action<HttpCall> syncHandler, Func<HttpCall, Task> asyncHandler, HttpCall call) {
-			if (syncHandler != null)
-				syncHandler(call);
+			syncHandler?.Invoke(call);
 			if (asyncHandler != null)
 				return asyncHandler(call);
 			return _completedTask;

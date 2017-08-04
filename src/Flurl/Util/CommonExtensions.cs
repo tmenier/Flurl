@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 #if !NET40
 using System.Reflection;
 #endif
@@ -45,7 +46,7 @@ namespace Flurl.Util
 			var f = obj as IFormattable;
 			if (f != null)
 				return f.ToString(null, CultureInfo.InvariantCulture);
-			
+
 			return obj.ToString();
 		}
 
@@ -74,8 +75,8 @@ namespace Flurl.Util
 		private static IEnumerable<KeyValuePair<string, object>> ObjectToKV(object obj) {
 #if NETSTANDARD1_0
 			return from prop in obj.GetType().GetRuntimeProperties()
-				   let val = prop.GetValue(obj, null)
-				   select new KeyValuePair<string, object>(prop.Name, val);
+				let val = prop.GetValue(obj, null)
+				select new KeyValuePair<string, object>(prop.Name, val);
 #else
 			return from prop in obj.GetType().GetProperties() 
 				   let val = prop.GetValue(obj, null)
@@ -113,6 +114,14 @@ namespace Flurl.Util
 				if (key != null)
 					yield return new KeyValuePair<string, object>(key, val);
 			}
+		}
+
+		/// <summary>
+		/// Merges the key/value pairs from d2 into d1, without overwriting those already set in d1.
+		/// </summary>
+		public static void Merge<TKey, TValue>(this IDictionary<TKey, TValue> d1, IDictionary<TKey, TValue> d2) {
+			foreach (var kv in d2.Where(x => !d1.Keys.Contains(x.Key)))
+				d1.Add(kv);
 		}
 	}
 }

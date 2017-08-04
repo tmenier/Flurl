@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using Flurl.Http.Configuration;
 using Flurl.Http.Content;
 using Flurl.Util;
 
@@ -14,20 +15,38 @@ namespace Flurl.Http.Testing
 	/// </summary>
 	public class HttpTest : IDisposable
 	{
-		/// <summary>
-		/// Gets the current HttpTest from the logical (async) call context
-		/// </summary>
-		public static HttpTest Current => GetCurrentTest();
-
 	    /// <summary>
 	    /// Initializes a new instance of the <see cref="HttpTest"/> class.
 	    /// </summary>
 	    /// <exception cref="Exception">A delegate callback throws an exception.</exception>
 	    public HttpTest() {
+		    Settings = new FlurlHttpSettings {
+			    FlurlClientFactory = new TestFlurlClientFactory()
+		    }.Merge(FlurlHttp.GlobalSettings);
 			ResponseQueue = new Queue<HttpResponseMessage>();
 			CallLog = new List<HttpCall>();
 		    SetCurrentTest(this);
 	    }
+
+		/// <summary>
+		/// Gets or sets the FlurlHttpSettings object used by this test.
+		/// </summary>
+		public FlurlHttpSettings Settings { get; set; }
+
+		/// <summary>
+		/// Gets the current HttpTest from the logical (async) call context
+		/// </summary>
+		public static HttpTest Current => GetCurrentTest();
+
+		/// <summary>
+		/// Queue of HttpResponseMessages to be returned in place of real responses during testing.
+		/// </summary>
+		public Queue<HttpResponseMessage> ResponseQueue { get; set; }
+
+		/// <summary>
+		/// List of all (fake) HTTP calls made since this HttpTest was created.
+		/// </summary>
+		public List<HttpCall> CallLog { get; }
 
 		/// <summary>
 		/// Adds an HttpResponseMessage to the response queue.
@@ -89,22 +108,12 @@ namespace Flurl.Http.Testing
 			return this;
 		}
 
-		/// <summary>
-		/// Queue of HttpResponseMessages to be returned in place of real responses during testing.
-		/// </summary>
-		public Queue<HttpResponseMessage> ResponseQueue { get; set; }
-
 		internal HttpResponseMessage GetNextResponse() {
 			return ResponseQueue.Any() ? ResponseQueue.Dequeue() : new HttpResponseMessage {
 				StatusCode = HttpStatusCode.OK,
 				Content = new StringContent("")
 			};
 		}
-
-		/// <summary>
-		/// List of all (fake) HTTP calls made since this HttpTest was created.
-		/// </summary>
-		public List<HttpCall> CallLog { get; private set; }
 
 		/// <summary>
 		/// Asserts whether matching URL was called, throwing HttpCallAssertException if it wasn't.
@@ -141,7 +150,6 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		public void Dispose() {
 			SetCurrentTest(null);
-			FlurlHttp.GlobalSettings.ResetDefaults();
 		}
 
 #if NET45
