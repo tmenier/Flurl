@@ -4,7 +4,7 @@ layout: default
 
 ## HttpClient Lifetime Management
 
-As of [Flurl.Http](https://www.nuget.org/packages/Flurl.Http) 0.4, instances of the underlying `HttpClient` are disposed immediately after each HTTP call by default. This is the case with almost every example on this site, and is suitable for most typical use cases. However, when making multiple calls to the same host, there are small performance gains to be had by re-using `HttpClient`, and hence re-using the underlying open connection. But where's the mechanism to accomplish that in a fluent expression like this?
+By default, instances of the underlying `HttpClient` are disposed immediately after each HTTP call. This is the case with almost every example on this site, and is suitable for most typical use cases. However, when making many calls to the same host, there are performance gains to be had by re-using `HttpClient`, and hence re-using the underlying open connection. But where's the mechanism to accomplish that in a fluent expression like this?
 
 ````c#
 var data = await "http://api.com/endpoint".GetJsonAsync();
