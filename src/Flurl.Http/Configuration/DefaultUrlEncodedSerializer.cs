@@ -22,9 +22,18 @@ namespace Flurl.Http.Configuration
 					continue;
 				if (sb.Length > 0)
 					sb.Append('&');
-				sb.Append(Url.EncodeQueryParamValue(kv.Key, true));
-				sb.Append('=');
-				sb.Append(Url.EncodeQueryParamValue(kv.Value, true));
+				if (kv.Value is IEnumerable && !(kv.Value is string))
+				{
+					sb.Append(string.Join("&",
+						from v in (kv.Value as IEnumerable).Cast<object>()
+						select $"{Url.EncodeQueryParamValue(kv.Key, true)}={Url.EncodeQueryParamValue(v, true)}"));
+				}
+				else
+				{
+					sb.Append(Url.EncodeQueryParamValue(kv.Key, true));
+					sb.Append('=');
+					sb.Append(Url.EncodeQueryParamValue(kv.Value, true));
+				}
 			}
 			return sb.ToString();
 		}
