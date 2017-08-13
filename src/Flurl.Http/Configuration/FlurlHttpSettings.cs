@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
-using Flurl.Util;
 
 namespace Flurl.Http.Configuration
 {
@@ -12,17 +11,35 @@ namespace Flurl.Http.Configuration
 	/// </summary>
 	public class FlurlHttpSettings
 	{
-		// There are some tricky order of precedence rules (request > client > global) that are easier
-		// to keep track of via dictionary key existence. (Can't do null-coalescing because if a setting
-		// is set to null at the request level, that should stick.)
-		private readonly IDictionary<string, object> _settings = new Dictionary<string, object>();
+		// We need to maintain order of precedence (request > client > global) in some tricky scenarios.
+		// e.g. if we explicitly set some FlurlRequest.Settings, then set the FlurlClient, we want the
+		// client-level settings to override the global settings but not the request-level settings.
+		private FlurlHttpSettings _defaults;
 
-		private static readonly FlurlHttpSettings _defaults = new FlurlHttpSettings {
+		// Values are dictionary-backed so we can check for key existence. Can't do null-coalescing
+		// because if a setting is set to null at the request level, that should stick.
+		private IDictionary<string, object> _vals = new Dictionary<string, object>();
+
+		private static FlurlHttpSettings _baseDefaults = new FlurlHttpSettings(null) {
 			FlurlClientFactory = new DefaultFlurlClientFactory(),
 			CookiesEnabled = false,
 			JsonSerializer = new NewtonsoftJsonSerializer(null),
 			UrlEncodedSerializer = new DefaultUrlEncodedSerializer()
 		};
+
+		/// <summary>
+		/// Creates a new FlurlHttpSettings object using another FlurlHttpSettings object as its default values.
+		/// </summary>
+		public FlurlHttpSettings(FlurlHttpSettings defaults) {
+			_defaults = defaults;
+		}
+
+		/// <summary>
+		/// Creates a new FlurlHttpSettings object.
+		/// </summary>
+		public FlurlHttpSettings() {
+			_defaults = _baseDefaults;
+		}
 
 		/// <summary>
 		/// Gets or sets a factory used to create HttpClient object used in Flurl HTTP calls. Default value
@@ -131,20 +148,20 @@ namespace Flurl.Http.Configuration
 		/// Clears all custom options and resets them to their default values.
 		/// </summary>
 		public void ResetDefaults() {
-			_settings.Clear();
+			_vals.Clear();
 		}
 
 		private T Get<T>(Expression<Func<T>> property) {
 			var p = (property.Body as MemberExpression).Member as PropertyInfo;
-			return 
-				_settings.ContainsKey(p.Name) ? (T)_settings[p.Name] :
-				_defaults._settings.ContainsKey(p.Name) ? (T)_defaults._settings[p.Name] :
+			return
+				_vals.ContainsKey(p.Name) ? (T)_vals[p.Name] :
+				_defaults != null ? (T)p.GetValue(_defaults) :
 				default(T);
 		}
 
 		private void Set<T>(Expression<Func<T>> property, T value) {
 			var p = (property.Body as MemberExpression).Member as PropertyInfo;
-			_settings[p.Name] = value;
+			_vals[p.Name] = value;
 		}
 
 		/// <summary>
@@ -153,7 +170,7 @@ namespace Flurl.Http.Configuration
 		/// </summary>
 		/// <param name="other">The settings to merge.</param>
 		public FlurlHttpSettings Merge(FlurlHttpSettings other) {
-			_settings.Merge(other._settings);
+			_defaults = other;
 			return this;
 		}
 	}

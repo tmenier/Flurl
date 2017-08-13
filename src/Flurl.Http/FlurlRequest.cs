@@ -72,7 +72,10 @@ namespace Flurl.Http
 		/// </summary>
 		public IFlurlClient Client {
 			get => _client = _client ?? Settings.FlurlClientFactory.GetClient(Url);
-			set => _client = value;
+			set {
+				_client = value;
+				Settings.Merge(_client.Settings);
+			}
 		}
 
 		/// <summary>
