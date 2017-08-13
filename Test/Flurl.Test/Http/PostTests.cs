@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace Flurl.Test.Http
 {
-	[TestFixture]
+	[TestFixture, Parallelizable]
 	public class PostTests : HttpTestFixtureBase
 	{
 		[Test]

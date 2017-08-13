@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 namespace Flurl.Test.Http
 {
-	[TestFixture]
+	[TestFixture, Parallelizable]
 	public class HeadTests : HttpTestFixtureBase
 	{
 		[Test]

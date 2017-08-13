@@ -12,7 +12,6 @@ namespace Flurl.Test.Http
 	/// All global settings can also be set at the client level, so this base class allows ClientConfigTests to 
 	/// inherit all the same tests.
 	/// </summary>
-	[Parallelizable]
 	public abstract class ConfigTestsBase
 	{
 		protected abstract FlurlHttpSettings GetSettings();
@@ -135,7 +134,7 @@ namespace Flurl.Test.Http
 		private class SomeCustomMessageHandler : HttpClientHandler { }
 	}
 
-	//[TestFixture]
+	//[TestFixture, Parallelizable]
 	//public class GlobalConfigTestsBase : ConfigTestsBase
 	//{
 	//	protected override FlurlHttpSettings GetSettings() {

@@ -9,7 +9,7 @@ using NUnit.Framework;
 
 namespace Flurl.Test.Http
 {
-	[TestFixture]
+	[TestFixture, Parallelizable]
 	public class GetTests : HttpTestFixtureBase
 	{
 		[Test]

@@ -10,7 +10,7 @@ using NUnit.Framework;
 
 namespace Flurl.Test.Http
 {
-    [TestFixture]
+    [TestFixture, Parallelizable]
     public class ClientConfigTestsBase //: ConfigTestsBase
     {
 	    //private FlurlClient _client = new FlurlClient();
