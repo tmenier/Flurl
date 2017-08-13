@@ -21,7 +21,7 @@ namespace Flurl.Http.Configuration
 		private IDictionary<string, object> _vals = new Dictionary<string, object>();
 
 		private static FlurlHttpSettings _baseDefaults = new FlurlHttpSettings(null) {
-			FlurlClientFactory = new DefaultFlurlClientFactory(),
+			HttpClientFactory = new DefaultHttpClientFactory(),
 			CookiesEnabled = false,
 			JsonSerializer = new NewtonsoftJsonSerializer(null),
 			UrlEncodedSerializer = new DefaultUrlEncodedSerializer()
@@ -43,13 +43,12 @@ namespace Flurl.Http.Configuration
 
 		/// <summary>
 		/// Gets or sets a factory used to create HttpClient object used in Flurl HTTP calls. Default value
-		/// is an instance of DefaultFlurlClientFactory. Custom factory implementations should generally
-		/// inherit from DefaultFlurlClientFactory, call base.CreateClient, and manipulate the returned HttpClient,
-		/// otherwise functionality such as callbacks and most testing features will be lost.
+		/// is an instance of DefaultHttpClientFactory. Custom factory implementations should generally
+		/// inherit from DefaultHttpClientFactory, the base implementations, and only customize as needed.
 		/// </summary>
-		public IFlurlClientFactory FlurlClientFactory {
-			get => Get(() => FlurlClientFactory);
-			set => Set(() => FlurlClientFactory, value);
+		public IHttpClientFactory HttpClientFactory {
+			get => Get(() => HttpClientFactory);
+			set => Set(() => HttpClientFactory, value);
 		}
 
 		/// <summary>
@@ -173,5 +172,17 @@ namespace Flurl.Http.Configuration
 			_defaults = other;
 			return this;
 		}
+	}
+
+	/// <summary>
+	/// Global default settings for Flurl.Http
+	/// </summary>
+	public class GlobalFlurlHttpSettings : FlurlHttpSettings
+	{
+		/// <summary>
+		/// Gets or sets the factory that defines creating, caching, and reusing FlurlClient instances and,
+		/// by proxy, HttpClient instances.
+		/// </summary>
+		public IFlurlClientFactory FlurlClientFactory { get; set; } = new DefaultFlurlClientFactory();
 	}
 }

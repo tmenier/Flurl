@@ -20,9 +20,10 @@ namespace Flurl.Http.Testing
 	    /// </summary>
 	    /// <exception cref="Exception">A delegate callback throws an exception.</exception>
 	    public HttpTest() {
-		    Settings = new FlurlHttpSettings {
-			    FlurlClientFactory = new TestFlurlClientFactory()
-		    }.Merge(FlurlHttp.GlobalSettings);
+		    Settings = new GlobalFlurlHttpSettings {
+			    HttpClientFactory = new TestHttpClientFactory(),
+				FlurlClientFactory = new TestFlurlClientFactory()
+		    };
 			ResponseQueue = new Queue<HttpResponseMessage>();
 			CallLog = new List<HttpCall>();
 		    SetCurrentTest(this);
@@ -31,7 +32,7 @@ namespace Flurl.Http.Testing
 		/// <summary>
 		/// Gets or sets the FlurlHttpSettings object used by this test.
 		/// </summary>
-		public FlurlHttpSettings Settings { get; set; }
+		public GlobalFlurlHttpSettings Settings { get; set; }
 
 		/// <summary>
 		/// Gets the current HttpTest from the logical (async) call context

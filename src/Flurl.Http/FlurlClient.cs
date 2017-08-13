@@ -40,9 +40,9 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="settings">The FlurlHttpSettings associated with this instance.</param>
 		public FlurlClient(FlurlHttpSettings settings = null) {
-			Settings = settings ?? new FlurlHttpSettings().Merge(HttpTest.Current?.Settings ?? FlurlHttp.GlobalSettings);
-			HttpMessageHandler = Settings.FlurlClientFactory.CreateMessageHandler();
-			HttpClient = Settings.FlurlClientFactory.CreateHttpClient(HttpMessageHandler);
+			Settings = settings ?? new FlurlHttpSettings(FlurlHttp.GlobalSettings);
+			HttpMessageHandler = Settings.HttpClientFactory.CreateMessageHandler();
+			HttpClient = Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler);
 		}
 
 		/// <summary>

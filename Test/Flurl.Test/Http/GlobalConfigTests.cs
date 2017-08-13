@@ -23,7 +23,7 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void can_provide_custom_client_factory() {
-			GetSettings().FlurlClientFactory = new SomeCustomFlurlClientFactory();
+			GetSettings().HttpClientFactory = new SomeCustomHttpClientFactory();
 			var client = new FlurlClient();
 			Assert.IsInstanceOf<SomeCustomHttpClient>(client.HttpClient);
 			Assert.IsInstanceOf<SomeCustomMessageHandler>(client.HttpMessageHandler);
@@ -115,7 +115,7 @@ namespace Flurl.Test.Http
 			}
 		}
 
-		private class SomeCustomFlurlClientFactory : IFlurlClientFactory
+		private class SomeCustomHttpClientFactory : IHttpClientFactory
 		{
 			public HttpClient CreateHttpClient(HttpMessageHandler handler) {
 				return new SomeCustomHttpClient();
@@ -123,10 +123,6 @@ namespace Flurl.Test.Http
 
 			public HttpMessageHandler CreateMessageHandler() {
 				return new SomeCustomMessageHandler();
-			}
-
-			public IFlurlClient GetClient(Url url) {
-				return new FlurlClient();
 			}
 		}
 

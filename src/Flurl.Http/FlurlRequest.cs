@@ -51,7 +51,7 @@ namespace Flurl.Http
 		/// <param name="url">The URL to call with this FlurlRequest instance.</param>
 		/// <param name="settings">The FlurlHttpSettings object used by this request.</param>
 		public FlurlRequest(Url url, FlurlHttpSettings settings = null) {
-			Settings = settings ?? new FlurlHttpSettings().Merge(HttpTest.Current?.Settings ?? FlurlHttp.GlobalSettings);
+			Settings = settings ?? new FlurlHttpSettings().Merge(FlurlHttp.GlobalSettings);
 			Url = url;
 		}
 
@@ -71,7 +71,13 @@ namespace Flurl.Http
 		/// Gets or sets the IFlurlClient to use when sending the request.
 		/// </summary>
 		public IFlurlClient Client {
-			get => _client = _client ?? Settings.FlurlClientFactory.GetClient(Url);
+			get {
+				if (_client == null) {
+					_client = FlurlHttp.GlobalSettings.FlurlClientFactory.Get(Url);
+					Settings.Merge(_client.Settings);
+				}
+				return _client;
+			}
 			set {
 				_client = value;
 				Settings.Merge(_client.Settings);
@@ -103,7 +109,6 @@ namespace Flurl.Http
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
-			Settings.Merge(Client.Settings);
 			if (Settings.Timeout.HasValue)
 				Client.HttpClient.Timeout = Settings.Timeout.Value;
 			var request = new HttpRequestMessage(verb, Url) { Content = content };

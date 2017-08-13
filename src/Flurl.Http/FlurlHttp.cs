@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http.Configuration;
+using Flurl.Http.Testing;
 
 namespace Flurl.Http
 {
@@ -13,13 +14,13 @@ namespace Flurl.Http
 		private static readonly object _configLock = new object();
 		private static readonly Task _completedTask = Task.FromResult(0);
 
-		private static Lazy<FlurlHttpSettings> _settings = 
-			new Lazy<FlurlHttpSettings>(() => new FlurlHttpSettings());
+		private static Lazy<GlobalFlurlHttpSettings> _settings = 
+			new Lazy<GlobalFlurlHttpSettings>(() => new GlobalFlurlHttpSettings());
 
 		/// <summary>
 		/// Globally configured Flurl.Http settings. Should normally be written to by calling FlurlHttp.Configure once application at startup.
 		/// </summary>
-		public static FlurlHttpSettings GlobalSettings => _settings.Value;
+		public static GlobalFlurlHttpSettings GlobalSettings => HttpTest.Current?.Settings ?? _settings.Value;
 
 		/// <summary>
 		/// Provides thread-safe access to Flurl.Http's global configuration settings. Should only be called once at application startup.
