@@ -24,16 +24,10 @@ namespace Flurl.Http.Content
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CapturedMultipartContent"/> class.
 		/// </summary>
-		/// <param name="settings">The FlurlHttpSettings used to serialize each content part.</param>
-		public CapturedMultipartContent(FlurlHttpSettings settings) : base("form-data") {
-			_settings = settings;
+		/// <param name="settings">The FlurlHttpSettings used to serialize each content part. (Defaults to FlurlHttp.GlobalSettings.)</param>
+		public CapturedMultipartContent(FlurlHttpSettings settings = null) : base("form-data") {
+			_settings = settings ?? FlurlHttp.GlobalSettings;
 		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="CapturedMultipartContent"/> class, using FlurlHttp.GlobalSettings
-		/// to determine how to serialize each content part.
-		/// </summary>
-		public CapturedMultipartContent() : this(FlurlHttp.GlobalSettings) { }
 
 		/// <summary>
 		/// Add a content part to the multipart request.
