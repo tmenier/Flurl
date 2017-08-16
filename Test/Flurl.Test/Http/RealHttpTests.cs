@@ -161,7 +161,7 @@ namespace Flurl.Test.Http
 			var handlerCalled = false;
 
 			try {
-				await "https://httpbin.org/status/500".WithSettings(c => {
+				await "https://httpbin.org/status/500".Configure(c => {
 					c.OnError = call => {
 						call.ExceptionHandled = true;
 						handlerCalled = true;

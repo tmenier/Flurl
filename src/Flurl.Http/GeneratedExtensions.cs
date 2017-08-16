@@ -14,7 +14,7 @@ namespace Flurl.Http
 	/// <summary>
 	/// Auto-generated fluent extension methods on String, Url, and IFlurlRequest.
 	/// </summary>
-	public static class AutoGenExtensions
+	public static class GeneratedExtensions
 	{
 		/// <summary>
 		/// Creates a FlurlRequest from the URL and sends an asynchronous request.
@@ -908,8 +908,8 @@ namespace Flurl.Http
 		/// <param name="url">The URL.</param>
 		/// <param name="action">A delegate defining the Settings changes.</param>
 		/// <returns>The IFlurlRequest.</returns>
-		public static IFlurlRequest WithSettings(this Url url, Action<FlurlHttpSettings> action) {
-			return new FlurlRequest(url).WithSettings(action);
+		public static IFlurlRequest Configure(this Url url, Action<FlurlHttpSettings> action) {
+			return new FlurlRequest(url).Configure(action);
 		}
 		/// <summary>
 		/// Creates a new FlurlRequest with the URL and sets the request timeout.
@@ -1037,8 +1037,8 @@ namespace Flurl.Http
 		/// <param name="url">The URL.</param>
 		/// <param name="action">A delegate defining the Settings changes.</param>
 		/// <returns>The IFlurlRequest.</returns>
-		public static IFlurlRequest WithSettings(this string url, Action<FlurlHttpSettings> action) {
-			return new FlurlRequest(url).WithSettings(action);
+		public static IFlurlRequest Configure(this string url, Action<FlurlHttpSettings> action) {
+			return new FlurlRequest(url).Configure(action);
 		}
 		/// <summary>
 		/// Creates a new FlurlRequest with the URL and sets the request timeout.

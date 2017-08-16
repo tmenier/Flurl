@@ -140,7 +140,7 @@ namespace Flurl.Test.Http
 	    public async Task can_simulate_timeout_with_exception_handled() {
 	        HttpTest.SimulateTimeout();
 	        var result = await "http://www.api.com"
-	            .WithSettings(c => c.OnError = call => call.ExceptionHandled = true)
+	            .Configure(c => c.OnError = call => call.ExceptionHandled = true)
 	            .GetAsync();
 	        Assert.IsNull(result);
 	    }

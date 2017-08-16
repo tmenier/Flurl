@@ -8,7 +8,7 @@ namespace Flurl.Http.CodeGen
     class Program
     {
         static int Main(string[] args) {
-	        var codePath = (args.Length > 0) ? args[0] : @"..\Flurl.Http\AutoGenExtensions.cs";
+	        var codePath = (args.Length > 0) ? args[0] : @"..\Flurl.Http\GeneratedExtensions.cs";
 
 			if (!File.Exists(codePath)) {
 				Console.ForegroundColor = ConsoleColor.Red;
@@ -38,7 +38,7 @@ namespace Flurl.Http.CodeGen
                         .WriteLine("/// <summary>")
                         .WriteLine("/// Auto-generated fluent extension methods on String, Url, and IFlurlRequest.")
                         .WriteLine("/// </summary>")
-                        .WriteLine("public static class AutoGenExtensions")
+                        .WriteLine("public static class GeneratedExtensions")
                         .WriteLine("{");
 
                     WriteExtensionMethods(writer);

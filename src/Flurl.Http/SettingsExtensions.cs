@@ -70,7 +70,7 @@ namespace Flurl.Http
 		/// <param name="obj">The IFlurlClient or IFlurlRequest.</param>
 		/// <param name="action">Action defining the settings changes.</param>
 		/// <returns>The T with the modified HttpClient</returns>
-		public static T WithSettings<T>(this T obj, Action<FlurlHttpSettings> action) where T : IHttpSettingsContainer {
+		public static T Configure<T>(this T obj, Action<FlurlHttpSettings> action) where T : IHttpSettingsContainer {
 			action(obj.Settings);
 			return obj;
 		}

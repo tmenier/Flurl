@@ -35,7 +35,7 @@ namespace Flurl.Http.CodeGen
 				.AddParam("expires", "DateTime?", "Expiration for all cookies (optional). If excluded, cookies only live for duration of session.", "null");
 
 			// settings extensions
-			yield return new UrlExtensionMethod("WithSettings", "Creates a new FlurlRequest with the URL and allows changing its Settings inline.")
+			yield return new UrlExtensionMethod("Configure", "Creates a new FlurlRequest with the URL and allows changing its Settings inline.")
 				.AddParam("action", "Action<FlurlHttpSettings>", "A delegate defining the Settings changes.");
 			yield return new UrlExtensionMethod("WithTimeout", "Creates a new FlurlRequest with the URL and sets the request timeout.")
 				.AddParam("timespan", "TimeSpan", "Time to wait before the request times out.");

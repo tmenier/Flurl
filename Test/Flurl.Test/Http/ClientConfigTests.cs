@@ -122,10 +122,10 @@ namespace Flurl.Test.Http
         public void can_override_settings_fluently()
         {
             using (var test = new HttpTest()) {
-	            var client = new FlurlClient().WithSettings(s => s.AllowedHttpStatusRange = "*");
+	            var client = new FlurlClient().Configure(s => s.AllowedHttpStatusRange = "*");
                 test.RespondWith("epic fail", 500);
                 Assert.ThrowsAsync<FlurlHttpException>(async () => await "http://www.api.com"
-					.WithSettings(c => c.AllowedHttpStatusRange = "2xx")
+					.Configure(c => c.AllowedHttpStatusRange = "2xx")
 					.WithClient(client) // client-level settings shouldn't win
 					.GetAsync());
             }
