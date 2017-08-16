@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http.Configuration;
-using Flurl.Http.Testing;
 using Flurl.Util;
 
 namespace Flurl.Http

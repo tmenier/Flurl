@@ -21,7 +21,6 @@ namespace Flurl.Http.Configuration
 		private IDictionary<string, object> _vals = new Dictionary<string, object>();
 
 		private static FlurlHttpSettings _baseDefaults = new FlurlHttpSettings(null) {
-			HttpClientFactory = new DefaultHttpClientFactory(),
 			CookiesEnabled = false,
 			JsonSerializer = new NewtonsoftJsonSerializer(null),
 			UrlEncodedSerializer = new DefaultUrlEncodedSerializer()
@@ -39,16 +38,6 @@ namespace Flurl.Http.Configuration
 		/// </summary>
 		public FlurlHttpSettings() {
 			_defaults = _baseDefaults;
-		}
-
-		/// <summary>
-		/// Gets or sets a factory used to create HttpClient object used in Flurl HTTP calls. Default value
-		/// is an instance of DefaultHttpClientFactory. Custom factory implementations should generally
-		/// inherit from DefaultHttpClientFactory, the base implementations, and only customize as needed.
-		/// </summary>
-		public IHttpClientFactory HttpClientFactory {
-			get => Get(() => HttpClientFactory);
-			set => Set(() => HttpClientFactory, value);
 		}
 
 		/// <summary>
@@ -150,7 +139,10 @@ namespace Flurl.Http.Configuration
 			_vals.Clear();
 		}
 
-		private T Get<T>(Expression<Func<T>> property) {
+		/// <summary>
+		/// Gets a settings value from this instance if explicitly set, otherwise from the default settings that back this instance.
+		/// </summary>
+		protected T Get<T>(Expression<Func<T>> property) {
 			var p = (property.Body as MemberExpression).Member as PropertyInfo;
 			return
 				_vals.ContainsKey(p.Name) ? (T)_vals[p.Name] :
@@ -158,7 +150,10 @@ namespace Flurl.Http.Configuration
 				default(T);
 		}
 
-		private void Set<T>(Expression<Func<T>> property, T value) {
+		/// <summary>
+		/// Sets a settings value for this instance.
+		/// </summary>
+		protected void Set<T>(Expression<Func<T>> property, T value) {
 			var p = (property.Body as MemberExpression).Member as PropertyInfo;
 			_vals[p.Name] = value;
 		}
@@ -184,5 +179,12 @@ namespace Flurl.Http.Configuration
 		/// by proxy, HttpClient instances.
 		/// </summary>
 		public IFlurlClientFactory FlurlClientFactory { get; set; } = new DefaultFlurlClientFactory();
+
+		/// <summary>
+		/// Gets or sets a factory used to create the HttpClient and HttpMessageHandler used for HTTP calls.
+		/// Whenever possible, custom factory implementations should inherit from DefaultHttpClientFactory,
+		/// only override the method(s) needed, call the base method, and modify the result.
+		/// </summary>
+		public IHttpClientFactory HttpClientFactory { get; set; } = new DefaultHttpClientFactory();
 	}
 }

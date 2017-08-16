@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using Flurl.Http.Configuration;
 
 namespace Flurl.Http
@@ -31,8 +28,9 @@ namespace Flurl.Http
 	/// </summary>
 	public class FlurlClient : IFlurlClient
 	{
-		private HttpClient _httpClient;
-		private HttpMessageHandler _httpMessageHandler;
+		private IHttpClientFactory _httpClientFactory;
+		private readonly Lazy<HttpClient> _httpClient;
+		private readonly Lazy<HttpMessageHandler> _httpMessageHandler;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
@@ -40,8 +38,8 @@ namespace Flurl.Http
 		/// <param name="settings">The FlurlHttpSettings associated with this instance.</param>
 		public FlurlClient(FlurlHttpSettings settings = null) {
 			Settings = settings ?? new FlurlHttpSettings(FlurlHttp.GlobalSettings);
-			HttpMessageHandler = Settings.HttpClientFactory.CreateMessageHandler();
-			HttpClient = Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler);
+			_httpClient = new Lazy<HttpClient>(() => HttpClientFactory.CreateHttpClient(HttpMessageHandler));
+			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => HttpClientFactory.CreateMessageHandler());
 		}
 
 		/// <summary>
@@ -58,6 +56,16 @@ namespace Flurl.Http
 		public FlurlHttpSettings Settings { get; set; }
 
 		/// <summary>
+		/// Gets or sets a factory used to create the HttpClient and HttpMessageHandler used for HTTP calls.
+		/// Whenever possible, custom factory implementations should inherit from DefaultHttpClientFactory,
+		/// only override the method(s) needed, call the base method, and modify the result.
+		/// </summary>
+		public IHttpClientFactory HttpClientFactory {
+			get => _httpClientFactory ?? FlurlHttp.GlobalSettings.HttpClientFactory;
+			set => _httpClientFactory = value;
+		}
+
+		/// <summary>
 		/// Collection of headers sent on all requests using this client.
 		/// </summary>
 		public IDictionary<string, object> Headers { get; } = new Dictionary<string, object>();
@@ -71,48 +79,22 @@ namespace Flurl.Http
 		/// Gets the HttpClient to be used in subsequent HTTP calls. Creation (when necessary) is delegated
 		/// to FlurlHttp.FlurlClientFactory. Reused for the life of the FlurlClient.
 		/// </summary>
-		public HttpClient HttpClient { get; }
+		public HttpClient HttpClient => _httpClient.Value;
 
 		/// <summary>
 		/// Gets the HttpMessageHandler to be used in subsequent HTTP calls. Creation (when necessary) is delegated
 		/// to FlurlHttp.FlurlClientFactory.
 		/// </summary>
-		public HttpMessageHandler HttpMessageHandler { get; }
-
-		//private HttpClient EnsureHttpClient(HttpClient hc = null) {
-		//	if (_httpClient == null) {
-		//		if (hc == null) {
-		//			hc = Settings.FlurlClientFactory.CreateHttpClient(Url, HttpMessageHandler);
-		//			hc.Timeout = Settings.DefaultTimeout;
-		//		}
-		//		_httpClient = hc;
-		//		_parent?.EnsureHttpClient(hc);
-		//	}
-		//	return _httpClient;
-		//}
-
-		//private HttpMessageHandler EnsureHttpMessageHandler(HttpMessageHandler handler = null) {
-		//	if (_httpMessageHandler == null) {
-		//		if (handler == null) {
-		//			handler = (HttpTest.Current == null) ?
-		//				Settings.FlurlClientFactory.CreateMessageHandler() :
-		//				new FakeHttpMessageHandler();
-		//		}
-		//		_httpMessageHandler = handler;
-		//		_parent?.EnsureHttpMessageHandler(handler);
-		//	}
-		//	return _httpMessageHandler;
-		//}
+		public HttpMessageHandler HttpMessageHandler => _httpMessageHandler.Value;
 
 		/// <summary>
-		/// Disposes the underlying HttpClient and HttpMessageHandler, setting both properties to null.
+		/// Disposes the underlying HttpClient and HttpMessageHandler.
 		/// </summary>
 		public void Dispose() {
-			_httpMessageHandler?.Dispose();
-			_httpClient?.Dispose();
-			_httpMessageHandler = null;
-			_httpClient = null;
-			Cookies = new Dictionary<string, Cookie>();
+			if (_httpMessageHandler.IsValueCreated)
+				_httpMessageHandler.Value.Dispose();
+			if (_httpClient.IsValueCreated)
+				_httpClient.Value.Dispose();
 		}
 	}
 }
