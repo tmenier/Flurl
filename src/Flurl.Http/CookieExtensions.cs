@@ -16,100 +16,53 @@ namespace Flurl.Http
 		/// <summary>
 		/// Allows cookies to be sent and received. Not necessary to call when setting cookies via WithCookie/WithCookies.
 		/// </summary>
-		/// <param name="client">The IFlurlClient.</param>
+		/// <param name="clientOrRequest">The IFlurlClient or IFlurlRequest.</param>
 		/// <returns>This IFlurlClient.</returns>
-		public static IFlurlClient EnableCookies(this IFlurlClient client) {
-			client.Settings.CookiesEnabled = true;
-			return client;
+		public static T EnableCookies<T>(this T clientOrRequest) where T : IHttpSettingsContainer {
+			clientOrRequest.Settings.CookiesEnabled = true;
+			return clientOrRequest;
 		}
 
 		/// <summary>
-		/// Sets an HTTP cookie to be sent with all requests made with this IFlurlClient.
+		/// Sets an HTTP cookie to be sent with this IFlurlRequest or all requests made with this IFlurlClient.
 		/// </summary>
-		/// <param name="client">The IFlurlClient.</param>
+		/// <param name="clientOrRequest">The IFlurlClient or IFlurlRequest.</param>
 		/// <param name="cookie">The cookie to set.</param>
 		/// <returns>This IFlurlClient.</returns>
-		public static IFlurlClient WithCookie(this IFlurlClient client, Cookie cookie) {
-			client.Settings.CookiesEnabled = true;
-			client.Cookies[cookie.Name] = cookie;
-			return client;
+		public static T WithCookie<T>(this T clientOrRequest, Cookie cookie) where T : IHttpSettingsContainer {
+			clientOrRequest.Settings.CookiesEnabled = true;
+			clientOrRequest.Cookies[cookie.Name] = cookie;
+			return clientOrRequest;
 		}
 
 		/// <summary>
-		/// Sets an HTTP cookie to be sent with all requests made with this IFlurlClient.
+		/// Sets an HTTP cookie to be sent with this IFlurlRequest or all requests made with this IFlurlClient.
 		/// </summary>
-		/// <param name="client">The IFlurlClient.</param>
+		/// <param name="clientOrRequest">The IFlurlClient or IFlurlRequest.</param>
 		/// <param name="name">The cookie name.</param>
 		/// <param name="value">The cookie value.</param>
 		/// <param name="expires">The cookie expiration (optional). If excluded, cookie only lives for duration of session.</param>
 		/// <returns>This IFlurlClient.</returns>
-		public static IFlurlClient WithCookie(this IFlurlClient client, string name, object value, DateTime? expires = null) {
+		public static T WithCookie<T>(this T clientOrRequest, string name, object value, DateTime? expires = null) where T : IHttpSettingsContainer {
 			var cookie = new Cookie(name, value?.ToInvariantString()) { Expires = expires ?? DateTime.MinValue };
-			return client.WithCookie(cookie);
+			return clientOrRequest.WithCookie(cookie);
 		}
 
 		/// <summary>
-		/// Sets HTTP cookies to be sent with all requests made with this IFlurlClient, based on property names/values of the provided object, or keys/values if object is a dictionary.
+		/// Sets HTTP cookies to be sent with this IFlurlRequest or all requests made with this IFlurlClient, based on property names/values of the provided object, or keys/values if object is a dictionary.
 		/// </summary>
-		/// <param name="client">The IFlurlClient.</param>
+		/// <param name="clientOrRequest">The IFlurlClient or IFlurlRequest.</param>
 		/// <param name="cookies">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
 		/// <param name="expires">Expiration for all cookies (optional). If excluded, cookies only live for duration of session.</param>
 		/// <returns>This IFlurlClient.</returns>
-		public static IFlurlClient WithCookies(this IFlurlClient client, object cookies, DateTime? expires = null) {
+		public static T WithCookies<T>(this T clientOrRequest, object cookies, DateTime? expires = null) where T : IHttpSettingsContainer {
 			if (cookies == null)
-				return client;
+				return clientOrRequest;
 
 			foreach (var kv in cookies.ToKeyValuePairs())
-				client.WithCookie(kv.Key, kv.Value, expires);
+				clientOrRequest.WithCookie(kv.Key, kv.Value, expires);
 
-			return client;
-		}
-
-		/// <summary>
-		/// Allows cookies to be sent and received with this request's IFlurlClient. Not necessary to call when setting cookies via WithCookie/WithCookies.
-		/// </summary>
-		/// <param name="request">The IFlurlRequest.</param>
-		/// <returns>This IFlurlRequest.</returns>
-		public static IFlurlRequest EnableCookies(this IFlurlRequest request) {
-			request.Settings.CookiesEnabled = true; // a little awkward to have this at both the client and request.
-			request.Client.EnableCookies();
-			return request;
-		}
-
-		/// <summary>
-		/// Sets an HTTP cookie to be sent with this request's IFlurlClient.
-		/// </summary>
-		/// <param name="request">The IFlurlRequest.</param>
-		/// <param name="cookie">The cookie to set.</param>
-		/// <returns>This IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookie(this IFlurlRequest request, Cookie cookie) {
-			request.Client.WithCookie(cookie);
-			return request;
-		}
-
-		/// <summary>
-		/// Sets an HTTP cookie to be sent with this request's IFlurlClient.
-		/// </summary>
-		/// <param name="request">The IFlurlRequest.</param>
-		/// <param name="name">The cookie name.</param>
-		/// <param name="value">The cookie value.</param>
-		/// <param name="expires">The cookie expiration (optional). If excluded, cookie only lives for duration of session.</param>
-		/// <returns>This IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookie(this IFlurlRequest request, string name, object value, DateTime? expires = null) {
-			request.Client.WithCookie(name, value, expires);
-			return request;
-		}
-
-		/// <summary>
-		/// Sets HTTP cookies to be sent with this request's IFlurlClient, based on property names/values of the provided object, or keys/values if object is a dictionary.
-		/// </summary>
-		/// <param name="request">The IFlurlRequest.</param>
-		/// <param name="cookies">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
-		/// <param name="expires">Expiration for all cookies (optional). If excluded, cookies only live for duration of session.</param>
-		/// <returns>This IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookies(this IFlurlRequest request, object cookies, DateTime? expires = null) {
-			request.Client.WithCookies(cookies, expires);
-			return request;
+			return clientOrRequest;
 		}
 	}
 }
