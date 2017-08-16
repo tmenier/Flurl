@@ -120,47 +120,42 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void settings_propagate_correctly() {
-			try {
-				FlurlHttp.GlobalSettings.CookiesEnabled = false;
-				FlurlHttp.GlobalSettings.AllowedHttpStatusRange = "4xx";
+			FlurlHttp.GlobalSettings.CookiesEnabled = false;
+			FlurlHttp.GlobalSettings.AllowedHttpStatusRange = "4xx";
 
-				var client1 = new FlurlClient();
-				client1.Settings.CookiesEnabled = true;
-				Assert.AreEqual("4xx", client1.Settings.AllowedHttpStatusRange);
-				client1.Settings.AllowedHttpStatusRange = "5xx";
+			var client1 = new FlurlClient();
+			client1.Settings.CookiesEnabled = true;
+			Assert.AreEqual("4xx", client1.Settings.AllowedHttpStatusRange);
+			client1.Settings.AllowedHttpStatusRange = "5xx";
 
-				var req = client1.WithUrl("http://myapi.com");
-				Assert.IsTrue(req.Settings.CookiesEnabled, "request should inherit client settings when not set at request level");
-				Assert.AreEqual("5xx", req.Settings.AllowedHttpStatusRange, "request should inherit client settings when not set at request level");
+			var req = client1.WithUrl("http://myapi.com");
+			Assert.IsTrue(req.Settings.CookiesEnabled, "request should inherit client settings when not set at request level");
+			Assert.AreEqual("5xx", req.Settings.AllowedHttpStatusRange, "request should inherit client settings when not set at request level");
 
-				var client2 = new FlurlClient();
-				client2.Settings.CookiesEnabled = false;
+			var client2 = new FlurlClient();
+			client2.Settings.CookiesEnabled = false;
 
-				req.WithClient(client2);
-				Assert.IsFalse(req.Settings.CookiesEnabled, "request should inherit client settings when not set at request level");
-				Assert.AreEqual("4xx", req.Settings.AllowedHttpStatusRange, "request should inherit global settings when not set at request or client level");
+			req.WithClient(client2);
+			Assert.IsFalse(req.Settings.CookiesEnabled, "request should inherit client settings when not set at request level");
+			Assert.AreEqual("4xx", req.Settings.AllowedHttpStatusRange, "request should inherit global settings when not set at request or client level");
 
-				client2.Settings.CookiesEnabled = true;
-				client2.Settings.AllowedHttpStatusRange = "3xx";
-				Assert.IsTrue(req.Settings.CookiesEnabled, "request should inherit client sttings when not set at request level");
-				Assert.AreEqual("3xx", req.Settings.AllowedHttpStatusRange, "request should inherit client sttings when not set at request level");
+			client2.Settings.CookiesEnabled = true;
+			client2.Settings.AllowedHttpStatusRange = "3xx";
+			Assert.IsTrue(req.Settings.CookiesEnabled, "request should inherit client sttings when not set at request level");
+			Assert.AreEqual("3xx", req.Settings.AllowedHttpStatusRange, "request should inherit client sttings when not set at request level");
 
-				req.Settings.CookiesEnabled = false;
-				req.Settings.AllowedHttpStatusRange = "6xx";
-				Assert.IsFalse(req.Settings.CookiesEnabled, "request-level settings should override any defaults");
-				Assert.AreEqual("6xx", req.Settings.AllowedHttpStatusRange, "request-level settings should override any defaults");
+			req.Settings.CookiesEnabled = false;
+			req.Settings.AllowedHttpStatusRange = "6xx";
+			Assert.IsFalse(req.Settings.CookiesEnabled, "request-level settings should override any defaults");
+			Assert.AreEqual("6xx", req.Settings.AllowedHttpStatusRange, "request-level settings should override any defaults");
 
-				req.Settings.ResetDefaults();
-				Assert.IsTrue(req.Settings.CookiesEnabled, "request should inherit client sttings when cleared at request level");
-				Assert.AreEqual("3xx", req.Settings.AllowedHttpStatusRange, "request should inherit client sttings when cleared request level");
+			req.Settings.ResetDefaults();
+			Assert.IsTrue(req.Settings.CookiesEnabled, "request should inherit client sttings when cleared at request level");
+			Assert.AreEqual("3xx", req.Settings.AllowedHttpStatusRange, "request should inherit client sttings when cleared request level");
 
-				client2.Settings.ResetDefaults();
-				Assert.IsFalse(req.Settings.CookiesEnabled, "request should inherit global settings when cleared at request and client level");
-				Assert.AreEqual("4xx", req.Settings.AllowedHttpStatusRange, "request should inherit global settings when cleared at request and client level");
-			}
-			finally {
-				FlurlHttp.GlobalSettings.ResetDefaults();
-			}
+			client2.Settings.ResetDefaults();
+			Assert.IsFalse(req.Settings.CookiesEnabled, "request should inherit global settings when cleared at request and client level");
+			Assert.AreEqual("4xx", req.Settings.AllowedHttpStatusRange, "request should inherit global settings when cleared at request and client level");
 		}
 
 		[Test]

@@ -70,7 +70,7 @@ namespace Flurl.Http.Testing
 		/// <param name="cookies">The simulated response cookies (optional).</param>
 		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
 		public HttpTest RespondWithJson(object body, int status = 200, object headers = null, object cookies = null) {
-			var content = new CapturedJsonContent(FlurlHttp.GlobalSettings.JsonSerializer.Serialize(body));
+			var content = new CapturedJsonContent(Settings.JsonSerializer.Serialize(body));
 			return RespondWith(content, status, headers, cookies);
 		}
 
