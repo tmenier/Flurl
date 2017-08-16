@@ -36,33 +36,33 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_set_cookies_before_setting_url() {
-			var fc = new FlurlClient().WithCookie("z", "999");
-			var resp = await fc.WithUrl("http://httpbin.org/cookies").GetJsonAsync();
+			var client = new FlurlClient().WithCookie("z", "999");
+			var resp = await client.WithUrl("http://httpbin.org/cookies").GetJsonAsync();
 			Assert.AreEqual("999", resp.cookies.z);
 		}
 
 		[Test]
 		public async Task can_get_response_cookies() {
-			var fc = new FlurlClient().EnableCookies();
-			await fc.WithUrl("https://httpbin.org/cookies/set?z=999").HeadAsync();
-			Assert.AreEqual("999", fc.Cookies["z"].Value);
+			var client = new FlurlClient().EnableCookies();
+			await client.WithUrl("https://httpbin.org/cookies/set?z=999").HeadAsync();
+			Assert.AreEqual("999", client.Cookies["z"].Value);
 		}
 
 		[Test]
 		public async Task can_persist_cookies() {
-			using (var fc = new FlurlClient()) {
-				var req = "http://httpbin.org/cookies".WithClient(fc).WithCookie("z", 999);
+			using (var client = new FlurlClient()) {
+				var req = "http://httpbin.org/cookies".WithClient(client).WithCookie("z", 999);
 				// cookie should be set
-				Assert.AreEqual("999", fc.Cookies["z"].Value);
+				Assert.AreEqual("999", client.Cookies["z"].Value);
 				Assert.AreEqual("999", req.Cookies["z"].Value);
 
 				await req.HeadAsync();
 				// FlurlClient should be re-used, so cookie should stick
-				Assert.AreEqual("999", fc.Cookies["z"].Value);
+				Assert.AreEqual("999", client.Cookies["z"].Value);
 				Assert.AreEqual("999", req.Cookies["z"].Value);
 
 				// httpbin returns json representation of cookies that were set on the server.
-				var resp = await "http://httpbin.org/cookies".WithClient(fc).GetJsonAsync();
+				var resp = await "http://httpbin.org/cookies".WithClient(client).GetJsonAsync();
 				Assert.AreEqual("999", resp.cookies.z);
 			}
 		}
