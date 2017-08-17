@@ -11,7 +11,7 @@ echo Restoring dependicies was successful.
 
 @set project=..\src\Flurl.Http.CodeGen\Flurl.Http.CodeGen.csproj
 
-@call dotnet run -c Release -p %project% ..\src\Flurl.Http\AutoGenExtensions.cs
+@call dotnet run -c Release -p %project% ..\src\Flurl.Http\GeneratedExtensions.cs
 @if ERRORLEVEL 1 (
 echo Error! Generation cs file failed.
 exit /b 1
