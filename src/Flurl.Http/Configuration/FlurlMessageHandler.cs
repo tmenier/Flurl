@@ -33,7 +33,7 @@ namespace Flurl.Http.Configuration
 			await FlurlHttp.RaiseEventAsync(request, FlurlEventType.BeforeCall).ConfigureAwait(false);
 			call.StartedUtc = DateTime.UtcNow;
 			try {
-				call.Response = await InnerSendAsync(call, request, cancellationToken).ConfigureAwait(false);
+				call.Response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 				call.Response.RequestMessage = request;
 				if (call.Succeeded)
 					return call.Response;
@@ -50,18 +50,6 @@ namespace Flurl.Http.Configuration
 			finally {
 				call.EndedUtc = DateTime.UtcNow;
 				await FlurlHttp.RaiseEventAsync(request, FlurlEventType.AfterCall).ConfigureAwait(false);
-			}
-		}
-
-		private async Task<HttpResponseMessage> InnerSendAsync(HttpCall call, HttpRequestMessage request, CancellationToken cancellationToken) {
-			try {
-				return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
-			}
-			catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested) {
-				throw new FlurlHttpTimeoutException(call, ex);
-			}
-			catch (Exception ex) {
-				throw new FlurlHttpException(call, ex);
 			}
 		}
 	}

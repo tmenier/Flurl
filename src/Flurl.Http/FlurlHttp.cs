@@ -27,7 +27,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="configAction"></param>
 		/// <exception cref="Exception">A delegate callback throws an exception.</exception>
-		public static void Configure(Action<FlurlHttpSettings> configAction) {
+		public static void Configure(Action<GlobalFlurlHttpSettings> configAction) {
 			lock (_configLock) {
 				configAction(GlobalSettings);
 			}

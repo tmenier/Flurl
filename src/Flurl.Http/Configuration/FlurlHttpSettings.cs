@@ -21,6 +21,7 @@ namespace Flurl.Http.Configuration
 		private IDictionary<string, object> _vals = new Dictionary<string, object>();
 
 		private static FlurlHttpSettings _baseDefaults = new FlurlHttpSettings(null) {
+			Timeout = TimeSpan.FromSeconds(100), // same as HttpClient
 			CookiesEnabled = false,
 			JsonSerializer = new NewtonsoftJsonSerializer(null),
 			UrlEncodedSerializer = new DefaultUrlEncodedSerializer()

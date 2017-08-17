@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,7 +17,7 @@ namespace Flurl.Test.Http
 		[Test]
 		public async Task can_download_file() {
 			var folder = "c:\\flurl-test-" + Guid.NewGuid(); // random so parallel tests don't trip over each other
-			var path = await "http://www.google.com".DownloadFileAsync(folder, "google.txt");
+			var path = await "https://www.google.com".DownloadFileAsync(folder, "google.txt");
 			Assert.AreEqual($@"{folder}\google.txt", path);
 			Assert.That(File.Exists(path));
 			File.Delete(path);
@@ -27,7 +26,8 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_set_request_cookies() {
-			var resp = await "http://httpbin.org/cookies".WithCookies(new { x = 1, y = 2 }).GetJsonAsync();
+			var client = new FlurlClient();
+			var resp = await client.WithUrl("https://httpbin.org/cookies").WithCookies(new { x = 1, y = 2 }).GetJsonAsync();
 
 			// httpbin returns json representation of cookies that were set on the server.
 			Assert.AreEqual("1", resp.cookies.x);
@@ -37,7 +37,7 @@ namespace Flurl.Test.Http
 		[Test]
 		public async Task can_set_cookies_before_setting_url() {
 			var client = new FlurlClient().WithCookie("z", "999");
-			var resp = await client.WithUrl("http://httpbin.org/cookies").GetJsonAsync();
+			var resp = await client.WithUrl("https://httpbin.org/cookies").GetJsonAsync();
 			Assert.AreEqual("999", resp.cookies.z);
 		}
 
@@ -50,33 +50,32 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_persist_cookies() {
-			using (var client = new FlurlClient()) {
-				var req = "http://httpbin.org/cookies".WithClient(client).WithCookie("z", 999);
-				// cookie should be set
-				Assert.AreEqual("999", client.Cookies["z"].Value);
-				Assert.AreEqual("999", req.Cookies["z"].Value);
+			var client = new FlurlClient();
+			var req = "https://httpbin.org/cookies".WithClient(client).WithCookie("z", 999);
+			// cookie should be set
+			Assert.AreEqual("999", client.Cookies["z"].Value);
+			Assert.AreEqual("999", req.Cookies["z"].Value);
 
-				await req.HeadAsync();
-				// FlurlClient should be re-used, so cookie should stick
-				Assert.AreEqual("999", client.Cookies["z"].Value);
-				Assert.AreEqual("999", req.Cookies["z"].Value);
+			await req.HeadAsync();
+			// FlurlClient should be re-used, so cookie should stick
+			Assert.AreEqual("999", client.Cookies["z"].Value);
+			Assert.AreEqual("999", req.Cookies["z"].Value);
 
-				// httpbin returns json representation of cookies that were set on the server.
-				var resp = await "http://httpbin.org/cookies".WithClient(client).GetJsonAsync();
-				Assert.AreEqual("999", resp.cookies.z);
-			}
+			// httpbin returns json representation of cookies that were set on the server.
+			var resp = await "https://httpbin.org/cookies".WithClient(client).GetJsonAsync();
+			Assert.AreEqual("999", resp.cookies.z);
 		}
 
 		[Test]
 		public async Task can_post_and_receive_json() {
-			var result = await "http://httpbin.org/post".PostJsonAsync(new { a = 1, b = 2 }).ReceiveJson();
+			var result = await "https://httpbin.org/post".PostJsonAsync(new { a = 1, b = 2 }).ReceiveJson();
 			Assert.AreEqual(result.json.a, 1);
 			Assert.AreEqual(result.json.b, 2);
 		}
 
 		[Test]
 		public async Task can_get_stream() {
-			using (var stream = await "http://www.google.com".GetStreamAsync())
+			using (var stream = await "https://www.google.com".GetStreamAsync())
 			using (var ms = new MemoryStream()) {
 				stream.CopyTo(ms);
 				Assert.Greater(ms.Length, 0);
@@ -85,37 +84,24 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_get_string() {
-			var s = await "http://www.google.com".GetStringAsync();
+			var s = await "https://www.google.com".GetStringAsync();
 			Assert.Greater(s.Length, 0);
 		}
 
 		[Test]
 		public async Task can_get_byte_array() {
-			var bytes = await "http://www.google.com".GetBytesAsync();
+			var bytes = await "https://www.google.com".GetBytesAsync();
 			Assert.Greater(bytes.Length, 0);
 		}
 
 		[Test]
 		public void fails_on_non_success_status() {
-			Assert.ThrowsAsync<FlurlHttpException>(async () => await "http://httpbin.org/status/418".GetAsync());
+			Assert.ThrowsAsync<FlurlHttpException>(async () => await "https://httpbin.org/status/418".GetAsync());
 		}
 
 		[Test]
 		public async Task can_allow_non_success_status() {
-			await "http://httpbin.org/status/418".AllowHttpStatus("4xx").GetAsync();
-		}
-
-		[Test]
-		public void can_cancel_request() {
-			var ex = Assert.ThrowsAsync<FlurlHttpException>(async () =>
-			{
-				var cts = new CancellationTokenSource();
-				var task = "http://www.google.com".GetStringAsync(cts.Token);
-				cts.Cancel();
-				await task;
-			});
-
-			Assert.IsNotNull(ex.InnerException as TaskCanceledException);
+			await "https://httpbin.org/status/418".AllowHttpStatus("4xx").GetAsync();
 		}
 
 		[Test]
@@ -131,7 +117,7 @@ namespace Flurl.Test.Http
 
 			try {
 				using (var stream = File.OpenRead(path2)) {
-					var resp = await "http://httpbin.org/post"
+					var resp = await "https://httpbin.org/post"
 						.PostMultipartAsync(content => {
 							content
 								.AddStringParts(new { a = 1, b = 2 })
@@ -184,6 +170,52 @@ namespace Flurl.Test.Http
 				Assert.AreEqual("fake!", fake);
 			}
 			Assert.AreNotEqual("fake!", await realTask);
+		}
+
+		[Test]
+		public void can_set_timeout() {
+			var ex = Assert.ThrowsAsync<FlurlHttpTimeoutException>(async () => {
+				await "https://httpbin.org/delay/5"
+					.WithTimeout(TimeSpan.FromMilliseconds(50))
+					.HeadAsync();
+			});
+			Assert.That(ex.InnerException is TaskCanceledException);
+		}
+
+		[Test]
+		public void can_cancel_request() {
+			var cts = new CancellationTokenSource();
+			var ex = Assert.ThrowsAsync<FlurlHttpException>(async () => {
+				var task = "https://httpbin.org/delay/5".GetAsync(cts.Token);
+				cts.Cancel();
+				await task;
+			});
+			Assert.That(ex.InnerException is TaskCanceledException);
+		}
+
+		[Test] // make sure the 2 tokens in play are playing nicely together
+		public void can_set_timeout_and_cancellation_token() {
+			// cancellation with timeout value set
+			var cts = new CancellationTokenSource();
+			var ex = Assert.ThrowsAsync<FlurlHttpException>(async () => {
+				var task = "https://httpbin.org/delay/5"
+					.WithTimeout(TimeSpan.FromMilliseconds(50))
+					.GetAsync(cts.Token);
+				cts.Cancel();
+				await task;
+			});
+			Assert.That(ex.InnerException is TaskCanceledException);
+			Assert.IsTrue(cts.Token.IsCancellationRequested);
+
+			// timeout with cancellation token set
+			cts = new CancellationTokenSource();
+			ex = Assert.ThrowsAsync<FlurlHttpTimeoutException>(async () => {
+				await "https://httpbin.org/delay/5"
+					.WithTimeout(TimeSpan.FromMilliseconds(50))
+					.GetAsync(cts.Token);
+			});
+			Assert.That(ex.InnerException is TaskCanceledException);
+			Assert.IsFalse(cts.Token.IsCancellationRequested);
 		}
 	}
 }
