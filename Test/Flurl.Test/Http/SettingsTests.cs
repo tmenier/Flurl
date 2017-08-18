@@ -105,6 +105,23 @@ namespace Flurl.Test.Http
 				}
 			}
 		}
+
+		[Test]
+		public void can_reset_defaults() {
+			GetSettings().JsonSerializer = null;
+			GetSettings().CookiesEnabled = true;
+			GetSettings().BeforeCall = (call) => Console.WriteLine("Before!");
+
+			Assert.IsNull(GetSettings().JsonSerializer);
+			Assert.IsTrue(GetSettings().CookiesEnabled);
+			Assert.IsNotNull(GetSettings().BeforeCall);
+
+			GetSettings().ResetDefaults();
+
+			Assert.That(GetSettings().JsonSerializer is NewtonsoftJsonSerializer);
+			Assert.IsFalse(GetSettings().CookiesEnabled);
+			Assert.IsNull(GetSettings().BeforeCall);
+		}
 	}
 
 	[TestFixture, NonParallelizable] // touches global settings, so can't run in parallel
@@ -114,9 +131,7 @@ namespace Flurl.Test.Http
 		protected override IFlurlRequest GetRequest() => new FlurlRequest("http://api.com");
 
 		[TearDown]
-		public void ResetDefaults() {
-			FlurlHttp.GlobalSettings.ResetDefaults();
-		}
+		public void ResetDefaults() => FlurlHttp.GlobalSettings.ResetDefaults();
 
 		[Test]
 		public void settings_propagate_correctly() {
@@ -169,6 +184,14 @@ namespace Flurl.Test.Http
 	[TestFixture, Parallelizable]
 	public class HttpTestSettingsTests : SettingsTestsBase
 	{
+		private HttpTest _test;
+
+		[SetUp]
+		public void CreateTest() => _test = new HttpTest();
+
+		[TearDown]
+		public void DisposeTest() => _test.Dispose();
+
 		protected override FlurlHttpSettings GetSettings() => HttpTest.Current.Settings;
 		protected override IFlurlRequest GetRequest() => new FlurlRequest("http://api.com");
 	}

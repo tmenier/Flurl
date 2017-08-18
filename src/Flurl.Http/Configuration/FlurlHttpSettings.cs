@@ -20,13 +20,6 @@ namespace Flurl.Http.Configuration
 		// because if a setting is set to null at the request level, that should stick.
 		private IDictionary<string, object> _vals = new Dictionary<string, object>();
 
-		private static FlurlHttpSettings _baseDefaults = new FlurlHttpSettings(null) {
-			Timeout = TimeSpan.FromSeconds(100), // same as HttpClient
-			CookiesEnabled = false,
-			JsonSerializer = new NewtonsoftJsonSerializer(null),
-			UrlEncodedSerializer = new DefaultUrlEncodedSerializer()
-		};
-
 		/// <summary>
 		/// Creates a new FlurlHttpSettings object using another FlurlHttpSettings object as its default values.
 		/// </summary>
@@ -37,9 +30,7 @@ namespace Flurl.Http.Configuration
 		/// <summary>
 		/// Creates a new FlurlHttpSettings object.
 		/// </summary>
-		public FlurlHttpSettings() {
-			_defaults = _baseDefaults;
-		}
+		public FlurlHttpSettings() : this(FlurlHttp.GlobalSettings) { }
 
 		/// <summary>
 		/// Gets or sets the HTTP request timeout.
@@ -134,9 +125,10 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <summary>
-		/// Clears all custom options and resets them to their default values.
+		/// Resets all overridden settings to their default values. For example, on a FlurlRequest,
+		/// all settings are reset to FlurlClient-level settings.
 		/// </summary>
-		public void ResetDefaults() {
+		public virtual void ResetDefaults() {
 			_vals.Clear();
 		}
 
@@ -175,17 +167,34 @@ namespace Flurl.Http.Configuration
 	/// </summary>
 	public class GlobalFlurlHttpSettings : FlurlHttpSettings
 	{
+		internal GlobalFlurlHttpSettings() : base(null) {
+			ResetDefaults();
+		}
+
 		/// <summary>
 		/// Gets or sets the factory that defines creating, caching, and reusing FlurlClient instances and,
 		/// by proxy, HttpClient instances.
 		/// </summary>
-		public IFlurlClientFactory FlurlClientFactory { get; set; } = new DefaultFlurlClientFactory();
+		public IFlurlClientFactory FlurlClientFactory { get; set; }
 
 		/// <summary>
 		/// Gets or sets a factory used to create the HttpClient and HttpMessageHandler used for HTTP calls.
 		/// Whenever possible, custom factory implementations should inherit from DefaultHttpClientFactory,
 		/// only override the method(s) needed, call the base method, and modify the result.
 		/// </summary>
-		public IHttpClientFactory HttpClientFactory { get; set; } = new DefaultHttpClientFactory();
+		public IHttpClientFactory HttpClientFactory { get; set; }
+
+		/// <summary>
+		/// Resets all global settings to their Flurl.Http-defined default values.
+		/// </summary>
+		public override void ResetDefaults() {
+			base.ResetDefaults();
+			Timeout = TimeSpan.FromSeconds(100); // same as HttpClient
+			CookiesEnabled = false;
+			JsonSerializer = new NewtonsoftJsonSerializer(null);
+			UrlEncodedSerializer = new DefaultUrlEncodedSerializer();
+			FlurlClientFactory = new DefaultFlurlClientFactory();
+			HttpClientFactory = new DefaultHttpClientFactory();
+		}
 	}
 }
