@@ -47,10 +47,11 @@ namespace Flurl.Http
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlRequest"/> class.
 		/// </summary>
+		/// <param name="client">The IFlurlClient used to send the request.</param>
 		/// <param name="url">The URL to call with this FlurlRequest instance.</param>
-		/// <param name="settings">The FlurlHttpSettings object used by this request.</param>
-		public FlurlRequest(Url url, FlurlHttpSettings settings = null) {
-			Settings = settings ?? new FlurlHttpSettings().Merge(FlurlHttp.GlobalSettings);
+		public FlurlRequest(IFlurlClient client, Url url = null) {
+			Settings = new FlurlHttpSettings().Merge(FlurlHttp.GlobalSettings);
+			Client = client;
 			Url = url;
 		}
 
@@ -58,8 +59,10 @@ namespace Flurl.Http
 		/// Initializes a new instance of the <see cref="FlurlRequest"/> class.
 		/// </summary>
 		/// <param name="url">The URL to call with this FlurlRequest instance.</param>
-		/// <param name="settings">The FlurlHttpSettings object used by this request.</param>
-		public FlurlRequest(string url, FlurlHttpSettings settings = null) : this(new Url(url), settings) { }
+		public FlurlRequest(Url url = null) {
+			Settings = new FlurlHttpSettings().Merge(FlurlHttp.GlobalSettings);
+			Url = url;
+		}
 
 		/// <summary>
 		/// Gets or sets the FlurlHttpSettings used by this request.
@@ -79,7 +82,7 @@ namespace Flurl.Http
 			}
 			set {
 				_client = value;
-				Settings.Merge(_client.Settings);
+				Settings.Merge(_client?.Settings ?? FlurlHttp.GlobalSettings);
 			}
 		}
 

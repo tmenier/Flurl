@@ -107,14 +107,14 @@ namespace Flurl.Test.Http
 	public class ClientSettingsExtensionsTests : SettingsExtensionsTests<IFlurlClient>
 	{
 		protected override IFlurlClient GetSettingsContainer() => new FlurlClient();
-		protected override IFlurlRequest GetRequest(IFlurlClient client) => client.WithUrl("http://api.com");
+		protected override IFlurlRequest GetRequest(IFlurlClient client) => client.Request("http://api.com");
 
 		[Test]
 		public void WithUrl_shares_client_but_not_Url() {
 			var client = new FlurlClient().WithCookie("mycookie", "123");
-			var req1 = client.WithUrl("http://www.api.com/for-req1");
-			var req2 = client.WithUrl("http://www.api.com/for-req2");
-			var req3 = client.WithUrl("http://www.api.com/for-req3");
+			var req1 = client.Request("http://www.api.com/for-req1");
+			var req2 = client.Request("http://www.api.com/for-req2");
+			var req3 = client.Request("http://www.api.com/for-req3");
 
 			CollectionAssert.AreEquivalent(req1.Cookies, req2.Cookies);
 			CollectionAssert.AreEquivalent(req1.Cookies, req3.Cookies);
@@ -138,7 +138,7 @@ namespace Flurl.Test.Http
 		[Test]
 		public void can_use_uri_with_WithUrl() {
 			var uri = new System.Uri("http://www.mysite.com/foo?x=1");
-			var req = new FlurlClient().WithUrl(uri);
+			var req = new FlurlClient().Request(uri);
 			Assert.AreEqual(uri.ToString(), req.Url.ToString());
 		}
 

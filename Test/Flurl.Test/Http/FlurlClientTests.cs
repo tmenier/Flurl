@@ -33,5 +33,49 @@ namespace Flurl.Test.Http
 				}
 			}
 		}
+
+		[Test]
+		public void can_create_request_without_base_url() {
+			var cli = new FlurlClient();
+			var req = cli.Request("http://myapi.com/foo");
+			Assert.AreEqual("http://myapi.com/foo", req.Url.ToString());
+		}
+
+		[Test]
+		public void can_create_request_with_base_url() {
+			var cli = new FlurlClient("http://myapi.com");
+			var req = cli.Request("foo", "bar");
+			Assert.AreEqual("http://myapi.com/foo/bar", req.Url.ToString());
+		}
+
+		[Test]
+		public void request_with_full_url_overrides_base_url() {
+			var cli = new FlurlClient("http://myapi.com");
+			var req = cli.Request("http://otherapi.com", "foo");
+			Assert.AreEqual("http://otherapi.com/foo", req.Url.ToString());
+		}
+
+		[Test]
+		public void can_create_request_with_base_url_and_no_segments() {
+			var cli = new FlurlClient("http://myapi.com");
+			var req = cli.Request();
+			Assert.AreEqual("http://myapi.com", req.Url.ToString());
+		}
+
+		[Test]
+		public void cannot_create_request_without_base_url_or_segments() {
+			var cli = new FlurlClient();
+			Assert.Throws<ArgumentException>(() => {
+				var req = cli.Request();
+			});
+		}
+
+		[Test]
+		public void cannot_create_request_without_base_url_or_segments_comprising_full_url() {
+			var cli = new FlurlClient();
+			Assert.Throws<ArgumentException>(() => {
+				var req = cli.Request("foo", "bar");
+			});
+		}
 	}
 }

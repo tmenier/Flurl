@@ -143,7 +143,7 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("4xx", client1.Settings.AllowedHttpStatusRange);
 			client1.Settings.AllowedHttpStatusRange = "5xx";
 
-			var req = client1.WithUrl("http://myapi.com");
+			var req = client1.Request("http://myapi.com");
 			Assert.IsTrue(req.Settings.CookiesEnabled, "request should inherit client settings when not set at request level");
 			Assert.AreEqual("5xx", req.Settings.AllowedHttpStatusRange, "request should inherit client settings when not set at request level");
 
@@ -202,7 +202,7 @@ namespace Flurl.Test.Http
 		private readonly Lazy<IFlurlClient> _client = new Lazy<IFlurlClient>(() => new FlurlClient());
 
 		protected override FlurlHttpSettings GetSettings() => _client.Value.Settings;
-		protected override IFlurlRequest GetRequest() => _client.Value.WithUrl("http://api.com");
+		protected override IFlurlRequest GetRequest() => _client.Value.Request("http://api.com");
 
 		[Test]
 		public void can_provide_custom_client_factory() {

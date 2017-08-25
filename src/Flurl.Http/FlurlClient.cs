@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Linq;
 using Flurl.Http.Configuration;
+using Flurl.Util;
 
 namespace Flurl.Http
 {
@@ -21,10 +23,22 @@ namespace Flurl.Http
 		/// to FlurlHttp.FlurlClientFactory.
 		/// </summary>
 		HttpMessageHandler HttpMessageHandler { get; }
+
+		/// <summary>
+		/// The base URL associated with this client.
+		/// </summary>
+		string BaseUrl { get; set; }
+
+		/// <summary>
+		/// Instantiates a new IFlurClient, optionally appending path segments to the BaseUrl.
+		/// </summary>
+		/// <param name="urlSegments">The URL or URL segments for the request. If BaseUrl is defined, it is assumed that these are path segments off that base.</param>
+		/// <returns>A new IFlurlRequest</returns>
+		IFlurlRequest Request(params object[] urlSegments);
 	}
 
 	/// <summary>
-	/// A chainable wrapper around HttpClient and Flurl.Url.
+	/// A reusable object for making HTTP calls.
 	/// </summary>
 	public class FlurlClient : IFlurlClient
 	{
@@ -35,20 +49,18 @@ namespace Flurl.Http
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
 		/// </summary>
-		/// <param name="settings">The FlurlHttpSettings associated with this instance.</param>
-		public FlurlClient(FlurlHttpSettings settings = null) {
-			Settings = settings ?? new FlurlHttpSettings(FlurlHttp.GlobalSettings);
+		/// <param name="baseUrl">The base URL associated with this client.</param>
+		public FlurlClient(string baseUrl = null) {
+			BaseUrl = baseUrl;
+			Settings = new FlurlHttpSettings(FlurlHttp.GlobalSettings);
 			_httpClient = new Lazy<HttpClient>(() => HttpClientFactory.CreateHttpClient(HttpMessageHandler));
 			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => HttpClientFactory.CreateMessageHandler());
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="FlurlClient"/> class.
+		/// The base URL associated with this client.
 		/// </summary>
-		/// <param name="configure">Action allowing you to overide default settings inline.</param>
-		public FlurlClient(Action<FlurlHttpSettings> configure) : this() {
-			configure(Settings);
-		}
+		public string BaseUrl { get; set; }
 
 		/// <summary>
 		/// Gets or sets the FlurlHttpSettings object used by this client.
@@ -86,6 +98,27 @@ namespace Flurl.Http
 		/// to FlurlHttp.FlurlClientFactory.
 		/// </summary>
 		public HttpMessageHandler HttpMessageHandler => _httpMessageHandler.Value;
+
+		/// <summary>
+		/// Instantiates a new IFlurClient, optionally appending path segments to the BaseUrl.
+		/// </summary>
+		/// <param name="urlSegments">The URL or URL segments for the request. If BaseUrl is defined, it is assumed that these are path segments off that base.</param>
+		/// <returns>A new IFlurlRequest</returns>
+		public IFlurlRequest Request(params object[] urlSegments) {
+			if (!urlSegments.Any()) {
+				if (string.IsNullOrEmpty(BaseUrl))
+					throw new ArgumentException("Cannot create a Request. No URL segments were passed, and this Client does not have a BaseUrl defined.");
+				return new FlurlRequest(this, BaseUrl);
+			}
+
+			if (!Url.IsValid(urlSegments[0]?.ToString())) {
+				if (string.IsNullOrEmpty(BaseUrl))
+					throw new ArgumentException("Cannot create a Request. This Client does not have a BaseUrl defined, and the first segment passed is not a valid URL.");
+				return new FlurlRequest(this, BaseUrl.AppendPathSegments(urlSegments));
+			}
+
+			return new FlurlRequest(this, Url.Combine(urlSegments.Select(s => s.ToInvariantString()).ToArray()));
+		}
 
 		/// <summary>
 		/// Disposes the underlying HttpClient and HttpMessageHandler.

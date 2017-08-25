@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Text;
 using Flurl.Http.Configuration;
 
 namespace Flurl.Http
@@ -12,27 +10,6 @@ namespace Flurl.Http
 	/// </summary>
 	public static class SettingsExtensions
 	{
-		/// <summary>
-		/// Provides access to modifying the underlying HttpClient.
-		/// </summary>
-		/// <param name="client">The client.</param>
-		/// <param name="action">Action to perform on the HttpClient.</param>
-		/// <returns>The FlurlClient with the modified HttpClient</returns>
-		public static IFlurlClient ConfigureHttpClient(this IFlurlClient client, Action<HttpClient> action) {
-			action(client.HttpClient);
-			return client;
-		}
-
-		/// <summary>
-		/// Fluently returns a new IFlurlRequest that can be used to call the given Url with this client.
-		/// </summary>
-		/// <param name="client"></param>
-		/// <param name="url">The Url to call.</param>
-		/// <returns>A new IFlurlRequest to use in calling the Url</returns>
-		public static IFlurlRequest WithUrl(this IFlurlClient client, Url url) {
-			return new FlurlRequest(url) { Client = client };
-		}
-
 		/// <summary>
 		/// Fluently specify the IFlurlClient to use with this IFlurlRequest.
 		/// </summary>
@@ -51,7 +28,7 @@ namespace Flurl.Http
 		/// <param name="client">The IFlurlClient to use to call the Url.</param>
 		/// <returns>A new IFlurlRequest to use in calling the Url</returns>
 		public static IFlurlRequest WithClient(this Url url, IFlurlClient client) {
-			return client.WithUrl(url);
+			return client.Request(url);
 		}
 
 		/// <summary>
@@ -61,7 +38,7 @@ namespace Flurl.Http
 		/// <param name="client">The IFlurlClient to use to call the Url.</param>
 		/// <returns>A new IFlurlRequest to use in calling the Url</returns>
 		public static IFlurlRequest WithClient(this string url, IFlurlClient client) {
-			return client.WithUrl(url);
+			return client.Request(url);
 		}
 
 		/// <summary>
