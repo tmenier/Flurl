@@ -207,7 +207,7 @@ namespace Flurl.Test.Http
 		[Test]
 		public void can_provide_custom_client_factory() {
 			var client = new FlurlClient();
-			client.HttpClientFactory = new SomeCustomHttpClientFactory();
+			client.Settings.HttpClientFactory = new SomeCustomHttpClientFactory();
 			Assert.IsInstanceOf<SomeCustomHttpClient>(client.HttpClient);
 			Assert.IsInstanceOf<SomeCustomMessageHandler>(client.HttpMessageHandler);
 		}

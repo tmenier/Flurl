@@ -42,7 +42,6 @@ namespace Flurl.Http
 	/// </summary>
 	public class FlurlClient : IFlurlClient
 	{
-		private IHttpClientFactory _httpClientFactory;
 		private readonly Lazy<HttpClient> _httpClient;
 		private readonly Lazy<HttpMessageHandler> _httpMessageHandler;
 
@@ -52,9 +51,9 @@ namespace Flurl.Http
 		/// <param name="baseUrl">The base URL associated with this client.</param>
 		public FlurlClient(string baseUrl = null) {
 			BaseUrl = baseUrl;
-			Settings = new FlurlHttpSettings(FlurlHttp.GlobalSettings);
-			_httpClient = new Lazy<HttpClient>(() => HttpClientFactory.CreateHttpClient(HttpMessageHandler));
-			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => HttpClientFactory.CreateMessageHandler());
+			Settings = new ClientFlurlHttpSettings(FlurlHttp.GlobalSettings);
+			_httpClient = new Lazy<HttpClient>(() => Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler));
+			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => Settings.HttpClientFactory.CreateMessageHandler());
 		}
 
 		/// <summary>
@@ -65,17 +64,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Gets or sets the FlurlHttpSettings object used by this client.
 		/// </summary>
-		public FlurlHttpSettings Settings { get; set; }
-
-		/// <summary>
-		/// Gets or sets a factory used to create the HttpClient and HttpMessageHandler used for HTTP calls.
-		/// Whenever possible, custom factory implementations should inherit from DefaultHttpClientFactory,
-		/// only override the method(s) needed, call the base method, and modify the result.
-		/// </summary>
-		public IHttpClientFactory HttpClientFactory {
-			get => _httpClientFactory ?? FlurlHttp.GlobalSettings.HttpClientFactory;
-			set => _httpClientFactory = value;
-		}
+		public ClientFlurlHttpSettings Settings { get; set; }
 
 		/// <summary>
 		/// Collection of headers sent on all requests using this client.
@@ -118,6 +107,11 @@ namespace Flurl.Http
 			}
 
 			return new FlurlRequest(this, Url.Combine(urlSegments.Select(s => s.ToInvariantString()).ToArray()));
+		}
+
+		FlurlHttpSettings IHttpSettingsContainer.Settings {
+			get => Settings;
+			set => Settings = value as ClientFlurlHttpSettings;
 		}
 
 		/// <summary>

@@ -162,10 +162,28 @@ namespace Flurl.Http.Configuration
 		}
 	}
 
+	public class ClientFlurlHttpSettings : FlurlHttpSettings
+	{
+		/// <summary>
+		/// Creates a new FlurlHttpSettings object using another FlurlHttpSettings object as its default values.
+		/// </summary>
+		public ClientFlurlHttpSettings(FlurlHttpSettings defaults) : base(defaults) { }
+
+		/// <summary>
+		/// Gets or sets a factory used to create the HttpClient and HttpMessageHandler used for HTTP calls.
+		/// Whenever possible, custom factory implementations should inherit from DefaultHttpClientFactory,
+		/// only override the method(s) needed, call the base method, and modify the result.
+		/// </summary>
+		public IHttpClientFactory HttpClientFactory {
+			get => Get(() => HttpClientFactory);
+			set => Set(() => HttpClientFactory, value);
+		}
+	}
+
 	/// <summary>
 	/// Global default settings for Flurl.Http
 	/// </summary>
-	public class GlobalFlurlHttpSettings : FlurlHttpSettings
+	public class GlobalFlurlHttpSettings : ClientFlurlHttpSettings
 	{
 		internal GlobalFlurlHttpSettings() : base(null) {
 			ResetDefaults();
@@ -176,13 +194,6 @@ namespace Flurl.Http.Configuration
 		/// by proxy, HttpClient instances.
 		/// </summary>
 		public IFlurlClientFactory FlurlClientFactory { get; set; }
-
-		/// <summary>
-		/// Gets or sets a factory used to create the HttpClient and HttpMessageHandler used for HTTP calls.
-		/// Whenever possible, custom factory implementations should inherit from DefaultHttpClientFactory,
-		/// only override the method(s) needed, call the base method, and modify the result.
-		/// </summary>
-		public IHttpClientFactory HttpClientFactory { get; set; }
 
 		/// <summary>
 		/// Resets all global settings to their Flurl.Http-defined default values.
