@@ -38,18 +38,14 @@ namespace Flurl.Http
 		public FlurlHttpException(HttpCall call) : this(call, BuildMessage(call, null), null) { }
 
 		private static string BuildMessage(HttpCall call, Exception inner) {
-			if (call.Response != null && !call.Succeeded) {
-				return string.Format("Request to {0} failed with status code {1} ({2}).",
-					call.Request.RequestUri.AbsoluteUri,
-					(int)call.Response.StatusCode,
-					call.Response.ReasonPhrase);
-			}
-			if (inner != null) {
-				return $"Request to {call.Request.RequestUri.AbsoluteUri} failed. {inner.Message}";
-			}
+			if (call.Response != null && !call.Succeeded)
+				return $"{call} failed with status code {(int)call.Response.StatusCode} ({call.Response.ReasonPhrase}).";
+
+			if (inner != null)
+				return $"{call} failed. {inner.Message}";
 
 			// in theory we should never get here.
-			return $"Request to {call.Request.RequestUri.AbsoluteUri} failed.";
+			return $"{call} failed.";
 		}
 
 		/// <summary>
@@ -93,7 +89,7 @@ namespace Flurl.Http
 		public FlurlHttpTimeoutException(HttpCall call, Exception inner) : base(call, BuildMessage(call), inner) { }
 
 		private static string BuildMessage(HttpCall call) {
-			return $"Request to {call} timed out.";
+			return $"{call} timed out.";
 		}
 	}
 }

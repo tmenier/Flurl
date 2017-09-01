@@ -108,5 +108,13 @@ namespace Flurl.Http
 		/// Body of the HTTP response if unsuccessful, otherwise null. (Successful responses are not captured as strings, mainly for performance reasons.)
 		/// </summary>
 		public string ErrorResponseBody { get; set; }
+
+		/// <summary>
+		/// Returns the verb and absolute URI associated with this call.
+		/// </summary>
+		/// <returns></returns>
+		public override string ToString() {
+			return $"{Request.Method:U} {Request.RequestUri.AbsoluteUri}";
+		}
 	}
 }
