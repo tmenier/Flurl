@@ -162,6 +162,9 @@ namespace Flurl.Http.Configuration
 		}
 	}
 
+	/// <summary>
+	/// Client-level settings for Flurl.Http
+	/// </summary>
 	public class ClientFlurlHttpSettings : FlurlHttpSettings
 	{
 		/// <summary>

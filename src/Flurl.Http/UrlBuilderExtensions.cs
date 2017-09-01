@@ -11,6 +11,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Appends a segment to the URL path, ensuring there is one and only one '/' character as a seperator.
 		/// </summary>
+		/// <param name="request">The IFlurlRequest associated with the URL</param>
 		/// <param name="segment">The segment to append</param>
 		/// <returns>This IFlurlRequest</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="segment"/> is <see langword="null" />.</exception>
@@ -22,6 +23,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a seperator.
 		/// </summary>
+		/// <param name="request">The IFlurlRequest associated with the URL</param>
 		/// <param name="segments">The segments to append</param>
 		/// <returns>This IFlurlRequest</returns>
 		public static IFlurlRequest AppendPathSegments(this IFlurlRequest request, params object[] segments) {
@@ -32,6 +34,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a seperator.
 		/// </summary>
+		/// <param name="request">The IFlurlRequest associated with the URL</param>
 		/// <param name="segments">The segments to append</param>
 		/// <returns>This IFlurlRequest</returns>
 		public static IFlurlRequest AppendPathSegments(this IFlurlRequest request, IEnumerable<object> segments) {
@@ -42,6 +45,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Adds a parameter to the URL query, overwriting the value if name exists.
 		/// </summary>
+		/// <param name="request">The IFlurlRequest associated with the URL</param>
 		/// <param name="name">Name of query parameter</param>
 		/// <param name="value">Value of query parameter</param>
 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
@@ -54,6 +58,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Adds a parameter to the URL query, overwriting the value if name exists.
 		/// </summary>
+		/// <param name="request">The IFlurlRequest associated with the URL</param>
 		/// <param name="name">Name of query parameter</param>
 		/// <param name="value">Value of query parameter</param>
 		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded</param>
@@ -68,6 +73,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Adds a parameter without a value to the URL query, removing any existing value.
 		/// </summary>
+		/// <param name="request">The IFlurlRequest associated with the URL</param>
 		/// <param name="name">Name of query parameter</param>
 		/// <returns>This IFlurlRequest</returns>
 		public static IFlurlRequest SetQueryParam(this IFlurlRequest request, string name) {
@@ -78,6 +84,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Parses values (usually an anonymous object or dictionary) into name/value pairs and adds them to the URL query, overwriting any that already exist.
 		/// </summary>
+		/// <param name="request">The IFlurlRequest associated with the URL</param>
 		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
 		/// <returns>This IFlurlRequest</returns>
@@ -89,6 +96,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Adds multiple parameters without values to the URL query.
 		/// </summary>
+		/// <param name="request">The IFlurlRequest associated with the URL</param>
 		/// <param name="names">Names of query parameters.</param>
 		/// <returns>This IFlurlRequest</returns>
 		public static IFlurlRequest SetQueryParams(this IFlurlRequest request, IEnumerable<string> names) {
@@ -99,6 +107,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Adds multiple parameters without values to the URL query.
 		/// </summary>
+		/// <param name="request">The IFlurlRequest associated with the URL</param>
 		/// <param name="names">Names of query parameters</param>
 		/// <returns>This IFlurlRequest</returns>
 		public static IFlurlRequest SetQueryParams(this IFlurlRequest request, params string[] names) {
@@ -109,6 +118,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Removes a name/value pair from the URL query by name.
 		/// </summary>
+		/// <param name="request">The IFlurlRequest associated with the URL</param>
 		/// <param name="name">Query string parameter name to remove</param>
 		/// <returns>This IFlurlRequest</returns>
 		public static IFlurlRequest RemoveQueryParam(this IFlurlRequest request, string name) {
@@ -119,6 +129,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Removes multiple name/value pairs from the URL query by name.
 		/// </summary>
+		/// <param name="request">The IFlurlRequest associated with the URL</param>
 		/// <param name="names">Query string parameter names to remove</param>
 		/// <returns>This IFlurlRequest</returns>
 		public static IFlurlRequest RemoveQueryParams(this IFlurlRequest request, params string[] names) {
@@ -129,6 +140,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Removes multiple name/value pairs from the URL query by name.
 		/// </summary>
+		/// <param name="request">The IFlurlRequest associated with the URL</param>
 		/// <param name="names">Query string parameter names to remove</param>
 		/// <returns>This IFlurlRequest</returns>
 		public static IFlurlRequest RemoveQueryParams(this IFlurlRequest request, IEnumerable<string> names) {
@@ -139,6 +151,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Set the URL fragment fluently.
 		/// </summary>
+		/// <param name="request">The IFlurlRequest associated with the URL</param>
 		/// <param name="fragment">The part of the URL afer #</param>
 		/// <returns>This IFlurlRequest</returns>
 		public static IFlurlRequest SetFragment(this IFlurlRequest request, string fragment) {
@@ -149,6 +162,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Removes the URL fragment including the #.
 		/// </summary>
+		/// <param name="request">The IFlurlRequest associated with the URL</param>
 		/// <returns>This IFlurlRequest</returns>
 		public static IFlurlRequest RemoveFragment(this IFlurlRequest request) {
 			request.Url.RemoveFragment();
