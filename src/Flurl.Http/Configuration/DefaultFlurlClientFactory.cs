@@ -12,14 +12,25 @@ namespace Flurl.Http.Configuration
 		private static readonly ConcurrentDictionary<string, IFlurlClient> _clients = new ConcurrentDictionary<string, IFlurlClient>();
 
 		/// <summary>
-		/// Uses a caching strategy of one FlurlClient per host. This maximizes reuse of underlying
-		/// HttpClient/Handler while allowing things like cookies to be host-specific.
+		/// By defaykt, uses a caching strategy of one FlurlClient per host. This maximizes reuse of
+		/// underlying HttpClient/Handler while allowing things like cookies to be host-specific.
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <returns>The FlurlClient instance.</returns>
 		public virtual IFlurlClient Get(Url url) {
-			var key = new Uri(url).Host;
-			return _clients.GetOrAdd(key, _ => new FlurlClient());
+			return _clients.AddOrUpdate(
+				GetCacheKey(url),
+				_ => new FlurlClient(),
+				(_, client) => client.IsDisposed ? new FlurlClient() : client);
 		}
+
+		/// <summary>
+		/// Defines a strategy for getting a cache key based on a Url. Default implementation
+		/// returns the host part (i.e www.api.com) so that all calls to the same host use the
+		/// same FlurlClient (and HttpClient/HttpMessageHandler) instance.
+		/// </summary>
+		/// <param name="url">The URL.</param>
+		/// <returns>The cache key</returns>
+		protected virtual string GetCacheKey(Url url) => new Uri(url).Host;
 	}
 }

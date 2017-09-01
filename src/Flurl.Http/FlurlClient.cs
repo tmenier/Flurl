@@ -35,6 +35,11 @@ namespace Flurl.Http
 		/// <param name="urlSegments">The URL or URL segments for the request. If BaseUrl is defined, it is assumed that these are path segments off that base.</param>
 		/// <returns>A new IFlurlRequest</returns>
 		IFlurlRequest Request(params object[] urlSegments);
+
+		/// <summary>
+		/// Gets a value indicating whether this instance (and its underlying HttpClient) has been disposed.
+		/// </summary>
+		bool IsDisposed { get; }
 	}
 
 	/// <summary>
@@ -115,13 +120,23 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
+		/// Gets a value indicating whether this instance (and its underlying HttpClient) has been disposed.
+		/// </summary>
+		public bool IsDisposed { get; private set; }
+
+		/// <summary>
 		/// Disposes the underlying HttpClient and HttpMessageHandler.
 		/// </summary>
 		public void Dispose() {
+			if (IsDisposed)
+				return;
+
 			if (_httpMessageHandler.IsValueCreated)
 				_httpMessageHandler.Value.Dispose();
 			if (_httpClient.IsValueCreated)
 				_httpClient.Value.Dispose();
+
+			IsDisposed = true;
 		}
 	}
 }

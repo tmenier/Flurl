@@ -77,5 +77,19 @@ namespace Flurl.Test.Http
 				var req = cli.Request("foo", "bar");
 			});
 		}
+
+		[Test]
+		public void default_factory_doesnt_reuse_disposed_clients() {
+			var cli1 = "http://api.com".WithHeader("foo", "1").Client;
+			var cli2 = "http://api.com".WithHeader("foo", "2").Client;
+			cli1.Dispose();
+			var cli3 = "http://api.com".WithHeader("foo", "3").Client;
+
+			Assert.AreEqual(cli1, cli2);
+			Assert.IsTrue(cli1.IsDisposed);
+			Assert.IsTrue(cli2.IsDisposed);
+			Assert.AreNotEqual(cli1, cli3);
+			Assert.IsFalse(cli3.IsDisposed);
+		}
 	}
 }
