@@ -157,7 +157,7 @@ namespace Flurl.Http.CodeGen
 			        var argList = new List<string> { $"this {xtype} url" };
 			        argList.AddRange(xm.Params.Select(p => $"{p.Type} {p.Name}" + (p.Default == null ? "" : $" = {p.Default}")));
 			        writer.WriteLine($"public static IFlurlRequest {xm.Name}({string.Join(", ", argList)}) {{");
-			        writer.WriteLine($"return new FlurlRequest(url).{xm.Name}({string.Join(", ", xm.Params.Select(p => p.Name))});");
+			        writer.WriteLine($"return new FlurlRequest(url).{xm.RequestMethodName}({string.Join(", ", xm.Params.Select(p => p.Name))});");
 			        writer.WriteLine("}");
 		        }
 	        }

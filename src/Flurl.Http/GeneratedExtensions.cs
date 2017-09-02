@@ -908,7 +908,7 @@ namespace Flurl.Http
 		/// <param name="url">The URL.</param>
 		/// <param name="action">A delegate defining the Settings changes.</param>
 		/// <returns>The IFlurlRequest.</returns>
-		public static IFlurlRequest Configure(this Url url, Action<FlurlHttpSettings> action) {
+		public static IFlurlRequest ConfigureRequest(this Url url, Action<FlurlHttpSettings> action) {
 			return new FlurlRequest(url).Configure(action);
 		}
 		/// <summary>
@@ -1037,7 +1037,7 @@ namespace Flurl.Http
 		/// <param name="url">The URL.</param>
 		/// <param name="action">A delegate defining the Settings changes.</param>
 		/// <returns>The IFlurlRequest.</returns>
-		public static IFlurlRequest Configure(this string url, Action<FlurlHttpSettings> action) {
+		public static IFlurlRequest ConfigureRequest(this string url, Action<FlurlHttpSettings> action) {
 			return new FlurlRequest(url).Configure(action);
 		}
 		/// <summary>

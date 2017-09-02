@@ -148,7 +148,7 @@ namespace Flurl.Test.Http
 				var client = new FlurlClient().Configure(s => s.AllowedHttpStatusRange = "*");
 				test.RespondWith("epic fail", 500);
 				Assert.ThrowsAsync<FlurlHttpException>(async () => await "http://www.api.com"
-					.Configure(c => c.AllowedHttpStatusRange = "2xx")
+					.ConfigureRequest(c => c.AllowedHttpStatusRange = "2xx")
 					.WithClient(client) // client-level settings shouldn't win
 					.GetAsync());
 			}
