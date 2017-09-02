@@ -107,16 +107,16 @@ namespace Flurl.Http
 			if (!urlSegments.Any()) {
 				if (string.IsNullOrEmpty(BaseUrl))
 					throw new ArgumentException("Cannot create a Request. No URL segments were passed, and this Client does not have a BaseUrl defined.");
-				return new FlurlRequest(this, BaseUrl);
+				return new FlurlRequest(BaseUrl).WithClient(this);
 			}
 
 			if (!Url.IsValid(urlSegments[0]?.ToString())) {
 				if (string.IsNullOrEmpty(BaseUrl))
 					throw new ArgumentException("Cannot create a Request. This Client does not have a BaseUrl defined, and the first segment passed is not a valid URL.");
-				return new FlurlRequest(this, BaseUrl.AppendPathSegments(urlSegments));
+				return new FlurlRequest(BaseUrl.AppendPathSegments(urlSegments)).WithClient(this);
 			}
 
-			return new FlurlRequest(this, Url.Combine(urlSegments.Select(s => s.ToInvariantString()).ToArray()));
+			return new FlurlRequest(Url.Combine(urlSegments.Select(s => s.ToInvariantString()).ToArray())).WithClient(this);
 		}
 
 		FlurlHttpSettings IHttpSettingsContainer.Settings {

@@ -47,17 +47,6 @@ namespace Flurl.Http
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlRequest"/> class.
 		/// </summary>
-		/// <param name="client">The IFlurlClient used to send the request.</param>
-		/// <param name="url">The URL to call with this FlurlRequest instance.</param>
-		public FlurlRequest(IFlurlClient client, Url url = null) {
-			Settings = new FlurlHttpSettings();
-			Client = client;
-			Url = url;
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="FlurlRequest"/> class.
-		/// </summary>
 		/// <param name="url">The URL to call with this FlurlRequest instance.</param>
 		public FlurlRequest(Url url = null) {
 			Settings = new FlurlHttpSettings();
