@@ -195,7 +195,15 @@ namespace Flurl.Test.Http
 			Assert.IsNull(resp);
 		}
 
-		// parallel testing not supported in PCL
+		[Test]
+		public void can_configure_settings_for_test() {
+			Assert.IsFalse(new FlurlRequest().Settings.CookiesEnabled);
+			using (new HttpTest().Configure(settings => settings.CookiesEnabled = true)) {
+				Assert.IsTrue(new FlurlRequest().Settings.CookiesEnabled);
+			}
+			// test disposed, should revert back to global settings
+			Assert.IsFalse(new FlurlRequest().Settings.CookiesEnabled);
+		}
 
 		[Test]
 		public async Task can_test_in_parallel() {

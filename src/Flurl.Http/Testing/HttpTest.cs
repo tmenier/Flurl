@@ -50,6 +50,16 @@ namespace Flurl.Http.Testing
 		public List<HttpCall> CallLog { get; }
 
 		/// <summary>
+		/// Change FlurlHttpSettings for the scope of this HttpTest.
+		/// </summary>
+		/// <param name="action">Action defining the settings changes.</param>
+		/// <returns>This HttpTest</returns>
+		public HttpTest Configure(Action<GlobalFlurlHttpSettings> action) {
+			action(Settings);
+			return this;
+		}
+
+		/// <summary>
 		/// Adds an HttpResponseMessage to the response queue.
 		/// </summary>
 		/// <param name="body">The simulated response body string.</param>

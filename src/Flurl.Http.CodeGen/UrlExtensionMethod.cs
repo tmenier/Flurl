@@ -35,7 +35,7 @@ namespace Flurl.Http.CodeGen
 				.AddParam("expires", "DateTime?", "Expiration for all cookies (optional). If excluded, cookies only live for duration of session.", "null");
 
 			// settings extensions
-			yield return new UrlExtensionMethod("ConfigureRequest", "Configure", "Creates a new FlurlRequest with the URL and allows changing its Settings inline.")
+			yield return new UrlExtensionMethod("ConfigureRequest", "Creates a new FlurlRequest with the URL and allows changing its Settings inline.")
 				.AddParam("action", "Action<FlurlHttpSettings>", "A delegate defining the Settings changes.");
 			yield return new UrlExtensionMethod("WithTimeout", "Creates a new FlurlRequest with the URL and sets the request timeout.")
 				.AddParam("timespan", "TimeSpan", "Time to wait before the request times out.");
@@ -49,15 +49,11 @@ namespace Flurl.Http.CodeGen
 		}
 
 		public string Name { get; }
-		public string RequestMethodName { get; }
 		public string Description { get; }
 		public IList<Param> Params { get; } = new List<Param>();
 
-		public UrlExtensionMethod(string name, string description) : this(name, name, description) { }
-
-		public UrlExtensionMethod(string name, string requestMethodName, string description) {
+		public UrlExtensionMethod(string name, string description) {
 			Name = name;
-			RequestMethodName = requestMethodName;
 			Description = description;
 		}
 

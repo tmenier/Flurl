@@ -13,6 +13,11 @@ namespace Flurl.Http
 	/// </summary>
 	public interface IFlurlClient : IHttpSettingsContainer, IDisposable {
 		/// <summary>
+		/// Gets or sets the FlurlHttpSettings object used by this client.
+		/// </summary>
+		new ClientFlurlHttpSettings Settings { get; set; }
+
+		/// <summary>
 		/// Gets the HttpClient to be used in subsequent HTTP calls. Creation (when necessary) is delegated
 		/// to FlurlHttp.FlurlClientFactory. Reused for the life of the FlurlClient.
 		/// </summary>
@@ -25,7 +30,7 @@ namespace Flurl.Http
 		HttpMessageHandler HttpMessageHandler { get; }
 
 		/// <summary>
-		/// The base URL associated with this client.
+		/// Gets or sets base URL associated with this client.
 		/// </summary>
 		string BaseUrl { get; set; }
 

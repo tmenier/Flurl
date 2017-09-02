@@ -18,7 +18,7 @@ namespace Flurl.Http.Configuration
 
 		// Values are dictionary-backed so we can check for key existence. Can't do null-coalescing
 		// because if a setting is set to null at the request level, that should stick.
-		private IDictionary<string, object> _vals = new Dictionary<string, object>();
+		private readonly IDictionary<string, object> _vals = new Dictionary<string, object>();
 
 		/// <summary>
 		/// Creates a new FlurlHttpSettings object using another FlurlHttpSettings object as its default values.

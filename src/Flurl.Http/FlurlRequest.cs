@@ -50,7 +50,7 @@ namespace Flurl.Http
 		/// <param name="client">The IFlurlClient used to send the request.</param>
 		/// <param name="url">The URL to call with this FlurlRequest instance.</param>
 		public FlurlRequest(IFlurlClient client, Url url = null) {
-			Settings = new FlurlHttpSettings().Merge(FlurlHttp.GlobalSettings);
+			Settings = new FlurlHttpSettings();
 			Client = client;
 			Url = url;
 		}
@@ -60,7 +60,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL to call with this FlurlRequest instance.</param>
 		public FlurlRequest(Url url = null) {
-			Settings = new FlurlHttpSettings().Merge(FlurlHttp.GlobalSettings);
+			Settings = new FlurlHttpSettings();
 			Url = url;
 		}
 

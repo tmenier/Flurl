@@ -11,6 +11,28 @@ namespace Flurl.Http
 	public static class SettingsExtensions
 	{
 		/// <summary>
+		/// Change FlurlHttpSettings for this IFlurlClient.
+		/// </summary>
+		/// <param name="client">The IFlurlClient.</param>
+		/// <param name="action">Action defining the settings changes.</param>
+		/// <returns>The IFlurlClient with the modified Settings</returns>
+		public static IFlurlClient Configure(this IFlurlClient client, Action<ClientFlurlHttpSettings> action) {
+			action(client.Settings);
+			return client;
+		}
+
+		/// <summary>
+		/// Change FlurlHttpSettings for this IFlurlRequest.
+		/// </summary>
+		/// <param name="request">The IFlurlRequest.</param>
+		/// <param name="action">Action defining the settings changes.</param>
+		/// <returns>The IFlurlRequest with the modified Settings</returns>
+		public static IFlurlRequest ConfigureRequest(this IFlurlRequest request, Action<FlurlHttpSettings> action) {
+			action(request.Settings);
+			return request;
+		}
+
+		/// <summary>
 		/// Fluently specify the IFlurlClient to use with this IFlurlRequest.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest.</param>
@@ -39,17 +61,6 @@ namespace Flurl.Http
 		/// <returns>A new IFlurlRequest to use in calling the Url</returns>
 		public static IFlurlRequest WithClient(this string url, IFlurlClient client) {
 			return client.Request(url);
-		}
-
-		/// <summary>
-		/// Change FlurlHttpSettings for this IFlurlClient or IFlurlRequest.
-		/// </summary>
-		/// <param name="obj">The IFlurlClient or IFlurlRequest.</param>
-		/// <param name="action">Action defining the settings changes.</param>
-		/// <returns>The T with the modified HttpClient</returns>
-		public static T Configure<T>(this T obj, Action<FlurlHttpSettings> action) where T : IHttpSettingsContainer {
-			action(obj.Settings);
-			return obj;
 		}
 
 		/// <summary>
