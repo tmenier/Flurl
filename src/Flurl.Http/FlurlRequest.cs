@@ -161,9 +161,9 @@ namespace Flurl.Http
 		}
 
 		private void ReadResponseCookies(HttpResponseMessage response) {
-			if (response?.RequestMessage == null) return;
-
-			var uri = response.RequestMessage.RequestUri;
+			var uri = response?.RequestMessage?.RequestUri;
+			if (uri == null)
+				return;
 
 			// if the handler is an HttpClientHandler (which it usually is), it's already plucked the
 			// cookies out of the headers and put them in the CookieContainer.
