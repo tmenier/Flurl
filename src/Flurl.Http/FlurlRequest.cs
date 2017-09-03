@@ -143,7 +143,7 @@ namespace Flurl.Http
 		private void WriteRequestCookies(HttpRequestMessage request) {
 			if (!Cookies.Any()) return;
 			var uri = request.RequestUri;
-			var cookieHandler = Client.HttpMessageHandler as HttpClientHandler;
+			var cookieHandler = FindHttpClientHandler(Client.HttpMessageHandler);
 
 			// if the handler is an HttpClientHandler (which it usually is), put the cookies in the CookieContainer.
 			if (cookieHandler != null && cookieHandler.UseCookies) {
@@ -167,7 +167,7 @@ namespace Flurl.Http
 
 			// if the handler is an HttpClientHandler (which it usually is), it's already plucked the
 			// cookies out of the headers and put them in the CookieContainer.
-			var jar = (Client.HttpMessageHandler as HttpClientHandler)?.CookieContainer;
+			var jar = FindHttpClientHandler(Client.HttpMessageHandler)?.CookieContainer;
 			if (jar == null) {
 				// http://stackoverflow.com/a/15588878/62600
 				IEnumerable<string> cookieHeaders;
@@ -182,6 +182,21 @@ namespace Flurl.Http
 
 			foreach (var cookie in jar.GetCookies(uri).Cast<Cookie>())
 				Cookies[cookie.Name] = cookie;
+		}
+
+		private HttpClientHandler FindHttpClientHandler(HttpMessageHandler handler) {
+			// if it's an HttpClientHandler, return it
+			var httpClientHandler = handler as HttpClientHandler;
+			if (httpClientHandler != null)
+				return httpClientHandler;
+
+			// if it's a DelegatingHandler, check the InnerHandler recursively
+			var delegatingHandler = handler as DelegatingHandler;
+			if (delegatingHandler != null)
+				return FindHttpClientHandler(delegatingHandler.InnerHandler);
+
+			// it's neither
+			return null;
 		}
 	}
 }
