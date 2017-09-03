@@ -104,19 +104,16 @@ namespace Flurl.Http
 		/// <param name="urlSegments">The URL or URL segments for the request. If BaseUrl is defined, it is assumed that these are path segments off that base.</param>
 		/// <returns>A new IFlurlRequest</returns>
 		public IFlurlRequest Request(params object[] urlSegments) {
-			if (!urlSegments.Any()) {
-				if (string.IsNullOrEmpty(BaseUrl))
-					throw new ArgumentException("Cannot create a Request. No URL segments were passed, and this Client does not have a BaseUrl defined.");
-				return new FlurlRequest(BaseUrl).WithClient(this);
-			}
+			var parts = new List<string>(urlSegments.Select(s => s.ToInvariantString()));
+			if (!Url.IsValid(parts.FirstOrDefault()) && !string.IsNullOrEmpty(BaseUrl))
+				parts.Insert(0, BaseUrl);
 
-			if (!Url.IsValid(urlSegments[0]?.ToString())) {
-				if (string.IsNullOrEmpty(BaseUrl))
-					throw new ArgumentException("Cannot create a Request. This Client does not have a BaseUrl defined, and the first segment passed is not a valid URL.");
-				return new FlurlRequest(BaseUrl.AppendPathSegments(urlSegments)).WithClient(this);
-			}
+			if (!parts.Any())
+				throw new ArgumentException("Cannot create a Request. BaseUrl is not defined and no segments were passed.");
+			if (!Url.IsValid(parts[0]))
+				throw new ArgumentException("Cannot create a Request. Neither BaseUrl nor the first segment passed is a valid URL.");
 
-			return new FlurlRequest(Url.Combine(urlSegments.Select(s => s.ToInvariantString()).ToArray())).WithClient(this);
+			return new FlurlRequest(Url.Combine(parts.ToArray())).WithClient(this);
 		}
 
 		FlurlHttpSettings IHttpSettingsContainer.Settings {

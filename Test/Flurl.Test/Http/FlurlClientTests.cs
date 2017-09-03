@@ -37,8 +37,8 @@ namespace Flurl.Test.Http
 		[Test]
 		public void can_create_request_without_base_url() {
 			var cli = new FlurlClient();
-			var req = cli.Request("http://myapi.com/foo");
-			Assert.AreEqual("http://myapi.com/foo", req.Url.ToString());
+			var req = cli.Request("http://myapi.com/foo?x=1&y=2#foo");
+			Assert.AreEqual("http://myapi.com/foo?x=1&y=2#foo", req.Url.ToString());
 		}
 
 		[Test]
