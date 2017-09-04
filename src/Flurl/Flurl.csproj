@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net40;netstandard1.3;netstandard1.0;</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>3.0.0</Version>
+    <Version>2.5.0</Version>
     <Authors>Todd Menier</Authors>
     <Description>A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.</Description>
     <PackageProjectUrl>http://tmenier.github.io/Flurl</PackageProjectUrl>
@@ -13,7 +13,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>fluent url uri querystring builder</PackageTags>
     <PackageReleaseNotes>
-      3.0.0 - Drop PCL target
+      2.5.0 - Drop PCL target. add .NET Standard 1.0
       2.4.0 - Up'd solution to VS2017, platform targeting fixes (github #176)
       2.3.0 - First-class support for name-only query parameters (github #164), NullValueHandling config enum
       2.2.1 - Fix net461 target (github #128)
