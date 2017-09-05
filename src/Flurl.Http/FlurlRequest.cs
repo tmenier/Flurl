@@ -100,6 +100,11 @@ namespace Flurl.Http
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
+			var request = new HttpRequestMessage(verb, Url) { Content = content };
+			var call = new HttpCall(request, Settings);
+
+			await HandleEventAsync(Settings.BeforeCall, Settings.BeforeCallAsync, call).ConfigureAwait(false);
+
 			var userToken = cancellationToken ?? CancellationToken.None;
 			var token = userToken;
 
@@ -109,28 +114,41 @@ namespace Flurl.Http
 				token = cts.Token;
 			}
 
-			var request = new HttpRequestMessage(verb, Url) { Content = content };
-			var call = new HttpCall(request, Settings);
-
+			call.StartedUtc = DateTime.UtcNow;
 			try {
 				WriteHeaders(request);
 				if (Settings.CookiesEnabled)
 					WriteRequestCookies(request);
-				return await Client.HttpClient.SendAsync(request, completionOption, token).ConfigureAwait(false);
-			}
-			catch (Exception) when (call.ExceptionHandled) {
-				return call.Response;
-			}
-			catch (OperationCanceledException ex) when (!userToken.IsCancellationRequested) {
-				throw new FlurlHttpTimeoutException(call, ex);
+
+				call.Response = await Client.HttpClient.SendAsync(request, completionOption, token).ConfigureAwait(false);
+				call.Response.RequestMessage = request;
+				if (call.Succeeded)
+					return call.Response;
+
+				if (call.Response.Content != null)
+					call.ErrorResponseBody = await call.Response.Content.StripCharsetQuotes().ReadAsStringAsync().ConfigureAwait(false);
+
+				throw new FlurlHttpException(call, null);
 			}
 			catch (Exception ex) {
+				call.Exception = ex;
+				await HandleEventAsync(Settings.OnError, Settings.OnErrorAsync, call).ConfigureAwait(false);
+
+				if (call.ExceptionHandled)
+					return call.Response;
+
+				if (ex is OperationCanceledException && !userToken.IsCancellationRequested)
+					throw new FlurlHttpTimeoutException(call, ex);
+
 				throw new FlurlHttpException(call, ex);
 			}
 			finally {
 				request.Dispose();
 				if (Settings.CookiesEnabled)
 					ReadResponseCookies(call.Response);
+
+				call.EndedUtc = DateTime.UtcNow;
+				await HandleEventAsync(Settings.AfterCall, Settings.AfterCallAsync, call).ConfigureAwait(false);
 			}
 		}
 
@@ -197,6 +215,13 @@ namespace Flurl.Http
 
 			// it's neither
 			return null;
+		}
+
+		private static Task HandleEventAsync(Action<HttpCall> syncHandler, Func<HttpCall, Task> asyncHandler, HttpCall call) {
+			syncHandler?.Invoke(call);
+			if (asyncHandler != null)
+				return asyncHandler(call);
+			return Task.FromResult(0);
 		}
 	}
 }

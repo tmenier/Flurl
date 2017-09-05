@@ -16,7 +16,7 @@ namespace Flurl.Http.Configuration
 		/// customize the result.
 		/// </summary>
 		public virtual HttpClient CreateHttpClient(HttpMessageHandler handler) {
-			return new HttpClient(new FlurlMessageHandler(handler)) {
+			return new HttpClient(handler) {
 				// Timeouts handled per request via FlurlHttpSettings.Timeout
 				Timeout = System.Threading.Timeout.InfiniteTimeSpan
 			};

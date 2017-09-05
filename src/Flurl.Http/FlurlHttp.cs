@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Flurl.Http.Configuration;
 using Flurl.Http.Testing;
 
@@ -12,9 +10,8 @@ namespace Flurl.Http
 	public static class FlurlHttp
 	{
 		private static readonly object _configLock = new object();
-		private static readonly Task _completedTask = Task.FromResult(0);
 
-		private static Lazy<GlobalFlurlHttpSettings> _settings = 
+		private static Lazy<GlobalFlurlHttpSettings> _settings =
 			new Lazy<GlobalFlurlHttpSettings>(() => new GlobalFlurlHttpSettings());
 
 		/// <summary>
@@ -32,52 +29,5 @@ namespace Flurl.Http
 				configAction(GlobalSettings);
 			}
 		}
-
-		/// <summary>
-		/// Triggers the specified sync and async event handlers, usually defined on 
-		/// </summary>
-		public static Task RaiseEventAsync(HttpRequestMessage request, FlurlEventType eventType) {
-			var call = HttpCall.Get(request);
-			var settings = call?.Settings;
-
-			if (settings == null)
-				return _completedTask;
-
-			switch (eventType) {
-				case FlurlEventType.BeforeCall:
-					return HandleEventAsync(settings.BeforeCall, settings.BeforeCallAsync, call);
-				case FlurlEventType.AfterCall:
-					return HandleEventAsync(settings.AfterCall, settings.AfterCallAsync, call);
-				case FlurlEventType.OnError:
-					return HandleEventAsync(settings.OnError, settings.OnErrorAsync, call);
-				default:
-					return _completedTask;
-			}
-		}
-
-		private static Task HandleEventAsync(Action<HttpCall> syncHandler, Func<HttpCall, Task> asyncHandler, HttpCall call) {
-			syncHandler?.Invoke(call);
-			if (asyncHandler != null)
-				return asyncHandler(call);
-			return _completedTask;
-		}
-	}
-
-	/// <summary>
-	/// Flurl event types/
-	/// </summary>
-	public enum FlurlEventType {
-		/// <summary>
-		/// The before call
-		/// </summary>
-		BeforeCall,
-		/// <summary>
-		/// The after call
-		/// </summary>
-		AfterCall,
-		/// <summary>
-		/// The on error
-		/// </summary>
-		OnError
 	}
 }
