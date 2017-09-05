@@ -101,9 +101,10 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			var request = new HttpRequestMessage(verb, Url) { Content = content };
-			var call = new HttpCall(request, Settings);
+			var call = new HttpCall(this, request);
 
 			await HandleEventAsync(Settings.BeforeCall, Settings.BeforeCallAsync, call).ConfigureAwait(false);
+			request.RequestUri = new Uri(Url); // in case it was modifed in the handler above
 
 			var userToken = cancellationToken ?? CancellationToken.None;
 			var token = userToken;

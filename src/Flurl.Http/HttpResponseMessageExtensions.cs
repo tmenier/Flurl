@@ -29,7 +29,7 @@ namespace Flurl.Http
 			var call = HttpCall.Get(resp.RequestMessage);
 			try {
 				using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false))
-					return call.Settings.JsonSerializer.Deserialize<T>(stream);
+					return call.FlurlRequest.Settings.JsonSerializer.Deserialize<T>(stream);
 			}
 			catch (Exception ex) {
 				call.Exception = ex;

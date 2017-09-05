@@ -63,8 +63,8 @@ namespace Flurl.Http
 		public T GetResponseJson<T>() {
 			return
 				Call?.ErrorResponseBody == null ? default(T) :
-				Call.Settings?.JsonSerializer == null ? default(T) :
-				Call.Settings.JsonSerializer.Deserialize<T>(Call.ErrorResponseBody);
+				Call?.FlurlRequest?.Settings?.JsonSerializer == null ? default(T) :
+				Call.FlurlRequest.Settings.JsonSerializer.Deserialize<T>(Call.ErrorResponseBody);
 		}
 
 		/// <summary>

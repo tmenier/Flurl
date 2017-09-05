@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
-using Flurl.Http.Configuration;
 using Flurl.Http.Content;
 
 namespace Flurl.Http
@@ -12,15 +11,11 @@ namespace Flurl.Http
 	/// </summary>
 	public class HttpCall
 	{
-		private readonly Lazy<Url> _url;
-
-		internal HttpCall(HttpRequestMessage request, FlurlHttpSettings settings) {
+		internal HttpCall(IFlurlRequest flurlRequest, HttpRequestMessage request) {
+			FlurlRequest = flurlRequest;
 			Request = request;
 			if (request?.Properties != null)
 				request.Properties["FlurlHttpCall"] = this;
-
-			Settings = settings;
-			_url = new Lazy<Url>(() => new Url(Request.RequestUri.AbsoluteUri));
 		}
 
 		internal static HttpCall Get(HttpRequestMessage request) {
@@ -31,12 +26,12 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// FlurlHttpSettings used for this call.
+		/// The IFlurlRequest associated with this call.
 		/// </summary>
-		public FlurlHttpSettings Settings { get; }
+		public IFlurlRequest FlurlRequest { get; }
 
 		/// <summary>
-		/// HttpRequestMessage associated with this call.
+		/// The HttpRequestMessage associated with this call.
 		/// </summary>
 		public HttpRequestMessage Request { get; }
 
@@ -84,11 +79,6 @@ namespace Flurl.Http
 		public TimeSpan? Duration => EndedUtc - StartedUtc;
 
 		/// <summary>
-		/// The URL being called.
-		/// </summary>
-		public Url Url => _url.Value;
-
-		/// <summary>
 		/// True if a response was received, regardless of whether it is an error status.
 		/// </summary>
 		public bool Completed => Response != null;
@@ -97,7 +87,7 @@ namespace Flurl.Http
 		/// True if a response with a successful HTTP status was received.
 		/// </summary>
 		public bool Succeeded => Completed && 
-			(Response.IsSuccessStatusCode || HttpStatusRangeParser.IsMatch(Settings.AllowedHttpStatusRange, Response.StatusCode));
+			(Response.IsSuccessStatusCode || HttpStatusRangeParser.IsMatch(FlurlRequest.Settings.AllowedHttpStatusRange, Response.StatusCode));
 
 		/// <summary>
 		/// HttpStatusCode of the response if the call completed, otherwise null.
