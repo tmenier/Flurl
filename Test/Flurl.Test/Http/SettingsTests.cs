@@ -179,6 +179,19 @@ namespace Flurl.Test.Http
 			Assert.IsInstanceOf<SomeCustomHttpClient>(GetRequest().Client.HttpClient);
 			Assert.IsInstanceOf<SomeCustomMessageHandler>(GetRequest().Client.HttpMessageHandler);
 		}
+
+		[Test]
+		public void can_configure_global_from_FlurlHttp_object() {
+			FlurlHttp.Configure(settings => settings.CookiesEnabled = true);
+			Assert.IsTrue(FlurlHttp.GlobalSettings.CookiesEnabled);
+		}
+
+		[Test]
+		public void can_configure_client_from_FlurlHttp_object() {
+			FlurlHttp.ConfigureClient("http://host1.com/foo", settings => settings.CookiesEnabled = true);
+			Assert.IsTrue(new FlurlRequest("https://host1.com/bar").Client.Settings.CookiesEnabled); // different URL but same host, so should use same client
+			Assert.IsFalse(new FlurlRequest("http://host2.com").Client.Settings.CookiesEnabled);
+		}
 	}
 
 	[TestFixture, Parallelizable]
