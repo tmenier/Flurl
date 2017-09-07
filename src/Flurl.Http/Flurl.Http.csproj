@@ -4,7 +4,7 @@
     <TargetFrameworks>net45;netstandard1.3;netstandard1.1;</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	  <PackageId>Flurl.Http</PackageId>
-    <Version>2.0.0-pre1</Version>
+    <Version>2.0.0-pre2</Version>
     <Authors>Todd Menier</Authors>
     <Description>A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.</Description>
     <PackageProjectUrl>http://tmenier.github.io/Flurl</PackageProjectUrl>
