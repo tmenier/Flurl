@@ -84,7 +84,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Collection of HttpCookies sent and received on all requests using this client.
 		/// </summary>
-		public IDictionary<string, Cookie> Cookies { get; private set; } = new Dictionary<string, Cookie>();
+		public IDictionary<string, Cookie> Cookies { get; } = new Dictionary<string, Cookie>();
 
 		/// <summary>
 		/// Gets the HttpClient to be used in subsequent HTTP calls. Creation (when necessary) is delegated
@@ -129,7 +129,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Disposes the underlying HttpClient and HttpMessageHandler.
 		/// </summary>
-		public void Dispose() {
+		public virtual void Dispose() {
 			if (IsDisposed)
 				return;
 
