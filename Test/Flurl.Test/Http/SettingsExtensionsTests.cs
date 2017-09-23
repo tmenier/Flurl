@@ -53,6 +53,25 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public void underscores_in_properties_convert_to_hyphens_in_header_names() {
+			var sc = GetSettingsContainer().WithHeaders(new { User_Agent = "Flurl", Cache_Control = "no-cache" });
+			Assert.IsTrue(sc.Headers.ContainsKey("User-Agent"));
+			Assert.IsTrue(sc.Headers.ContainsKey("Cache-Control"));
+
+			// make sure we can disable the behavior
+			sc.WithHeaders(new { no_i_really_want_underscores = "foo" }, false);
+			Assert.IsTrue(sc.Headers.ContainsKey("no_i_really_want_underscores"));
+
+			// dictionaries don't get this behavior since you can use hyphens explicitly
+			sc.WithHeaders(new Dictionary<string, string> { { "exclude_dictionaries", "bar" } });
+			Assert.IsTrue(sc.Headers.ContainsKey("exclude_dictionaries"));
+
+			// same with strings
+			sc.WithHeaders("exclude_strings=123");
+			Assert.IsTrue(sc.Headers.ContainsKey("exclude_strings"));
+		}
+
+		[Test]
 		public void can_setup_oauth_bearer_token() {
 			var sc = GetSettingsContainer().WithOAuthBearerToken("mytoken");
 			Assert.AreEqual(1, sc.Headers.Count);

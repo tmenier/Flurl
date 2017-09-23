@@ -841,9 +841,10 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="headers">Names/values of HTTP headers to set. Typically an anonymous object or IDictionary.</param>
+		/// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names will be replaced by hyphens. Default is true.</param>
 		/// <returns>The IFlurlRequest.</returns>
-		public static IFlurlRequest WithHeaders(this Url url, object headers) {
-			return new FlurlRequest(url).WithHeaders(headers);
+		public static IFlurlRequest WithHeaders(this Url url, object headers, bool replaceUnderscoreWithHyphen = true) {
+			return new FlurlRequest(url).WithHeaders(headers, replaceUnderscoreWithHyphen);
 		}
 		/// <summary>
 		/// Creates a new FlurlRequest with the URL and sets the Authorization header according to Basic Authentication protocol.
@@ -970,9 +971,10 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="headers">Names/values of HTTP headers to set. Typically an anonymous object or IDictionary.</param>
+		/// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names will be replaced by hyphens. Default is true.</param>
 		/// <returns>The IFlurlRequest.</returns>
-		public static IFlurlRequest WithHeaders(this string url, object headers) {
-			return new FlurlRequest(url).WithHeaders(headers);
+		public static IFlurlRequest WithHeaders(this string url, object headers, bool replaceUnderscoreWithHyphen = true) {
+			return new FlurlRequest(url).WithHeaders(headers, replaceUnderscoreWithHyphen);
 		}
 		/// <summary>
 		/// Creates a new FlurlRequest with the URL and sets the Authorization header according to Basic Authentication protocol.

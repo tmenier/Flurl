@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,13 +30,18 @@ namespace Flurl.Http
 	    /// </summary>
 	    /// <param name="clientOrRequest">The IFlurlClient or IFlurlRequest.</param>
 	    /// <param name="headers">Names/values of HTTP headers to set. Typically an anonymous object or IDictionary.</param>
+	    /// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names will be replaced by hyphens. Default is true.</param>
 	    /// <returns>This IFlurlClient or IFlurlRequest.</returns>
-	    public static T WithHeaders<T>(this T clientOrRequest, object headers) where T : IHttpSettingsContainer {
+	    public static T WithHeaders<T>(this T clientOrRequest, object headers, bool replaceUnderscoreWithHyphen = true) where T : IHttpSettingsContainer {
 		    if (headers == null)
 			    return clientOrRequest;
 
+			// underscore replacement only applies when object properties are parsed to kv pairs
+		    replaceUnderscoreWithHyphen = replaceUnderscoreWithHyphen && !(headers is string) && !(headers is IEnumerable);
+
 		    foreach (var kv in headers.ToKeyValuePairs()) {
-			    clientOrRequest.WithHeader(kv.Key, kv.Value);
+			    var key = replaceUnderscoreWithHyphen ? kv.Key.Replace("_", "-") : kv.Key;
+			    clientOrRequest.WithHeader(key, kv.Value);
 		    }
 
 		    return clientOrRequest;

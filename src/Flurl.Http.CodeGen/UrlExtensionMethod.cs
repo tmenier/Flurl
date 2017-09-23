@@ -15,7 +15,8 @@ namespace Flurl.Http.CodeGen
 				.AddParam("name", "string", "The header name.")
 				.AddParam("value", "object", "The header value.");
 			yield return new UrlExtensionMethod("WithHeaders", "Creates a new FlurlRequest with the URL and sets request headers based on property names/values of the provided object, or keys/values if object is a dictionary, to be sent")
-				.AddParam("headers", "object", "Names/values of HTTP headers to set. Typically an anonymous object or IDictionary.");
+				.AddParam("headers", "object", "Names/values of HTTP headers to set. Typically an anonymous object or IDictionary.")
+				.AddParam("replaceUnderscoreWithHyphen", "bool", "If true, underscores in property names will be replaced by hyphens. Default is true.", "true");
 			yield return new UrlExtensionMethod("WithBasicAuth", "Creates a new FlurlRequest with the URL and sets the Authorization header according to Basic Authentication protocol.")
 				.AddParam("username", "string", "Username of authenticating user.")
 				.AddParam("password", "string", "Password of authenticating user.");
