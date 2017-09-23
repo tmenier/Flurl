@@ -4,12 +4,12 @@ using System.Collections.Concurrent;
 namespace Flurl.Http.Configuration
 {
 	/// <summary>
-	/// Default implementation of IFlurlClientFactory used by Flurl.Http. Custom factories looking to extend
+	/// Encapsulates a creation/caching strategy for IFlurlClient instances. Custom factories looking to extend
 	/// Flurl's behavior should inherit from this class, rather than implementing IFlurlClientFactory directly.
 	/// </summary>
-	public class DefaultFlurlClientFactory : IFlurlClientFactory
+	public abstract class FlurlClientFactoryBase : IFlurlClientFactory
 	{
-		private static readonly ConcurrentDictionary<string, IFlurlClient> _clients = new ConcurrentDictionary<string, IFlurlClient>();
+		private readonly ConcurrentDictionary<string, IFlurlClient> _clients = new ConcurrentDictionary<string, IFlurlClient>();
 
 		/// <summary>
 		/// By defaykt, uses a caching strategy of one FlurlClient per host. This maximizes reuse of
@@ -20,8 +20,8 @@ namespace Flurl.Http.Configuration
 		public virtual IFlurlClient Get(Url url) {
 			return _clients.AddOrUpdate(
 				GetCacheKey(url),
-				_ => new FlurlClient(),
-				(_, client) => client.IsDisposed ? new FlurlClient() : client);
+				u => Create(u),
+				(u, client) => client.IsDisposed ? Create(u) : client);
 		}
 
 		/// <summary>
@@ -31,6 +31,13 @@ namespace Flurl.Http.Configuration
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <returns>The cache key</returns>
-		protected virtual string GetCacheKey(Url url) => new Uri(url).Host;
+		protected abstract string GetCacheKey(Url url);
+
+		/// <summary>
+		/// Creates a new FlurlClient
+		/// </summary>
+		/// <param name="url">The URL (not used)</param>
+		/// <returns></returns>
+		protected virtual IFlurlClient Create(Url url) => new FlurlClient();
 	}
 }

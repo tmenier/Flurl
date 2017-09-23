@@ -207,7 +207,7 @@ namespace Flurl.Http.Configuration
 			CookiesEnabled = false;
 			JsonSerializer = new NewtonsoftJsonSerializer(null);
 			UrlEncodedSerializer = new DefaultUrlEncodedSerializer();
-			FlurlClientFactory = new DefaultFlurlClientFactory();
+			FlurlClientFactory = new PerHostFlurlClientFactory();
 			HttpClientFactory = new DefaultHttpClientFactory();
 		}
 	}

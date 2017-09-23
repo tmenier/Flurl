@@ -21,7 +21,7 @@ namespace Flurl.Http.Testing
 	/// <summary>
 	/// IFlurlClientFactory implementation used to fake and record calls in tests.
 	/// </summary>
-	public class TestFlurlClientFactory : DefaultFlurlClientFactory
+	public class TestFlurlClientFactory : FlurlClientFactoryBase
 	{
 		private readonly Lazy<FlurlClient> _client = new Lazy<FlurlClient>(() => new FlurlClient());
 
@@ -32,6 +32,15 @@ namespace Flurl.Http.Testing
 		/// <returns>The FlurlClient instance.</returns>
 		public override IFlurlClient Get(Url url) {
 			return _client.Value;
+		}
+
+		/// <summary>
+		/// Not used. Singleton FlurlClient used for lifetime of test.
+		/// </summary>
+		/// <param name="url"></param>
+		/// <returns></returns>
+		protected override string GetCacheKey(Url url) {
+			return null;
 		}
 	}
 }
