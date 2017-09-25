@@ -165,24 +165,6 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("foo", rec.Cookies["c1"].Value);
 		}
 
-		// https://github.com/tmenier/Flurl/issues/169
-		[Test]
-		public async Task cannot_inspect_RequestBody_with_uncaptured_content() {
-			using (var httpTest = new HttpTest()) {
-				// use StringContent instead of CapturedStringContent
-				await "http://api.com".SendAsync(HttpMethod.Post, new StringContent("foo", null, "text/plain"));
-				try {
-					httpTest.ShouldHaveMadeACall().WithRequestBody("foo");
-					Assert.Fail("Asserting RequestBody with uncaptured content should have thrown FlurlHttpException.");
-				}
-				catch (FlurlHttpException ex) {
-					// message should mention RequestBody and CapturedStringContent
-					StringAssert.Contains("RequestBody", ex.Message);
-					StringAssert.Contains("CapturedStringContent", ex.Message);
-				}
-			}
-		}
-
 		// https://github.com/tmenier/Flurl/issues/175
 		[Test]
 		public async Task can_deserialize_default_response_more_than_once() {

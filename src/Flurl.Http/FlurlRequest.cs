@@ -123,9 +123,11 @@ namespace Flurl.Http
 
 				call.Response = await Client.HttpClient.SendAsync(request, completionOption, token).ConfigureAwait(false);
 				call.Response.RequestMessage = request;
+
 				if (call.Succeeded)
 					return call.Response;
 
+				// response content is only awaited here if the call failed.
 				if (call.Response.Content != null)
 					call.ErrorResponseBody = await call.Response.Content.StripCharsetQuotes().ReadAsStringAsync().ConfigureAwait(false);
 
@@ -140,6 +142,9 @@ namespace Flurl.Http
 
 				if (ex is OperationCanceledException && !userToken.IsCancellationRequested)
 					throw new FlurlHttpTimeoutException(call, ex);
+
+				if (ex is FlurlHttpException)
+					throw;
 
 				throw new FlurlHttpException(call, ex);
 			}

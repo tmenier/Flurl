@@ -36,16 +36,9 @@ namespace Flurl.Http
 		public HttpRequestMessage Request { get; }
 
 		/// <summary>
-		/// Captured request body. Available only if Request.Content is a Flurl.Http.Content.CapturedStringContent.
+		/// Captured request body. Available ONLY if Request.Content is a Flurl.Http.Content.CapturedStringContent.
 		/// </summary>
-		public string RequestBody {
-			get {
-				var csc = Request.Content as CapturedStringContent;
-				if (csc == null)
-					throw new FlurlHttpException(this, "RequestBody is only available when Request.Content derives from Flurl.Http.Content.CapturedStringContent.", null);
-				return csc.Content;
-			}
-		}
+		public string RequestBody => (Request.Content as CapturedStringContent)?.Content;
 
 		/// <summary>
 		/// HttpResponseMessage associated with the call if the call completed, otherwise null.
@@ -104,7 +97,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns></returns>
 		public override string ToString() {
-			return $"{Request.Method:U} {Request.RequestUri.AbsoluteUri}";
+			return $"{Request.Method:U} {FlurlRequest.Url}";
 		}
 	}
 }
