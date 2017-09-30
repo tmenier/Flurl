@@ -204,6 +204,32 @@ namespace Flurl.Http.Testing
 		}
 
 		/// <summary>
+		/// Asserts whther the calls were made containing the given request header.
+		/// </summary>
+		/// <param name="name">Expected header name</param>
+		/// <param name="valuePattern">Expected header value pattern</param>
+		/// <returns></returns>
+		public HttpCallAssertion WithHeader(string name, string valuePattern = "*") {
+			_expectedConditions.Add($"header {name}: {valuePattern}");
+			return With(c => 
+				c.Request.Headers.TryGetValues(name, out var vals) &&
+				vals.Any(v => MatchesPattern(v, valuePattern)));
+		}
+
+		/// <summary>
+		/// Asserts whther the calls were made that do not contain the given request header.
+		/// </summary>
+		/// <param name="name">Expected header name</param>
+		/// <param name="valuePattern">Expected header value pattern</param>
+		/// <returns></returns>
+		public HttpCallAssertion WithoutHeader(string name, string valuePattern = "*") {
+			_expectedConditions.Add($"no header {name}: {valuePattern}");
+			return Without(c =>
+				c.Request.Headers.TryGetValues(name, out var vals) &&
+				vals.Any(v => MatchesPattern(v, valuePattern)));
+		}
+
+		/// <summary>
 		/// Asserts whether the Authorization header was set with basic auth.
 		/// </summary>
 		/// <param name="username">Expected username</param>

@@ -124,6 +124,24 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public async Task can_assert_headers() {
+			await "http://api.com".WithHeaders(new { h1 = "val1", h2 = "val2" }).GetAsync();
+
+			HttpTest.ShouldHaveMadeACall().WithHeader("h1");
+			HttpTest.ShouldHaveMadeACall().WithHeader("h2", "val2");
+			HttpTest.ShouldHaveMadeACall().WithHeader("h1", "val*");
+
+			HttpTest.ShouldHaveMadeACall().WithoutHeader("h3");
+			HttpTest.ShouldHaveMadeACall().WithoutHeader("h2", "val1");
+			HttpTest.ShouldHaveMadeACall().WithoutHeader("h1", "foo*");
+
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithHeader("h3"));
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithoutHeader("h1"));
+		}
+
+		[Test]
 		public async Task can_simulate_timeout() {
 			HttpTest.SimulateTimeout();
 			try {
