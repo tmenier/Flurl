@@ -218,19 +218,19 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void can_provide_custom_client_factory() {
-			var client = new FlurlClient();
-			client.Settings.HttpClientFactory = new SomeCustomHttpClientFactory();
-			Assert.IsInstanceOf<SomeCustomHttpClient>(client.HttpClient);
-			Assert.IsInstanceOf<SomeCustomMessageHandler>(client.HttpMessageHandler);
+			var cli = new FlurlClient();
+			cli.Settings.HttpClientFactory = new SomeCustomHttpClientFactory();
+			Assert.IsInstanceOf<SomeCustomHttpClient>(cli.HttpClient);
+			Assert.IsInstanceOf<SomeCustomMessageHandler>(cli.HttpMessageHandler);
 		}
 
 		[Test]
 		public async Task connection_lease_timeout_sets_connection_close_header() {
 			using (var test = new HttpTest()) {
-				var client = new FlurlClient("http://api.com");
-				client.Settings.ConnectionLeaseTimeout = TimeSpan.FromMilliseconds(50);
+				var cli = new FlurlClient("http://api.com");
+				cli.Settings.ConnectionLeaseTimeout = TimeSpan.FromMilliseconds(50);
 
-				await client.Request("1").GetAsync();
+				await cli.Request("1").GetAsync();
 				test.ShouldHaveCalled("http://api.com/1").WithoutHeader("Connection");
 
 				// exceed the timeout
@@ -238,21 +238,21 @@ namespace Flurl.Test.Http
 
 				// slam it many times concurrently
 				await Task.WhenAll(
-					client.Request("2").GetAsync(),
-					client.Request("2").GetAsync(),
-					client.Request("2").GetAsync(),
-					client.Request("2").GetAsync(),
-					client.Request("2").GetAsync(),
-					client.Request("2").GetAsync(),
-					client.Request("2").GetAsync(),
-					client.Request("2").GetAsync());
+					cli.Request("2").GetAsync(),
+					cli.Request("2").GetAsync(),
+					cli.Request("2").GetAsync(),
+					cli.Request("2").GetAsync(),
+					cli.Request("2").GetAsync(),
+					cli.Request("2").GetAsync(),
+					cli.Request("2").GetAsync(),
+					cli.Request("2").GetAsync());
 
 				// connection:close header should get sent exactly once
 				test.ShouldHaveCalled("http://api.com/2").WithHeader("Connection", "close").Times(1);
 
 				await Task.Delay(10);
 
-				await client.Request("3").GetAsync();
+				await cli.Request("3").GetAsync();
 				test.ShouldHaveCalled("http://api.com/3").WithoutHeader("Connection");
 			}
 		}

@@ -29,8 +29,8 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_set_request_cookies() {
-			var client = new FlurlClient();
-			var resp = await client.Request("https://httpbin.org/cookies").WithCookies(new { x = 1, y = 2 }).GetJsonAsync();
+			var cli = new FlurlClient();
+			var resp = await cli.Request("https://httpbin.org/cookies").WithCookies(new { x = 1, y = 2 }).GetJsonAsync();
 
 			// httpbin returns json representation of cookies that were set on the server.
 			Assert.AreEqual("1", resp.cookies.x);
@@ -39,33 +39,33 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_set_cookies_before_setting_url() {
-			var client = new FlurlClient().WithCookie("z", "999");
-			var resp = await client.Request("https://httpbin.org/cookies").GetJsonAsync();
+			var cli = new FlurlClient().WithCookie("z", "999");
+			var resp = await cli.Request("https://httpbin.org/cookies").GetJsonAsync();
 			Assert.AreEqual("999", resp.cookies.z);
 		}
 
 		[Test]
 		public async Task can_get_response_cookies() {
-			var client = new FlurlClient().EnableCookies();
-			await client.Request("https://httpbin.org/cookies/set?z=999").HeadAsync();
-			Assert.AreEqual("999", client.Cookies["z"].Value);
+			var cli = new FlurlClient().EnableCookies();
+			await cli.Request("https://httpbin.org/cookies/set?z=999").HeadAsync();
+			Assert.AreEqual("999", cli.Cookies["z"].Value);
 		}
 
 		[Test]
 		public async Task can_persist_cookies() {
-			var client = new FlurlClient("https://httpbin.org/cookies");
-			var req = client.Request().WithCookie("z", 999);
+			var cli = new FlurlClient("https://httpbin.org/cookies");
+			var req = cli.Request().WithCookie("z", 999);
 			// cookie should be set
-			Assert.AreEqual("999", client.Cookies["z"].Value);
+			Assert.AreEqual("999", cli.Cookies["z"].Value);
 			Assert.AreEqual("999", req.Cookies["z"].Value);
 
 			await req.HeadAsync();
 			// FlurlClient should be re-used, so cookie should stick
-			Assert.AreEqual("999", client.Cookies["z"].Value);
+			Assert.AreEqual("999", cli.Cookies["z"].Value);
 			Assert.AreEqual("999", req.Cookies["z"].Value);
 
 			// httpbin returns json representation of cookies that were set on the server.
-			var resp = await client.Request().GetJsonAsync();
+			var resp = await cli.Request().GetJsonAsync();
 			Assert.AreEqual("999", resp.cookies.z);
 		}
 

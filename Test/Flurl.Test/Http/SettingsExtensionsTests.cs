@@ -130,10 +130,10 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void WithUrl_shares_client_but_not_Url() {
-			var client = new FlurlClient().WithCookie("mycookie", "123");
-			var req1 = client.Request("http://www.api.com/for-req1");
-			var req2 = client.Request("http://www.api.com/for-req2");
-			var req3 = client.Request("http://www.api.com/for-req3");
+			var cli = new FlurlClient().WithCookie("mycookie", "123");
+			var req1 = cli.Request("http://www.api.com/for-req1");
+			var req2 = cli.Request("http://www.api.com/for-req2");
+			var req3 = cli.Request("http://www.api.com/for-req3");
 
 			CollectionAssert.AreEquivalent(req1.Cookies, req2.Cookies);
 			CollectionAssert.AreEquivalent(req1.Cookies, req3.Cookies);
@@ -143,10 +143,10 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void WithClient_shares_client_but_not_Url() {
-			var client = new FlurlClient().WithCookie("mycookie", "123");
-			var req1 = "http://www.api.com/for-req1".WithClient(client);
-			var req2 = "http://www.api.com/for-req2".WithClient(client);
-			var req3 = "http://www.api.com/for-req3".WithClient(client);
+			var cli = new FlurlClient().WithCookie("mycookie", "123");
+			var req1 = "http://www.api.com/for-req1".WithClient(cli);
+			var req2 = "http://www.api.com/for-req2".WithClient(cli);
+			var req3 = "http://www.api.com/for-req3".WithClient(cli);
 
 			CollectionAssert.AreEquivalent(req1.Cookies, req2.Cookies);
 			CollectionAssert.AreEquivalent(req1.Cookies, req3.Cookies);
@@ -164,11 +164,11 @@ namespace Flurl.Test.Http
 		[Test]
 		public void can_override_settings_fluently() {
 			using (var test = new HttpTest()) {
-				var client = new FlurlClient().Configure(s => s.AllowedHttpStatusRange = "*");
+				var cli = new FlurlClient().Configure(s => s.AllowedHttpStatusRange = "*");
 				test.RespondWith("epic fail", 500);
 				Assert.ThrowsAsync<FlurlHttpException>(async () => await "http://www.api.com"
 					.ConfigureRequest(c => c.AllowedHttpStatusRange = "2xx")
-					.WithClient(client) // client-level settings shouldn't win
+					.WithClient(cli) // client-level settings shouldn't win
 					.GetAsync());
 			}
 		}
