@@ -121,6 +121,9 @@ namespace Flurl.Http
 				if (Settings.CookiesEnabled)
 					WriteRequestCookies(request);
 
+				if (Client.CheckAndRenewConnectionLease())
+					request.Headers.ConnectionClose = true;
+
 				call.Response = await Client.HttpClient.SendAsync(request, completionOption, token).ConfigureAwait(false);
 				call.Response.RequestMessage = request;
 

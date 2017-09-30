@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -241,6 +242,23 @@ namespace Flurl.Test.Http
 
 			await cli.Request("cookies/set?z=999").HeadAsync();
 			Assert.AreEqual("999", cli.Cookies["z"].Value);
+		}
+
+		[Test]
+		public async Task connection_lease_timeout_doesnt_disrupt_calls() {
+			// Specific behavior associated with ConnectionLeaseTimeout is coverd in SettingsTests.
+			// Here let's just make sure it isn't disruptive in any way in real calls.
+
+			var cli = new FlurlClient("http://www.google.com");
+			cli.Settings.ConnectionLeaseTimeout = TimeSpan.FromMilliseconds(20);
+
+			// initiate a call to google every 10ms for 100ms.
+			var tasks = new List<Task>();
+			for (var i = 0; i < 10; i++) {
+				tasks.Add(cli.Request().GetAsync());
+				await Task.Delay(10);
+			}
+			await Task.WhenAll(tasks); // failed HTTP status, etc, would throw here and fail the test.
 		}
 
 		public class DelegatingHandlerHttpClientFactory : DefaultHttpClientFactory

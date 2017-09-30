@@ -173,6 +173,16 @@ namespace Flurl.Http.Configuration
 		public ClientFlurlHttpSettings(FlurlHttpSettings defaults) : base(defaults) { }
 
 		/// <summary>
+		/// Specifies the time to keep the underlying HTTP/TCP conneciton open. When expired, a Connection: close header
+		/// is sent with the next request, which should force a new connection and DSN lookup to occur on the next call.
+		/// Default is null, effectively disabling the behavior.
+		/// </summary>
+		public TimeSpan? ConnectionLeaseTimeout {
+			get => Get(() => ConnectionLeaseTimeout);
+			set => Set(() => ConnectionLeaseTimeout, value);
+		}
+
+		/// <summary>
 		/// Gets or sets a factory used to create the HttpClient and HttpMessageHandler used for HTTP calls.
 		/// Whenever possible, custom factory implementations should inherit from DefaultHttpClientFactory,
 		/// only override the method(s) needed, call the base method, and modify the result.

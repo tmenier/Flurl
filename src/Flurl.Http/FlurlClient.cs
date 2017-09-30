@@ -42,6 +42,12 @@ namespace Flurl.Http
 		IFlurlRequest Request(params object[] urlSegments);
 
 		/// <summary>
+		/// Checks whether the connection lease timeout (as specified in Settings.ConnectionLeaseTimeout) has passed since
+		/// connection was opened. If it has, resets the interval and returns true. 
+		/// </summary>
+		bool CheckAndRenewConnectionLease();
+
+		/// <summary>
 		/// Gets a value indicating whether this instance (and its underlying HttpClient) has been disposed.
 		/// </summary>
 		bool IsDisposed { get; }
@@ -63,46 +69,31 @@ namespace Flurl.Http
 			BaseUrl = baseUrl;
 			Settings = new ClientFlurlHttpSettings(FlurlHttp.GlobalSettings);
 			_httpClient = new Lazy<HttpClient>(() => Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler));
-			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => Settings.HttpClientFactory.CreateMessageHandler());
+			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => {
+				_connectionLeaseStart = DateTime.UtcNow;
+				return Settings.HttpClientFactory.CreateMessageHandler();
+			});
 		}
 
-		/// <summary>
-		/// The base URL associated with this client.
-		/// </summary>
+		/// <inheritdoc />
 		public string BaseUrl { get; set; }
 
-		/// <summary>
-		/// Gets or sets the FlurlHttpSettings object used by this client.
-		/// </summary>
+		/// <inheritdoc />
 		public ClientFlurlHttpSettings Settings { get; set; }
 
-		/// <summary>
-		/// Collection of headers sent on all requests using this client.
-		/// </summary>
+		/// <inheritdoc />
 		public IDictionary<string, object> Headers { get; } = new Dictionary<string, object>();
 
-		/// <summary>
-		/// Collection of HttpCookies sent and received on all requests using this client.
-		/// </summary>
+		/// <inheritdoc />
 		public IDictionary<string, Cookie> Cookies { get; } = new Dictionary<string, Cookie>();
 
-		/// <summary>
-		/// Gets the HttpClient to be used in subsequent HTTP calls. Creation (when necessary) is delegated
-		/// to FlurlHttp.FlurlClientFactory. Reused for the life of the FlurlClient.
-		/// </summary>
+		/// <inheritdoc />
 		public HttpClient HttpClient => _httpClient.Value;
 
-		/// <summary>
-		/// Gets the HttpMessageHandler to be used in subsequent HTTP calls. Creation (when necessary) is delegated
-		/// to FlurlHttp.FlurlClientFactory.
-		/// </summary>
+		/// <inheritdoc />
 		public HttpMessageHandler HttpMessageHandler => _httpMessageHandler.Value;
 
-		/// <summary>
-		/// Instantiates a new IFlurClient, optionally appending path segments to the BaseUrl.
-		/// </summary>
-		/// <param name="urlSegments">The URL or URL segments for the request. If BaseUrl is defined, it is assumed that these are path segments off that base.</param>
-		/// <returns>A new IFlurlRequest</returns>
+		/// <inheritdoc />
 		public IFlurlRequest Request(params object[] urlSegments) {
 			var parts = new List<string>(urlSegments.Select(s => s.ToInvariantString()));
 			if (!Url.IsValid(parts.FirstOrDefault()) && !string.IsNullOrEmpty(BaseUrl))
@@ -121,9 +112,29 @@ namespace Flurl.Http
 			set => Settings = value as ClientFlurlHttpSettings;
 		}
 
-		/// <summary>
-		/// Gets a value indicating whether this instance (and its underlying HttpClient) has been disposed.
-		/// </summary>
+		private DateTime? _connectionLeaseStart = null;
+		private readonly object _connectionLeaseLock = new object();
+
+		private bool IsConnectionLeaseExpired =>
+			_connectionLeaseStart.HasValue &&
+			Settings.ConnectionLeaseTimeout.HasValue &&
+			DateTime.UtcNow - _connectionLeaseStart > Settings.ConnectionLeaseTimeout;
+
+		/// <inheritdoc />
+		public bool CheckAndRenewConnectionLease() {
+			// do double-check locking to avoid lock overhead most of the time
+			if (IsConnectionLeaseExpired) {
+				lock (_connectionLeaseLock) {
+					if (IsConnectionLeaseExpired) {
+						_connectionLeaseStart = DateTime.UtcNow;
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		/// <inheritdoc />
 		public bool IsDisposed { get; private set; }
 
 		/// <summary>
