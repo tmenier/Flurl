@@ -6,7 +6,7 @@
 	  <PackageId>Flurl.Http</PackageId>
     <Version>2.0.0-pre4</Version>
     <Authors>Todd Menier</Authors>
-    <Description>A fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.</Description>
+    <Description>WARNING: 2.0 CONTAINS BREAKING CHANGES - REVIEW RELEASE NOTES CAREFULLY! Flurl.Http fluent, portable, testable HTTP client library that extends Flurl's URL builder chain.</Description>
     <PackageProjectUrl>http://tmenier.github.io/Flurl</PackageProjectUrl>
     <PackageIconUrl>https://pbs.twimg.com/profile_images/534024476296376320/IuPGZ_bX_400x400.png</PackageIconUrl>
     <PackageLicenseUrl>https://raw.githubusercontent.com/tmenier/Flurl/master/LICENSE</PackageLicenseUrl>
