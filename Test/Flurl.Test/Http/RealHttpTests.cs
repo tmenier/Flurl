@@ -261,6 +261,35 @@ namespace Flurl.Test.Http
 			await Task.WhenAll(tasks); // failed HTTP status, etc, would throw here and fail the test.
 		}
 
+		[Test]
+		public async Task test_settings_override_client_settings() {
+			var cli1 = new FlurlClient();
+			cli1.Settings.HttpClientFactory = new DefaultHttpClientFactory();
+			var h = cli1.HttpClient; // force (lazy) instantiation
+
+			using (var test = new HttpTest()) {
+				test.Settings.CookiesEnabled = false;
+
+				test.RespondWith("foo!");
+				var s = await cli1.Request("http://www.google.com")
+					.EnableCookies() // test says cookies are off, and test should always win
+					.GetStringAsync();
+				Assert.AreEqual("foo!", s);
+				Assert.IsFalse(cli1.Settings.CookiesEnabled);
+
+				var cli2 = new FlurlClient();
+				cli2.Settings.HttpClientFactory = new DefaultHttpClientFactory();
+				h = cli2.HttpClient;
+
+				test.RespondWith("foo 2!");
+				s = await cli2.Request("http://www.google.com")
+					.EnableCookies() // test says cookies are off, and test should always win
+					.GetStringAsync();
+				Assert.AreEqual("foo 2!", s);
+				Assert.IsFalse(cli2.Settings.CookiesEnabled);
+			}
+		}
+
 		public class DelegatingHandlerHttpClientFactory : DefaultHttpClientFactory
 		{
 			public override HttpMessageHandler CreateMessageHandler() {

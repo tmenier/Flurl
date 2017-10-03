@@ -179,7 +179,7 @@ namespace Flurl.Test.Http
 
 			var rec = "http://www.api.com".EnableCookies();
 			await rec.GetAsync();
-			Assert.AreEqual(1, rec.Cookies.Count());
+			Assert.AreEqual(1, rec.Cookies.Count);
 			Assert.AreEqual("foo", rec.Cookies["c1"].Value);
 		}
 

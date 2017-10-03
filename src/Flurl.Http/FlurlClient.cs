@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Linq;
 using Flurl.Http.Configuration;
+using Flurl.Http.Testing;
 using Flurl.Util;
 
 namespace Flurl.Http
@@ -69,10 +70,7 @@ namespace Flurl.Http
 			BaseUrl = baseUrl;
 			Settings = new ClientFlurlHttpSettings(FlurlHttp.GlobalSettings);
 			_httpClient = new Lazy<HttpClient>(() => Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler));
-			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => {
-				_connectionLeaseStart = DateTime.UtcNow;
-				return Settings.HttpClientFactory.CreateMessageHandler();
-			});
+			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => Settings.HttpClientFactory.CreateMessageHandler());
 		}
 
 		/// <inheritdoc />
@@ -88,10 +86,10 @@ namespace Flurl.Http
 		public IDictionary<string, Cookie> Cookies { get; } = new Dictionary<string, Cookie>();
 
 		/// <inheritdoc />
-		public HttpClient HttpClient => _httpClient.Value;
+		public HttpClient HttpClient => HttpTest.Current?.HttpClient ?? _httpClient.Value;
 
 		/// <inheritdoc />
-		public HttpMessageHandler HttpMessageHandler => _httpMessageHandler.Value;
+		public HttpMessageHandler HttpMessageHandler => HttpTest.Current?.HttpMessageHandler ?? _httpMessageHandler.Value;
 
 		/// <inheritdoc />
 		public IFlurlRequest Request(params object[] urlSegments) {
@@ -112,13 +110,12 @@ namespace Flurl.Http
 			set => Settings = value as ClientFlurlHttpSettings;
 		}
 
-		private DateTime? _connectionLeaseStart = null;
+		private Lazy<DateTime> _connectionLeaseStart = new Lazy<DateTime>(() => DateTime.UtcNow);
 		private readonly object _connectionLeaseLock = new object();
 
 		private bool IsConnectionLeaseExpired =>
-			_connectionLeaseStart.HasValue &&
 			Settings.ConnectionLeaseTimeout.HasValue &&
-			DateTime.UtcNow - _connectionLeaseStart > Settings.ConnectionLeaseTimeout;
+			DateTime.UtcNow - _connectionLeaseStart.Value > Settings.ConnectionLeaseTimeout;
 
 		/// <inheritdoc />
 		public bool CheckAndRenewConnectionLease() {
@@ -126,7 +123,7 @@ namespace Flurl.Http
 			if (IsConnectionLeaseExpired) {
 				lock (_connectionLeaseLock) {
 					if (IsConnectionLeaseExpired) {
-						_connectionLeaseStart = DateTime.UtcNow;
+						_connectionLeaseStart = new Lazy<DateTime>(() => DateTime.UtcNow);
 						return true;
 					}
 				}

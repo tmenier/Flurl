@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using Flurl.Http.Testing;
 
 namespace Flurl.Http.Configuration
 {
@@ -137,7 +138,9 @@ namespace Flurl.Http.Configuration
 		/// </summary>
 		protected T Get<T>(Expression<Func<T>> property) {
 			var p = (property.Body as MemberExpression).Member as PropertyInfo;
+			var testVals = HttpTest.Current?.Settings._vals;
 			return
+				testVals?.ContainsKey(p.Name) == true ? (T)testVals[p.Name] :
 				_vals.ContainsKey(p.Name) ? (T)_vals[p.Name] :
 				_defaults != null ? (T)p.GetValue(_defaults) :
 				default(T);
@@ -206,7 +209,10 @@ namespace Flurl.Http.Configuration
 		/// Gets or sets the factory that defines creating, caching, and reusing FlurlClient instances and,
 		/// by proxy, HttpClient instances.
 		/// </summary>
-		public IFlurlClientFactory FlurlClientFactory { get; set; }
+		public IFlurlClientFactory FlurlClientFactory {
+			get => Get(() => FlurlClientFactory);
+			set => Set(() => FlurlClientFactory, value);
+		}
 
 		/// <summary>
 		/// Resets all global settings to their Flurl.Http-defined default values.
@@ -214,11 +220,25 @@ namespace Flurl.Http.Configuration
 		public override void ResetDefaults() {
 			base.ResetDefaults();
 			Timeout = TimeSpan.FromSeconds(100); // same as HttpClient
-			CookiesEnabled = false;
 			JsonSerializer = new NewtonsoftJsonSerializer(null);
 			UrlEncodedSerializer = new DefaultUrlEncodedSerializer();
 			FlurlClientFactory = new PerHostFlurlClientFactory();
 			HttpClientFactory = new DefaultHttpClientFactory();
+		}
+	}
+
+	/// <summary>
+	/// Settings overrides within the context of an HttpTest
+	/// </summary>
+	public class TestFlurlHttpSettings : GlobalFlurlHttpSettings
+	{
+		/// <summary>
+		/// Resets all test settings to their Flurl.Http-defined default values.
+		/// </summary>
+		public override void ResetDefaults() {
+			base.ResetDefaults();
+			FlurlClientFactory = new TestFlurlClientFactory();
+			HttpClientFactory = new TestHttpClientFactory();
 		}
 	}
 }

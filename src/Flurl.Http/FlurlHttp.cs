@@ -1,6 +1,5 @@
 ﻿using System;
 using Flurl.Http.Configuration;
-using Flurl.Http.Testing;
 
 namespace Flurl.Http
 {
@@ -17,7 +16,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Globally configured Flurl.Http settings. Should normally be written to by calling FlurlHttp.Configure once application at startup.
 		/// </summary>
-		public static GlobalFlurlHttpSettings GlobalSettings => HttpTest.Current?.Settings ?? _settings.Value;
+		public static GlobalFlurlHttpSettings GlobalSettings => _settings.Value;
 
 		/// <summary>
 		/// Provides thread-safe access to Flurl.Http's global configuration settings. Should only be called once at application startup.

@@ -15,19 +15,24 @@ namespace Flurl.Http.Testing
 	/// </summary>
 	public class HttpTest : IDisposable
 	{
-	    /// <summary>
-	    /// Initializes a new instance of the <see cref="HttpTest"/> class.
-	    /// </summary>
-	    /// <exception cref="Exception">A delegate callback throws an exception.</exception>
-	    public HttpTest() {
-		    Settings = new GlobalFlurlHttpSettings {
-			    HttpClientFactory = new TestHttpClientFactory(),
-				FlurlClientFactory = new TestFlurlClientFactory()
-		    };
+		private readonly Lazy<HttpClient> _httpClient;
+		private readonly Lazy<HttpMessageHandler> _httpMessageHandler;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="HttpTest"/> class.
+		/// </summary>
+		/// <exception cref="Exception">A delegate callback throws an exception.</exception>
+		public HttpTest() {
+		    Settings = new TestFlurlHttpSettings();
 			ResponseQueue = new Queue<HttpResponseMessage>();
 			CallLog = new List<HttpCall>();
+			_httpClient = new Lazy<HttpClient>(() => Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler));
+			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => Settings.HttpClientFactory.CreateMessageHandler());
 		    SetCurrentTest(this);
 	    }
+
+		internal HttpClient HttpClient => _httpClient.Value;
+		internal HttpMessageHandler HttpMessageHandler => _httpMessageHandler.Value;
 
 		/// <summary>
 		/// Gets or sets the FlurlHttpSettings object used by this test.
