@@ -10,15 +10,15 @@ Flurl.Http uses [HttpClient](https://msdn.microsoft.com/en-us/library/system.net
 
 Starting in version 2.0, Flurl.Http adheres to this guidance by default. Fluent methods like this will create an HTTP client lazily, cache it, and resue it for every call to the same _host_:
 
-````c#
+```c#
 var data = await "http://api.com/endpoint".GetJsonAsync();
-````
+```
 
 (Note that this is _not_ the default behavior in 1.x. If you want this behavior without having to manage client objects explicitly, [upgrading](https://www.nuget.org/packages/Flurl.Http/) is highly recommended.)
 
 ## Managing Instances Explicitly
 
-`FlurlClient` is a lightweight wrapper around `HttpClient` that is tightly bound to its lifetime. (It implements `IDisposable`, and when disposed will also dispose `HttpClient`.) `FlurlClient` includes a `BaseUrl` property, as well as `Headers`, `Cookies`, `Settings`, and many of the [fluent methods]({{ site.baseurl }}/fluent-http) you may already be familiar with. Most of these properties and methods are used to set defaults that can be overridden at the request level.
+`FlurlClient` is a lightweight wrapper around `HttpClient` and is tightly bound to its lifetime. (It implements `IDisposable`, and when disposed will also dispose `HttpClient`.) `FlurlClient` includes a `BaseUrl` property, as well as `Headers`, `Cookies`, `Settings`, and many of the [fluent methods]({{ site.baseurl }}/fluent-http) you may already be familiar with. Most of these properties and methods are used to set defaults that can be overridden at the request level.
 
 So if you want to use Flurl's goodness while maintaining tight control over `HttpClient` instances and their lifetime, `FlurlClient` is the object to use. The `Request` method is the preferred way to begin fluently building, configuring and making a call off a `FlurlClient`.
 
@@ -32,7 +32,7 @@ using (var cli = new FlurlClient("https://api.com").WithOAUthBearerToken(token))
 
 ## Using Flurl With an IoC Container
 
-Flurl.Http is well suited for use with IoC containers and dependency injection. It provides interfaces for most of its core classes, notably `IFlurlClient`. Here are some options for registering `IFlurlClient` with your container:
+Flurl.Http is well suited for use with IoC containers and dependency injection. It provides interfaces for its core classes, most notably `IFlurlClient`. Here are some options for registering `IFlurlClient` with your container:
 
 1. Register `IFlurlClient` as a singleton. The drawback here is if your application interacts with more than one web service, you can't use stateful properties like `BaseUrl` or `Headers` or they'll likely collide.
 
@@ -62,7 +62,7 @@ Now simply register `IFlurlClientFactory` as a singleton and you'll get a single
 
 As for the `IFlurlClientFactory` implementation, `PerHostFlurlClientFactory` (used internally to implement the default implicit behavior) would probably work, but it isn't perfect. Say you have services that wrap 2 versions of the same API, where the base URLs are `https://api.com/v1` and `https://api.com/v2`. Since they have the same host, you'll get the same `FlurlClient` instance for both, which could lead to unexpected behavior.
 
-But Flurl comes with an alternative implementation that is better for this scenario: `PerBaseUrlClientFactory`. Rather than picking the host out of the URL you pass to `Get`, it considers the entire URL to be the key. And as a bonus, it will set `IFlurlClient.BaseUrl` to that URL in the returned instance. So, depending on your container, the registration will look something like this:
+Flurl comes with an alternative implementation that is better for this scenario: `PerBaseUrlClientFactory`. Rather than picking the host out of the URL you pass to `Get`, it considers the entire URL to be the key. And as a bonus, it will set `IFlurlClient.BaseUrl` to that URL in the returned instance. So, depending on your container, the registration will look something like this:
 
 ```c#
 container.RegisterSingleton<IFlurlClientFactory, PerBaseUrlClientFactory>();
