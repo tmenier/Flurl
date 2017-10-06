@@ -3,19 +3,19 @@ using System.Linq;
 
 namespace Flurl.Http.CodeGen
 {
-	public class ExtensionMethodModel
+	public class HttpExtensionMethod
 	{
-		public static IEnumerable<ExtensionMethodModel> GetAll() {
+		public static IEnumerable<HttpExtensionMethod> GetAll() {
 			return
 				from httpVerb in new[] { null, "Get", "Post", "Head", "Put", "Delete", "Patch" }
 				from bodyType in new[] { null, "Json", /*"Xml",*/ "String", "UrlEncoded" }
-				from extensionType in new[] { "IFlurlClient", "Url", "string" }
+				from extensionType in new[] { "IFlurlRequest", "Url", "string" }
 				where SupportedCombo(httpVerb, bodyType, extensionType)
 				from deserializeType in new[] { null, "Json", "JsonList", /*"Xml",*/ "String", "Stream", "Bytes" }
 				where httpVerb == "Get" || deserializeType == null
 				from isGeneric in new[] { true, false }
 				where AllowDeserializeToGeneric(deserializeType) || !isGeneric
-				select new ExtensionMethodModel {
+				select new HttpExtensionMethod {
 					HttpVerb = httpVerb,
 					BodyType = bodyType,
 					ExtentionOfType = extensionType,
@@ -27,7 +27,7 @@ namespace Flurl.Http.CodeGen
 		private static bool SupportedCombo(string verb, string bodyType, string extensionType) {
 			switch (verb) {
 				case null: // Send
-					return bodyType != null || extensionType != "IFlurlClient";
+					return bodyType != null || extensionType != "IFlurlRequest";
 				case "Post":
 					return true;
 				case "Put":

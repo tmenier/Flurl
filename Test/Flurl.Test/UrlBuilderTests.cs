@@ -8,7 +8,7 @@ using NUnit.Framework;
 
 namespace Flurl.Test
 {
-	[TestFixture]
+	[TestFixture, Parallelizable]
 	public class UrlBuilderTests
 	{
 		[Test]

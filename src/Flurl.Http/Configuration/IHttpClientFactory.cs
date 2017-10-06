@@ -11,15 +11,16 @@ namespace Flurl.Http.Configuration
 	public interface IHttpClientFactory
 	{
 		/// <summary>
-		/// Creates the client.
+		/// Defines how HttpClient should be instantiated and configured by default. Do NOT attempt
+		/// to cache/reuse HttpClient instances here - that should be done at the FlurlClient level
+		/// via a custom FlurlClientFactory that gets registered globally.
 		/// </summary>
-		/// <param name="url">The URL.</param>
-		/// <param name="handler">The handler.</param>
+		/// <param name="handler">The HttpMessageHandler used to construct the HttpClient.</param>
 		/// <returns></returns>
-		HttpClient CreateClient(Url url, HttpMessageHandler handler);
-		
+		HttpClient CreateHttpClient(HttpMessageHandler handler);
+
 		/// <summary>
-		/// Creates the message handler.
+		/// Defines how the 
 		/// </summary>
 		/// <returns></returns>
 		HttpMessageHandler CreateMessageHandler();

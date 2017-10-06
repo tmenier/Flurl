@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flurl", "src\Flurl\Flurl.csproj", "{117B6C6E-53F9-45AE-9439-F4FB7E21B116}"
 EndProject
@@ -18,11 +18,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{86A5ACB4-F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flurl.Test", "Test\Flurl.Test\Flurl.Test.csproj", "{DF68EB0E-9566-4577-B709-291520383F8D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9B549ED2-56BB-46AC-A430-E39C2AE74BF3}"
-	ProjectSection(SolutionItems) = preProject
-		appveyor.yml = appveyor.yml
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PackageTesters", "PackageTesters", "{9A136878-A43E-4154-9B5E-EDAF27E8628D}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PackageTester.Shared", "PackageTesters\PackageTester.Shared\PackageTester.Shared.shproj", "{D4717AA7-5549-4BAD-81C5-406844A12990}"
@@ -33,12 +28,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTester.NETCore", "Pa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageTester.NET45", "PackageTesters\PackageTester.NET45\PackageTester.NET45.csproj", "{AA8792B6-E0FA-46BA-BA03-C7971745F577}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageTester.PCL", "PackageTesters\PackageTester.PCL\PackageTester.PCL.csproj", "{7018B9E0-AD5B-42E4-AD35-59F324ED8E56}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{B6BF9238-4541-4E1F-955E-C95F1C2A1F46}"
+	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
+		Build\build.cmd = Build\build.cmd
+		Build\test.cmd = Build\test.cmd
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{7018b9e0-ad5b-42e4-ad35-59f324ed8e56}*SharedItemsImports = 4
 		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{84fb572a-8b77-4b09-b825-2a240bce1b7a}*SharedItemsImports = 4
+		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{aa8792b6-e0fa-46ba-ba03-c7971745f577}*SharedItemsImports = 4
 		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{d4717aa7-5549-4bad-81c5-406844a12990}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -74,10 +74,6 @@ Global
 		{AA8792B6-E0FA-46BA-BA03-C7971745F577}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA8792B6-E0FA-46BA-BA03-C7971745F577}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA8792B6-E0FA-46BA-BA03-C7971745F577}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7018B9E0-AD5B-42E4-AD35-59F324ED8E56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7018B9E0-AD5B-42E4-AD35-59F324ED8E56}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7018B9E0-AD5B-42E4-AD35-59F324ED8E56}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7018B9E0-AD5B-42E4-AD35-59F324ED8E56}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,6 +87,8 @@ Global
 		{84FB572A-8B77-4B09-B825-2A240BCE1B7A} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
 		{0231607B-9CA3-4277-9F19-9925694D22E0} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
 		{AA8792B6-E0FA-46BA-BA03-C7971745F577} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
-		{7018B9E0-AD5B-42E4-AD35-59F324ED8E56} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {61289482-AC5A-44E1-AEA1-76A3F3CCB6A4}
 	EndGlobalSection
 EndGlobal

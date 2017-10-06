@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Flurl.Http.Configuration;
 
 namespace Flurl.Http
@@ -12,73 +10,35 @@ namespace Flurl.Http
 	{
 		private static readonly object _configLock = new object();
 
-		private static Lazy<FlurlHttpSettings> _settings = 
-			new Lazy<FlurlHttpSettings>(() => new FlurlHttpSettings());
+		private static Lazy<GlobalFlurlHttpSettings> _settings =
+			new Lazy<GlobalFlurlHttpSettings>(() => new GlobalFlurlHttpSettings());
 
 		/// <summary>
 		/// Globally configured Flurl.Http settings. Should normally be written to by calling FlurlHttp.Configure once application at startup.
 		/// </summary>
-		public static FlurlHttpSettings GlobalSettings {
-			get { return _settings.Value; }
-		}
+		public static GlobalFlurlHttpSettings GlobalSettings => _settings.Value;
 
 		/// <summary>
 		/// Provides thread-safe access to Flurl.Http's global configuration settings. Should only be called once at application startup.
 		/// </summary>
-		/// <param name="configAction"></param>
-		/// <exception cref="Exception">A delegate callback throws an exception.</exception>
-		public static void Configure(Action<FlurlHttpSettings> configAction) {
+		/// <param name="configAction">the action to perform against the GlobalSettings</param>
+		public static void Configure(Action<GlobalFlurlHttpSettings> configAction) {
 			lock (_configLock) {
 				configAction(GlobalSettings);
 			}
 		}
 
 		/// <summary>
-		/// Triggers the specified sync and async event handlers, usually defined on 
+		/// Provides thread-safe access to the Settings associated with a specific IFlurlClient. The URL is used to find the client,
+		/// but keep in mind that the same client will be used in all calls to the same host by default.
 		/// </summary>
-		public static Task RaiseEventAsync(HttpRequestMessage request, FlurlEventType eventType) {
-			var call = HttpCall.Get(request);
-			var settings = call?.Settings;
-
-			if (settings == null)
-				return NoOpTask.Instance;
-
-			switch (eventType) {
-				case FlurlEventType.BeforeCall:
-					return HandleEventAsync(settings.BeforeCall, settings.BeforeCallAsync, call);
-				case FlurlEventType.AfterCall:
-					return HandleEventAsync(settings.AfterCall, settings.AfterCallAsync, call);
-				case FlurlEventType.OnError:
-					return HandleEventAsync(settings.OnError, settings.OnErrorAsync, call);
-				default:
-					return NoOpTask.Instance;
+		/// <param name="url">the URL used to find the IFlurlClient</param>
+		/// <param name="configAction">the action to perform against the IFlurlClient's Settings</param>
+		public static void ConfigureClient(string url, Action<ClientFlurlHttpSettings> configAction) {
+			var client = GlobalSettings.FlurlClientFactory.Get(url);
+			lock (_configLock) {
+				configAction(client.Settings);
 			}
 		}
-
-		private static Task HandleEventAsync(Action<HttpCall> syncHandler, Func<HttpCall, Task> asyncHandler, HttpCall call) {
-			if (syncHandler != null)
-				syncHandler(call);
-			if (asyncHandler != null)
-				return asyncHandler(call);
-			return NoOpTask.Instance;
-		}
-	}
-
-	/// <summary>
-	/// Flurl event types/
-	/// </summary>
-	public enum FlurlEventType {
-		/// <summary>
-		/// The before call
-		/// </summary>
-		BeforeCall,
-		/// <summary>
-		/// The after call
-		/// </summary>
-		AfterCall,
-		/// <summary>
-		/// The on error
-		/// </summary>
-		OnError
 	}
 }

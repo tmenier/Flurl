@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace Flurl.Test.Http
 {
-	[TestFixture]
+	[TestFixture, Parallelizable]
 	public class PostTests : HttpTestFixtureBase
 	{
 		[Test]
@@ -33,11 +33,11 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_post_url_encoded() {
-			await "http://some-api.com".PostUrlEncodedAsync(new { a = 1, b = 2, c = "hi there" });
+			await "http://some-api.com".PostUrlEncodedAsync(new { a = 1, b = 2, c = "hi there", d = new[] { 1, 2, 3 } });
 			HttpTest.ShouldHaveCalled("http://some-api.com")
 				.WithVerb(HttpMethod.Post)
 				.WithContentType("application/x-www-form-urlencoded")
-				.WithRequestBody("a=1&b=2&c=hi+there")
+				.WithRequestBody("a=1&b=2&c=hi+there&d=1&d=2&d=3")
 				.Times(1);
 		}
 

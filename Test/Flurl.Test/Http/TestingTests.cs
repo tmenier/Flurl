@@ -9,7 +9,7 @@ using NUnit.Framework;
 
 namespace Flurl.Test.Http
 {
-	[TestFixture]
+	[TestFixture, Parallelizable]
 	public class TestingTests : HttpTestFixtureBase
 	{
 		[Test]
@@ -124,6 +124,24 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public async Task can_assert_headers() {
+			await "http://api.com".WithHeaders(new { h1 = "val1", h2 = "val2" }).GetAsync();
+
+			HttpTest.ShouldHaveMadeACall().WithHeader("h1");
+			HttpTest.ShouldHaveMadeACall().WithHeader("h2", "val2");
+			HttpTest.ShouldHaveMadeACall().WithHeader("h1", "val*");
+
+			HttpTest.ShouldHaveMadeACall().WithoutHeader("h3");
+			HttpTest.ShouldHaveMadeACall().WithoutHeader("h2", "val1");
+			HttpTest.ShouldHaveMadeACall().WithoutHeader("h1", "foo*");
+
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithHeader("h3"));
+			Assert.Throws<HttpCallAssertException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithoutHeader("h1"));
+		}
+
+		[Test]
 		public async Task can_simulate_timeout() {
 			HttpTest.SimulateTimeout();
 			try {
@@ -140,7 +158,7 @@ namespace Flurl.Test.Http
 	    public async Task can_simulate_timeout_with_exception_handled() {
 	        HttpTest.SimulateTimeout();
 	        var result = await "http://www.api.com"
-	            .ConfigureClient(c => c.OnError = call => call.ExceptionHandled = true)
+	            .ConfigureRequest(c => c.OnError = call => call.ExceptionHandled = true)
 	            .GetAsync();
 	        Assert.IsNull(result);
 	    }
@@ -159,28 +177,10 @@ namespace Flurl.Test.Http
 		public async Task can_fake_cookies() {
 			HttpTest.RespondWith(cookies: new { c1 = "foo" });
 
-			var fc = "http://www.api.com".EnableCookies();
-			await fc.GetAsync();
-			Assert.AreEqual(1, fc.Cookies.Count());
-			Assert.AreEqual("foo", fc.Cookies["c1"].Value);
-		}
-
-		// https://github.com/tmenier/Flurl/issues/169
-		[Test]
-		public async Task cannot_inspect_RequestBody_with_uncaptured_content() {
-			using (var httpTest = new HttpTest()) {
-				// use StringContent instead of CapturedStringContent
-				await "http://api.com".SendAsync(HttpMethod.Post, new StringContent("foo", null, "text/plain"));
-				try {
-					httpTest.ShouldHaveMadeACall().WithRequestBody("foo");
-					Assert.Fail("Asserting RequestBody with uncaptured content should have thrown FlurlHttpException.");
-				}
-				catch (FlurlHttpException ex) {
-					// message should mention RequestBody and CapturedStringContent
-					StringAssert.Contains("RequestBody", ex.Message);
-					StringAssert.Contains("CapturedStringContent", ex.Message);
-				}
-			}
+			var rec = "http://www.api.com".EnableCookies();
+			await rec.GetAsync();
+			Assert.AreEqual(1, rec.Cookies.Count);
+			Assert.AreEqual("foo", rec.Cookies["c1"].Value);
 		}
 
 		// https://github.com/tmenier/Flurl/issues/175
@@ -195,8 +195,16 @@ namespace Flurl.Test.Http
 			Assert.IsNull(resp);
 		}
 
-		// parallel testing not supported in PCL
-#if !PORTABLE
+		[Test]
+		public void can_configure_settings_for_test() {
+			Assert.IsFalse(new FlurlRequest().Settings.CookiesEnabled);
+			using (new HttpTest().Configure(settings => settings.CookiesEnabled = true)) {
+				Assert.IsTrue(new FlurlRequest().Settings.CookiesEnabled);
+			}
+			// test disposed, should revert back to global settings
+			Assert.IsFalse(new FlurlRequest().Settings.CookiesEnabled);
+		}
+
 		[Test]
 		public async Task can_test_in_parallel() {
 			await Task.WhenAll(
@@ -206,7 +214,6 @@ namespace Flurl.Test.Http
 				CallAndAssertCountAsync(4),
 				CallAndAssertCountAsync(6));
 		}
-#endif
 
 		private async Task CallAndAssertCountAsync(int calls) {
 			using (var test = new HttpTest()) {

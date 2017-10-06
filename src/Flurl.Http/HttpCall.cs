@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
-using Flurl.Http.Configuration;
 using Flurl.Http.Content;
 
 namespace Flurl.Http
@@ -12,15 +11,11 @@ namespace Flurl.Http
 	/// </summary>
 	public class HttpCall
 	{
-		private readonly Lazy<Url> _url;
-
-		internal HttpCall(HttpRequestMessage request, FlurlHttpSettings settings) {
+		internal HttpCall(IFlurlRequest flurlRequest, HttpRequestMessage request) {
+			FlurlRequest = flurlRequest;
 			Request = request;
 			if (request?.Properties != null)
 				request.Properties["FlurlHttpCall"] = this;
-
-			Settings = settings;
-			_url = new Lazy<Url>(() => new Url(Request.RequestUri.AbsoluteUri));
 		}
 
 		internal static HttpCall Get(HttpRequestMessage request) {
@@ -31,26 +26,19 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// FlurlHttpSettings used for this call.
+		/// The IFlurlRequest associated with this call.
 		/// </summary>
-		public FlurlHttpSettings Settings { get; }
+		public IFlurlRequest FlurlRequest { get; }
 
 		/// <summary>
-		/// HttpRequestMessage associated with this call.
+		/// The HttpRequestMessage associated with this call.
 		/// </summary>
 		public HttpRequestMessage Request { get; }
 
 		/// <summary>
-		/// Captured request body. Available only if Request.Content is a Flurl.Http.Content.CapturedStringContent.
+		/// Captured request body. Available ONLY if Request.Content is a Flurl.Http.Content.CapturedStringContent.
 		/// </summary>
-		public string RequestBody {
-			get {
-				var csc = Request.Content as CapturedStringContent;
-				if (csc == null)
-					throw new FlurlHttpException(this, "RequestBody is only available when Request.Content derives from Flurl.Http.Content.CapturedStringContent.", null);
-				return csc.Content;
-			}
-		}
+		public string RequestBody => (Request.Content as CapturedStringContent)?.Content;
 
 		/// <summary>
 		/// HttpResponseMessage associated with the call if the call completed, otherwise null.
@@ -84,11 +72,6 @@ namespace Flurl.Http
 		public TimeSpan? Duration => EndedUtc - StartedUtc;
 
 		/// <summary>
-		/// The URL being called.
-		/// </summary>
-		public Url Url => _url.Value;
-
-		/// <summary>
 		/// True if a response was received, regardless of whether it is an error status.
 		/// </summary>
 		public bool Completed => Response != null;
@@ -97,7 +80,7 @@ namespace Flurl.Http
 		/// True if a response with a successful HTTP status was received.
 		/// </summary>
 		public bool Succeeded => Completed && 
-			(Response.IsSuccessStatusCode || HttpStatusRangeParser.IsMatch(Settings.AllowedHttpStatusRange, Response.StatusCode));
+			(Response.IsSuccessStatusCode || HttpStatusRangeParser.IsMatch(FlurlRequest.Settings.AllowedHttpStatusRange, Response.StatusCode));
 
 		/// <summary>
 		/// HttpStatusCode of the response if the call completed, otherwise null.
@@ -108,5 +91,13 @@ namespace Flurl.Http
 		/// Body of the HTTP response if unsuccessful, otherwise null. (Successful responses are not captured as strings, mainly for performance reasons.)
 		/// </summary>
 		public string ErrorResponseBody { get; set; }
+
+		/// <summary>
+		/// Returns the verb and absolute URI associated with this call.
+		/// </summary>
+		/// <returns></returns>
+		public override string ToString() {
+			return $"{Request.Method:U} {FlurlRequest.Url}";
+		}
 	}
 }

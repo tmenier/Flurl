@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 
 namespace Flurl.Http.Configuration
 {
@@ -14,8 +15,11 @@ namespace Flurl.Http.Configuration
 		/// In order not to lose Flurl.Http functionality, it is recommended to call base.CreateClient and
 		/// customize the result.
 		/// </summary>
-		public virtual HttpClient CreateClient(Url url, HttpMessageHandler handler) {
-			return new HttpClient(new FlurlMessageHandler(handler));
+		public virtual HttpClient CreateHttpClient(HttpMessageHandler handler) {
+			return new HttpClient(handler) {
+				// Timeouts handled per request via FlurlHttpSettings.Timeout
+				Timeout = System.Threading.Timeout.InfiniteTimeSpan
+			};
 		}
 
 		/// <summary>

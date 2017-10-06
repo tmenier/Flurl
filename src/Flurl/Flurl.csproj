@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net40;netstandard1.3;portable-net40+win8+wpa81+wp8+sl5</TargetFrameworks>
+    <TargetFrameworks>net40;netstandard1.3;netstandard1.0;</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>2.4.0</Version>
+		<PackageId>Flurl</PackageId>
+    <Version>2.5.0</Version>
     <Authors>Todd Menier</Authors>
     <Description>A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.</Description>
     <PackageProjectUrl>http://tmenier.github.io/Flurl</PackageProjectUrl>
@@ -11,32 +12,8 @@
     <PackageLicenseUrl>https://raw.githubusercontent.com/tmenier/Flurl/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/tmenier/Flurl.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>fluent portable url uri querystring builder</PackageTags>
-    <PackageReleaseNotes>
-      2.4.0 - Up'd solution to VS2017, platform targeting fixes (github #176)
-      2.3.0 - First-class support for name-only query parameters (github #164), NullValueHandling config enum
-      2.2.1 - Fix net461 target (github #128)
-      2.2.0 - Url.Combine enhancements, broader PCL support https://github.com/tmenier/Flurl/releases/tag/Flurl.2.2.0
-      2.1.0 - .NET Core 1.0.0 support. Target .NET Platform Standard 1.4
-      2.0.0 - BREAKING CHANGES: https://github.com/tmenier/Flurl/wiki/Release-Notes
-      1.1.2 - Fix net461 target (github #74)
-      1.1.1 - Packaging fix
-      1.1.0 - .NET Core support (github #61, thx @kroniak)
-      1.0.10 - More flexible kv parsing (github pr #16)
-      1.0.9 - Decode + as space, optionally encode space as + (github #41)
-      1.0.8 - Don't trim trailing slash (github #37)
-      1.0.7 - Bugfix - parsing querystrings like: "?x=1&amp;amp;x=2" (thanks @miiihi)
-      1.0.6 - Use CultureInfo.InvariantCulture in a few string conversions
-      1.0.5 - Url.GetRoot (static) and Url.ResetToRoot
-      1.0.4 - Support for multi-value query params, i.e. SetQueryParam("x", new[] { 1, 2 }) =&gt; "x=1&amp;amp;x=2")
-      1.0.3 - Bugfix - exclude null values from querystring (thanks to @niemyjski)
-      1.0.2 - Bugfix related to querystring with only key (thanks to @rafaelsteil)
-      1.0.1 - Fixed DLL version, dropped support for xbox and wp7 due to VS2013 upgrade
-      1.0.0 - Minor code cleanup, no API changes.
-      0.2.2 - Nuspec updates, no changes to binaries.
-      0.2.1 - Fixed a couple string extensions whose names were inconsistent with their Flurl.Url equivalent.
-      0.2.0 - Added PCL support.
-    </PackageReleaseNotes>
+    <PackageTags>fluent url uri querystring builder</PackageTags>
+    <PackageReleaseNotes>See https://github.com/tmenier/Flurl/releases</PackageReleaseNotes>
 	  <IncludeProjectPriFile>false</IncludeProjectPriFile>
   </PropertyGroup>
 
@@ -48,26 +25,8 @@
     <DocumentationFile>bin\Release\Flurl.xml</DocumentationFile>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'portable-net40+win8+wpa81+wp8+sl5'">
-    <DefineConstants>PORTABLE</DefineConstants>
-    <TargetFrameworkIdentifier>.NETPortable</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Profile328</TargetFrameworkProfile>
-    <NugetTargetMoniker>.NETPortable,Version=v0.0,Profile=Profile328</NugetTargetMoniker>
-    <LanguageTargets>C:\Program Files (x86)\MSBuild\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets</LanguageTargets>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
-    <DefineConstants>NETSTANDARD</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)'=='portable-net40+win8+wpa81+wp8+sl5'">
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-  </ItemGroup>
 </Project>

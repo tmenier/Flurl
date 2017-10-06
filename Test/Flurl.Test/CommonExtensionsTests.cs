@@ -6,7 +6,7 @@ using Flurl.Util;
 
 namespace Flurl.Test
 {
-	[TestFixture]
+	[TestFixture, Parallelizable]
 	public class CommonExtensionsTests
 	{
 		[Test]

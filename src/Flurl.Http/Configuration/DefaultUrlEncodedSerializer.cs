@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using Flurl.Util;
 
 namespace Flurl.Http.Configuration
@@ -16,17 +15,13 @@ namespace Flurl.Http.Configuration
 		/// </summary>
 		/// <param name="obj">The object.</param>
 		public string Serialize(object obj) {
-			var sb = new StringBuilder();
-			foreach (var kv in obj.ToKeyValuePairs()) {
-				if (kv.Value == null)
-					continue;
-				if (sb.Length > 0)
-					sb.Append('&');
-				sb.Append(Url.EncodeQueryParamValue(kv.Key, true));
-				sb.Append('=');
-				sb.Append(Url.EncodeQueryParamValue(kv.Value, true));
-			}
-			return sb.ToString();
+			if (obj == null)
+				return null;
+
+			var qp = new QueryParamCollection();
+			foreach (var kv in obj.ToKeyValuePairs())
+				qp[kv.Key] = new QueryParameter(kv.Key, kv.Value);
+			return qp.ToString(true);
 		}
 
 		/// <summary>
@@ -36,7 +31,7 @@ namespace Flurl.Http.Configuration
 		/// <param name="s">The s.</param>
 		/// <exception cref="NotImplementedException">Deserializing to UrlEncoded not supported.</exception>
 		public T Deserialize<T>(string s) {
-			throw new NotImplementedException("Deserializing to UrlEncoded not supported.");
+			throw new NotImplementedException("Deserializing to UrlEncoded is not supported.");
 		}
 
 		/// <summary>
@@ -46,7 +41,7 @@ namespace Flurl.Http.Configuration
 		/// <param name="stream">The stream.</param>
 		/// <exception cref="NotImplementedException">Deserializing to UrlEncoded not supported.</exception>
 		public T Deserialize<T>(Stream stream) {
-			throw new NotImplementedException("Deserializing to UrlEncoded not supported.");
+			throw new NotImplementedException("Deserializing to UrlEncoded is not supported.");
 		}
 	}
 }

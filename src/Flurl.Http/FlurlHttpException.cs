@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Dynamic;
+using System.Text;
 
 namespace Flurl.Http
 {
@@ -38,18 +39,22 @@ namespace Flurl.Http
 		public FlurlHttpException(HttpCall call) : this(call, BuildMessage(call, null), null) { }
 
 		private static string BuildMessage(HttpCall call, Exception inner) {
-			if (call.Response != null && !call.Succeeded) {
-				return string.Format("Request to {0} failed with status code {1} ({2}).",
-					call.Request.RequestUri.AbsoluteUri,
-					(int)call.Response.StatusCode,
-					call.Response.ReasonPhrase);
-			}
-			if (inner != null) {
-				return $"Request to {call.Request.RequestUri.AbsoluteUri} failed. {inner.Message}";
-			}
+			var sb = new StringBuilder();
 
-			// in theory we should never get here.
-			return $"Request to {call.Request.RequestUri.AbsoluteUri} failed.";
+			if (call.Response != null && !call.Succeeded)
+				sb.AppendLine($"{call} failed with status code {(int)call.Response.StatusCode} ({call.Response.ReasonPhrase}).");
+			else if (inner != null)
+				sb.AppendLine($"{call} failed. {inner.Message}");
+			else // in theory we should never get here.
+				sb.AppendLine($"{call} failed.");
+
+			if (!string.IsNullOrWhiteSpace(call.RequestBody))
+				sb.AppendLine("Request body:").AppendLine(call.RequestBody);
+
+			if (!string.IsNullOrWhiteSpace(call.ErrorResponseBody))
+				sb.AppendLine("Response body:").AppendLine(call.ErrorResponseBody);
+
+			return sb.ToString().Trim();
 		}
 
 		/// <summary>
@@ -67,8 +72,8 @@ namespace Flurl.Http
 		public T GetResponseJson<T>() {
 			return
 				Call?.ErrorResponseBody == null ? default(T) :
-				Call.Settings?.JsonSerializer == null ? default(T) :
-				Call.Settings.JsonSerializer.Deserialize<T>(Call.ErrorResponseBody);
+				Call?.FlurlRequest?.Settings?.JsonSerializer == null ? default(T) :
+				Call.FlurlRequest.Settings.JsonSerializer.Deserialize<T>(Call.ErrorResponseBody);
 		}
 
 		/// <summary>
@@ -93,7 +98,7 @@ namespace Flurl.Http
 		public FlurlHttpTimeoutException(HttpCall call, Exception inner) : base(call, BuildMessage(call), inner) { }
 
 		private static string BuildMessage(HttpCall call) {
-			return $"Request to {call} timed out.";
+			return $"{call} timed out.";
 		}
 	}
 }

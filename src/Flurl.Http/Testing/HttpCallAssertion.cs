@@ -51,7 +51,7 @@ namespace Flurl.Http.Testing
 				return this;
 			}
 			_expectedConditions.Add($"URL pattern {urlPattern}");
-			return With(c => MatchesPattern(c.Url, urlPattern));
+			return With(c => MatchesPattern(c.FlurlRequest.Url, urlPattern));
 		}
 
 		/// <summary>
@@ -61,7 +61,7 @@ namespace Flurl.Http.Testing
 		/// <returns></returns>
 		public HttpCallAssertion WithQueryParam(string name) {
 			_expectedConditions.Add($"query parameter {name}");
-			return With(c => c.Url.QueryParams.Any(q => q.Name == name));
+			return With(c => c.FlurlRequest.Url.QueryParams.Any(q => q.Name == name));
 		}
 
 		/// <summary>
@@ -71,7 +71,7 @@ namespace Flurl.Http.Testing
 		/// <returns></returns>
 		public HttpCallAssertion WithoutQueryParam(string name) {
 			_expectedConditions.Add($"no query parameter {name}");
-			return Without(c => c.Url.QueryParams.Any(q => q.Name == name));
+			return Without(c => c.FlurlRequest.Url.QueryParams.Any(q => q.Name == name));
 		}
 
 		/// <summary>
@@ -82,7 +82,7 @@ namespace Flurl.Http.Testing
 		public HttpCallAssertion WithQueryParams(params string[] names) {
 			if (!names.Any()) {
 				_expectedConditions.Add("any query parameters");
-				return With(c => c.Url.QueryParams.Any());
+				return With(c => c.FlurlRequest.Url.QueryParams.Any());
 			}
 			return names.Select(WithQueryParam).LastOrDefault() ?? this;
 		}
@@ -95,7 +95,7 @@ namespace Flurl.Http.Testing
 		public HttpCallAssertion WithoutQueryParams(params string[] names) {
 			if (!names.Any()) {
 				_expectedConditions.Add("no query parameters");
-				return Without(c => c.Url.QueryParams.Any());
+				return Without(c => c.FlurlRequest.Url.QueryParams.Any());
 			}
 			return names.Select(WithoutQueryParam).LastOrDefault() ?? this;
 		}
@@ -113,7 +113,7 @@ namespace Flurl.Http.Testing
 				return this;
 			}
 			_expectedConditions.Add($"query parameter {name}={value}");
-			return With(c => c.Url.QueryParams.Any(qp => QueryParamMatches(qp, name, value)));
+			return With(c => c.FlurlRequest.Url.QueryParams.Any(qp => QueryParamMatches(qp, name, value)));
 		}
 
 		/// <summary>
@@ -129,7 +129,7 @@ namespace Flurl.Http.Testing
 				return this;
 			}
 			_expectedConditions.Add($"no query parameter {name}={value}");
-			return Without(c => c.Url.QueryParams.Any(qp => QueryParamMatches(qp, name, value)));
+			return Without(c => c.FlurlRequest.Url.QueryParams.Any(qp => QueryParamMatches(qp, name, value)));
 		}
 
 		/// <summary>
@@ -201,6 +201,32 @@ namespace Flurl.Http.Testing
 			_expectedConditions.Add("OAuth bearer token " + token);
 			return With(c => c.Request.Headers.Authorization?.Scheme == "Bearer"
 				&& c.Request.Headers.Authorization?.Parameter == token);
+		}
+
+		/// <summary>
+		/// Asserts whther the calls were made containing the given request header.
+		/// </summary>
+		/// <param name="name">Expected header name</param>
+		/// <param name="valuePattern">Expected header value pattern</param>
+		/// <returns></returns>
+		public HttpCallAssertion WithHeader(string name, string valuePattern = "*") {
+			_expectedConditions.Add($"header {name}: {valuePattern}");
+			return With(c => 
+				c.Request.Headers.TryGetValues(name, out var vals) &&
+				vals.Any(v => MatchesPattern(v, valuePattern)));
+		}
+
+		/// <summary>
+		/// Asserts whther the calls were made that do not contain the given request header.
+		/// </summary>
+		/// <param name="name">Expected header name</param>
+		/// <param name="valuePattern">Expected header value pattern</param>
+		/// <returns></returns>
+		public HttpCallAssertion WithoutHeader(string name, string valuePattern = "*") {
+			_expectedConditions.Add($"no header {name}: {valuePattern}");
+			return Without(c =>
+				c.Request.Headers.TryGetValues(name, out var vals) &&
+				vals.Any(v => MatchesPattern(v, valuePattern)));
 		}
 
 		/// <summary>

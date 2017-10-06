@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using Flurl.Http.Configuration;
 using Flurl.Http.Content;
 using Flurl.Util;
 
@@ -14,20 +15,54 @@ namespace Flurl.Http.Testing
 	/// </summary>
 	public class HttpTest : IDisposable
 	{
+		private readonly Lazy<HttpClient> _httpClient;
+		private readonly Lazy<HttpMessageHandler> _httpMessageHandler;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="HttpTest"/> class.
+		/// </summary>
+		/// <exception cref="Exception">A delegate callback throws an exception.</exception>
+		public HttpTest() {
+		    Settings = new TestFlurlHttpSettings();
+			ResponseQueue = new Queue<HttpResponseMessage>();
+			CallLog = new List<HttpCall>();
+			_httpClient = new Lazy<HttpClient>(() => Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler));
+			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => Settings.HttpClientFactory.CreateMessageHandler());
+		    SetCurrentTest(this);
+	    }
+
+		internal HttpClient HttpClient => _httpClient.Value;
+		internal HttpMessageHandler HttpMessageHandler => _httpMessageHandler.Value;
+
+		/// <summary>
+		/// Gets or sets the FlurlHttpSettings object used by this test.
+		/// </summary>
+		public GlobalFlurlHttpSettings Settings { get; set; }
+
 		/// <summary>
 		/// Gets the current HttpTest from the logical (async) call context
 		/// </summary>
 		public static HttpTest Current => GetCurrentTest();
 
-	    /// <summary>
-	    /// Initializes a new instance of the <see cref="HttpTest"/> class.
-	    /// </summary>
-	    /// <exception cref="Exception">A delegate callback throws an exception.</exception>
-	    public HttpTest() {
-			ResponseQueue = new Queue<HttpResponseMessage>();
-			CallLog = new List<HttpCall>();
-		    SetCurrentTest(this);
-	    }
+		/// <summary>
+		/// Queue of HttpResponseMessages to be returned in place of real responses during testing.
+		/// </summary>
+		public Queue<HttpResponseMessage> ResponseQueue { get; set; }
+
+		/// <summary>
+		/// List of all (fake) HTTP calls made since this HttpTest was created.
+		/// </summary>
+		public List<HttpCall> CallLog { get; }
+
+		/// <summary>
+		/// Change FlurlHttpSettings for the scope of this HttpTest.
+		/// </summary>
+		/// <param name="action">Action defining the settings changes.</param>
+		/// <returns>This HttpTest</returns>
+		public HttpTest Configure(Action<GlobalFlurlHttpSettings> action) {
+			action(Settings);
+			return this;
+		}
 
 		/// <summary>
 		/// Adds an HttpResponseMessage to the response queue.
@@ -50,7 +85,7 @@ namespace Flurl.Http.Testing
 		/// <param name="cookies">The simulated response cookies (optional).</param>
 		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
 		public HttpTest RespondWithJson(object body, int status = 200, object headers = null, object cookies = null) {
-			var content = new CapturedJsonContent(FlurlHttp.GlobalSettings.JsonSerializer.Serialize(body));
+			var content = new CapturedJsonContent(Settings.JsonSerializer.Serialize(body));
 			return RespondWith(content, status, headers, cookies);
 		}
 
@@ -89,22 +124,12 @@ namespace Flurl.Http.Testing
 			return this;
 		}
 
-		/// <summary>
-		/// Queue of HttpResponseMessages to be returned in place of real responses during testing.
-		/// </summary>
-		public Queue<HttpResponseMessage> ResponseQueue { get; set; }
-
 		internal HttpResponseMessage GetNextResponse() {
 			return ResponseQueue.Any() ? ResponseQueue.Dequeue() : new HttpResponseMessage {
 				StatusCode = HttpStatusCode.OK,
 				Content = new StringContent("")
 			};
 		}
-
-		/// <summary>
-		/// List of all (fake) HTTP calls made since this HttpTest was created.
-		/// </summary>
-		public List<HttpCall> CallLog { get; private set; }
 
 		/// <summary>
 		/// Asserts whether matching URL was called, throwing HttpCallAssertException if it wasn't.
@@ -141,20 +166,19 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		public void Dispose() {
 			SetCurrentTest(null);
-			FlurlHttp.GlobalSettings.ResetDefaults();
 		}
 
-#if PORTABLE
-		private static HttpTest _test;
-		private static void SetCurrentTest(HttpTest test) => _test = test;
-		private static HttpTest GetCurrentTest() => _test;
-#elif NET45
+#if NET45
 		private static void SetCurrentTest(HttpTest test) => System.Runtime.Remoting.Messaging.CallContext.LogicalSetData("FlurlHttpTest", test);
 		private static HttpTest GetCurrentTest() => System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("FlurlHttpTest") as HttpTest;
-#else
+#elif NETSTANDARD1_3
 		private static System.Threading.AsyncLocal<HttpTest> _test = new System.Threading.AsyncLocal<HttpTest>();
 		private static void SetCurrentTest(HttpTest test) => _test.Value = test;
 		private static HttpTest GetCurrentTest() => _test.Value;
+#elif NETSTANDARD1_1
+		private static HttpTest _test;
+		private static void SetCurrentTest(HttpTest test) => _test = test;
+		private static HttpTest GetCurrentTest() => _test;
 #endif
 	}
 }
