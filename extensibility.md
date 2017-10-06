@@ -6,7 +6,7 @@ layout: default
 
 Since most of Flurl's functionality is provided through extension methods, it is very easy to extend using the same patterns that Flurl itself uses.
 
-## Extending the URL builder
+### Extending the URL builder
 
 Chainable URL builder methods generally come in pairs of overloads - one extending `Flurl.Url` and the other extending `String`, both of which should return the modified `Flurl.Url` object:
 
