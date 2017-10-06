@@ -16,16 +16,16 @@ var url = "http://www.some-api.com"
 		max_results = 20,
 		q = "Don't worry, I'll get encoded!"
 	})
-    .SetFragment("after-hash");
+	.SetFragment("after-hash");
 ````
 
-At its core is the `Url` class, which is designed to work seamlessly with strings, as demonstrated above. Creating a `Url` via a string extension is purely optional though; you can create one explicitly if you prefer:
+This example (and most on this site) uses and extension method off `string` to implicitly create a `Url` object. You can do exactly the same explicitly if you prefer:
 
 ````c#
 var url = new Url("http://www.some-api.com").AppendPathSegment(...
 ````
 
-`SetQueryParam` and `SetQueryParams` overwrite any previously set values of the same name, but you can set multiple values of the same name by passing an `IEnumerable`:
+`SetQueryParam` and `SetQueryParams` overwrite any previously set values of the same name, but you can set multiple values of the same name by passing an array or other `IEnumerable`:
 
 ````c#
 var url = "http://www.mysite.com".SetQueryParam("x", new[] { 1, 2, 3 });
