@@ -20,7 +20,7 @@ var data = await "http://api.com/endpoint".GetJsonAsync();
 
 `FlurlClient` is a lightweight wrapper around `HttpClient` and is tightly bound to its lifetime. (It implements `IDisposable`, and when disposed will also dispose `HttpClient`.) `FlurlClient` includes a `BaseUrl` property, as well as `Headers`, `Cookies`, `Settings`, and many of the [fluent methods]({{ site.baseurl }}/fluent-http) you may already be familiar with. Most of these properties and methods are used to set defaults that can be overridden at the request level.
 
-So if you want to use Flurl's goodness while maintaining tight control over `HttpClient` instances and their lifetime, `FlurlClient` is the object to use. The `Request` method is the preferred way to begin fluently building, configuring and making a call off a `FlurlClient`.
+So if you want to use Flurl's goodness while maintaining tight control over `HttpClient` instances and their lifetime, `FlurlClient` is the object to use. The `Request` method (new in 2.0) is the preferred way to begin fluently building, configuring and making a call off a `FlurlClient`.
 
 ```c#
 using (var cli = new FlurlClient("https://api.com").WithOAUthBearerToken(token))
@@ -40,7 +40,7 @@ Flurl.Http is well suited for use with IoC containers and dependency injection. 
 
 3. Register `IFlurlClient` as a transient and your services as singletons. This is getting closer to what you want - a single instance per web service. However, a singleton that depends on a transient [is considered bad practice](http://simpleinjector.readthedocs.io/en/latest/LifestyleMismatches.html) and some containers won't allow it.
 
-So how do you get a single instance per web service? The answer lies with the `IFlurlClientFactory` interface, which exists primarily so that Flurl's instance-per-host default behavior can be overridden. This is also the ideal interface to implement an [instance-per-key](http://simpleinjector.readthedocs.io/en/latest/howto.html#resolve-instances-by-key) IoC strategy. Here's what an implementation might look like:
+So how do you get a single instance per web service? The answer lies with the `IFlurlClientFactory` interface (new in 2.0), which exists primarily so that Flurl's instance-per-host default behavior can be overridden. This is also the ideal interface to implement an [instance-per-key](http://simpleinjector.readthedocs.io/en/latest/howto.html#resolve-instances-by-key) IoC strategy. Here's what an implementation might look like:
 
 ```c#
 public class MyService : IMyService
