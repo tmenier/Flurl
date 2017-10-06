@@ -19,7 +19,7 @@ var url = "http://www.some-api.com"
 	.SetFragment("after-hash");
 ````
 
-This example (and most on this site) uses and extension method off `string` to implicitly create a `Url` object. You can do exactly the same explicitly if you prefer:
+This example (and most on this site) uses an extension method off `string` to implicitly create a `Url` object. You can do exactly the same explicitly if you prefer:
 
 ````c#
 var url = new Url("http://www.some-api.com").AppendPathSegment(...
