@@ -20,7 +20,10 @@ namespace Flurl.Http.Configuration
 
 			var qp = new QueryParamCollection();
 			foreach (var kv in obj.ToKeyValuePairs())
+			{
+				if(kv.Value == null) continue;
 				qp[kv.Key] = new QueryParameter(kv.Key, kv.Value);
+			}				
 			return qp.ToString(true);
 		}
 
