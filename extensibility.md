@@ -66,39 +66,3 @@ result = "http://api.com"
 
 You may want to define a fourth extension method on `IFlurlClient`, if it makes sense for your method to configure some sort of default that should apply to all requests made with that client. This method should return the current `IFlurlClient` for further chaining. `WithHeaders` is an example where Flurl.Http defines all 4 extension methods.
 
-### Providing a custom HttpClient factory
-
-For advanced scenarios, you can customize the way Flurl.Http constructs `HttpClient` and `HttpMessageHandler` instances. Although it is only required that your custom factory implements `Flurl.Http.Configuration.IHttpClientFactory`, it is strongly advised to inherit from `DefaultHttpClientFactory` and extend only as needed.
-
-```c#
-public class MyCustomHttpClientFactory : DefaultHttpClientFactory
-{
-    public override HttpClient CreateHttpClient(HttpMessageHandler handler) {
-        var client = base.CreateClient(handler);
-        // customize the client here
-        return client;
-    }
-
-    public override HttpMessageHandler CreateMessageHandler() {
-        // return an alternative HttpMessageHandler
-    }
-}
-```
-
-Register the factory as part of your [global configuration]({{ site.baseurl }}/configuration):
-
-```c#
-FlurlHttp.Configure(settings => {
-    settings.HttpClientFactory = new MyCustomHttpClientFactory();
-});
-```
-
-Or (less common) on an individual `FlurlClient`:
-
-```c#
-var cli = new FlurlClient(BASE_URL).Configure(settings => {
-    settings.HttpClientFactory = new MyCustomHttpClientFactory();
-});
-```
-
-Note that custom HttpClient factories are _not_ the recommended place to control caching/reusing of created instances. Custom [FlurlClient factories]({{ site.baseurl }}/client-lifetime) are better suited for this.
