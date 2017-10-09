@@ -43,12 +43,12 @@ namespace Flurl.Http
 		/// <summary>
 		/// HttpResponseMessage associated with the call if the call completed, otherwise null.
 		/// </summary>
-		public HttpResponseMessage Response { get; set; }
+		public HttpResponseMessage Response { get; internal set; }
 
 		/// <summary>
 		/// Exception that occurred while sending the HttpRequestMessage.
 		/// </summary>
-		public Exception Exception { get; set; }
+		public Exception Exception { get; internal set; }
 	
 		/// <summary>
 		/// User code should set this to true inside global event handlers (OnError, etc) to indicate
@@ -59,12 +59,12 @@ namespace Flurl.Http
 		/// <summary>
 		/// DateTime the moment the request was sent.
 		/// </summary>
-		public DateTime StartedUtc { get; set; }
+		public DateTime StartedUtc { get; internal set; }
 
 		/// <summary>
 		/// DateTime the moment a response was received.
 		/// </summary>
-		public DateTime? EndedUtc { get; set; }
+		public DateTime? EndedUtc { get; internal set; }
 
 		/// <summary>
 		/// Total duration of the call if it completed, otherwise null.
@@ -90,7 +90,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Body of the HTTP response if unsuccessful, otherwise null. (Successful responses are not captured as strings, mainly for performance reasons.)
 		/// </summary>
-		public string ErrorResponseBody { get; set; }
+		public string ErrorResponseBody { get; internal set; }
 
 		/// <summary>
 		/// Returns the verb and absolute URI associated with this call.
