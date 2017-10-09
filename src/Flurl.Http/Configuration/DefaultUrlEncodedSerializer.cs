@@ -19,9 +19,13 @@ namespace Flurl.Http.Configuration
 				return null;
 
 			var qp = new QueryParamCollection();
-			foreach (var kv in obj.ToKeyValuePairs())
-				qp[kv.Key] = new QueryParameter(kv.Key, kv.Value);
-			return qp.ToString(true);
+            foreach (var kv in obj.ToKeyValuePairs())
+            {
+                // if value is null, the serializer shouldn't add this key-value pair.
+                if (kv.Value == null) continue;
+                qp[kv.Key] = new QueryParameter(kv.Key, kv.Value);
+            }
+            return qp.ToString(true);
 		}
 
 		/// <summary>
