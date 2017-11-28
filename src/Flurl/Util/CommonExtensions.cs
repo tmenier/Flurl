@@ -37,6 +37,10 @@ namespace Flurl.Util
 		/// </summary>
 		public static string ToInvariantString(this object obj) {
 			// inspired by: http://stackoverflow.com/a/19570016/62600
+				
+			var d = obj as DateTime?;
+			if (d != null)
+				return d.Value.ToString("O", CultureInfo.InvariantCulture);
 
 #if !NETSTANDARD1_0
 			var c = obj as IConvertible;
