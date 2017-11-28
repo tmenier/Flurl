@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -206,6 +207,31 @@ namespace Flurl.Test.Http
 
 		protected override FlurlHttpSettings GetSettings() => HttpTest.Current.Settings;
 		protected override IFlurlRequest GetRequest() => new FlurlRequest("http://api.com");
+
+		[Test] // github #246
+		public void test_settings_dont_override_request_settings_when_not_set_explicitily() {
+			var ser1 = new FakeSerializer();
+			var ser2 = new FakeSerializer();
+
+			using (var test = new HttpTest()) {
+				var cli = new FlurlClient();
+				cli.Settings.JsonSerializer = ser1;
+				Assert.AreSame(ser1, cli.Settings.JsonSerializer);
+
+				var req = new FlurlRequest { Client = cli };
+				Assert.AreSame(ser1, req.Settings.JsonSerializer);
+
+				req.Settings.JsonSerializer = ser2;
+				Assert.AreSame(ser2, req.Settings.JsonSerializer);
+			}
+		}
+
+		private class FakeSerializer : ISerializer
+		{
+			public string Serialize(object obj) => "foo";
+			public T Deserialize<T>(string s) => default(T);
+			public T Deserialize<T>(Stream stream) => default(T);
+		}
 	}
 
 	[TestFixture, Parallelizable]

@@ -78,7 +78,7 @@ namespace Flurl.Http
 
 		/// <inheritdoc />
 		public ClientFlurlHttpSettings Settings {
-			get => _settings ?? (_settings = new ClientFlurlHttpSettings(FlurlHttp.GlobalSettings));
+			get => _settings ?? (_settings = new ClientFlurlHttpSettings());
 			set => _settings = value;
 		}
 

@@ -16,17 +16,21 @@ namespace Flurl.Http.Configuration
 		// because if a setting is set to null at the request level, that should stick.
 		private readonly IDictionary<string, object> _vals = new Dictionary<string, object>();
 
-		/// <summary>
-		/// Creates a new FlurlHttpSettings object, optionally using another FlurlHttpSettings object as its default values.
-		/// </summary>
-		public FlurlHttpSettings(FlurlHttpSettings defaults = null) {
-			Defaults = defaults;
-		}
+		private FlurlHttpSettings _defaults;
 
+		/// <summary>
+		/// Creates a new FlurlHttpSettings object.
+		/// </summary>
+		public FlurlHttpSettings() {
+			ResetDefaults();
+		}
 		/// <summary>
 		/// Gets or sets the default values to fall back on when values are not explicitly set on this instance.
 		/// </summary>
-		public FlurlHttpSettings Defaults { get; set; }
+		public virtual FlurlHttpSettings Defaults {
+			get => _defaults ?? FlurlHttp.GlobalSettings;
+			set => _defaults = value;
+		}
 
 		/// <summary>
 		/// Gets or sets the HTTP request timeout.
@@ -156,11 +160,6 @@ namespace Flurl.Http.Configuration
 	public class ClientFlurlHttpSettings : FlurlHttpSettings
 	{
 		/// <summary>
-		/// Creates a new FlurlHttpSettings object using another FlurlHttpSettings object as its default values.
-		/// </summary>
-		public ClientFlurlHttpSettings(FlurlHttpSettings defaults) : base(defaults) { }
-
-		/// <summary>
 		/// Specifies the time to keep the underlying HTTP/TCP conneciton open. When expired, a Connection: close header
 		/// is sent with the next request, which should force a new connection and DSN lookup to occur on the next call.
 		/// Default is null, effectively disabling the behavior.
@@ -186,8 +185,16 @@ namespace Flurl.Http.Configuration
 	/// </summary>
 	public class GlobalFlurlHttpSettings : ClientFlurlHttpSettings
 	{
-		internal GlobalFlurlHttpSettings() : base(null) {
+		internal GlobalFlurlHttpSettings() {
 			ResetDefaults();
+		}
+
+		/// <summary>
+		/// Defaults at the global level do not make sense and will always be null.
+		/// </summary>
+		public override FlurlHttpSettings Defaults {
+			get => null;
+			set => throw new Exception("Global settings cannot be backed by any higher-level defauts.");
 		}
 
 		/// <summary>
@@ -215,8 +222,17 @@ namespace Flurl.Http.Configuration
 	/// <summary>
 	/// Settings overrides within the context of an HttpTest
 	/// </summary>
-	public class TestFlurlHttpSettings : GlobalFlurlHttpSettings
+	public class TestFlurlHttpSettings : ClientFlurlHttpSettings
 	{
+		/// <summary>
+		/// Gets or sets the factory that defines creating, caching, and reusing FlurlClient instances
+		/// within the context of this HttpTest
+		/// </summary>
+		public IFlurlClientFactory FlurlClientFactory {
+			get => Get(() => FlurlClientFactory);
+			set => Set(() => FlurlClientFactory, value);
+		}
+
 		/// <summary>
 		/// Resets all test settings to their Flurl.Http-defined default values.
 		/// </summary>

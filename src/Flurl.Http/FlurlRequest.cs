@@ -61,13 +61,13 @@ namespace Flurl.Http
 			get {
 				if (_settings == null) {
 					_settings = new FlurlHttpSettings();
-					MergeDefaultSettings();
+					ResetDefaultSettings();
 				}
 				return _settings;
 			}
 			set {
 				_settings = value;
-				MergeDefaultSettings();
+				ResetDefaultSettings();
 			}
 		}
 
@@ -79,7 +79,7 @@ namespace Flurl.Http
 				null;
 			set {
 				_client = value;
-				MergeDefaultSettings();
+				ResetDefaultSettings();
 			}
 		}
 
@@ -88,13 +88,13 @@ namespace Flurl.Http
 			get => _url;
 			set {
 				_url = value;
-				MergeDefaultSettings();
+				ResetDefaultSettings();
 			}
 		}
 
-		private void MergeDefaultSettings() {
+		private void ResetDefaultSettings() {
 			if (_settings != null)
-				_settings.Defaults = Client?.Settings ?? FlurlHttp.GlobalSettings;
+				_settings.Defaults = Client?.Settings;
 		}
 
 		/// <summary>
