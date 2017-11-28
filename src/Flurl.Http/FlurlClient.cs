@@ -59,6 +59,7 @@ namespace Flurl.Http
 	/// </summary>
 	public class FlurlClient : IFlurlClient
 	{
+		private ClientFlurlHttpSettings _settings;
 		private readonly Lazy<HttpClient> _httpClient;
 		private readonly Lazy<HttpMessageHandler> _httpMessageHandler;
 
@@ -68,7 +69,6 @@ namespace Flurl.Http
 		/// <param name="baseUrl">The base URL associated with this client.</param>
 		public FlurlClient(string baseUrl = null) {
 			BaseUrl = baseUrl;
-			Settings = new ClientFlurlHttpSettings(FlurlHttp.GlobalSettings);
 			_httpClient = new Lazy<HttpClient>(() => Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler));
 			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => Settings.HttpClientFactory.CreateMessageHandler());
 		}
@@ -77,7 +77,10 @@ namespace Flurl.Http
 		public string BaseUrl { get; set; }
 
 		/// <inheritdoc />
-		public ClientFlurlHttpSettings Settings { get; set; }
+		public ClientFlurlHttpSettings Settings {
+			get => _settings ?? (_settings = new ClientFlurlHttpSettings(FlurlHttp.GlobalSettings));
+			set => _settings = value;
+		}
 
 		/// <inheritdoc />
 		public IDictionary<string, object> Headers { get; } = new Dictionary<string, object>();

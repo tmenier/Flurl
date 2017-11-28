@@ -18,6 +18,9 @@ namespace Flurl.Http.Configuration
 		/// <param name="url">The URL.</param>
 		/// <returns>The FlurlClient instance.</returns>
 		public virtual IFlurlClient Get(Url url) {
+			if (url == null)
+				throw new ArgumentNullException(nameof(url));
+
 			return _clients.AddOrUpdate(
 				GetCacheKey(url),
 				u => Create(u),
