@@ -29,15 +29,15 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// Provides thread-safe access to the Settings associated with a specific IFlurlClient. The URL is used to find the client,
-		/// but keep in mind that the same client will be used in all calls to the same host by default.
+		/// Provides thread-safe access to a specific IFlurlClient, typically to configure settings and default headers.
+		/// The URL is used to find the client, but keep in mind that the same client will be used in all calls to the same host by default.
 		/// </summary>
 		/// <param name="url">the URL used to find the IFlurlClient</param>
-		/// <param name="configAction">the action to perform against the IFlurlClient's Settings</param>
-		public static void ConfigureClient(string url, Action<ClientFlurlHttpSettings> configAction) {
+		/// <param name="configAction">the action to perform against the IFlurlClient</param>
+		public static void ConfigureClient(string url, Action<IFlurlClient> configAction) {
 			var client = GlobalSettings.FlurlClientFactory.Get(url);
 			lock (_configLock) {
-				configAction(client.Settings);
+				configAction(client);
 			}
 		}
 	}

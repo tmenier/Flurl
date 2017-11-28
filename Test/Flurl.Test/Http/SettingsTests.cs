@@ -188,7 +188,7 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void can_configure_client_from_FlurlHttp_object() {
-			FlurlHttp.ConfigureClient("http://host1.com/foo", settings => settings.CookiesEnabled = true);
+			FlurlHttp.ConfigureClient("http://host1.com/foo", cli => cli.Settings.CookiesEnabled = true);
 			Assert.IsTrue(new FlurlRequest("https://host1.com/bar").Client.Settings.CookiesEnabled); // different URL but same host, so should use same client
 			Assert.IsFalse(new FlurlRequest("http://host2.com").Client.Settings.CookiesEnabled);
 		}
@@ -294,7 +294,7 @@ namespace Flurl.Test.Http
 
 		[Test, NonParallelizable] // github #239
 		public void request_default_settings_change_when_client_changes() {
-			FlurlHttp.ConfigureClient("http://test.com", settings => settings.CookiesEnabled = true);
+			FlurlHttp.ConfigureClient("http://test.com", cli => cli.Settings.CookiesEnabled = true);
 			var req = new FlurlRequest("http://test.com");
 			var cli1 = req.Client;
 			Assert.IsTrue(req.Settings.CookiesEnabled, "pre-configured client should provide defaults to new request");
@@ -307,7 +307,7 @@ namespace Flurl.Test.Http
 			Assert.AreNotSame(cli1, req.Client, "new host should trigger new client");
 			Assert.IsFalse(req.Settings.CookiesEnabled);
 
-			FlurlHttp.ConfigureClient("http://test2.com", settings => settings.CookiesEnabled = true);
+			FlurlHttp.ConfigureClient("http://test2.com", cli => cli.Settings.CookiesEnabled = true);
 			Assert.IsTrue(req.Settings.CookiesEnabled, "changing client settings should be reflected in request");
 
 			req.Settings = new FlurlHttpSettings();
