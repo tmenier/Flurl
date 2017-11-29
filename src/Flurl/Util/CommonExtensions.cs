@@ -38,8 +38,8 @@ namespace Flurl.Util
 		/// </summary>
 		public static string ToInvariantString(this object obj) {
 			// inspired by: http://stackoverflow.com/a/19570016/62600
-
 			return
+				obj == null ? null :
 				obj is DateTime dt ? dt.ToString("o", CultureInfo.InvariantCulture) :
 				obj is DateTimeOffset dto ? dto.ToString("o", CultureInfo.InvariantCulture) :
 #if !NETSTANDARD1_0

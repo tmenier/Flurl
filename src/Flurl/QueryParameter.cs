@@ -38,7 +38,7 @@ namespace Flurl
 		/// The value (right side) of the query parameter.
 		/// </summary>
 		public object Value {
-			get { return _value; }
+			get => _value;
 			set {
 				_value = value;
 				_encodedValue = null;

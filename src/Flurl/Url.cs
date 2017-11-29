@@ -19,8 +19,8 @@ namespace Flurl
 		/// The query part of the URL (after the ?, RFC 3986).
 		/// </summary>
 		public string Query {
-			get { return QueryParams.ToString(); }
-			set { QueryParams = ParseQueryParams(value); }
+			get => QueryParams.ToString();
+			set => QueryParams = ParseQueryParams(value);
 		}
 
 		/// <summary>
@@ -377,7 +377,7 @@ namespace Flurl
 		/// <param name="url">the Url object</param>
 		/// <returns>The string</returns>
 		public static implicit operator string(Url url) {
-			return url.ToString();
+			return url?.ToString();
 		}
 
 		/// <summary>
