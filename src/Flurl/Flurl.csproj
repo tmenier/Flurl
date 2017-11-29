@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/tmenier/Flurl.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>fluent url uri querystring builder</PackageTags>
-    <PackageReleaseNotes>See https://github.com/tmenier/Flurl/releases</PackageReleaseNotes>
+    <PackageReleaseNotes>https://github.com/tmenier/Flurl/releases</PackageReleaseNotes>
 	  <IncludeProjectPriFile>false</IncludeProjectPriFile>
   </PropertyGroup>
 
