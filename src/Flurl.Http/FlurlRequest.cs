@@ -42,43 +42,60 @@ namespace Flurl.Http
 	/// </summary>
 	public class FlurlRequest : IFlurlRequest
 	{
+		private FlurlHttpSettings _settings;
 		private IFlurlClient _client;
+		private Url _url;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlRequest"/> class.
 		/// </summary>
 		/// <param name="url">The URL to call with this FlurlRequest instance.</param>
 		public FlurlRequest(Url url = null) {
-			Settings = new FlurlHttpSettings();
-			Url = url;
+			_url = url;
 		}
 
 		/// <summary>
 		/// Gets or sets the FlurlHttpSettings used by this request.
 		/// </summary>
-		public FlurlHttpSettings Settings { get; set; }
-
-		/// <summary>
-		/// Gets or sets the IFlurlClient to use when sending the request.
-		/// </summary>
-		public IFlurlClient Client {
+		public FlurlHttpSettings Settings {
 			get {
-				if (_client == null) {
-					_client = FlurlHttp.GlobalSettings.FlurlClientFactory.Get(Url);
-					Settings.Merge(_client.Settings);
+				if (_settings == null) {
+					_settings = new FlurlHttpSettings();
+					ResetDefaultSettings();
 				}
-				return _client;
+				return _settings;
 			}
 			set {
-				_client = value;
-				Settings.Merge(_client?.Settings ?? FlurlHttp.GlobalSettings);
+				_settings = value;
+				ResetDefaultSettings();
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets the URL to be called.
-		/// </summary>
-		public Url Url { get; set; }
+		/// <inheritdoc />
+		public IFlurlClient Client {
+			get => 
+				(_client != null) ? _client :
+				(Url != null) ? FlurlHttp.GlobalSettings.FlurlClientFactory.Get(Url) :
+				null;
+			set {
+				_client = value;
+				ResetDefaultSettings();
+			}
+		}
+
+		/// <inheritdoc />
+		public Url Url {
+			get => _url;
+			set {
+				_url = value;
+				ResetDefaultSettings();
+			}
+		}
+
+		private void ResetDefaultSettings() {
+			if (_settings != null)
+				_settings.Defaults = Client?.Settings;
+		}
 
 		/// <summary>
 		/// Collection of headers sent on this request.
@@ -90,15 +107,7 @@ namespace Flurl.Http
 		/// </summary>
 		public IDictionary<string, Cookie> Cookies => Client.Cookies;
 
-		/// <summary>
-		/// Creates and asynchronously sends an HttpRequestMessage.
-		/// Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
-		/// </summary>
-		/// <param name="verb">The HTTP method used to make the request.</param>
-		/// <param name="content">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
-		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
-		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
+		/// <inheritdoc />
 		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			var request = new HttpRequestMessage(verb, Url) { Content = content };
 			var call = new HttpCall(this, request);

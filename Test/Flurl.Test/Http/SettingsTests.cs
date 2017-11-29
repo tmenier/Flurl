@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -187,7 +188,7 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void can_configure_client_from_FlurlHttp_object() {
-			FlurlHttp.ConfigureClient("http://host1.com/foo", settings => settings.CookiesEnabled = true);
+			FlurlHttp.ConfigureClient("http://host1.com/foo", cli => cli.Settings.CookiesEnabled = true);
 			Assert.IsTrue(new FlurlRequest("https://host1.com/bar").Client.Settings.CookiesEnabled); // different URL but same host, so should use same client
 			Assert.IsFalse(new FlurlRequest("http://host2.com").Client.Settings.CookiesEnabled);
 		}
@@ -206,6 +207,31 @@ namespace Flurl.Test.Http
 
 		protected override FlurlHttpSettings GetSettings() => HttpTest.Current.Settings;
 		protected override IFlurlRequest GetRequest() => new FlurlRequest("http://api.com");
+
+		[Test] // github #246
+		public void test_settings_dont_override_request_settings_when_not_set_explicitily() {
+			var ser1 = new FakeSerializer();
+			var ser2 = new FakeSerializer();
+
+			using (var test = new HttpTest()) {
+				var cli = new FlurlClient();
+				cli.Settings.JsonSerializer = ser1;
+				Assert.AreSame(ser1, cli.Settings.JsonSerializer);
+
+				var req = new FlurlRequest { Client = cli };
+				Assert.AreSame(ser1, req.Settings.JsonSerializer);
+
+				req.Settings.JsonSerializer = ser2;
+				Assert.AreSame(ser2, req.Settings.JsonSerializer);
+			}
+		}
+
+		private class FakeSerializer : ISerializer
+		{
+			public string Serialize(object obj) => "foo";
+			public T Deserialize<T>(string s) => default(T);
+			public T Deserialize<T>(Stream stream) => default(T);
+		}
 	}
 
 	[TestFixture, Parallelizable]
@@ -265,6 +291,43 @@ namespace Flurl.Test.Http
 
 		protected override FlurlHttpSettings GetSettings() => _req.Value.Settings;
 		protected override IFlurlRequest GetRequest() => _req.Value;
+
+		[Test, NonParallelizable] // github #239
+		public void request_default_settings_change_when_client_changes() {
+			FlurlHttp.ConfigureClient("http://test.com", cli => cli.Settings.CookiesEnabled = true);
+			var req = new FlurlRequest("http://test.com");
+			var cli1 = req.Client;
+			Assert.IsTrue(req.Settings.CookiesEnabled, "pre-configured client should provide defaults to new request");
+
+			req.Url = "http://test.com/foo";
+			Assert.AreSame(cli1, req.Client, "new URL with same host should hold onto same client");
+			Assert.IsTrue(req.Settings.CookiesEnabled);
+
+			req.Url = "http://test2.com";
+			Assert.AreNotSame(cli1, req.Client, "new host should trigger new client");
+			Assert.IsFalse(req.Settings.CookiesEnabled);
+
+			FlurlHttp.ConfigureClient("http://test2.com", cli => cli.Settings.CookiesEnabled = true);
+			Assert.IsTrue(req.Settings.CookiesEnabled, "changing client settings should be reflected in request");
+
+			req.Settings = new FlurlHttpSettings();
+			Assert.IsTrue(req.Settings.CookiesEnabled, "entirely new settings object should still inherit current client settings");
+
+			req.Client = new FlurlClient();
+			Assert.IsFalse(req.Settings.CookiesEnabled, "entirely new client should provide new defaults");
+
+			req.Url = "http://test.com";
+			Assert.AreNotSame(cli1, req.Client, "client was explicitly set on request, so it shouldn't change even if the URL changes");
+			Assert.IsFalse(req.Settings.CookiesEnabled);
+		}
+
+		[Test]
+		public void request_gets_global_settings_when_no_client() {
+			var req = new FlurlRequest();
+			Assert.IsNull(req.Client);
+			Assert.IsNull(req.Url);
+			Assert.AreEqual(FlurlHttp.GlobalSettings.JsonSerializer, req.Settings.JsonSerializer);
+		}
 	}
 
 	public class SomeCustomHttpClientFactory : IHttpClientFactory
