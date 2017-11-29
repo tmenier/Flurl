@@ -27,27 +27,26 @@ namespace Flurl.Util
 				throw new ArgumentNullException(nameof(obj));
 
 			return
-				(obj is string) ? StringToKV((string)obj) :
-				(obj is IEnumerable) ? CollectionToKV((IEnumerable)obj) :
+				obj is string s ? StringToKV(s) :
+				obj is IEnumerable e ? CollectionToKV(e) :
 				ObjectToKV(obj);
 		}
 
 		/// <summary>
 		/// Returns a string that represents the current object, using CultureInfo.InvariantCulture where possible.
+		/// Dates are represented in IS0 8601.
 		/// </summary>
 		public static string ToInvariantString(this object obj) {
 			// inspired by: http://stackoverflow.com/a/19570016/62600
 
+			return
+				obj is DateTime dt ? dt.ToString("o", CultureInfo.InvariantCulture) :
+				obj is DateTimeOffset dto ? dto.ToString("o", CultureInfo.InvariantCulture) :
 #if !NETSTANDARD1_0
-			var c = obj as IConvertible;
-			if (c != null) 
-				return c.ToString(CultureInfo.InvariantCulture);
+				obj is IConvertible c ? c.ToString(CultureInfo.InvariantCulture) :
 #endif
-			var f = obj as IFormattable;
-			if (f != null)
-				return f.ToString(null, CultureInfo.InvariantCulture);
-
-			return obj.ToString();
+				obj is IFormattable f ? f.ToString(null, CultureInfo.InvariantCulture) :
+				obj.ToString();
 		}
 
 		/// <summary>

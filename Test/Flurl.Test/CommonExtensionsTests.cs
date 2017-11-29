@@ -108,5 +108,12 @@ namespace Flurl.Test
 		[TestCase("   '  hi there  '   ", ExpectedResult = "  hi there  ")]
 		[TestCase("  hi there  ", ExpectedResult = "  hi there  ")]
 		public string StripQuotes_works(string s) => s.StripQuotes();
+
+		[Test]
+		public void ToInvariantString_serializes_dates_to_iso() {
+			Assert.AreEqual("2017-12-01T02:34:56.7890000", new DateTime(2017, 12, 1, 2, 34, 56, 789, DateTimeKind.Unspecified).ToInvariantString());
+			Assert.AreEqual("2017-12-01T02:34:56.7890000Z", new DateTime(2017, 12, 1, 2, 34, 56, 789, DateTimeKind.Utc).ToInvariantString());
+			Assert.AreEqual("2017-12-01T02:34:56.7890000-06:00", new DateTimeOffset(2017, 12, 1, 2, 34, 56, 789, TimeSpan.FromHours(-6)).ToInvariantString());
+		}
 	}
 }
