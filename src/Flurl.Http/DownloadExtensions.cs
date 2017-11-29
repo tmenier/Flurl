@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Flurl.Util;
 
 namespace Flurl.Http
 {
@@ -22,7 +23,7 @@ namespace Flurl.Http
 
 			localFileName =
 				localFileName ??
-				response.Content?.Headers.ContentDisposition?.FileName?.Trim().TrimStart('"').TrimEnd('"') ??
+				response.Content?.Headers.ContentDisposition?.FileName?.StripQuotes() ??
 				request.Url.Path.Split('/').Last();
 
 			// http://codereview.stackexchange.com/a/18679

@@ -123,5 +123,10 @@ namespace Flurl.Util
 			foreach (var kv in d2.Where(x => !d1.Keys.Contains(x.Key)))
 				d1.Add(kv);
 		}
+
+		/// <summary>
+		/// Strips any single quotes or double quotes from the beginning and end of a string.
+		/// </summary>
+		public static string StripQuotes(this string s) => Regex.Replace(s, "^\\s*['\"]+|['\"]+\\s*$", "");
 	}
 }

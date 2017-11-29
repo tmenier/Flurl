@@ -103,5 +103,10 @@ namespace Flurl.Test
 			var result = "hello/how/are/you".SplitOnFirstOccurence('/');
 			Assert.AreEqual(new[] { "hello", "how/are/you" }, result);
 		}
+
+		[TestCase("   \"\thi there \"  \t\t ", ExpectedResult = "\thi there ")]
+		[TestCase("   '  hi there  '   ", ExpectedResult = "  hi there  ")]
+		[TestCase("  hi there  ", ExpectedResult = "  hi there  ")]
+		public string StripQuotes_works(string s) => s.StripQuotes();
 	}
 }
