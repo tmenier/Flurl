@@ -23,6 +23,6 @@ With a discoverable API, [extensibility](extensibility) at every turn, and a nif
 - [Fluent HTTP](fluent-http)
 - [Testable HTTP](testable-http)
 - [Configuration](configuration)
-- [Error Handling](error-handling) <em>(new!)</em>
+- [Error Handling](error-handling)
 - [HttpClient Lifetime Management](client-lifetime)
 - [Extensibility](extensibility)
