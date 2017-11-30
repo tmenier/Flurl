@@ -62,8 +62,8 @@ Now simply register `IFlurlClientFactory` as a singleton and you'll get a single
 
 As for the `IFlurlClientFactory` implementation, `PerHostFlurlClientFactory` (used internally to implement the default implicit behavior) would probably work, but it isn't perfect. Say you have services that wrap 2 versions of the same API, where the base URLs are `https://api.com/v1` and `https://api.com/v2`. Since they have the same host, you'll get the same `FlurlClient` instance for both, which could lead to unexpected behavior.
 
-Flurl comes with an alternative implementation that is better for this scenario: `PerBaseUrlClientFactory`. Rather than picking the host out of the URL you pass to `Get`, it considers the entire URL to be the key. And as a bonus, it will set `IFlurlClient.BaseUrl` to that URL in the returned instance. So, depending on your container, the registration will look something like this:
+Flurl comes with an alternative implementation that is better for this scenario: `PerBaseUrlFlurlClientFactory`. Rather than picking the host out of the URL you pass to `Get`, it considers the entire URL to be the key. And as a bonus, it will set `IFlurlClient.BaseUrl` to that URL in the returned instance. So, depending on your container, the registration will look something like this:
 
 ```c#
-container.RegisterSingleton<IFlurlClientFactory, PerBaseUrlClientFactory>();
+container.RegisterSingleton<IFlurlClientFactory, PerBaseUrlFlurlClientFactory>();
 ```
