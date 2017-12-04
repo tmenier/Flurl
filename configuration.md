@@ -51,7 +51,7 @@ You can also configure the `FlurlClient` that will be used to call a given URL. 
 
 ```c#
 // call once at application startup
-FlurlHttp.ConfigureClient(url, settings => ...);
+FlurlHttp.ConfigureClient(url, cli => ...);
 ```
 
 If you're managing `FlurlClient`s explicitly:
