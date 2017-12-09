@@ -13,11 +13,12 @@ namespace Flurl
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="segment">The segment to append</param>
+		/// <param name="fullyEncode">If true, URL-encodes reserved characters such as '/', '+', and '%'. Otherwise, only encodes strictly illegal characters (including '%' but only when not followed by 2 hex characters).</param>
 		/// <returns>
 		/// the resulting Url object
 		/// </returns>
-		public static Url AppendPathSegment(this string url, object segment) {
-			return new Url(url).AppendPathSegment(segment);
+		public static Url AppendPathSegment(this string url, object segment, bool fullyEncode = false) {
+			return new Url(url).AppendPathSegment(segment, fullyEncode);
 		}
 
 		/// <summary>

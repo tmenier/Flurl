@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Text.RegularExpressions;
 
 namespace Flurl
 {
@@ -135,7 +137,12 @@ namespace Flurl
 		/// <param name="encodeSpaceAsPlus">If true, spaces will be encoded as + signs. Otherwise, they'll be encoded as %20.</param>
 		/// <returns></returns>
 		public static string EncodeQueryParamValue(object value, bool encodeSpaceAsPlus) {
-			var result = Uri.EscapeDataString((value ?? "").ToInvariantString());
+			var result = (value ?? "").ToInvariantString();
+#if NET40
+			result = Uri.EscapeDataString(result);
+#else
+			result = WebUtility.UrlEncode(result);
+#endif
 			return encodeSpaceAsPlus ? result.Replace("%20", "+") : result;
 		}
 
@@ -144,22 +151,47 @@ namespace Flurl
 		/// </summary>
 		/// <param name="urlPart">The URL or URL part.</param>
 		public static string EncodeIllegalCharacters(string urlPart) {
-			// http://stackoverflow.com/questions/4669692/valid-characters-for-directory-part-of-a-url-for-short-links
-			var unescaped = Uri.UnescapeDataString(urlPart);
-			return Uri.EscapeUriString(unescaped);
+			if (string.IsNullOrEmpty(urlPart))
+				return urlPart;
+
+			// EscapeUriString works perfectly if there are no % characters (and this avoids regex overhead of SplitAndEscapeParts)
+			if (!urlPart.Contains("%"))
+				return Uri.EscapeUriString(urlPart);
+
+			// String.Concat should be marginally faster than StringBuilder with relatively few/small strings (like most URLs)
+			return string.Concat(SplitAndEscapeParts(urlPart));
 		}
 
-	    /// <summary>
-	    /// Appends a segment to the URL path, ensuring there is one and only one '/' character as a seperator.
-	    /// </summary>
-	    /// <param name="segment">The segment to append</param>
-	    /// <returns>the Url object with the segment appended</returns>
-	    /// <exception cref="ArgumentNullException"><paramref name="segment"/> is <see langword="null" />.</exception>
-	    public Url AppendPathSegment(object segment) {
+		private static IEnumerable<string> SplitAndEscapeParts(string s) {
+			// EscapeUriString encodes illegal characters only, but doesn't recognize %-encoded character sequences as legal: https://stackoverflow.com/a/47636037/62600
+			// So pick out all %-hex-hex matches and avoid double-encoding 
+			const string pattern = "(.*?)((%[0-9A-Fa-f]{2})|$)";
+			foreach (Match match in Regex.Matches(s, pattern)) {
+				var a = match.Groups[1].Value;
+				var b = match.Groups[2].Value;
+				if (a.Length > 0)
+					yield return Uri.EscapeUriString(a); // sequence with no %-encoding - encode illegal characters
+				if (b.Length > 0)
+					yield return b; // 3-character %-encoded sequence - leave it alone
+			}
+		}
+
+		/// <summary>
+		/// Appends a segment to the URL path, ensuring there is one and only one '/' character as a seperator.
+		/// </summary>
+		/// <param name="segment">The segment to append</param>
+		/// <param name="fullyEncode">If true, URL-encodes reserved characters such as '/', '+', and '%'. Otherwise, only encodes strictly illegal characters (including '%' but only when not followed by 2 hex characters).</param>
+		/// <returns>the Url object with the segment appended</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="segment"/> is <see langword="null" />.</exception>
+		public Url AppendPathSegment(object segment, bool fullyEncode = false) {
 			if (segment == null)
 				throw new ArgumentNullException(nameof(segment));
 
-			Path = CombineEnsureSingleSeperator(Path, EncodeIllegalCharacters(segment.ToInvariantString()).Replace("?", "%3F"), '/');
+			var encoded = fullyEncode ? 
+				Uri.EscapeDataString(segment.ToInvariantString()) :
+				EncodeIllegalCharacters(segment.ToInvariantString());
+
+			Path = CombineEnsureSingleSeperator(Path, encoded.Replace("?", "%3F"), '/');
 			return this;
 		}
 

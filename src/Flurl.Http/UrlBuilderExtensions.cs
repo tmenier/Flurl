@@ -13,10 +13,11 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="request">The IFlurlRequest associated with the URL</param>
 		/// <param name="segment">The segment to append</param>
+		/// <param name="fullyEncode">If true, URL-encodes reserved characters such as '/', '+', and '%'. Otherwise, only encodes strictly illegal characters (including '%' but only when not followed by 2 hex characters).</param>
 		/// <returns>This IFlurlRequest</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="segment"/> is <see langword="null" />.</exception>
-		public static IFlurlRequest AppendPathSegment(this IFlurlRequest request, object segment) {
-			request.Url.AppendPathSegment(segment);
+		public static IFlurlRequest AppendPathSegment(this IFlurlRequest request, object segment, bool fullyEncode = false) {
+			request.Url.AppendPathSegment(segment, fullyEncode);
 			return request;
 		}
 

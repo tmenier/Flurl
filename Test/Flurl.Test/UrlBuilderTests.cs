@@ -272,15 +272,23 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void encodes_invalid_path_chars() {
-			var url = "http://www.mysite.com".AppendPathSegment("hey there how are ya");
-			Assert.AreEqual("http://www.mysite.com/hey%20there%20how%20are%20ya", url.ToString());
+		public void encodes_illegal_path_chars() {
+			// should not encode '/'
+			var url = "http://www.mysite.com".AppendPathSegment("hi there/bye now");
+			Assert.AreEqual("http://www.mysite.com/hi%20there/bye%20now", url.ToString());
+		}
+
+		[Test]
+		public void can_encodes_reserved_path_chars() {
+			// should encode '/' (tests optional fullyEncode arg)
+			var url = "http://www.mysite.com".AppendPathSegment("hi there/bye now", true);
+			Assert.AreEqual("http://www.mysite.com/hi%20there%2Fbye%20now", url.ToString());
 		}
 
 		[Test]
 		public void does_not_reencode_path_escape_chars() {
-			var url = "http://www.mysite.com".AppendPathSegment("hey%20there%20how%20are%20ya");
-			Assert.AreEqual("http://www.mysite.com/hey%20there%20how%20are%20ya", url.ToString());
+			var url = "http://www.mysite.com".AppendPathSegment("hi%20there/inside%2foutside");
+			Assert.AreEqual("http://www.mysite.com/hi%20there/inside%2foutside", url.ToString());
 		}
 
 		[Test]
@@ -384,5 +392,15 @@ namespace Flurl.Test
 			Assert.AreEqual(fragment, url.Fragment);
 			Assert.AreEqual(full, url.ToString());
 		}
+
+#if !NET40
+		// https://github.com/tmenier/Flurl/issues/185
+		[Test]
+		public void can_encode_very_long_value() {
+			// 65520 chars was the tipping point https://github.com/dotnet/corefx/issues/1936
+			var s = new String('x', 1000000);
+			Url.EncodeQueryParamValue(s, false);
+		}
+#endif
 	}
 }
