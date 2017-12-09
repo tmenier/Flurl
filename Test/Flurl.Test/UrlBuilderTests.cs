@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Threading;
 using NUnit.Framework;
@@ -273,9 +272,17 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void encodes_invalid_path_chars() {
+		public void encodes_illegal_path_chars() {
+			// should not encode '/'
 			var url = "http://www.mysite.com".AppendPathSegment("hi there/bye now");
 			Assert.AreEqual("http://www.mysite.com/hi%20there/bye%20now", url.ToString());
+		}
+
+		[Test]
+		public void can_encodes_reserved_path_chars() {
+			// should encode '/' (tests optional fullyEncode arg)
+			var url = "http://www.mysite.com".AppendPathSegment("hi there/bye now", true);
+			Assert.AreEqual("http://www.mysite.com/hi%20there%2Fbye%20now", url.ToString());
 		}
 
 		[Test]

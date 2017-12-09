@@ -170,17 +170,22 @@ namespace Flurl
 			}
 		}
 
-	    /// <summary>
-	    /// Appends a segment to the URL path, ensuring there is one and only one '/' character as a seperator.
-	    /// </summary>
-	    /// <param name="segment">The segment to append</param>
-	    /// <returns>the Url object with the segment appended</returns>
-	    /// <exception cref="ArgumentNullException"><paramref name="segment"/> is <see langword="null" />.</exception>
-	    public Url AppendPathSegment(object segment) {
+		/// <summary>
+		/// Appends a segment to the URL path, ensuring there is one and only one '/' character as a seperator.
+		/// </summary>
+		/// <param name="segment">The segment to append</param>
+		/// <param name="fullyEncode">If true, URL-encodes reserved characters such as '/', '+', and '%'. Otherwise, only encodes strictly illegal characters (including '%' but only when not followed by 2 hex characters).</param>
+		/// <returns>the Url object with the segment appended</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="segment"/> is <see langword="null" />.</exception>
+		public Url AppendPathSegment(object segment, bool fullyEncode = false) {
 			if (segment == null)
 				throw new ArgumentNullException(nameof(segment));
 
-			Path = CombineEnsureSingleSeperator(Path, EncodeIllegalCharacters(segment.ToInvariantString()).Replace("?", "%3F"), '/');
+			var encoded = fullyEncode ? 
+				Uri.EscapeDataString(segment.ToInvariantString()) :
+				EncodeIllegalCharacters(segment.ToInvariantString());
+
+			Path = CombineEnsureSingleSeperator(Path, encoded.Replace("?", "%3F"), '/');
 			return this;
 		}
 
