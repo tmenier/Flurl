@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace Flurl
@@ -136,7 +137,12 @@ namespace Flurl
 		/// <param name="encodeSpaceAsPlus">If true, spaces will be encoded as + signs. Otherwise, they'll be encoded as %20.</param>
 		/// <returns></returns>
 		public static string EncodeQueryParamValue(object value, bool encodeSpaceAsPlus) {
-			var result = Uri.EscapeDataString((value ?? "").ToInvariantString());
+			var result = (value ?? "").ToInvariantString();
+#if NET40
+			result = Uri.EscapeDataString(result);
+#else
+			result = WebUtility.UrlEncode(result);
+#endif
 			return encodeSpaceAsPlus ? result.Replace("%20", "+") : result;
 		}
 

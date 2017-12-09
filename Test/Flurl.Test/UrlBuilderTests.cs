@@ -392,5 +392,15 @@ namespace Flurl.Test
 			Assert.AreEqual(fragment, url.Fragment);
 			Assert.AreEqual(full, url.ToString());
 		}
+
+#if !NET40
+		// https://github.com/tmenier/Flurl/issues/185
+		[Test]
+		public void can_encode_very_long_value() {
+			// 65520 chars was the tipping point https://github.com/dotnet/corefx/issues/1936
+			var s = new String('x', 1000000);
+			Url.EncodeQueryParamValue(s, false);
+		}
+#endif
 	}
 }
