@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 using NUnit.Framework;
@@ -273,14 +274,14 @@ namespace Flurl.Test
 
 		[Test]
 		public void encodes_invalid_path_chars() {
-			var url = "http://www.mysite.com".AppendPathSegment("hey there how are ya");
-			Assert.AreEqual("http://www.mysite.com/hey%20there%20how%20are%20ya", url.ToString());
+			var url = "http://www.mysite.com".AppendPathSegment("hi there/bye now");
+			Assert.AreEqual("http://www.mysite.com/hi%20there/bye%20now", url.ToString());
 		}
 
 		[Test]
 		public void does_not_reencode_path_escape_chars() {
-			var url = "http://www.mysite.com".AppendPathSegment("hey%20there%20how%20are%20ya");
-			Assert.AreEqual("http://www.mysite.com/hey%20there%20how%20are%20ya", url.ToString());
+			var url = "http://www.mysite.com".AppendPathSegment("hi%20there/inside%2foutside");
+			Assert.AreEqual("http://www.mysite.com/hi%20there/inside%2foutside", url.ToString());
 		}
 
 		[Test]

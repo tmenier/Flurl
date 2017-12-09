@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Flurl
 {
@@ -144,9 +145,29 @@ namespace Flurl
 		/// </summary>
 		/// <param name="urlPart">The URL or URL part.</param>
 		public static string EncodeIllegalCharacters(string urlPart) {
-			// http://stackoverflow.com/questions/4669692/valid-characters-for-directory-part-of-a-url-for-short-links
-			var unescaped = Uri.UnescapeDataString(urlPart);
-			return Uri.EscapeUriString(unescaped);
+			if (string.IsNullOrEmpty(urlPart))
+				return urlPart;
+
+			// EscapeUriString works perfectly if there are no % characters (and this avoids regex overhead of SplitAndEscapeParts)
+			if (!urlPart.Contains("%"))
+				return Uri.EscapeUriString(urlPart);
+
+			// String.Concat should be marginally faster than StringBuilder with relatively few/small strings (like most URLs)
+			return string.Concat(SplitAndEscapeParts(urlPart));
+		}
+
+		private static IEnumerable<string> SplitAndEscapeParts(string s) {
+			// EscapeUriString encodes illegal characters only, but doesn't recognize %-encoded character sequences as legal: https://stackoverflow.com/a/47636037/62600
+			// So pick out all %-hex-hex matches and avoid double-encoding 
+			const string pattern = "(.*?)((%[0-9A-Fa-f]{2})|$)";
+			foreach (Match match in Regex.Matches(s, pattern)) {
+				var a = match.Groups[1].Value;
+				var b = match.Groups[2].Value;
+				if (a.Length > 0)
+					yield return Uri.EscapeUriString(a); // sequence with no %-encoding - encode illegal characters
+				if (b.Length > 0)
+					yield return b; // 3-character %-encoded sequence - leave it alone
+			}
 		}
 
 	    /// <summary>
