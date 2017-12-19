@@ -119,14 +119,17 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Decodes a URL-encoded query parameter value.
+		/// Decodes a URL-encoded string.
 		/// </summary>
-		/// <param name="value">The encoded query parameter value.</param>
+		/// <param name="s">The URL-encoded string.</param>
+		/// <param name="interpretPlusAsSpace">If true, any '+' character will be decoded to a space.</param>
 		/// <returns></returns>
-		public static string DecodeQueryParamValue(string value) {
-			// Uri.UnescapeDataString comes closest to doing it right, but famously stumbles on the + sign
-			// http://weblog.west-wind.com/posts/2009/Feb/05/Html-and-Uri-String-Encoding-without-SystemWeb
-			return Uri.UnescapeDataString((value ?? "").Replace("+", " "));
+		public static string Decode(string s, bool interpretPlusAsSpace) {
+			if (string.IsNullOrEmpty(s))
+				return s;
+
+			s = Uri.UnescapeDataString(s);
+			return interpretPlusAsSpace ? s.Replace("+", " ") : s;
 		}
 
 		private const int MAX_URL_LENGTH = 65519;
@@ -165,7 +168,7 @@ namespace Flurl
 			if (string.IsNullOrEmpty(s))
 				return s;
 
-			// Uri.EscapeUriString generally does what we want - encode illegal characters only - but it has a quirk
+			// Uri.EscapeUriString mostly does what we want - encodes illegal characters only - but it has a quirk
 			// in that % isn't illegal if it's the start of a %-encoded sequence https://stackoverflow.com/a/47636037/62600
 
 			// no % characters, so avoid the regex overhead
@@ -175,7 +178,7 @@ namespace Flurl
 			// pick out all %-hex-hex matches and avoid double-encoding 
 			return Regex.Replace(s, "(.*?)((%[0-9A-Fa-f]{2})|$)", c => {
 				var a = c.Groups[1].Value; // group 1 is a sequence with no %-encoding - encode illegal characters
-				var b = c.Groups[2].Value; // group 2 is a 3-character %-encoded sequence - leave it alone
+				var b = c.Groups[2].Value; // group 2 is a valid 3-character %-encoded sequence - leave it alone!
 				return Uri.EscapeUriString(a) + b;
 			});
 		}

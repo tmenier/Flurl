@@ -23,7 +23,7 @@ namespace Flurl
 			Name = name;
 			if (isEncoded && value != null) {
 				_encodedValue = value as string;
-				_value = Url.DecodeQueryParamValue(_encodedValue);
+				_value = Url.Decode(_encodedValue, true);
 			}
 			else {
 				Value = value;
