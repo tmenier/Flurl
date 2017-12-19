@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Flurl.Util;
 
 namespace Flurl
 {
@@ -51,21 +52,21 @@ namespace Flurl
 		/// <param name="encodeSpaceAsPlus">Indicates whether to encode space characters with "+" instead of "%20".</param>
 		/// <returns></returns>
 		public string ToString(bool encodeSpaceAsPlus) {
-			if (_encodedValue != null) {
-				return $"{Name}={_encodedValue}";
-			}
 			if (_value is IEnumerable && !(_value is string)) {
 				return string.Join("&",
 					from v in (_value as IEnumerable).Cast<object>()
-					select BuildPair(Name, v, encodeSpaceAsPlus));
+					select BuildPair(Name, v, false, encodeSpaceAsPlus));
 			}
-			else {
-				return BuildPair(Name, Value, encodeSpaceAsPlus);
-			}
+			return BuildPair(Name, _encodedValue ?? Value, _encodedValue != null, encodeSpaceAsPlus);
 		}
 
-		private static string BuildPair(string name, object value, bool encodeSpaceAsPlus) {
-			return (value == null) ? name : $"{name}={Url.EncodeQueryParamValue(value, encodeSpaceAsPlus)}";
+		private static string BuildPair(string name, object value, bool valueIsEncoded, bool encodeSpaceAsPlus) {
+			name = Url.Encode(name, encodeSpaceAsPlus);
+			if (value == null)
+				return name;
+
+			value = valueIsEncoded ? value : Url.Encode(value.ToInvariantString(), encodeSpaceAsPlus);
+			return $"{name}={value}";
 		}
 	}
 }

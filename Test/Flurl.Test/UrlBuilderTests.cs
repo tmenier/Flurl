@@ -323,15 +323,16 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void can_encode_space_as_plus() {
-			var url = new Url("http://www.mysite.com/foo+bar?x=1+2");
-			Assert.AreEqual("http://www.mysite.com/foo+bar?x=1+2", url.ToString(true));
-		}
-
-		[Test]
 		public void encodes_plus() {
 			var url = new Url("http://www.mysite.com").SetQueryParam("x", "1+2");
 			Assert.AreEqual("http://www.mysite.com?x=1%2B2", url.ToString());
+		}
+
+		[Test]
+		public void can_encode_space_as_plus() {
+			var url = new Url("http://www.mysite.com").AppendPathSegment("a b").SetQueryParam("c d", "1 2");
+			Assert.AreEqual("http://www.mysite.com/a%20b?c%20d=1%202", url.ToString()); // but not by default
+			Assert.AreEqual("http://www.mysite.com/a+b?c+d=1+2", url.ToString(true));
 		}
 
 		[TestCase("http://www.mysite.com/more", true)]
@@ -393,14 +394,24 @@ namespace Flurl.Test
 			Assert.AreEqual(full, url.ToString());
 		}
 
-#if !NET40
 		// https://github.com/tmenier/Flurl/issues/185
 		[Test]
 		public void can_encode_very_long_value() {
-			// 65520 chars was the tipping point https://github.com/dotnet/corefx/issues/1936
-			var s = new String('x', 1000000);
-			Url.EncodeQueryParamValue(s, false);
+			// 65520 chars is the tipping point https://github.com/dotnet/corefx/issues/1936
+			var len = 300000;
+
+			var s = new string('x', len);
+			var encoded = Url.Encode(s, false);
+			Assert.AreEqual(s, encoded);
+
+			// same length string, but every 10th char needs to be hex encoded
+			s = string.Concat(Enumerable.Repeat("xxxxxxxxx?", len / 10));
+			Assert.AreEqual(len, s.Length); // just a sanity check
+			encoded = Url.Encode(s, false);
+			// hex encoding will add 2 addtional chars for every char that needs to be encoded
+			Assert.AreEqual(len + (2 * len / 10), encoded.Length);
+			var expected = string.Concat(Enumerable.Repeat("xxxxxxxxx%3F", len / 10));
+			Assert.AreEqual(expected, encoded);
 		}
-#endif
 	}
 }

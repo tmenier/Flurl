@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Text.RegularExpressions;
 
 namespace Flurl
@@ -130,50 +129,55 @@ namespace Flurl
 			return Uri.UnescapeDataString((value ?? "").Replace("+", " "));
 		}
 
+		private const int MAX_URL_LENGTH = 65519;
+
 		/// <summary>
-		/// URL-encodes a query parameter value.
+		/// URL-encodes a string, including reserved characters such as '/' and '?'.
 		/// </summary>
-		/// <param name="value">The query parameter value to encode.</param>
+		/// <param name="s">The string to encode.</param>
 		/// <param name="encodeSpaceAsPlus">If true, spaces will be encoded as + signs. Otherwise, they'll be encoded as %20.</param>
 		/// <returns></returns>
-		public static string EncodeQueryParamValue(object value, bool encodeSpaceAsPlus) {
-			var result = (value ?? "").ToInvariantString();
-#if NET40
-			result = Uri.EscapeDataString(result);
-#else
-			result = WebUtility.UrlEncode(result);
-#endif
-			return encodeSpaceAsPlus ? result.Replace("%20", "+") : result;
+		public static string Encode(string s, bool encodeSpaceAsPlus) {
+			if (string.IsNullOrEmpty(s))
+				return s;
+
+			if (s.Length > MAX_URL_LENGTH) {
+				// Uri.EscapeDataString is going to throw because the string is "too long", so break it into pieces and concat them
+				var parts = new string[(int)Math.Ceiling((double)s.Length / MAX_URL_LENGTH)];
+				for (var i = 0; i < parts.Length; i++) {
+					var start = i * MAX_URL_LENGTH;
+					var len = Math.Min(MAX_URL_LENGTH, s.Length - start);
+					parts[i] = Uri.EscapeDataString(s.Substring(start, len));
+				}
+				s = string.Concat(parts);
+			}
+			else {
+				s = Uri.EscapeDataString(s);
+			}
+			return encodeSpaceAsPlus ? s.Replace("%20", "+") : s;
 		}
 
 		/// <summary>
-		/// Encodes characters that are illegal in a URL. Does not encode reserved characters, i.e. '/', '+', etc.
+		/// URL-encodes characters in a string that are neither reserved nor unreserved. Avoids encoding reserved characters such as '/' and '?'. Avoids encoding '%' if it begins a %-hex-hex sequence (i.e. avoids double-encoding).
 		/// </summary>
-		/// <param name="urlPart">The URL or URL part.</param>
-		public static string EncodeIllegalCharacters(string urlPart) {
-			if (string.IsNullOrEmpty(urlPart))
-				return urlPart;
+		/// <param name="s">The string to encode.</param>
+		public static string EncodeIllegalCharacters(string s) {
+			if (string.IsNullOrEmpty(s))
+				return s;
 
-			// EscapeUriString works perfectly if there are no % characters (and this avoids regex overhead of SplitAndEscapeParts)
-			if (!urlPart.Contains("%"))
-				return Uri.EscapeUriString(urlPart);
+			// Uri.EscapeUriString generally does what we want - encode illegal characters only - but it has a quirk
+			// in that % isn't illegal if it's the start of a %-encoded sequence https://stackoverflow.com/a/47636037/62600
 
-			// String.Concat should be marginally faster than StringBuilder with relatively few/small strings (like most URLs)
-			return string.Concat(SplitAndEscapeParts(urlPart));
-		}
+			// no % characters, so avoid the regex overhead
+			if (!s.Contains("%"))
+				return Uri.EscapeUriString(s);
 
-		private static IEnumerable<string> SplitAndEscapeParts(string s) {
-			// EscapeUriString encodes illegal characters only, but doesn't recognize %-encoded character sequences as legal: https://stackoverflow.com/a/47636037/62600
-			// So pick out all %-hex-hex matches and avoid double-encoding 
-			const string pattern = "(.*?)((%[0-9A-Fa-f]{2})|$)";
-			foreach (Match match in Regex.Matches(s, pattern)) {
-				var a = match.Groups[1].Value;
-				var b = match.Groups[2].Value;
-				if (a.Length > 0)
-					yield return Uri.EscapeUriString(a); // sequence with no %-encoding - encode illegal characters
-				if (b.Length > 0)
-					yield return b; // 3-character %-encoded sequence - leave it alone
-			}
+			// pick out all %-hex-hex matches and avoid double-encoding 
+			return Regex.Replace(s, "(.*?)((%[0-9A-Fa-f]{2})|$)", c => {
+				var a = c.Groups[1].Value; // group 1 is a sequence with no %-encoding - encode illegal characters
+				var b = c.Groups[2].Value; // group 2 is a 3-character %-encoded sequence - leave it alone
+				return Uri.EscapeUriString(a) + b;
+			});
 		}
 
 		/// <summary>
@@ -395,7 +399,7 @@ namespace Flurl
 		/// <param name="encodeSpaceAsPlus">Indicates whether to encode spaces with the "+" character instead of "%20"</param>
 		/// <returns></returns>
 		public string ToString(bool encodeSpaceAsPlus) {
-			var sb = new System.Text.StringBuilder(Path);
+			var sb = new System.Text.StringBuilder(encodeSpaceAsPlus ? Path.Replace("%20", "+") : Path);
 			if (Query.Length > 0)
 				sb.Append("?").Append(QueryParams.ToString(encodeSpaceAsPlus));
 			if (Fragment.Length > 0)
