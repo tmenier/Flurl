@@ -17,6 +17,19 @@ namespace Flurl.Test.Http
 	[TestFixture, Parallelizable]
 	public class RealHttpTests
 	{
+		[TestCase("gzip")]
+		[TestCase("deflate")]
+		public async Task decompresses_automatically(string encoding) {
+			var page = DateTime.Now.Ticks % 10 + 1; // vary it a bit to avoid possible rate limit errors
+			Console.WriteLine(page);
+			dynamic d2 = await $"https://api.stackexchange.com/2.2/answers?site=stackoverflow&pagesize=10&page={page}"
+				.WithHeader("Accept-Encoding", encoding)
+				.GetJsonAsync();
+
+			Assert.AreEqual(10, d2.items.Count);
+			Assert.IsTrue(d2.has_more);
+		}
+
 		[Test]
 		public async Task can_download_file() {
 			var folder = "c:\\flurl-test-" + Guid.NewGuid(); // random so parallel tests don't trip over each other
