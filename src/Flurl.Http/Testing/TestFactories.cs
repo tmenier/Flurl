@@ -23,15 +23,13 @@ namespace Flurl.Http.Testing
 	/// </summary>
 	public class TestFlurlClientFactory : FlurlClientFactoryBase
 	{
-		private readonly Lazy<FlurlClient> _client = new Lazy<FlurlClient>(() => new FlurlClient());
-
 		/// <summary>
 		/// Returns the FlurlClient sigleton used for testing
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <returns>The FlurlClient instance.</returns>
 		public override IFlurlClient Get(Url url) {
-			return _client.Value;
+			return new FlurlClient(url.ToString());
 		}
 
 		/// <summary>
