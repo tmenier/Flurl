@@ -7,9 +7,8 @@ using NUnit.Framework;
 namespace Flurl.Test.Http
 {
     [TestFixture, Parallelizable]
-    public class FlurlClientFactoryTests
+    public class FlurlClientFactoryTests: HttpTestFixtureBase
     {
-        private HttpTest httpTest;
         private readonly IFlurlClientFactory flurlClientFactory;
         private readonly FlurlClientFactoryTestService testService;
 
@@ -19,24 +18,12 @@ namespace Flurl.Test.Http
             testService = new FlurlClientFactoryTestService(flurlClientFactory);
         }
 
-        [SetUp]
-        public void Setup()
-        {
-            httpTest = new HttpTest();
-        }
-
-        [TearDown]
-        public void Cleanup()
-        {
-            httpTest.Dispose();
-        }
-
         [Test]
-        public async Task can_make_requests_using_flurlclientfactory()
+        public async Task can_make_post_requests_using_flurlclientfactory()
         {
             var actual = await testService.MakeCall();
 
-            httpTest.ShouldHaveCalled("http://fake-domain.com:8080/some/fake/path")
+            HttpTest.ShouldHaveCalled("http://fake-domain.com:8080/some/fake/path")
                 .WithRequestJson(new
                 {
                     Data = "some data"
