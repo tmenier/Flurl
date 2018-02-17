@@ -279,7 +279,7 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void can_encodes_reserved_path_chars() {
+		public void can_encode_reserved_path_chars() {
 			// should encode '/' (tests optional fullyEncode arg)
 			var url = "http://www.mysite.com".AppendPathSegment("hi there/bye now", true);
 			Assert.AreEqual("http://www.mysite.com/hi%20there%2Fbye%20now", url.ToString());
@@ -307,6 +307,12 @@ namespace Flurl.Test
 		public void reencodes_encoded_query_values_when_isEncoded_false() {
 			var url = "http://www.mysite.com".SetQueryParam("x", "%CD%EE%E2%FB%E9%20%E3%EE%E4", false);
 			Assert.AreEqual("http://www.mysite.com?x=%25CD%25EE%25E2%25FB%25E9%2520%25E3%25EE%25E4", url.ToString());
+		}
+
+		[Test]
+		public void does_not_encode_reserved_chars_in_query_param_name() {
+			var url = "http://www.mysite.com".SetQueryParam("$x", 1);
+			Assert.AreEqual("http://www.mysite.com?$x=1", url.ToString());
 		}
 
 		[Test]

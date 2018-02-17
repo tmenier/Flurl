@@ -61,7 +61,7 @@ namespace Flurl
 		}
 
 		private static string BuildPair(string name, object value, bool valueIsEncoded, bool encodeSpaceAsPlus) {
-			name = Url.Encode(name, encodeSpaceAsPlus);
+			name = Url.EncodeIllegalCharacters(name, encodeSpaceAsPlus);
 			if (value == null)
 				return name;
 
