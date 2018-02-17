@@ -17,14 +17,72 @@ namespace Flurl.Test.Http
 	[TestFixture, Parallelizable]
 	public class RealHttpTests
 	{
+		class StackExResponse
+		{
+			public object[] items { get; set; }
+			public bool has_more { get; set; }
+			public int backoff { get; set; }
+
+			internal static int last_page = 0;
+			internal static int last_backoff = 0;
+		}
+
+		[TestCase("gzip")]
+		[TestCase("deflate")]
+		[NonParallelizable]
+		public async Task decompresses_automatically(string encoding) {
+			if (StackExResponse.last_backoff > 0) {
+				Console.WriteLine($"Backing off StackExchange for {StackExResponse.last_backoff} seconds...");
+				await Task.Delay(TimeSpan.FromSeconds(StackExResponse.last_backoff));
+			}
+
+			StackExResponse.last_page++;
+			var result = await $"https://api.stackexchange.com/2.2/answers?site=stackoverflow&pagesize=10"
+				.SetQueryParam("page", ++StackExResponse.last_page)
+				.WithHeader("Accept-Encoding", encoding)
+				.GetJsonAsync<StackExResponse>();
+
+			StackExResponse.last_backoff = result.backoff;
+
+			Assert.AreEqual(10, result.items.Length);
+			Assert.IsTrue(result.has_more);
+		}
+
 		[Test]
 		public async Task can_download_file() {
 			var folder = "c:\\flurl-test-" + Guid.NewGuid(); // random so parallel tests don't trip over each other
-			var path = await "https://www.google.com".DownloadFileAsync(folder, "google.txt");
-			Assert.AreEqual($@"{folder}\google.txt", path);
-			Assert.That(File.Exists(path));
-			File.Delete(path);
-			Directory.Delete(folder, true);
+			try {
+				var path = await "https://www.google.com".DownloadFileAsync(folder, "google.txt");
+				Assert.AreEqual($@"{folder}\google.txt", path);
+				Assert.That(File.Exists(path));
+			}
+			finally {
+				Directory.Delete(folder, true);
+			}
+		}
+
+		[Test]
+		public async Task can_download_file_with_default_name() {
+			var folder = "c:\\flurl-test-" + Guid.NewGuid(); // random so parallel tests don't trip over each other
+			try {
+				// no Content-Dispositon header, use last part of URL
+				var path = await "https://www.google.com".DownloadFileAsync(folder);
+				Assert.AreEqual($@"{folder}\www.google.com", path);
+				Assert.That(File.Exists(path));
+
+				// has Content-Disposition header but no filename in it, use last part of URL
+				path = await "https://httpbin.org/response-headers?Content-Disposition=attachment".DownloadFileAsync(folder);
+				Assert.AreEqual($@"{folder}\response-headers", path);
+				Assert.That(File.Exists(path));
+
+				// has header Content-Disposition: attachment; filename="myfile.txt"
+				path = await "https://httpbin.org/response-headers?Content-Disposition=attachment%3B%20filename%3D%22myfile.txt%22".DownloadFileAsync(folder);
+				Assert.AreEqual($@"{folder}\myfile.txt", path);
+				Assert.That(File.Exists(path));
+			}
+			finally {
+				Directory.Delete(folder, true);
+			}
 		}
 
 		[Test]

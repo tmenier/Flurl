@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text;
 #endif
 using System.Threading.Tasks;
+using Flurl.Util;
 
 namespace Flurl.Http
 {
@@ -101,7 +102,7 @@ namespace Flurl.Http
 		internal static HttpContent StripCharsetQuotes(this HttpContent content) {
 			var header = content?.Headers?.ContentType;
 			if (header?.CharSet != null)
-				header.CharSet = header.CharSet.Trim().TrimStart('"').TrimEnd('"');
+				header.CharSet = header.CharSet.StripQuotes();
 			return content;
 		}
 	}

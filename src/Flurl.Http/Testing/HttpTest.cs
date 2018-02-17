@@ -37,7 +37,7 @@ namespace Flurl.Http.Testing
 		/// <summary>
 		/// Gets or sets the FlurlHttpSettings object used by this test.
 		/// </summary>
-		public GlobalFlurlHttpSettings Settings { get; set; }
+		public TestFlurlHttpSettings Settings { get; set; }
 
 		/// <summary>
 		/// Gets the current HttpTest from the logical (async) call context
@@ -59,7 +59,7 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		/// <param name="action">Action defining the settings changes.</param>
 		/// <returns>This HttpTest</returns>
-		public HttpTest Configure(Action<GlobalFlurlHttpSettings> action) {
+		public HttpTest Configure(Action<TestFlurlHttpSettings> action) {
 			action(Settings);
 			return this;
 		}

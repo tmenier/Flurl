@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 
 namespace Flurl.Http.Configuration
@@ -28,7 +29,10 @@ namespace Flurl.Http.Configuration
 		/// customize the result.
 		/// </summary>
 		public virtual HttpMessageHandler CreateMessageHandler() {
-			return new HttpClientHandler();
+			return new HttpClientHandler {
+				// #266
+				AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+			};
 		}
 	}
 }

@@ -12,26 +12,25 @@ namespace Flurl.Http.Configuration
 	/// </summary>
 	public class FlurlHttpSettings
 	{
-		// We need to maintain order of precedence (request > client > global) in some tricky scenarios.
-		// e.g. if we explicitly set some FlurlRequest.Settings, then set the FlurlClient, we want the
-		// client-level settings to override the global settings but not the request-level settings.
-		private FlurlHttpSettings _defaults;
-
 		// Values are dictionary-backed so we can check for key existence. Can't do null-coalescing
 		// because if a setting is set to null at the request level, that should stick.
 		private readonly IDictionary<string, object> _vals = new Dictionary<string, object>();
 
-		/// <summary>
-		/// Creates a new FlurlHttpSettings object using another FlurlHttpSettings object as its default values.
-		/// </summary>
-		public FlurlHttpSettings(FlurlHttpSettings defaults) {
-			_defaults = defaults;
-		}
+		private FlurlHttpSettings _defaults;
 
 		/// <summary>
 		/// Creates a new FlurlHttpSettings object.
 		/// </summary>
-		public FlurlHttpSettings() : this(FlurlHttp.GlobalSettings) { }
+		public FlurlHttpSettings() {
+			ResetDefaults();
+		}
+		/// <summary>
+		/// Gets or sets the default values to fall back on when values are not explicitly set on this instance.
+		/// </summary>
+		public virtual FlurlHttpSettings Defaults {
+			get => _defaults ?? FlurlHttp.GlobalSettings;
+			set => _defaults = value;
+		}
 
 		/// <summary>
 		/// Gets or sets the HTTP request timeout.
@@ -142,7 +141,7 @@ namespace Flurl.Http.Configuration
 			return
 				testVals?.ContainsKey(p.Name) == true ? (T)testVals[p.Name] :
 				_vals.ContainsKey(p.Name) ? (T)_vals[p.Name] :
-				_defaults != null ? (T)p.GetValue(_defaults) :
+				Defaults != null ? (T)p.GetValue(Defaults) :
 				default(T);
 		}
 
@@ -153,16 +152,6 @@ namespace Flurl.Http.Configuration
 			var p = (property.Body as MemberExpression).Member as PropertyInfo;
 			_vals[p.Name] = value;
 		}
-
-		/// <summary>
-		/// Merges other settings with this one. Overrides defaults, but does NOT override
-		/// this settings' explicitly set values.
-		/// </summary>
-		/// <param name="other">The settings to merge.</param>
-		public FlurlHttpSettings Merge(FlurlHttpSettings other) {
-			_defaults = other;
-			return this;
-		}
 	}
 
 	/// <summary>
@@ -170,11 +159,6 @@ namespace Flurl.Http.Configuration
 	/// </summary>
 	public class ClientFlurlHttpSettings : FlurlHttpSettings
 	{
-		/// <summary>
-		/// Creates a new FlurlHttpSettings object using another FlurlHttpSettings object as its default values.
-		/// </summary>
-		public ClientFlurlHttpSettings(FlurlHttpSettings defaults) : base(defaults) { }
-
 		/// <summary>
 		/// Specifies the time to keep the underlying HTTP/TCP conneciton open. When expired, a Connection: close header
 		/// is sent with the next request, which should force a new connection and DSN lookup to occur on the next call.
@@ -201,8 +185,16 @@ namespace Flurl.Http.Configuration
 	/// </summary>
 	public class GlobalFlurlHttpSettings : ClientFlurlHttpSettings
 	{
-		internal GlobalFlurlHttpSettings() : base(null) {
+		internal GlobalFlurlHttpSettings() {
 			ResetDefaults();
+		}
+
+		/// <summary>
+		/// Defaults at the global level do not make sense and will always be null.
+		/// </summary>
+		public override FlurlHttpSettings Defaults {
+			get => null;
+			set => throw new Exception("Global settings cannot be backed by any higher-level defauts.");
 		}
 
 		/// <summary>
@@ -230,8 +222,17 @@ namespace Flurl.Http.Configuration
 	/// <summary>
 	/// Settings overrides within the context of an HttpTest
 	/// </summary>
-	public class TestFlurlHttpSettings : GlobalFlurlHttpSettings
+	public class TestFlurlHttpSettings : ClientFlurlHttpSettings
 	{
+		/// <summary>
+		/// Gets or sets the factory that defines creating, caching, and reusing FlurlClient instances
+		/// within the context of this HttpTest
+		/// </summary>
+		public IFlurlClientFactory FlurlClientFactory {
+			get => Get(() => FlurlClientFactory);
+			set => Set(() => FlurlClientFactory, value);
+		}
+
 		/// <summary>
 		/// Resets all test settings to their Flurl.Http-defined default values.
 		/// </summary>
