@@ -225,20 +225,10 @@ namespace Flurl.Http.Configuration
 	public class TestFlurlHttpSettings : ClientFlurlHttpSettings
 	{
 		/// <summary>
-		/// Gets or sets the factory that defines creating, caching, and reusing FlurlClient instances
-		/// within the context of this HttpTest
-		/// </summary>
-		public IFlurlClientFactory FlurlClientFactory {
-			get => Get(() => FlurlClientFactory);
-			set => Set(() => FlurlClientFactory, value);
-		}
-
-		/// <summary>
 		/// Resets all test settings to their Flurl.Http-defined default values.
 		/// </summary>
 		public override void ResetDefaults() {
 			base.ResetDefaults();
-			FlurlClientFactory = new TestFlurlClientFactory();
 			HttpClientFactory = new TestHttpClientFactory();
 		}
 	}
