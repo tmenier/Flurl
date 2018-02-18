@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Net.Http;
-#if NETSTANDARD1_3 || NETSTANDARD2_0
-using System.Text;
-#endif
 using System.Threading.Tasks;
 using Flurl.Util;
 
@@ -66,9 +63,9 @@ namespace Flurl.Http
 		/// <example>s = await url.PostAsync(data).ReceiveString()</example>
 		public static async Task<string> ReceiveString(this Task<HttpResponseMessage> response) {
 #if NETSTANDARD1_3 || NETSTANDARD2_0
-			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 #endif
-            var resp = await response.ConfigureAwait(false);
+			var resp = await response.ConfigureAwait(false);
 			if (resp == null) return null;
 
 			return await resp.Content.StripCharsetQuotes().ReadAsStringAsync().ConfigureAwait(false);
