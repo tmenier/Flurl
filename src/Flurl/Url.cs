@@ -139,8 +139,8 @@ namespace Flurl
 		/// </summary>
 		/// <param name="s">The string to encode.</param>
 		/// <param name="encodeSpaceAsPlus">If true, spaces will be encoded as + signs. Otherwise, they'll be encoded as %20.</param>
-		/// <returns></returns>
-		public static string Encode(string s, bool encodeSpaceAsPlus) {
+		/// <returns>The encoded URL.</returns>
+		public static string Encode(string s, bool encodeSpaceAsPlus = false) {
 			if (string.IsNullOrEmpty(s))
 				return s;
 
@@ -164,9 +164,14 @@ namespace Flurl
 		/// URL-encodes characters in a string that are neither reserved nor unreserved. Avoids encoding reserved characters such as '/' and '?'. Avoids encoding '%' if it begins a %-hex-hex sequence (i.e. avoids double-encoding).
 		/// </summary>
 		/// <param name="s">The string to encode.</param>
-		public static string EncodeIllegalCharacters(string s) {
+		/// <param name="encodeSpaceAsPlus">If true, spaces will be encoded as + signs. Otherwise, they'll be encoded as %20.</param>
+		/// <returns>The encoded URL.</returns>
+		public static string EncodeIllegalCharacters(string s, bool encodeSpaceAsPlus = false) {
 			if (string.IsNullOrEmpty(s))
 				return s;
+
+			if (encodeSpaceAsPlus)
+				s = s.Replace(" ", "+");
 
 			// Uri.EscapeUriString mostly does what we want - encodes illegal characters only - but it has a quirk
 			// in that % isn't illegal if it's the start of a %-encoded sequence https://stackoverflow.com/a/47636037/62600

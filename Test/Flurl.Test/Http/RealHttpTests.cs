@@ -17,6 +17,37 @@ namespace Flurl.Test.Http
 	[TestFixture, Parallelizable]
 	public class RealHttpTests
 	{
+		class StackExResponse
+		{
+			public object[] items { get; set; }
+			public bool has_more { get; set; }
+			public int backoff { get; set; }
+
+			internal static int last_page = 0;
+			internal static int last_backoff = 0;
+		}
+
+		[TestCase("gzip")]
+		[TestCase("deflate")]
+		[NonParallelizable]
+		public async Task decompresses_automatically(string encoding) {
+			if (StackExResponse.last_backoff > 0) {
+				Console.WriteLine($"Backing off StackExchange for {StackExResponse.last_backoff} seconds...");
+				await Task.Delay(TimeSpan.FromSeconds(StackExResponse.last_backoff));
+			}
+
+			StackExResponse.last_page++;
+			var result = await $"https://api.stackexchange.com/2.2/answers?site=stackoverflow&pagesize=10"
+				.SetQueryParam("page", ++StackExResponse.last_page)
+				.WithHeader("Accept-Encoding", encoding)
+				.GetJsonAsync<StackExResponse>();
+
+			StackExResponse.last_backoff = result.backoff;
+
+			Assert.AreEqual(10, result.items.Length);
+			Assert.IsTrue(result.has_more);
+		}
+
 		[Test]
 		public async Task can_download_file() {
 			var folder = "c:\\flurl-test-" + Guid.NewGuid(); // random so parallel tests don't trip over each other
