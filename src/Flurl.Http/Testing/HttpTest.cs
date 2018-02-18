@@ -13,6 +13,9 @@ namespace Flurl.Http.Testing
 	/// An object whose existence puts Flurl.Http into test mode where actual HTTP calls are faked. Provides a response
 	/// queue, call log, and assertion helpers for use in Arrange/Act/Assert style tests.
 	/// </summary>
+#if !NETSTANDARD1_1
+	[Serializable] // fixes MSTest issue? #207
+#endif
 	public class HttpTest : IDisposable
 	{
 		private readonly Lazy<HttpClient> _httpClient;
