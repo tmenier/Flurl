@@ -8,7 +8,7 @@
   <Import Project="..\PackageTester.Shared\PackageTester.Shared.projitems" Label="Shared" />
 
   <ItemGroup>
-    <PackageReference Include="Flurl.Http" Version="2.1.1" />
+    <PackageReference Include="Flurl.Http" Version="2.2.0-pre2" />
   </ItemGroup>
 
 </Project>
