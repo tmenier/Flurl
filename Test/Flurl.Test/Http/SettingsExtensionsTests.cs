@@ -38,10 +38,20 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void can_set_headers_from_anon_object() {
-			var sc = GetSettingsContainer().WithHeaders(new { a = "b", one = 2 });
+			// null values shouldn't be added
+			var sc = GetSettingsContainer().WithHeaders(new { a = "b", one = 2, three = (object)null });
 			Assert.AreEqual(2, sc.Headers.Count);
 			Assert.AreEqual("b", sc.Headers["a"]);
 			Assert.AreEqual(2, sc.Headers["one"]);
+		}
+
+		[Test]
+		public void can_remove_header_by_setting_null() {
+			var sc = GetSettingsContainer().WithHeaders(new { a = 1, b = 2 });
+			Assert.AreEqual(2, sc.Headers.Count);
+			sc.WithHeader("b", null);
+			Assert.AreEqual(1, sc.Headers.Count);
+			Assert.AreEqual("a", sc.Headers.Keys.Single());
 		}
 
 		[Test]
