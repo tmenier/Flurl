@@ -50,10 +50,10 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_download_file() {
-			var folder = "c:\\flurl-test-" + Guid.NewGuid(); // random so parallel tests don't trip over each other
+			var folder = Path.Combine(Path.GetTempPath(), $"flurl-test-{Guid.NewGuid()}"); // random so parallel tests don't trip over each other
 			try {
 				var path = await "https://www.google.com".DownloadFileAsync(folder, "google.txt");
-				Assert.AreEqual($@"{folder}\google.txt", path);
+				Assert.AreEqual(Path.Combine(folder, "google.txt"), path);
 				Assert.That(File.Exists(path));
 			}
 			finally {
@@ -63,21 +63,21 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_download_file_with_default_name() {
-			var folder = "c:\\flurl-test-" + Guid.NewGuid(); // random so parallel tests don't trip over each other
+			var folder = Path.Combine(Path.GetTempPath(), $"flurl-test-{Guid.NewGuid()}"); // random so parallel tests don't trip over each other
 			try {
 				// no Content-Dispositon header, use last part of URL
 				var path = await "https://www.google.com".DownloadFileAsync(folder);
-				Assert.AreEqual($@"{folder}\www.google.com", path);
+				Assert.AreEqual(Path.Combine(folder, "www.google.com"), path);
 				Assert.That(File.Exists(path));
 
 				// has Content-Disposition header but no filename in it, use last part of URL
 				path = await "https://httpbin.org/response-headers?Content-Disposition=attachment".DownloadFileAsync(folder);
-				Assert.AreEqual($@"{folder}\response-headers", path);
+				Assert.AreEqual(Path.Combine(folder, "response-headers"), path);
 				Assert.That(File.Exists(path));
 
 				// has header Content-Disposition: attachment; filename="myfile.txt"
 				path = await "https://httpbin.org/response-headers?Content-Disposition=attachment%3B%20filename%3D%22myfile.txt%22".DownloadFileAsync(folder);
-				Assert.AreEqual($@"{folder}\myfile.txt", path);
+				Assert.AreEqual(Path.Combine(folder, "myfile.txt"), path);
 				Assert.That(File.Exists(path));
 			}
 			finally {
