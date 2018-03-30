@@ -93,12 +93,38 @@ namespace Flurl.Http
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlHttpTimeoutException"/> class.
 		/// </summary>
-		/// <param name="call">The call.</param>
-		/// <param name="inner">The inner.</param>
+		/// <param name="call">The HttpCall instance.</param>
+		/// <param name="inner">The inner exception.</param>
 		public FlurlHttpTimeoutException(HttpCall call, Exception inner) : base(call, BuildMessage(call), inner) { }
 
 		private static string BuildMessage(HttpCall call) {
 			return $"{call} timed out.";
 		}
 	}
+
+	/// <summary>
+	/// An exception that is thrown when an HTTP response could not be parsed to a particular format.
+	/// </summary>
+	public class FlurlParsingException : FlurlHttpException
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Flurl.Http.FlurlParsingException"/> class.
+		/// </summary>
+		/// <param name="call">The HttpCall instance.</param>
+		/// <param name="expectedFormat">The format that could not be parsed to, i.e. JSON.</param>
+		/// <param name="inner">The inner exception.</param>
+		public FlurlParsingException(HttpCall call, string expectedFormat, Exception inner) : base(call, BuildMessage(call, expectedFormat), inner) {
+			ExpectedFormat = expectedFormat;
+		}
+
+		/// <summary>
+		/// The format that could not be parsed to, i.e. JSON.
+		/// </summary>
+		public string ExpectedFormat { get; }
+
+		private static string BuildMessage(HttpCall call, string expectedFormat) {
+			return $"Response from {call} could not be deserialized to {expectedFormat}.";
+		}
+	}
+
 }

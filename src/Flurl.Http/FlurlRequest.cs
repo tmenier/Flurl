@@ -146,19 +146,7 @@ namespace Flurl.Http
 				throw new FlurlHttpException(call, null);
 			}
 			catch (Exception ex) {
-				call.Exception = ex;
-				await HandleEventAsync(Settings.OnError, Settings.OnErrorAsync, call).ConfigureAwait(false);
-
-				if (call.ExceptionHandled)
-					return call.Response;
-
-				if (ex is OperationCanceledException && !userToken.IsCancellationRequested)
-					throw new FlurlHttpTimeoutException(call, ex);
-
-				if (ex is FlurlHttpException)
-					throw;
-
-				throw new FlurlHttpException(call, ex);
+				return await HandleExceptionAsync(call, ex, userToken);
 			}
 			finally {
 				request.Dispose();
@@ -233,6 +221,22 @@ namespace Flurl.Http
 
 			// it's neither
 			return null;
+		}
+
+		internal static async Task<HttpResponseMessage> HandleExceptionAsync(HttpCall call, Exception ex, CancellationToken token) {
+			call.Exception = ex;
+			await HandleEventAsync(call.FlurlRequest.Settings.OnError, call.FlurlRequest.Settings.OnErrorAsync, call).ConfigureAwait(false);
+
+			if (call.ExceptionHandled)
+				return call.Response;
+
+			if (ex is OperationCanceledException && !token.IsCancellationRequested)
+				throw new FlurlHttpTimeoutException(call, ex);
+
+			if (ex is FlurlHttpException)
+				throw ex;
+
+			throw new FlurlHttpException(call, ex);
 		}
 
 		private static Task HandleEventAsync(Action<HttpCall> syncHandler, Func<HttpCall, Task> asyncHandler, HttpCall call) {

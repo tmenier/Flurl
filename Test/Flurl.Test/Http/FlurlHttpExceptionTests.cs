@@ -37,5 +37,21 @@ namespace Flurl.Test.Http
 			    Assert.AreEqual("GET http://myapi.com failed with status code 400 (Bad Request).", ex.Message);
 		    }
 	    }
+
+	    [Test]
+	    public async Task can_catch_parsing_error() {
+		    HttpTest.RespondWith("I'm not JSON!");
+
+		    try {
+			    await "http://myapi.com".GetJsonAsync();
+			    Assert.Fail("should have failed to parse response.");
+		    }
+		    catch (FlurlParsingException ex) {
+			    Assert.AreEqual("Response from GET http://myapi.com could not be deserialized to JSON.", ex.Message);
+			    Assert.AreEqual("I'm not JSON!", ex.GetResponseString());
+				// will differ if you're using a different serializer (which you probably aren't):
+			    Assert.IsInstanceOf<Newtonsoft.Json.JsonReaderException>(ex.InnerException);
+		    }
+		}
 	}
 }
