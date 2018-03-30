@@ -215,6 +215,16 @@ namespace Flurl.Test.Http
 				CallAndAssertCountAsync(6));
 		}
 
+		[Test]
+		public async Task does_not_throw_nullref_for_empty_content() {
+			await "http://some-api.com".AppendPathSegment("foo").SendAsync(HttpMethod.Post, null);
+			await "http://some-api.com".AppendPathSegment("foo").PostJsonAsync(new { foo = "bar" });
+
+			HttpTest.ShouldHaveCalled("http://some-api.com/foo")
+				.WithVerb(HttpMethod.Post)
+				.WithContentType("application/json");
+		}
+
 		private async Task CallAndAssertCountAsync(int calls) {
 			using (var test = new HttpTest()) {
 				for (int i = 0; i < calls; i++) {

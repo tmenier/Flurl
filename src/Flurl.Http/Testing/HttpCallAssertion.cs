@@ -189,7 +189,7 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		public HttpCallAssertion WithContentType(string mediaType) {
 			_expectedConditions.Add("content type " + mediaType);
-			return With(c => c.Request.Content.Headers.ContentType.MediaType == mediaType);
+			return With(c => c.Request.Content?.Headers?.ContentType?.MediaType == mediaType);
 		}
 
 		/// <summary>
