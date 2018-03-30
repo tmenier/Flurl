@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Dynamic;
-using System.Text;
 
 namespace Flurl.Http
 {
@@ -39,22 +38,9 @@ namespace Flurl.Http
 		public FlurlHttpException(HttpCall call) : this(call, BuildMessage(call, null), null) { }
 
 		private static string BuildMessage(HttpCall call, Exception inner) {
-			var sb = new StringBuilder();
-
-			if (call.Response != null && !call.Succeeded)
-				sb.AppendLine($"{call} failed with status code {(int)call.Response.StatusCode} ({call.Response.ReasonPhrase}).");
-			else if (inner != null)
-				sb.AppendLine($"{call} failed. {inner.Message}");
-			else // in theory we should never get here.
-				sb.AppendLine($"{call} failed.");
-
-			if (!string.IsNullOrWhiteSpace(call.RequestBody))
-				sb.AppendLine("Request body:").AppendLine(call.RequestBody);
-
-			if (!string.IsNullOrWhiteSpace(call.ErrorResponseBody))
-				sb.AppendLine("Response body:").AppendLine(call.ErrorResponseBody);
-
-			return sb.ToString().Trim();
+			return (call.Response != null && !call.Succeeded) ?
+				$"{call} failed with status code {(int)call.Response.StatusCode} ({call.Response.ReasonPhrase}).":
+				$"{call} failed. {inner?.Message}".Trim();
 		}
 
 		/// <summary>

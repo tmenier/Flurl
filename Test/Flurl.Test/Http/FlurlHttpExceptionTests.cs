@@ -20,7 +20,7 @@ namespace Flurl.Test.Http
 			    Assert.Fail("should have thrown 400.");
 		    }
 		    catch (FlurlHttpException ex) {
-			    Assert.AreEqual("POST http://myapi.com failed with status code 400 (Bad Request).\r\nRequest body:\r\n{\"data\":\"bad\"}\r\nResponse body:\r\n{\"message\":\"bad data!\"}", ex.Message);
+			    Assert.AreEqual("POST http://myapi.com failed with status code 400 (Bad Request).", ex.Message);
 		    }
 	    }
 
