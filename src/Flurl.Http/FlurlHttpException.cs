@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Dynamic;
+using System.Threading.Tasks;
 
 namespace Flurl.Http
 {
@@ -46,29 +47,30 @@ namespace Flurl.Http
 		/// <summary>
 		/// Gets the response body of the failed call.
 		/// </summary>
-		public string GetResponseString() {
-			return Call?.ErrorResponseBody;
+		/// <returns>A task whose result is the string contents of the response body.</returns>
+		public async Task<string> GetResponseStringAsync() {
+			var task = Call?.Response?.Content?.ReadAsStringAsync();
+			return (task == null) ? null : await task.ConfigureAwait(false);
 		}
 
 		/// <summary>
 		/// Deserializes the JSON response body to an object of the given type.
 		/// </summary>
 		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
-		/// <returns>An object containing data in the response body.</returns>
-		public T GetResponseJson<T>() {
-			return
-				Call?.ErrorResponseBody == null ? default(T) :
-				Call?.FlurlRequest?.Settings?.JsonSerializer == null ? default(T) :
-				Call.FlurlRequest.Settings.JsonSerializer.Deserialize<T>(Call.ErrorResponseBody);
+		/// <returns>A task whose result is an object containing data in the response body.</returns>
+		public async Task<T> GetResponseJsonAsync<T>() {
+			var task = Call?.Response?.Content?.ReadAsStreamAsync();
+			if (task == null) return default(T);
+			var ser = Call.FlurlRequest?.Settings?.JsonSerializer;
+			if (ser == null) return default(T);
+			return ser.Deserialize<T>(await task.ConfigureAwait(false));
 		}
 
 		/// <summary>
 		/// Deserializes the JSON response body to a dynamic object.
 		/// </summary>
-		/// <returns>An object containing data in the response body.</returns>
-		public dynamic GetResponseJson() {
-			return GetResponseJson<ExpandoObject>();
-		}
+		/// <returns>A task whose result is an object containing data in the response body.</returns>
+		public async Task<dynamic> GetResponseJsonAsync() => await GetResponseJsonAsync<ExpandoObject>().ConfigureAwait(false);
 	}
 
 	/// <summary>

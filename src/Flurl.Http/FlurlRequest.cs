@@ -139,10 +139,6 @@ namespace Flurl.Http
 				if (call.Succeeded)
 					return call.Response;
 
-				// response content is only awaited here if the call failed.
-				if (call.Response.Content != null)
-					call.ErrorResponseBody = await call.Response.Content.StripCharsetQuotes().ReadAsStringAsync().ConfigureAwait(false);
-
 				throw new FlurlHttpException(call, null);
 			}
 			catch (Exception ex) {

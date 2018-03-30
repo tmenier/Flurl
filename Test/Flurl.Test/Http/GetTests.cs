@@ -94,7 +94,7 @@ namespace Flurl.Test.Http
 				Assert.AreEqual("http://api.com/", ex.Call.Request.RequestUri.AbsoluteUri);
 				Assert.AreEqual(HttpMethod.Get, ex.Call.Request.Method);
 				Assert.AreEqual(HttpStatusCode.InternalServerError, ex.Call.Response.StatusCode);
-				Assert.AreEqual(ex.GetResponseString(), "bad job");
+				Assert.AreEqual("bad job", await ex.GetResponseStringAsync());
 			}
 		}
 
@@ -106,7 +106,7 @@ namespace Flurl.Test.Http
 				await "http://api.com".GetStringAsync();
 			}
 			catch (FlurlHttpException ex) {
-				var error = ex.GetResponseJson<TestError>();
+				var error = await ex.GetResponseJsonAsync<TestError>();
 				Assert.IsNotNull(error);
 				Assert.AreEqual(999, error.code);
 				Assert.AreEqual("our server crashed", error.message);
@@ -121,7 +121,7 @@ namespace Flurl.Test.Http
 				await "http://api.com".GetStringAsync();
 			}
 			catch (FlurlHttpException ex) {
-				var error = ex.GetResponseJson(); // error is a dynamic this time
+				var error = await ex.GetResponseJsonAsync(); // error is a dynamic this time
 				Assert.IsNotNull(error);
 				Assert.AreEqual(999, error.code);
 				Assert.AreEqual("our server crashed", error.message);

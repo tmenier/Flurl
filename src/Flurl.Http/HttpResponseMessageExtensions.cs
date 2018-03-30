@@ -32,7 +32,6 @@ namespace Flurl.Http
 				}
 				catch (Exception ex) {
 					call.Exception = new FlurlParsingException(call, "JSON", ex);
-					call.ErrorResponseBody = await call.Response.Content.ReadAsStringAsync().ConfigureAwait(false);
 					await FlurlRequest.HandleExceptionAsync(call, call.Exception, CancellationToken.None).ConfigureAwait(false);
 					return default(T);
 				}
