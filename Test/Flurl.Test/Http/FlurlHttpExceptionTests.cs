@@ -20,7 +20,7 @@ namespace Flurl.Test.Http
 			    Assert.Fail("should have thrown 400.");
 		    }
 		    catch (FlurlHttpException ex) {
-			    Assert.AreEqual("POST http://myapi.com failed with status code 400 (Bad Request).", ex.Message);
+			    Assert.AreEqual("Call failed with status code 400 (Bad Request): POST http://myapi.com", ex.Message);
 		    }
 	    }
 
@@ -34,7 +34,7 @@ namespace Flurl.Test.Http
 		    }
 		    catch (FlurlHttpException ex) {
 				// no "Request body:", "Response body:", or line breaks
-			    Assert.AreEqual("GET http://myapi.com failed with status code 400 (Bad Request).", ex.Message);
+			    Assert.AreEqual("Call failed with status code 400 (Bad Request): GET http://myapi.com", ex.Message);
 		    }
 	    }
 
@@ -47,7 +47,7 @@ namespace Flurl.Test.Http
 			    Assert.Fail("should have failed to parse response.");
 		    }
 		    catch (FlurlParsingException ex) {
-			    Assert.AreEqual("Response from GET http://myapi.com could not be deserialized to JSON.", ex.Message);
+			    Assert.AreEqual("Response could not be deserialized to JSON: GET http://myapi.com", ex.Message);
 			    Assert.AreEqual("I'm not JSON!", await ex.GetResponseStringAsync());
 				// will differ if you're using a different serializer (which you probably aren't):
 			    Assert.IsInstanceOf<Newtonsoft.Json.JsonReaderException>(ex.InnerException);
