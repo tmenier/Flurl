@@ -39,9 +39,10 @@ namespace Flurl.Http
 		public FlurlHttpException(HttpCall call) : this(call, BuildMessage(call, null), null) { }
 
 		private static string BuildMessage(HttpCall call, Exception inner) {
-			return (call.Response != null && !call.Succeeded) ?
-				$"{call} failed with status code {(int)call.Response.StatusCode} ({call.Response.ReasonPhrase}).":
-				$"{call} failed. {inner?.Message}".Trim();
+			return
+				(call.Response != null && !call.Succeeded) ?
+				$"Call failed with status code {(int)call.Response.StatusCode} ({call.Response.ReasonPhrase}): {call}":
+				$"Call failed. {inner?.Message} {call}";
 		}
 
 		/// <summary>
@@ -86,7 +87,7 @@ namespace Flurl.Http
 		public FlurlHttpTimeoutException(HttpCall call, Exception inner) : base(call, BuildMessage(call), inner) { }
 
 		private static string BuildMessage(HttpCall call) {
-			return $"{call} timed out.";
+			return $"Call timed out: {call}";
 		}
 	}
 
@@ -111,7 +112,7 @@ namespace Flurl.Http
 		public string ExpectedFormat { get; }
 
 		private static string BuildMessage(HttpCall call, string expectedFormat) {
-			return $"Response from {call} could not be deserialized to {expectedFormat}.";
+			return $"Response could not be deserialized to {expectedFormat}: {call}";
 		}
 	}
 
