@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Dynamic;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace Flurl.Http
 {
@@ -39,50 +39,38 @@ namespace Flurl.Http
 		public FlurlHttpException(HttpCall call) : this(call, BuildMessage(call, null), null) { }
 
 		private static string BuildMessage(HttpCall call, Exception inner) {
-			var sb = new StringBuilder();
-
-			if (call.Response != null && !call.Succeeded)
-				sb.AppendLine($"{call} failed with status code {(int)call.Response.StatusCode} ({call.Response.ReasonPhrase}).");
-			else if (inner != null)
-				sb.AppendLine($"{call} failed. {inner.Message}");
-			else // in theory we should never get here.
-				sb.AppendLine($"{call} failed.");
-
-			if (!string.IsNullOrWhiteSpace(call.RequestBody))
-				sb.AppendLine("Request body:").AppendLine(call.RequestBody);
-
-			if (!string.IsNullOrWhiteSpace(call.ErrorResponseBody))
-				sb.AppendLine("Response body:").AppendLine(call.ErrorResponseBody);
-
-			return sb.ToString().Trim();
+			return (call.Response != null && !call.Succeeded) ?
+				$"{call} failed with status code {(int)call.Response.StatusCode} ({call.Response.ReasonPhrase}).":
+				$"{call} failed. {inner?.Message}".Trim();
 		}
 
 		/// <summary>
 		/// Gets the response body of the failed call.
 		/// </summary>
-		public string GetResponseString() {
-			return Call?.ErrorResponseBody;
+		/// <returns>A task whose result is the string contents of the response body.</returns>
+		public async Task<string> GetResponseStringAsync() {
+			var task = Call?.Response?.Content?.ReadAsStringAsync();
+			return (task == null) ? null : await task.ConfigureAwait(false);
 		}
 
 		/// <summary>
 		/// Deserializes the JSON response body to an object of the given type.
 		/// </summary>
 		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
-		/// <returns>An object containing data in the response body.</returns>
-		public T GetResponseJson<T>() {
-			return
-				Call?.ErrorResponseBody == null ? default(T) :
-				Call?.FlurlRequest?.Settings?.JsonSerializer == null ? default(T) :
-				Call.FlurlRequest.Settings.JsonSerializer.Deserialize<T>(Call.ErrorResponseBody);
+		/// <returns>A task whose result is an object containing data in the response body.</returns>
+		public async Task<T> GetResponseJsonAsync<T>() {
+			var task = Call?.Response?.Content?.ReadAsStreamAsync();
+			if (task == null) return default(T);
+			var ser = Call.FlurlRequest?.Settings?.JsonSerializer;
+			if (ser == null) return default(T);
+			return ser.Deserialize<T>(await task.ConfigureAwait(false));
 		}
 
 		/// <summary>
 		/// Deserializes the JSON response body to a dynamic object.
 		/// </summary>
-		/// <returns>An object containing data in the response body.</returns>
-		public dynamic GetResponseJson() {
-			return GetResponseJson<ExpandoObject>();
-		}
+		/// <returns>A task whose result is an object containing data in the response body.</returns>
+		public async Task<dynamic> GetResponseJsonAsync() => await GetResponseJsonAsync<ExpandoObject>().ConfigureAwait(false);
 	}
 
 	/// <summary>
@@ -93,12 +81,38 @@ namespace Flurl.Http
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlHttpTimeoutException"/> class.
 		/// </summary>
-		/// <param name="call">The call.</param>
-		/// <param name="inner">The inner.</param>
+		/// <param name="call">The HttpCall instance.</param>
+		/// <param name="inner">The inner exception.</param>
 		public FlurlHttpTimeoutException(HttpCall call, Exception inner) : base(call, BuildMessage(call), inner) { }
 
 		private static string BuildMessage(HttpCall call) {
 			return $"{call} timed out.";
 		}
 	}
+
+	/// <summary>
+	/// An exception that is thrown when an HTTP response could not be parsed to a particular format.
+	/// </summary>
+	public class FlurlParsingException : FlurlHttpException
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Flurl.Http.FlurlParsingException"/> class.
+		/// </summary>
+		/// <param name="call">The HttpCall instance.</param>
+		/// <param name="expectedFormat">The format that could not be parsed to, i.e. JSON.</param>
+		/// <param name="inner">The inner exception.</param>
+		public FlurlParsingException(HttpCall call, string expectedFormat, Exception inner) : base(call, BuildMessage(call, expectedFormat), inner) {
+			ExpectedFormat = expectedFormat;
+		}
+
+		/// <summary>
+		/// The format that could not be parsed to, i.e. JSON.
+		/// </summary>
+		public string ExpectedFormat { get; }
+
+		private static string BuildMessage(HttpCall call, string expectedFormat) {
+			return $"Response from {call} could not be deserialized to {expectedFormat}.";
+		}
+	}
+
 }

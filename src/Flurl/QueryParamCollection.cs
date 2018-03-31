@@ -57,6 +57,44 @@ namespace Flurl
 		}
 
 		/// <summary>
+		/// Replaces an existing QueryParameter or appends one to the end. If object is a collection type (array, IEnumerable, etc.),
+		/// multiple paramters are added, i.e. x=1&amp;x=2. If any of the same name already exist, they are overwritten one by one
+		/// (preserving order) and any remaining are appended to the end. If fewer values are specified than already exist,
+		/// remaining existing values are removed.
+		/// </summary>
+		public void Merge(string name, object value, bool isEncoded, NullValueHandling nullValueHandling) {
+			if (value == null && nullValueHandling != NullValueHandling.NameOnly) {
+				if (nullValueHandling == NullValueHandling.Remove)
+					Remove(name);
+				return;
+			}
+
+			// This covers some complex edge cases involving multiple values of the same name.
+			// example: x has values at positions 2 and 4 in the query string, then we set x to
+			// an array of 4 values. We want to replace the values at positions 2 and 4 with the
+			// first 2 values of the new array, then append the remaining 2 values to the end.
+			var parameters = this.Where(p => p.Name == name).ToArray();
+			var values = (!(value is string) && value is IEnumerable en) ? en.Cast<object>().ToArray() : new[] { value };
+
+			for (int i = 0;; i++) {
+				if (i < parameters.Length && i < values.Length) {
+					if (values[i] is QueryParameter qp)
+						this[IndexOf(parameters[i])] = qp;
+					else
+						parameters[i].Value = values[i];
+				}
+				else if (i < parameters.Length)
+					Remove(parameters[i]);
+				else if (i < values.Length) {
+					var qp = values[i] as QueryParameter ?? new QueryParameter(name, values[i], isEncoded);
+					Add(qp);
+				}
+				else
+					break;
+			}
+		}
+
+		/// <summary>
 		/// Gets or sets a query parameter value by name. A query may contain multiple values of the same name
 		/// (i.e. "x=1&amp;x=2"), in which case the value is an array, which works for both getting and setting.
 		/// </summary>
@@ -71,37 +109,7 @@ namespace Flurl
 					return all[0];
 				return all;
 			}
-			set {
-				// This covers some complex edge cases involving multiple values of the same name.
-				// example: x has values at positions 2 and 4 in the query string, then we set x to
-				// an array of 4 values. We want to replace the values at positions 2 and 4 with the
-				// first 2 values of the new array, then append the remaining 2 values to the end.
-				var parameters = this.Where(p => p.Name == name).ToArray();
-				var values = (value is IEnumerable && !(value is string)) ?
-					(value as IEnumerable).Cast<object>().ToArray() :
-					new[] { value };
-
-				for (int i = 0;; i++) {
-					if (i < parameters.Length && i < values.Length) {
-						if (values[i] == null)
-							Remove(parameters[i]);
-						else if (values[i] is QueryParameter)
-							this[IndexOf(parameters[i])] = (QueryParameter)values[i];
-						else
-							parameters[i].Value = values[i];
-					}
-					else if (i < parameters.Length)
-						Remove(parameters[i]);
-					else if (i < values.Length) {
-						if (values[i] is QueryParameter)
-							Add((QueryParameter)values[i]);
-						else
-							Add(name, values[i]);
-					}
-					else
-						break;
-				}
-			}
+			set => Merge(name, value, false, NullValueHandling.Remove);
 		}
 	}
 }

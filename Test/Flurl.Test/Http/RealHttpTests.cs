@@ -204,7 +204,7 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task can_handle_error() {
+		public async Task can_handle_http_error() {
 			var handlerCalled = false;
 
 			try {
@@ -213,8 +213,27 @@ namespace Flurl.Test.Http
 						call.ExceptionHandled = true;
 						handlerCalled = true;
 					};
-				}).GetAsync();
-				Assert.IsTrue(handlerCalled, "error handler shoule have been called.");
+				}).GetJsonAsync();
+				Assert.IsTrue(handlerCalled, "error handler should have been called.");
+			}
+			catch (FlurlHttpException) {
+				Assert.Fail("exception should have been supressed.");
+			}
+		}
+
+		[Test]
+		public async Task can_handle_parsing_error() {
+			Exception ex = null;
+
+			try {
+				await "http://httpbin.org/image/jpeg".ConfigureRequest(c => {
+					c.OnError = call => {
+						ex = call.Exception;
+						call.ExceptionHandled = true;
+					};
+				}).GetJsonAsync();
+				Assert.IsNotNull(ex, "error handler should have been called.");
+				Assert.IsInstanceOf<FlurlParsingException>(ex);
 			}
 			catch (FlurlHttpException) {
 				Assert.Fail("exception should have been supressed.");

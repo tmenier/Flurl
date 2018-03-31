@@ -245,7 +245,7 @@ namespace Flurl
 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
 		/// <returns>The Url object with the query parameter added</returns>
 		public Url SetQueryParam(string name, object value, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
-			SetQueryParamInternal(name, value, false, nullValueHandling);
+			QueryParams.Merge(name, value, false, nullValueHandling);
 			return this;
 		}
 
@@ -259,7 +259,7 @@ namespace Flurl
 		/// <returns>The Url object with the query parameter added</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
 		public Url SetQueryParam(string name, string value, bool isEncoded = false, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
-			SetQueryParamInternal(name, value, isEncoded, nullValueHandling);
+			QueryParams.Merge(name, value, isEncoded, nullValueHandling);
 			return this;
 		}
 
@@ -269,16 +269,10 @@ namespace Flurl
 		/// <param name="name">Name of query parameter</param>
 		/// <returns>The Url object with the query parameter added</returns>
 		public Url SetQueryParam(string name) {
-			SetQueryParamInternal(name, null, false, NullValueHandling.NameOnly);
+			QueryParams.Merge(name, null, false, NullValueHandling.NameOnly);
 			return this;
 		}
 
-		private void SetQueryParamInternal(string name, object value, bool isEncoded, NullValueHandling nullValueHandling) {
-			if (value != null || nullValueHandling == NullValueHandling.NameOnly)
-				QueryParams[name] = new QueryParameter(name, value, isEncoded);
-			else if (nullValueHandling == NullValueHandling.Remove)
-				RemoveQueryParam(name);
-		}
 
 		/// <summary>
 		/// Parses values (usually an anonymous object or dictionary) into name/value pairs and adds them to the query, overwriting any that already exist.
@@ -291,7 +285,7 @@ namespace Flurl
 				return this;
 
 			foreach (var kv in values.ToKeyValuePairs())
-				SetQueryParamInternal(kv.Key, kv.Value, false, nullValueHandling);
+				QueryParams.Merge(kv.Key, kv.Value, false, nullValueHandling);
 
 			return this;
 		}

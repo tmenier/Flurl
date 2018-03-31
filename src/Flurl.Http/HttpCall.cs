@@ -88,11 +88,6 @@ namespace Flurl.Http
 		public HttpStatusCode? HttpStatus => Completed ? (HttpStatusCode?)Response.StatusCode : null;
 
 		/// <summary>
-		/// Body of the HTTP response if unsuccessful, otherwise null. (Successful responses are not captured as strings, mainly for performance reasons.)
-		/// </summary>
-		public string ErrorResponseBody { get; internal set; }
-
-		/// <summary>
 		/// Returns the verb and absolute URI associated with this call.
 		/// </summary>
 		/// <returns></returns>

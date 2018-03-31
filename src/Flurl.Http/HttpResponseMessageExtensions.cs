@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Util;
 
@@ -25,13 +26,15 @@ namespace Flurl.Http
 			if (resp == null) return default(T);
 
 			var call = HttpCall.Get(resp.RequestMessage);
-			try {
-				using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false))
+			using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false)) {
+				try {
 					return call.FlurlRequest.Settings.JsonSerializer.Deserialize<T>(stream);
-			}
-			catch (Exception ex) {
-				call.Exception = ex;
-				throw new FlurlHttpException(call, ex);
+				}
+				catch (Exception ex) {
+					call.Exception = new FlurlParsingException(call, "JSON", ex);
+					await FlurlRequest.HandleExceptionAsync(call, call.Exception, CancellationToken.None).ConfigureAwait(false);
+					return default(T);
+				}
 			}
 		}
 
