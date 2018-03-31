@@ -109,9 +109,15 @@ namespace Flurl.Test.Http
 				HttpTest.ShouldHaveMadeACall().WithoutQueryParamValues(new { z = 333, y = 222 }));
 		}
 
-		[Test]
-		public async Task can_assert_multiple_occurances_of_query_param() {
-			await "http://www.api.com?x=1&x=2&x=3&y=4#abcd".GetAsync();
+		[TestCase(false)]
+		[TestCase(true)]
+		public async Task can_assert_multiple_occurances_of_query_param(bool buildFluently) {
+			// #276 showed that this failed when the URL was built fluently (caused by #301)
+			var url = buildFluently ?
+				"http://www.api.com".SetQueryParam("x", new[] { 1, 2, 3 }).SetQueryParam("y", 4).SetFragment("abcd") :
+				new Url("http://www.api.com?x=1&x=2&x=3&y=4#abcd");
+
+			await url.GetAsync();
 
 			HttpTest.ShouldHaveMadeACall().WithQueryParam("x");
 			HttpTest.ShouldHaveMadeACall().WithQueryParamValue("x", new[] { 2, 1 }); // order shouldn't matter

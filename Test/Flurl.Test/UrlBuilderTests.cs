@@ -82,6 +82,13 @@ namespace Flurl.Test
 			Assert.AreEqual("http://www.mysite.com/more?y=2&z=4", url.ToString());
 		}
 
+		[Test] // #301
+		public void setting_query_param_array_creates_multiple() {
+			var q = "http://www.mysite.com".SetQueryParam("x", new[] { 1, 2, 3 }).QueryParams;
+			Assert.AreEqual(3, q.Count);
+			Assert.AreEqual(new[] { 1, 2, 3 }, q.Select(p => p.Value));
+		}
+
 		[Test]
 		public void can_change_query_param() {
 			var url = "http://www.mysite.com?x=1".SetQueryParam("x", 2);

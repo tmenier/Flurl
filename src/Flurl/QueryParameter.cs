@@ -52,21 +52,13 @@ namespace Flurl
 		/// <param name="encodeSpaceAsPlus">Indicates whether to encode space characters with "+" instead of "%20".</param>
 		/// <returns></returns>
 		public string ToString(bool encodeSpaceAsPlus) {
-			if (_value is IEnumerable && !(_value is string)) {
-				return string.Join("&",
-					from v in (_value as IEnumerable).Cast<object>()
-					select BuildPair(Name, v, false, encodeSpaceAsPlus));
-			}
-			return BuildPair(Name, _encodedValue ?? Value, _encodedValue != null, encodeSpaceAsPlus);
-		}
+			var name = Url.EncodeIllegalCharacters(Name, encodeSpaceAsPlus);
+			var value =
+				(_encodedValue != null) ? _encodedValue :
+				(Value != null) ? Url.Encode(Value.ToInvariantString(), encodeSpaceAsPlus) :
+				null;
 
-		private static string BuildPair(string name, object value, bool valueIsEncoded, bool encodeSpaceAsPlus) {
-			name = Url.EncodeIllegalCharacters(name, encodeSpaceAsPlus);
-			if (value == null)
-				return name;
-
-			value = valueIsEncoded ? value : Url.Encode(value.ToInvariantString(), encodeSpaceAsPlus);
-			return $"{name}={value}";
+			return (value == null) ? name : $"{name}={value}";
 		}
 	}
 }

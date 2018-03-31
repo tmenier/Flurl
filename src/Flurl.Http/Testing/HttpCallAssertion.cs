@@ -107,8 +107,8 @@ namespace Flurl.Http.Testing
 		/// <param name="value">The query parameter value. Can contain * wildcard.</param>
 		/// <returns></returns>
 		public HttpCallAssertion WithQueryParamValue(string name, object value) {
-			if (value is IEnumerable && !(value is string)) {
-				foreach (var val in (IEnumerable)value)
+			if (!(value is string) && value is IEnumerable en) {
+				foreach (var val in en)
 					WithQueryParamValue(name, val);
 				return this;
 			}
@@ -123,8 +123,8 @@ namespace Flurl.Http.Testing
 		/// <param name="value">The query parameter value. Can contain * wildcard.</param>
 		/// <returns></returns>
 		public HttpCallAssertion WithoutQueryParamValue(string name, object value) {
-			if (value is IEnumerable && !(value is string)) {
-				foreach (var val in (IEnumerable)value)
+			if (!(value is string) && value is IEnumerable en) {
+				foreach (var val in en)
 					WithoutQueryParamValue(name, val);
 				return this;
 			}
@@ -153,8 +153,8 @@ namespace Flurl.Http.Testing
 		private bool QueryParamMatches(QueryParameter qp, string name, object value) {
 			if (qp.Name != name)
 				return false;
-			if (value is string)
-				return MatchesPattern(qp.Value?.ToString(), value?.ToString());
+			if (value is string s)
+				return MatchesPattern(qp.Value?.ToString(), s);
 			return qp.Value?.ToString() == value?.ToString();
 		}
 

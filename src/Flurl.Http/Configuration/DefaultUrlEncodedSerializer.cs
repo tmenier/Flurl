@@ -20,12 +20,9 @@ namespace Flurl.Http.Configuration
 
 			var qp = new QueryParamCollection();
             foreach (var kv in obj.ToKeyValuePairs())
-            {
-                // if value is null, the serializer shouldn't add this key-value pair.
-                if (kv.Value == null) continue;
-                qp[kv.Key] = new QueryParameter(kv.Key, kv.Value);
-            }
-            return qp.ToString(true);
+	            qp.Merge(kv.Key, kv.Value, false, NullValueHandling.Ignore);
+
+			return qp.ToString(true);
 		}
 
 		/// <summary>
