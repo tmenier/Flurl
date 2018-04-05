@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -18,7 +19,7 @@ namespace Flurl.Test.Http
 			var content = new CapturedMultipartContent()
 				.AddString("string", "foo")
 				.AddStringParts(new { part1 = 1, part2 = 2, part3 = (string)null }) // part3 should be excluded
-				.AddFile("file", @"path\to\image.jpg", "image/jpeg")
+				.AddFile("file", Path.Combine("path", "to", "image.jpg"), "image/jpeg")
 				.AddJson("json", new { foo = "bar" })
 				.AddUrlEncoded("urlEnc", new { fizz = "buzz" });
 
