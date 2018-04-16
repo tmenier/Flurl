@@ -122,6 +122,21 @@ namespace Flurl.Test.Http
 			Assert.IsFalse(GetSettings().CookiesEnabled);
 			Assert.IsNull(GetSettings().BeforeCall);
 		}
+
+		[Test] // #256
+		public async Task explicit_content_type_header_is_not_overridden() {
+			using (var test = new HttpTest()) {
+				// PostJsonAsync will normally set Content-Type to application/json, but it shouldn't touch it if it was set explicitly.
+				await "https://api.com"
+					.WithHeader("content-type", "application/json-patch+json; utf-8")
+					.WithHeader("CONTENT-LENGTH", 10) // header names are case-insensitive
+					.PostJsonAsync(new { foo = "bar" });
+
+				var h = test.CallLog[0].Request.Content.Headers;
+				Assert.AreEqual(new[] { "application/json-patch+json; utf-8" }, h.GetValues("Content-Type"));
+				Assert.AreEqual(new[] { "10" }, h.GetValues("Content-Length"));
+			}
+		}
 	}
 
 	[TestFixture, NonParallelizable] // touches global settings, so can't run in parallel
@@ -208,7 +223,7 @@ namespace Flurl.Test.Http
 		protected override FlurlHttpSettings GetSettings() => HttpTest.Current.Settings;
 		protected override IFlurlRequest GetRequest() => new FlurlRequest("http://api.com");
 
-		[Test] // github #246
+		[Test] // #246
 		public void test_settings_dont_override_request_settings_when_not_set_explicitily() {
 			var ser1 = new FakeSerializer();
 			var ser2 = new FakeSerializer();
@@ -292,7 +307,7 @@ namespace Flurl.Test.Http
 		protected override FlurlHttpSettings GetSettings() => _req.Value.Settings;
 		protected override IFlurlRequest GetRequest() => _req.Value;
 
-		[Test, NonParallelizable] // github #239
+		[Test, NonParallelizable] // #239
 		public void request_default_settings_change_when_client_changes() {
 			FlurlHttp.ConfigureClient("http://test.com", cli => cli.Settings.CookiesEnabled = true);
 			var req = new FlurlRequest("http://test.com");
