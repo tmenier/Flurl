@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using Flurl.Http;
 using NUnit.Framework;
@@ -90,6 +91,19 @@ namespace Flurl.Test.Http
 			Assert.IsTrue(cli2.IsDisposed);
 			Assert.AreNotEqual(cli1, cli3);
 			Assert.IsFalse(cli3.IsDisposed);
+		}
+
+		[Test]
+		public void can_create_FlurlClient_with_existing_HttpClient() {
+			var hc = new HttpClient {
+				BaseAddress = new Uri("http://api.com/"),
+				Timeout = TimeSpan.FromSeconds(123)
+			};
+			var cli = new FlurlClient(hc);
+
+			Assert.AreEqual("http://api.com/", cli.HttpClient.BaseAddress.ToString());
+			Assert.AreEqual(123, cli.HttpClient.Timeout.TotalSeconds);
+			Assert.AreEqual("http://api.com/", cli.BaseUrl);
 		}
 	}
 }

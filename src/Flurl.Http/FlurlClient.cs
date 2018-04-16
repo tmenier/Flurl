@@ -73,6 +73,21 @@ namespace Flurl.Http
 			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => Settings.HttpClientFactory.CreateMessageHandler());
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlClient"/> class, wrapping an existing HttpClient.
+		/// Generally you should let Flurl create and manage HttpClient instances for you, but you might, for
+		/// example, have an HttpClient instance that was created by a 3rd-party library and you want to use
+		/// Flurl to build and send calls with it.
+		/// </summary>
+		/// <param name="httpClient">The instantiated HttpClient instance.</param>
+		public FlurlClient(HttpClient httpClient) {
+			if (httpClient == null)
+				throw new ArgumentNullException(nameof(httpClient));
+
+			BaseUrl = httpClient.BaseAddress?.ToString();
+			_httpClient = new Lazy<HttpClient>(() => httpClient);
+		}
+
 		/// <inheritdoc />
 		public string BaseUrl { get; set; }
 
