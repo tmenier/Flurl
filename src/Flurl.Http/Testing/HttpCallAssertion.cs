@@ -211,9 +211,9 @@ namespace Flurl.Http.Testing
 		/// <returns></returns>
 		public HttpCallAssertion WithHeader(string name, string valuePattern = "*") {
 			_expectedConditions.Add($"header {name}: {valuePattern}");
-			return With(c => 
+			return With(c =>
 				c.Request.Headers.TryGetValues(name, out var vals) &&
-				vals.Any(v => MatchesPattern(v, valuePattern)));
+				MatchesPattern(string.Join(" ", vals), valuePattern));
 		}
 
 		/// <summary>
