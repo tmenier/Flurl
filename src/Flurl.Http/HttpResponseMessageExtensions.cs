@@ -25,7 +25,7 @@ namespace Flurl.Http
 			var resp = await response.ConfigureAwait(false);
 			if (resp == null) return default(T);
 
-			var call = HttpCall.Get(resp.RequestMessage);
+			var call = resp.RequestMessage.GetHttpCall();
 			using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false)) {
 				try {
 					return call.FlurlRequest.Settings.JsonSerializer.Deserialize<T>(stream);
