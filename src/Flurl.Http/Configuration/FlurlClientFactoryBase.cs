@@ -42,5 +42,16 @@ namespace Flurl.Http.Configuration
 		/// <param name="url">The URL (not used)</param>
 		/// <returns></returns>
 		protected virtual IFlurlClient Create(Url url) => new FlurlClient();
+
+		/// <summary>
+		/// Disposes all cached IFlurlClient instances and clears the cache.
+		/// </summary>
+		public void Dispose() {
+			foreach (var kv in _clients) {
+				if (!kv.Value.IsDisposed)
+					kv.Value.Dispose();
+			}
+			_clients.Clear();
+		}
 	}
 }
