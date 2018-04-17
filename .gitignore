@@ -12,3 +12,4 @@ packages
 publish
 TestResult.xml
 *.bak
+.idea

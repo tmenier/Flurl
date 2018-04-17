@@ -10,15 +10,13 @@ using NUnit.Framework;
 namespace Flurl.Test.Http
 {
 	[TestFixture, Parallelizable]
-	public class GetTests : HttpTestFixtureBase
+	public class GetTests : HttpMethodTests
 	{
-		[Test]
-		public async Task can_get() {
-			await "http://www.api.com".GetAsync();
+		public GetTests() : base(HttpMethod.Get) { }
 
-			Assert.AreEqual(1, HttpTest.CallLog.Count);
-			Assert.AreEqual(HttpMethod.Get, HttpTest.CallLog.Single().Request.Method);
-		}
+		protected override Task<HttpResponseMessage> CallOnString(string url) => url.GetAsync();
+		protected override Task<HttpResponseMessage> CallOnUrl(Url url) => url.GetAsync();
+		protected override Task<HttpResponseMessage> CallOnFlurlRequest(IFlurlRequest req) => req.GetAsync();
 
 		[Test]
 		public async Task can_get_json() {

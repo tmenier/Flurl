@@ -11,29 +11,15 @@ namespace Flurl.Http
 	/// </summary>
 	public class HttpCall
 	{
-		internal HttpCall(IFlurlRequest flurlRequest, HttpRequestMessage request) {
-			FlurlRequest = flurlRequest;
-			Request = request;
-			if (request?.Properties != null)
-				request.Properties["FlurlHttpCall"] = this;
-		}
-
-		internal static HttpCall Get(HttpRequestMessage request) {
-			object obj;
-			if (request?.Properties != null && request.Properties.TryGetValue("FlurlHttpCall", out obj) && obj is HttpCall)
-				return (HttpCall)obj;
-			return null;
-		}
-
 		/// <summary>
 		/// The IFlurlRequest associated with this call.
 		/// </summary>
-		public IFlurlRequest FlurlRequest { get; }
+		public IFlurlRequest FlurlRequest { get; set; }
 
 		/// <summary>
 		/// The HttpRequestMessage associated with this call.
 		/// </summary>
-		public HttpRequestMessage Request { get; }
+		public HttpRequestMessage Request { get; set; }
 
 		/// <summary>
 		/// Captured request body. Available ONLY if Request.Content is a Flurl.Http.Content.CapturedStringContent.
@@ -43,12 +29,12 @@ namespace Flurl.Http
 		/// <summary>
 		/// HttpResponseMessage associated with the call if the call completed, otherwise null.
 		/// </summary>
-		public HttpResponseMessage Response { get; internal set; }
+		public HttpResponseMessage Response { get; set; }
 
 		/// <summary>
 		/// Exception that occurred while sending the HttpRequestMessage.
 		/// </summary>
-		public Exception Exception { get; internal set; }
+		public Exception Exception { get; set; }
 	
 		/// <summary>
 		/// User code should set this to true inside global event handlers (OnError, etc) to indicate
@@ -59,12 +45,12 @@ namespace Flurl.Http
 		/// <summary>
 		/// DateTime the moment the request was sent.
 		/// </summary>
-		public DateTime StartedUtc { get; internal set; }
+		public DateTime StartedUtc { get; set; }
 
 		/// <summary>
 		/// DateTime the moment a response was received.
 		/// </summary>
-		public DateTime? EndedUtc { get; internal set; }
+		public DateTime? EndedUtc { get; set; }
 
 		/// <summary>
 		/// Total duration of the call if it completed, otherwise null.

@@ -110,7 +110,8 @@ namespace Flurl.Http
 		/// <inheritdoc />
 		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			var request = new HttpRequestMessage(verb, Url) { Content = content };
-			var call = new HttpCall(this, request);
+			var call = new HttpCall { FlurlRequest = this, Request = request };
+			request.SetHttpCall(call);
 
 			await HandleEventAsync(Settings.BeforeCall, Settings.BeforeCallAsync, call).ConfigureAwait(false);
 			request.RequestUri = new Uri(Url); // in case it was modifed in the handler above
@@ -156,8 +157,34 @@ namespace Flurl.Http
 
 		private void WriteHeaders(HttpRequestMessage request) {
 			Headers.Merge(Client.Headers);
-			foreach (var header in Headers.Where(h => h.Value != null))
-				request.Headers.TryAddWithoutValidation(header.Key, header.Value.ToInvariantString());
+			foreach (var header in Headers) {
+				// Flurl favors being a lot less fancy with headers than HttpClient. No validation,
+				// no request-level vs. content-level, no collections of values. Just overwriteable
+				// name/value pairs. But we're using HttpClient to send the request, so we need
+				// to translate to the fancy way just before sending.
+				switch (header.Key.ToLower()) {
+					// https://msdn.microsoft.com/en-us/library/system.net.http.headers.httpcontentheaders.aspx
+					case "content-disposition":
+					case "content-length":
+					case "content-location":
+					case "content-md5":
+					case "content-range":
+					case "content-type":
+					case "expires":
+					case "last-modified":
+						// it's a content-level header
+						request.Content.Headers.Remove(header.Key);
+						if (header.Value != null)
+							request.Content.Headers.TryAddWithoutValidation(header.Key, header.Value.ToInvariantString());
+						break;
+					default:
+						// it's a request-level header
+						request.Headers.Remove(header.Key);
+						if (header.Value != null)
+							request.Headers.TryAddWithoutValidation(header.Key, header.Value.ToInvariantString());
+						break;
+				}
+			}
 		}
 
 		private void WriteRequestCookies(HttpRequestMessage request) {

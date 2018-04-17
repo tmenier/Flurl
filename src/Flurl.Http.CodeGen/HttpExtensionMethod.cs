@@ -7,7 +7,7 @@ namespace Flurl.Http.CodeGen
 	{
 		public static IEnumerable<HttpExtensionMethod> GetAll() {
 			return
-				from httpVerb in new[] { null, "Get", "Post", "Head", "Put", "Delete", "Patch" }
+				from httpVerb in new[] { null, "Get", "Post", "Head", "Put", "Delete", "Patch", "Options" }
 				from bodyType in new[] { null, "Json", /*"Xml",*/ "String", "UrlEncoded" }
 				from extensionType in new[] { "IFlurlRequest", "Url", "string" }
 				where SupportedCombo(httpVerb, bodyType, extensionType)
@@ -33,7 +33,7 @@ namespace Flurl.Http.CodeGen
 				case "Put":
 				case "Patch":
 					return bodyType != "UrlEncoded";
-				default: // Get, Head, Delete
+				default: // Get, Head, Delete, Options
 					return bodyType == null;
 			}
 		}

@@ -131,11 +131,19 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_assert_headers() {
-			await "http://api.com".WithHeaders(new { h1 = "val1", h2 = "val2" }).GetAsync();
+			await "http://api.com"
+				.WithHeaders(new { h1 = "val1", h2 = "val2" })
+				.WithHeader("User-Agent", "two words") // #307
+				.WithHeader("x", "dos       words")    // crazier than #307
+				.WithHeader("y", "hi;  there")         // crazier still
+				.GetAsync();
 
 			HttpTest.ShouldHaveMadeACall().WithHeader("h1");
 			HttpTest.ShouldHaveMadeACall().WithHeader("h2", "val2");
 			HttpTest.ShouldHaveMadeACall().WithHeader("h1", "val*");
+			HttpTest.ShouldHaveMadeACall().WithHeader("User-Agent", "two words");
+			HttpTest.ShouldHaveMadeACall().WithHeader("x", "dos       words");
+			HttpTest.ShouldHaveMadeACall().WithHeader("y", "hi;  there");
 
 			HttpTest.ShouldHaveMadeACall().WithoutHeader("h3");
 			HttpTest.ShouldHaveMadeACall().WithoutHeader("h2", "val1");
