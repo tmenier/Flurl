@@ -6,8 +6,14 @@ using NUnit.Framework;
 namespace Flurl.Test.Http
 {
 	[TestFixture, Parallelizable]
-	public class PostTests : HttpTestFixtureBase
+	public class PostTests : HttpMethodTests
 	{
+		public PostTests() : base(HttpMethod.Post) { }
+
+		protected override Task<HttpResponseMessage> CallOnString(string url) => url.PostAsync(null);
+		protected override Task<HttpResponseMessage> CallOnUrl(Url url) => url.PostAsync(null);
+		protected override Task<HttpResponseMessage> CallOnFlurlRequest(IFlurlRequest req) => req.PostAsync(null);
+
 		[Test]
 		public async Task can_post_string() {
 			var expectedEndpoint = "http://some-api.com";
