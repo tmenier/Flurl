@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -77,7 +77,7 @@ namespace Flurl.Util
 				let val = prop.GetValue(obj, null)
 				select new KeyValuePair<string, object>(prop.Name, val);
 #else
-			return from prop in obj.GetType().GetProperties() 
+			return from prop in obj.GetType().GetProperties()
 				   let val = prop.GetValue(obj, null)
 				   select new KeyValuePair<string, object>(prop.Name, val);
 #endif
@@ -119,7 +119,7 @@ namespace Flurl.Util
 		/// Merges the key/value pairs from d2 into d1, without overwriting those already set in d1.
 		/// </summary>
 		public static void Merge<TKey, TValue>(this IDictionary<TKey, TValue> d1, IDictionary<TKey, TValue> d2) {
-			foreach (var kv in d2.Where(x => !d1.Keys.Contains(x.Key)))
+			foreach (var kv in d2.Where(x => !d1.Keys.Contains(x.Key)).ToArray())
 				d1.Add(kv);
 		}
 
