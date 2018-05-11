@@ -26,7 +26,10 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		/// <exception cref="Exception">A delegate callback throws an exception.</exception>
 		public HttpTest() {
-		    Settings = new TestFlurlHttpSettings();
+#if !NETSTANDARD1_1 && !NETSTANDARD1_3
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+#endif
+            Settings = new TestFlurlHttpSettings();
 			ResponseQueue = new Queue<HttpResponseMessage>();
 			CallLog = new List<HttpCall>();
 			_httpClient = new Lazy<HttpClient>(() => Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler));
