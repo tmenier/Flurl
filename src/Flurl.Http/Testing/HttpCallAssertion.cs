@@ -50,6 +50,12 @@ namespace Flurl.Http.Testing
 				Assert();
 				return this;
 			}
+
+            // if no wildcard is present do a strict match
+            // https://github.com/tmenier/Flurl/issues/323
+		    if (!urlPattern.Contains("*"))
+		        return With(c => c.FlurlRequest.Url == urlPattern);
+
 			_expectedConditions.Add($"URL pattern {urlPattern}");
 			return With(c => MatchesPattern(c.FlurlRequest.Url, urlPattern));
 		}

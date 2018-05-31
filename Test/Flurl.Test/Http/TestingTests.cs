@@ -12,6 +12,18 @@ namespace Flurl.Test.Http
 	[TestFixture, Parallelizable]
 	public class TestingTests : HttpTestFixtureBase
 	{
+	    [Test]
+	    public async Task can_assert_url() {
+	        await "http://api.com"
+	            .AppendPathSegment("test")
+	            .GetAsync();
+
+	        HttpTest.ShouldHaveMadeACall().WithUrlPattern("http://api.com/test");
+
+	        Assert.Throws<HttpCallAssertException>(() =>
+	                HttpTest.ShouldHaveMadeACall().WithUrlPattern("http://api.com"));
+	    }
+
 		[Test]
 		public async Task fake_get_works() {
 			HttpTest.RespondWith("great job");
