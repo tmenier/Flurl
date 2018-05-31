@@ -20,9 +20,12 @@ namespace Flurl.Test.Http
 
 	        HttpTest.ShouldHaveMadeACall().WithUrlPattern("http://api.com/test");
 	        HttpTest.ShouldHaveMadeACall().WithUrlPattern("http://api.com/TEST");
+	        HttpTest.ShouldHaveMadeACall().WithUrlPattern("http://api.com/*");
 
 	        Assert.Throws<HttpCallAssertException>(() =>
 	                HttpTest.ShouldHaveMadeACall().WithUrlPattern("http://api.com"));
+	        Assert.Throws<HttpCallAssertException>(() =>
+	            HttpTest.ShouldHaveMadeACall().WithUrlPattern("http://api.com/*/a"));
 	    }
 
 		[Test]
