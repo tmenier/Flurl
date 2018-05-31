@@ -54,7 +54,7 @@ namespace Flurl.Http.Testing
             // if no wildcard is present do a strict match
             // https://github.com/tmenier/Flurl/issues/323
 		    if (!urlPattern.Contains("*"))
-		        return With(c => c.FlurlRequest.Url == urlPattern);
+		        return With(c => string.Equals(c.FlurlRequest.Url,urlPattern, StringComparison.OrdinalIgnoreCase));
 
 			_expectedConditions.Add($"URL pattern {urlPattern}");
 			return With(c => MatchesPattern(c.FlurlRequest.Url, urlPattern));

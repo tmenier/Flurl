@@ -19,6 +19,7 @@ namespace Flurl.Test.Http
 	            .GetAsync();
 
 	        HttpTest.ShouldHaveMadeACall().WithUrlPattern("http://api.com/test");
+	        HttpTest.ShouldHaveMadeACall().WithUrlPattern("http://api.com/TEST");
 
 	        Assert.Throws<HttpCallAssertException>(() =>
 	                HttpTest.ShouldHaveMadeACall().WithUrlPattern("http://api.com"));
