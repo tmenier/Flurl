@@ -124,9 +124,9 @@ namespace Flurl.Http.Content
 				throw new ArgumentException("name must not be empty", nameof(name));
 
 			content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") {
-				Name = name,
-				FileName = fileName,
-				FileNameStar = fileName
+                Name = '"' + name + '"',
+                FileName = (fileName == null ? null : ('"' + fileName + '"')),
+                FileNameStar = fileName
 			};
 			base.Add(content);
 			return this;
