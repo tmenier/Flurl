@@ -1,5 +1,6 @@
 ---
-layout: default
+layout: redirect
+redirect_to: /docs/error-handling/
 ---
 
 ## Error Handling

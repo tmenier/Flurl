@@ -1,3 +1,16 @@
+#we-moved {
+  text-align: center;
+  height: 100px;
+
+  position: absolute;
+  top:0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  margin: auto;
+}
+
 @font-face {
   font-family: 'OpenSansLight';
   src: url("../fonts/OpenSans-Light-webfont.eot");
@@ -535,13 +548,6 @@ body {
   color: #f0e7d5;
   font-weight: normal;
   background: #252525;
-  background-attachment: fixed !important;
-  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #2a2a29), color-stop(100%, #1c1c1c));
-  background: -webkit-linear-gradient(#2a2a29, #1c1c1c);
-  background: -moz-linear-gradient(#2a2a29, #1c1c1c);
-  background: -o-linear-gradient(#2a2a29, #1c1c1c);
-  background: -ms-linear-gradient(#2a2a29, #1c1c1c);
-  background: linear-gradient(#2a2a29, #1c1c1c);
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -585,7 +591,7 @@ a {
   text-decoration: none;
 }
 a:hover {
-  color: #ffeb9b;
+  text-decoration: underline;
 }
 
 a small {

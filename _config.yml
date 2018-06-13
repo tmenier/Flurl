@@ -1,3 +1,6 @@
+new_home:         flurl.netlify.com
+new_home_url:     https://flurl.netlify.com
+
 # Dependencies
 markdown:         kramdown
 highlighter:      rouge

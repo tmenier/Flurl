@@ -1,5 +1,6 @@
 ---
-layout: default
+layout: redirect
+redirect_to: /docs/client-lifetime/
 ---
 
 ## HttpClient Lifetime Management
