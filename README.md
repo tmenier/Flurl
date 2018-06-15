@@ -42,4 +42,4 @@ Or get just the stand-alone URL builder without the HTTP features:
 
 For updates and announcements, [follow @FlurlHttp on Twitter](https://twitter.com/intent/user?screen_name=FlurlHttp).
 
-For detailed documentation, please visit the [main site](https://flurl.netlify.com/). 
+For detailed documentation, please visit the [main site](https://flurl.io). 
