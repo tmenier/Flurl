@@ -1,5 +1,5 @@
-new_home:         flurl.netlify.com
-new_home_url:     https://flurl.netlify.com
+new_home:         flurl.io
+new_home_url:     https://flurl.io
 
 # Dependencies
 markdown:         kramdown
