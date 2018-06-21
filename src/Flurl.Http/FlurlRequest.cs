@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http.Configuration;
+using Flurl.Http.Content;
 using Flurl.Util;
 
 namespace Flurl.Http
@@ -173,7 +174,15 @@ namespace Flurl.Http
 					case "expires":
 					case "last-modified":
 						// it's a content-level header
-						request.Content.Headers.Remove(header.Key);
+						if (request.Content == null && header.Value == null)
+							break;
+						if (request.Content == null) {
+							request.Content = new CapturedStringContent("");
+							request.Content.Headers.Clear();
+						}
+						else {
+							request.Content.Headers.Remove(header.Key);
+						}
 						if (header.Value != null)
 							request.Content.Headers.TryAddWithoutValidation(header.Key, header.Value.ToInvariantString());
 						break;
