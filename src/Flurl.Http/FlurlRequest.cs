@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http.Configuration;
-using Flurl.Http.Content;
 using Flurl.Util;
 
 namespace Flurl.Http
@@ -128,7 +127,10 @@ namespace Flurl.Http
 
 			call.StartedUtc = DateTime.UtcNow;
 			try {
-				WriteHeaders(request);
+				Headers.Merge(Client.Headers);
+				foreach (var header in Headers)
+					request.SetHeader(header.Key, header.Value);
+
 				if (Settings.CookiesEnabled)
 					WriteRequestCookies(request);
 
@@ -153,46 +155,6 @@ namespace Flurl.Http
 
 				call.EndedUtc = DateTime.UtcNow;
 				await HandleEventAsync(Settings.AfterCall, Settings.AfterCallAsync, call).ConfigureAwait(false);
-			}
-		}
-
-		private void WriteHeaders(HttpRequestMessage request) {
-			Headers.Merge(Client.Headers);
-			foreach (var header in Headers) {
-				// Flurl favors being a lot less fancy with headers than HttpClient. No validation,
-				// no request-level vs. content-level, no collections of values. Just overwriteable
-				// name/value pairs. But we're using HttpClient to send the request, so we need
-				// to translate to the fancy way just before sending.
-				switch (header.Key.ToLower()) {
-					// https://msdn.microsoft.com/en-us/library/system.net.http.headers.httpcontentheaders.aspx
-					case "content-disposition":
-					case "content-length":
-					case "content-location":
-					case "content-md5":
-					case "content-range":
-					case "content-type":
-					case "expires":
-					case "last-modified":
-						// it's a content-level header
-						if (request.Content == null && header.Value == null)
-							break;
-						if (request.Content == null) {
-							request.Content = new CapturedStringContent("");
-							request.Content.Headers.Clear();
-						}
-						else {
-							request.Content.Headers.Remove(header.Key);
-						}
-						if (header.Value != null)
-							request.Content.Headers.TryAddWithoutValidation(header.Key, header.Value.ToInvariantString());
-						break;
-					default:
-						// it's a request-level header
-						request.Headers.Remove(header.Key);
-						if (header.Value != null)
-							request.Headers.TryAddWithoutValidation(header.Key, header.Value.ToInvariantString());
-						break;
-				}
 			}
 		}
 
