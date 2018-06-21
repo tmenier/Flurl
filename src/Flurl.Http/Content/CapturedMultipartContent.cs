@@ -124,12 +124,23 @@ namespace Flurl.Http.Content
 				throw new ArgumentException("name must not be empty", nameof(name));
 
 			content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") {
-				Name = name,
-				FileName = fileName,
-				FileNameStar = fileName
+				Name = GetQuoted(name),
+				FileName = GetQuoted(fileName),
+				FileNameStar = GetQuoted(fileName)
 			};
 			base.Add(content);
 			return this;
+		}
+
+		private string GetQuoted(string s) {
+			if (s == null)
+				return s;
+
+			if (s.StartsWith("\"") && s.EndsWith("\""))
+				return s; // assume the user took care of it already and we don't need to worry about escaping etc.
+
+			// escape \ and inner " and surround with quotes
+			return $"\"{ s.TrimStart('"').TrimEnd('"').Replace(@"\\", @"\\\\").Replace("\"", "\\\"") }\"";
 		}
 	}
 }
