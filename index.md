@@ -11,7 +11,7 @@ var result = await "https://api.mysite.com"
     .AppendPathSegment("person")
     .SetQueryParams(new { a = 1, b = 2 })
     .WithOAuthBearerToken("my_oauth_token")
-    .PostJsonAsync(new { first_name = "Frank", last_name = "Underwood" })
+    .PostJsonAsync(new { first_name = "Claire", last_name = "Underwood" })
     .ReceiveJson<T>();
 ````
 
