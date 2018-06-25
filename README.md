@@ -22,7 +22,7 @@ public void Can_Create_Person() {
         httpTest.RespondWith(200, "OK");
 
         // act
-        await sut.CreatePersonAsync("Frank", "Underwood");
+        await sut.CreatePersonAsync("Claire", "Underwood");
         
         // assert
         httpTest.ShouldHaveCalled("http://api.mysite.com/*")
