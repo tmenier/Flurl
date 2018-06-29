@@ -1,15 +1,17 @@
 ﻿using Flurl.Util;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Flurl
 {
-	/// <summary>
-	/// Represents a URL that can be built fluently
-	/// </summary>
-	public class Url
+    /// <summary>
+    /// Represents a URL that can be built fluently
+    /// </summary>
+    public class Url
 	{
 		/// <summary>
 		/// The full absolute path part of the URL (everthing except the query and fragment).
@@ -274,28 +276,42 @@ namespace Flurl
 		}
 
 
-		/// <summary>
-		/// Parses values (usually an anonymous object or dictionary) into name/value pairs and adds them to the query, overwriting any that already exist.
-		/// </summary>
-		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
-		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
-		/// <returns>The Url object with the query parameters added</returns>
-		public Url SetQueryParams(object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+        /// <summary>
+        /// Parses values (usually an anonymous object or dictionary) into name/value pairs and adds them to the query, overwriting any that already exist.
+        /// </summary>
+        /// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
+        /// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+        /// <returns>The Url object with the query parameters added</returns>
+        public Url SetQueryParams(object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
 			if (values == null)
 				return this;
 
-			foreach (var kv in values.ToKeyValuePairs())
-				QueryParams.Merge(kv.Key, kv.Value, false, nullValueHandling);
+            var type = values.GetType();            
+            foreach (var kv in values.ToKeyValuePairs()) {
+                var paramName = kv.Key;
+#if NETSTANDARD1_0
+                var prop = type.GetRuntimeProperty(kv.Key);
+#else
+                var prop = type.GetProperty(kv.Key);
+#endif
+                if (prop != null) {
+                    var attributes = prop.GetCustomAttributes(typeof(JsonPropertyAttribute), false);
+                    if (attributes != null) {
+                        if (attributes.Any() && attributes.First() != null) paramName = ((JsonPropertyAttribute)attributes.First()).PropertyName;
+                    }
+                }
+                QueryParams.Merge(paramName, kv.Value, false, nullValueHandling);
+            }
 
-			return this;
+            return this;
 		}
 
-		/// <summary>
-		/// Adds multiple parameters without values to the query.
-		/// </summary>
-		/// <param name="names">Names of query parameters.</param>
-		/// <returns>The Url object with the query parameter added</returns>
-		public Url SetQueryParams(IEnumerable<string> names) {
+        /// <summary>
+        /// Adds multiple parameters without values to the query.
+        /// </summary>
+        /// <param name="names">Names of query parameters.</param>
+        /// <returns>The Url object with the query parameter added</returns>
+        public Url SetQueryParams(IEnumerable<string> names) {
 			foreach (var name in names.Where(n => n != null))
 				SetQueryParam(name);
 			return this;
