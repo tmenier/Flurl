@@ -11,3 +11,5 @@ packages
 .vscode
 publish
 TestResult.xml
+*.bak
+.idea
