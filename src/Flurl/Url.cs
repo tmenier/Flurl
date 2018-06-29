@@ -276,13 +276,13 @@ namespace Flurl
 		}
 
 
-		/// <summary>
-		/// Parses values (usually an anonymous object or dictionary) into name/value pairs and adds them to the query, overwriting any that already exist.
-		/// </summary>
-		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
-		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
-		/// <returns>The Url object with the query parameters added</returns>
-		public Url SetQueryParams(object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+        /// <summary>
+        /// Parses values (usually an anonymous object or dictionary) into name/value pairs and adds them to the query, overwriting any that already exist.
+        /// </summary>
+        /// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
+        /// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+        /// <returns>The Url object with the query parameters added</returns>
+        public Url SetQueryParams(object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
 			if (values == null)
 				return this;
 
