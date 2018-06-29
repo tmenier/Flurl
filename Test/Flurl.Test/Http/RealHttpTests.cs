@@ -326,7 +326,7 @@ namespace Flurl.Test.Http
 			// Specific behavior associated with ConnectionLeaseTimeout is coverd in SettingsTests.
 			// Here let's just make sure it isn't disruptive in any way in real calls.
 
-			var cli = new FlurlClient("http://www.google.com");
+			var cli = new FlurlClient("https://www.google.com");
 			cli.Settings.ConnectionLeaseTimeout = TimeSpan.FromMilliseconds(20);
 
 			// initiate a call to google every 10ms for 100ms.

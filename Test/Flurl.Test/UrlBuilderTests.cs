@@ -278,7 +278,18 @@ namespace Flurl.Test
 			Assert.AreEqual("http://www.mysite.com/category/endpoint?b=2&n=hi&m=bye#fooey", url.ToString());
 		}
 
-		[Test]
+        [Test]
+        public void respect_jsonproperty_attribute_on_query_params()
+        {
+            var foo = FooParams.Instance();
+
+            var url = "http://www.mysite.com"
+                .SetQueryParams(foo);
+
+            Assert.AreEqual("http://www.mysite.com?page=1&per_page=10&term=SpaceGhost", url.ToString());
+        }
+
+        [Test]
 		public void encodes_illegal_path_chars() {
 			// should not encode '/'
 			var url = "http://www.mysite.com".AppendPathSegment("hi there/bye now");

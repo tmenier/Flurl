@@ -1,15 +1,17 @@
 ﻿using Flurl.Util;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Flurl
 {
-	/// <summary>
-	/// Represents a URL that can be built fluently
-	/// </summary>
-	public class Url
+    /// <summary>
+    /// Represents a URL that can be built fluently
+    /// </summary>
+    public class Url
 	{
 		/// <summary>
 		/// The full absolute path part of the URL (everthing except the query and fragment).
@@ -284,18 +286,44 @@ namespace Flurl
 			if (values == null)
 				return this;
 
-			foreach (var kv in values.ToKeyValuePairs())
-				QueryParams.Merge(kv.Key, kv.Value, false, nullValueHandling);
+            var type = values.GetType();            
+            foreach (var kv in values.ToKeyValuePairs()) {
+                var paramName = kv.Key;
+#if NETSTANDARD1_0
+                var prop = type.GetRuntimeProperty(kv.Key);
+#else
+                var prop = type.GetProperty(kv.Key);
+#endif
+                if (prop != null) {
+                    var attributes = prop.GetCustomAttributes(typeof(JsonPropertyAttribute), false);
+                    if (attributes != null) {
+                        if (attributes.Any() && attributes.First() != null) paramName = ((JsonPropertyAttribute)attributes.First()).PropertyName;
+                    }
+                }
+                QueryParams.Merge(paramName, kv.Value, false, nullValueHandling);
+            }
 
-			return this;
+            return this;
 		}
 
-		/// <summary>
-		/// Adds multiple parameters without values to the query.
-		/// </summary>
-		/// <param name="names">Names of query parameters.</param>
-		/// <returns>The Url object with the query parameter added</returns>
-		public Url SetQueryParams(IEnumerable<string> names) {
+        private static bool TryGetAttribute<T>(MemberInfo memberInfo, out T customAttribute) where T : Attribute
+        {
+            var attributes = memberInfo.GetCustomAttributes(typeof(T), false).FirstOrDefault();
+            if (attributes == null)
+            {
+                customAttribute = null;
+                return false;
+            }
+            customAttribute = (T)attributes;
+            return true;
+        }
+
+        /// <summary>
+        /// Adds multiple parameters without values to the query.
+        /// </summary>
+        /// <param name="names">Names of query parameters.</param>
+        /// <returns>The Url object with the query parameter added</returns>
+        public Url SetQueryParams(IEnumerable<string> names) {
 			foreach (var name in names.Where(n => n != null))
 				SetQueryParam(name);
 			return this;
