@@ -86,6 +86,10 @@ namespace Flurl.Http
 
 			BaseUrl = httpClient.BaseAddress?.ToString();
 			_httpClient = new Lazy<HttpClient>(() => httpClient);
+
+			// Force the Lazy delegate to get hit. Since we know the HttpClient exists, we want to
+			// ensure it gets disposed if we dispose the FlurlClient. (See Dispose logic.)
+			var _ = _httpClient.Value;
 		}
 
 		/// <inheritdoc />
@@ -104,10 +108,10 @@ namespace Flurl.Http
 		public IDictionary<string, Cookie> Cookies { get; } = new Dictionary<string, Cookie>();
 
 		/// <inheritdoc />
-		public HttpClient HttpClient => HttpTest.Current?.HttpClient ?? _httpClient.Value;
+		public HttpClient HttpClient => HttpTest.Current?.HttpClient ?? _httpClient?.Value;
 
 		/// <inheritdoc />
-		public HttpMessageHandler HttpMessageHandler => HttpTest.Current?.HttpMessageHandler ?? _httpMessageHandler.Value;
+		public HttpMessageHandler HttpMessageHandler => HttpTest.Current?.HttpMessageHandler ?? _httpMessageHandler?.Value;
 
 		/// <inheritdoc />
 		public IFlurlRequest Request(params object[] urlSegments) {
@@ -159,9 +163,9 @@ namespace Flurl.Http
 			if (IsDisposed)
 				return;
 
-			if (_httpMessageHandler.IsValueCreated)
+			if (_httpMessageHandler?.IsValueCreated == true)
 				_httpMessageHandler.Value.Dispose();
-			if (_httpClient.IsValueCreated)
+			if (_httpClient?.IsValueCreated == true)
 				_httpClient.Value.Dispose();
 
 			IsDisposed = true;
