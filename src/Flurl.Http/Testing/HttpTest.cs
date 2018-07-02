@@ -13,8 +13,8 @@ namespace Flurl.Http.Testing
 	/// An object whose existence puts Flurl.Http into test mode where actual HTTP calls are faked. Provides a response
 	/// queue, call log, and assertion helpers for use in Arrange/Act/Assert style tests.
 	/// </summary>
-#if !NETSTANDARD1_1
-	[Serializable] // fixes MSTest issue? #207
+#if NET45
+	[Serializable]
 #endif
 	public class HttpTest : IDisposable
 	{
@@ -179,7 +179,7 @@ namespace Flurl.Http.Testing
 #if NET45
 		private static void SetCurrentTest(HttpTest test) => System.Runtime.Remoting.Messaging.CallContext.LogicalSetData("FlurlHttpTest", test);
 		private static HttpTest GetCurrentTest() => System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("FlurlHttpTest") as HttpTest;
-#elif NETSTANDARD1_3 || NETSTANDARD2_0
+#elif NET46 || NETSTANDARD1_3 || NETSTANDARD2_0
 		private static System.Threading.AsyncLocal<HttpTest> _test = new System.Threading.AsyncLocal<HttpTest>();
 		private static void SetCurrentTest(HttpTest test) => _test.Value = test;
 		private static HttpTest GetCurrentTest() => _test.Value;
