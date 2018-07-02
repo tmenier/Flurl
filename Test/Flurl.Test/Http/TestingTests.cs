@@ -256,5 +256,16 @@ namespace Flurl.Test.Http
 			await "http://api.com".GetAsync();
 			HttpTest.ShouldHaveMadeACall().With(call => call.Response.Content.Headers.ContentType.MediaType == "text/xml");
 		}
+
+		[Test] // #335
+		public async Task doesnt_record_calls_made_with_HttpClient() {
+			using (var httpTest = new HttpTest()) {
+				httpTest.RespondWith("Hello");
+				var flurClient = new FlurlClient();
+				// use the underlying HttpClient directly
+				await flurClient.HttpClient.GetStringAsync("http://google.com/");
+				CollectionAssert.IsEmpty(httpTest.CallLog);
+			}
+		}
 	}
 }

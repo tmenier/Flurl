@@ -47,8 +47,8 @@ namespace Flurl.Http
 		/// Get the HttpCall assocaited with this request, if any.
 		/// </summary>
 		internal static HttpCall GetHttpCall(this HttpRequestMessage request) {
-		    if (request?.Properties != null && request.Properties.TryGetValue("FlurlHttpCall", out var obj) && obj is HttpCall)
-			    return (HttpCall)obj;
+		    if (request?.Properties != null && request.Properties.TryGetValue("FlurlHttpCall", out var obj) && obj is HttpCall call)
+			    return call;
 		    return null;
 	    }
 	}
