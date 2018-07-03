@@ -105,5 +105,15 @@ namespace Flurl.Test.Http
 			Assert.AreEqual(123, cli.HttpClient.Timeout.TotalSeconds);
 			Assert.AreEqual("http://api.com/", cli.BaseUrl);
 		}
+
+		[Test] // #334
+		public void can_dispose_FlurlClient_created_with_HttpClient() {
+			var hc = new HttpClient();
+			var fc = new FlurlClient(hc);
+			fc.Dispose();
+
+			// ensure the HttpClient got disposed
+			Assert.ThrowsAsync<ObjectDisposedException>(() => hc.GetAsync("http://mysite.com"));
+		}
 	}
 }

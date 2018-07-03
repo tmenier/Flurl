@@ -8,18 +8,18 @@ namespace Flurl.Http.CodeGen
 		public static IEnumerable<HttpExtensionMethod> GetAll() {
 			return
 				from httpVerb in new[] { null, "Get", "Post", "Head", "Put", "Delete", "Patch", "Options" }
-				from bodyType in new[] { null, "Json", /*"Xml",*/ "String", "UrlEncoded" }
+				from reqType in new[] { null, "Json", /*"Xml",*/ "String", "UrlEncoded" }
 				from extensionType in new[] { "IFlurlRequest", "Url", "string" }
-				where SupportedCombo(httpVerb, bodyType, extensionType)
-				from deserializeType in new[] { null, "Json", "JsonList", /*"Xml",*/ "String", "Stream", "Bytes" }
-				where httpVerb == "Get" || deserializeType == null
+				where SupportedCombo(httpVerb, reqType, extensionType)
+				from respType in new[] { null, "Json", "JsonList", /*"Xml",*/ "String", "Stream", "Bytes" }
+				where httpVerb == "Get" || respType == null
 				from isGeneric in new[] { true, false }
-				where AllowDeserializeToGeneric(deserializeType) || !isGeneric
+				where AllowDeserializeToGeneric(respType) || !isGeneric
 				select new HttpExtensionMethod {
 					HttpVerb = httpVerb,
-					BodyType = bodyType,
+					RequestBodyType = reqType,
 					ExtentionOfType = extensionType,
-					DeserializeToType = deserializeType,
+					ResponseBodyType = respType,
 					IsGeneric = isGeneric
 				};
 		}
@@ -48,16 +48,16 @@ namespace Flurl.Http.CodeGen
 		}
 
 		public string HttpVerb { get; set; }
-		public string BodyType { get; set; }
+		public string RequestBodyType { get; set; }
 		public string ExtentionOfType { get; set; }
-		public string DeserializeToType { get; set; }
+		public string ResponseBodyType { get; set; }
 		public bool IsGeneric { get; set; }
 
-		public string Name => $"{HttpVerb ?? "Send"}{BodyType ?? DeserializeToType}Async";
+		public string Name => $"{HttpVerb ?? "Send"}{RequestBodyType ?? ResponseBodyType}Async";
 
 		public string TaskArg {
 			get {
-				switch (DeserializeToType) {
+				switch (ResponseBodyType) {
 					case "Json": return IsGeneric ? "T" : "dynamic";
 					case "JsonList": return "IList<dynamic>";
 					//case "Xml": return ?;
@@ -72,7 +72,7 @@ namespace Flurl.Http.CodeGen
 		public string ReturnTypeDescription {
 			get {
 				//var response = (xm.DeserializeToType == null) ? "" : "" + xm.TaskArg;
-				switch (DeserializeToType) {
+				switch (ResponseBodyType) {
 					case "Json": return "the JSON response body deserialized to " + (IsGeneric ? "an object of type T" : "a dynamic");
 					case "JsonList": return "the JSON response body deserialized to a list of dynamics";
 					//case "Xml": return ?;

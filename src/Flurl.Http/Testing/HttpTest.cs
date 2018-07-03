@@ -13,8 +13,8 @@ namespace Flurl.Http.Testing
 	/// An object whose existence puts Flurl.Http into test mode where actual HTTP calls are faked. Provides a response
 	/// queue, call log, and assertion helpers for use in Arrange/Act/Assert style tests.
 	/// </summary>
-#if !NETSTANDARD1_1
-	[Serializable] // fixes MSTest issue? #207
+#if NET45
+	[Serializable]
 #endif
 	public class HttpTest : IDisposable
 	{
@@ -74,9 +74,10 @@ namespace Flurl.Http.Testing
 		/// <param name="status">The simulated HTTP status. Default is 200.</param>
 		/// <param name="headers">The simulated response headers (optional).</param>
 		/// <param name="cookies">The simulated response cookies (optional).</param>
+		/// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names of headers will be replaced by hyphens. Default is true.</param>
 		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
-		public HttpTest RespondWith(string body, int status = 200, object headers = null, object cookies = null) {
-			return RespondWith(new StringContent(body), status, headers, cookies);
+		public HttpTest RespondWith(string body, int status = 200, object headers = null, object cookies = null, bool replaceUnderscoreWithHyphen = true) {
+			return RespondWith(new StringContent(body), status, headers, cookies, replaceUnderscoreWithHyphen);
 		}
 
 		/// <summary>
@@ -86,10 +87,11 @@ namespace Flurl.Http.Testing
 		/// <param name="status">The simulated HTTP status. Default is 200.</param>
 		/// <param name="headers">The simulated response headers (optional).</param>
 		/// <param name="cookies">The simulated response cookies (optional).</param>
+		/// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names of headers will be replaced by hyphens. Default is true.</param>
 		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
-		public HttpTest RespondWithJson(object body, int status = 200, object headers = null, object cookies = null) {
+		public HttpTest RespondWithJson(object body, int status = 200, object headers = null, object cookies = null, bool replaceUnderscoreWithHyphen = true) {
 			var content = new CapturedJsonContent(Settings.JsonSerializer.Serialize(body));
-			return RespondWith(content, status, headers, cookies);
+			return RespondWith(content, status, headers, cookies, replaceUnderscoreWithHyphen);
 		}
 
 		/// <summary>
@@ -99,15 +101,18 @@ namespace Flurl.Http.Testing
 		/// <param name="status">The simulated HTTP status. Default is 200.</param>
 		/// <param name="headers">The simulated response headers (optional).</param>
 		/// <param name="cookies">The simulated response cookies (optional).</param>
+		/// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names of headers will be replaced by hyphens. Default is true.</param>
 		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
-		public HttpTest RespondWith(HttpContent content = null, int status = 200, object headers = null, object cookies = null) {
+		public HttpTest RespondWith(HttpContent content = null, int status = 200, object headers = null, object cookies = null, bool replaceUnderscoreWithHyphen = true) {
 			var response = new HttpResponseMessage {
 				StatusCode = (HttpStatusCode)status,
 				Content = content
 			};
 			if (headers != null) {
-				foreach (var kv in headers.ToKeyValuePairs())
-					response.Headers.Add(kv.Key, kv.Value.ToInvariantString());
+				foreach (var kv in headers.ToKeyValuePairs()) {
+					var key = replaceUnderscoreWithHyphen ? kv.Key.Replace("_", "-") : kv.Key;
+					response.SetHeader(key, kv.Value.ToInvariantString());
+				}
 			}
 			if (cookies != null) {
 				foreach (var kv in cookies.ToKeyValuePairs()) {
@@ -174,14 +179,14 @@ namespace Flurl.Http.Testing
 #if NET45
 		private static void SetCurrentTest(HttpTest test) => System.Runtime.Remoting.Messaging.CallContext.LogicalSetData("FlurlHttpTest", test);
 		private static HttpTest GetCurrentTest() => System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("FlurlHttpTest") as HttpTest;
-#elif NETSTANDARD1_3 || NETSTANDARD2_0
-		private static System.Threading.AsyncLocal<HttpTest> _test = new System.Threading.AsyncLocal<HttpTest>();
-		private static void SetCurrentTest(HttpTest test) => _test.Value = test;
-		private static HttpTest GetCurrentTest() => _test.Value;
 #elif NETSTANDARD1_1
 		private static HttpTest _test;
 		private static void SetCurrentTest(HttpTest test) => _test = test;
 		private static HttpTest GetCurrentTest() => _test;
+#else
+		private static readonly System.Threading.AsyncLocal<HttpTest> _test = new System.Threading.AsyncLocal<HttpTest>();
+		private static void SetCurrentTest(HttpTest test) => _test.Value = test;
+		private static HttpTest GetCurrentTest() => _test.Value;
 #endif
     }
 }

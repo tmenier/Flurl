@@ -186,8 +186,8 @@ namespace Flurl.Test.Http
 								.AddFile("File1", path1)
 								.AddFile("File2", stream, "foo.txt");
 
-							// hack to deal with #179, remove when this is fixed: https://github.com/kennethreitz/httpbin/issues/340
-							content.Headers.ContentLength = 735;
+							// hack to deal with #179. appears to be fixed on httpbin now.
+							// content.Headers.ContentLength = 735;
 						})
 						//.ReceiveString();
 						.ReceiveJson();

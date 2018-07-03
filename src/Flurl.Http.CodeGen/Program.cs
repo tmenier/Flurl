@@ -8,7 +8,7 @@ namespace Flurl.Http.CodeGen
     class Program
     {
         static int Main(string[] args) {
-	        var codePath = (args.Length > 0) ? args[0] : @"..\Flurl.Http\GeneratedExtensions.cs";
+	        var codePath = (args.Length > 0) ? args[0] : @"..\..\..\..\Flurl.Http\GeneratedExtensions.cs";
 
 			if (!File.Exists(codePath)) {
 				Console.ForegroundColor = ConsoleColor.Red;
@@ -82,10 +82,14 @@ namespace Flurl.Http.CodeGen
                     writer.WriteLine("/// <param name=\"url\">The URL.</param>");
 				if (xm.HttpVerb == null)
 					writer.WriteLine("/// <param name=\"verb\">The HTTP method used to make the request.</param>");
-				if (xm.BodyType != null)
-					writer.WriteLine("/// <param name=\"data\">Contents of the request body.</param>");
-				else if (hasRequestBody)
-					writer.WriteLine("/// <param name=\"content\">Contents of the request body.</param>");
+	            if (hasRequestBody) {
+					if (xm.RequestBodyType == "Json")
+			            writer.WriteLine("/// <param name=\"data\">An object representing the request body, which will be serialized to JSON.</param>");
+					else if (xm.RequestBodyType != null)
+			            writer.WriteLine("/// <param name=\"data\">Contents of the request body.</param>");
+					else
+			            writer.WriteLine("/// <param name=\"content\">Contents of the request body.</param>");
+	            }
 				writer.WriteLine("/// <param name=\"cancellationToken\">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>");
 				writer.WriteLine("/// <param name=\"completionOption\">The HttpCompletionOption used in the request. Optional.</param>");
 				writer.WriteLine("/// <returns>A Task whose result is @0.</returns>", xm.ReturnTypeDescription);
@@ -94,8 +98,8 @@ namespace Flurl.Http.CodeGen
                 args.Add("this " + xm.ExtentionOfType + (xm.ExtentionOfType == "IFlurlRequest" ? " request" : " url"));
 	            if (xm.HttpVerb == null)
 		            args.Add("HttpMethod verb");
-                if (xm.BodyType != null)
-                    args.Add((xm.BodyType == "String" ? "string" : "object") + " data");
+                if (xm.RequestBodyType != null)
+                    args.Add((xm.RequestBodyType == "String" ? "string" : "object") + " data");
 				else if (hasRequestBody)
 					args.Add("HttpContent content");
 
@@ -113,20 +117,20 @@ namespace Flurl.Http.CodeGen
 						xm.HttpVerb == "Patch" ? "new HttpMethod(\"PATCH\")" : // there's no HttpMethod.Patch
 						"HttpMethod." + xm.HttpVerb);
 
-                    if (xm.BodyType != null || hasRequestBody)
+                    if (xm.RequestBodyType != null || hasRequestBody)
                         args.Add("content: content");
 
 					args.Add("cancellationToken: cancellationToken");
 					args.Add("completionOption: completionOption");
 
-					if (xm.BodyType != null) {
+					if (xm.RequestBodyType != null) {
 		                writer.WriteLine("var content = new Captured@0Content(@1);",
-			                xm.BodyType,
-			                xm.BodyType == "String" ? "data" : $"request.Settings.{xm.BodyType}Serializer.Serialize(data)");
+			                xm.RequestBodyType,
+			                xm.RequestBodyType == "String" ? "data" : $"request.Settings.{xm.RequestBodyType}Serializer.Serialize(data)");
 	                }
 
                     var request = (xm.ExtentionOfType == "IFlurlRequest") ? "request" : "new FlurlRequest(url)";
-                    var receive = (xm.DeserializeToType == null) ? "" : string.Format(".Receive{0}{1}()", xm.DeserializeToType, xm.IsGeneric ? "<T>" : "");
+                    var receive = (xm.ResponseBodyType == null) ? "" : string.Format(".Receive{0}{1}()", xm.ResponseBodyType, xm.IsGeneric ? "<T>" : "");
                     writer.WriteLine("return @0.SendAsync(@1)@2;", request, string.Join(", ", args), receive);
                 }
                 else

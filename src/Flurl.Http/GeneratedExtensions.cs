@@ -47,7 +47,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
 		/// <param name="verb">The HTTP method used to make the request.</param>
-		/// <param name="data">Contents of the request body.</param>
+		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
 		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
@@ -61,7 +61,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="verb">The HTTP method used to make the request.</param>
-		/// <param name="data">Contents of the request body.</param>
+		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
 		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
@@ -74,7 +74,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="verb">The HTTP method used to make the request.</param>
-		/// <param name="data">Contents of the request body.</param>
+		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
 		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
@@ -433,7 +433,7 @@ namespace Flurl.Http
 		/// Sends an asynchronous POST request.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
-		/// <param name="data">Contents of the request body.</param>
+		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
 		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
@@ -446,7 +446,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous POST request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="data">Contents of the request body.</param>
+		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
 		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
@@ -458,7 +458,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous POST request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="data">Contents of the request body.</param>
+		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
 		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
@@ -613,7 +613,7 @@ namespace Flurl.Http
 		/// Sends an asynchronous PUT request.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
-		/// <param name="data">Contents of the request body.</param>
+		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
 		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
@@ -626,7 +626,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous PUT request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="data">Contents of the request body.</param>
+		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
 		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
@@ -638,7 +638,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous PUT request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="data">Contents of the request body.</param>
+		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
 		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
@@ -756,7 +756,7 @@ namespace Flurl.Http
 		/// Sends an asynchronous PATCH request.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
-		/// <param name="data">Contents of the request body.</param>
+		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
 		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
@@ -769,7 +769,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous PATCH request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="data">Contents of the request body.</param>
+		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
 		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
@@ -781,7 +781,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous PATCH request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="data">Contents of the request body.</param>
+		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
 		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>

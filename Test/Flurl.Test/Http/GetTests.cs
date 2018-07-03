@@ -148,6 +148,15 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("foo", resp);
 		}
 
+		[Test] // #313
+		public async Task can_setting_content_header_with_no_content() {
+			await "http://api.com"
+				.WithHeader("Content-Type", "application/json")
+				.GetAsync();
+
+			HttpTest.ShouldHaveMadeACall().WithContentType("application/json");
+		}
+
 		private class TestData
 		{
 			public int id { get; set; }

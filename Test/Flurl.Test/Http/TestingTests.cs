@@ -221,6 +221,17 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_test_in_parallel() {
+			async Task CallAndAssertCountAsync(int calls) {
+				using (var test = new HttpTest()) {
+					for (int i = 0; i < calls; i++) {
+						await "http://www.api.com".GetAsync();
+						await Task.Delay(100);
+					}
+					test.ShouldHaveCalled("http://www.api.com").Times(calls);
+					//Console.WriteLine($"{calls} calls expected, {test.CallLog.Count} calls made");
+				}
+			}
+
 			await Task.WhenAll(
 				CallAndAssertCountAsync(7),
 				CallAndAssertCountAsync(5),
@@ -239,14 +250,21 @@ namespace Flurl.Test.Http
 				.WithContentType("application/json");
 		}
 
-		private async Task CallAndAssertCountAsync(int calls) {
-			using (var test = new HttpTest()) {
-				for (int i = 0; i < calls; i++) {
-					await "http://www.api.com".GetAsync();
-					await Task.Delay(100);
-				}
-				test.ShouldHaveCalled("http://www.api.com").Times(calls);
-				//Console.WriteLine($"{calls} calls expected, {test.CallLog.Count} calls made");
+		[Test] // #331
+		public async Task can_fake_content_headers() {
+			HttpTest.RespondWith("<xml></xml>", 200, new { Content_Type = "text/xml" });
+			await "http://api.com".GetAsync();
+			HttpTest.ShouldHaveMadeACall().With(call => call.Response.Content.Headers.ContentType.MediaType == "text/xml");
+		}
+
+		[Test] // #335
+		public async Task doesnt_record_calls_made_with_HttpClient() {
+			using (var httpTest = new HttpTest()) {
+				httpTest.RespondWith("Hello");
+				var flurClient = new FlurlClient();
+				// use the underlying HttpClient directly
+				await flurClient.HttpClient.GetStringAsync("http://google.com/");
+				CollectionAssert.IsEmpty(httpTest.CallLog);
 			}
 		}
 	}
