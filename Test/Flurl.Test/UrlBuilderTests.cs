@@ -330,6 +330,14 @@ namespace Flurl.Test
 		}
 
 		[Test]
+		public void Url_implicitly_converts_to_uri()
+		{
+			var url = new Url("http://www.mysite.com/more?x=1&y=2");
+			var someMethodThatTakesAUri = new Action<Uri>(s => { });
+			someMethodThatTakesAUri(url); // if this compiles, test passed.
+		}
+
+		[Test]
 		public void interprets_plus_as_space() {
 			var url = new Url("http://www.mysite.com/foo+bar?x=1+2");
 			Assert.AreEqual("1 2", url.QueryParams["x"]);

@@ -109,7 +109,7 @@ namespace Flurl.Http
 
 		/// <inheritdoc />
 		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
-			var request = new HttpRequestMessage(verb, Url) { Content = content };
+			var request = new HttpRequestMessage(verb, (Uri)Url) { Content = content };
 			var call = new HttpCall { FlurlRequest = this, Request = request };
 			request.SetHttpCall(call);
 
