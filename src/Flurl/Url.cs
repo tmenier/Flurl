@@ -410,6 +410,14 @@ namespace Flurl
 		}
 
 		/// <summary>
+		/// Converts this Url object to System.Uri
+		/// </summary>
+		/// <returns>The System.Uri object</returns>
+		public Uri ToUri() {
+			return new Uri(this);
+		}
+
+		/// <summary>
 		/// Implicit conversion from Url to String.
 		/// </summary>
 		/// <param name="url">The Url object</param>
@@ -433,16 +441,6 @@ namespace Flurl
 		/// <returns>The string</returns>
 		public static implicit operator Url(Uri uri) {
 			return new Url(uri.ToString());
-		}
-
-		/// <summary>
-		/// Implicit conversion from Flurl.Url to System.Uri.
-		/// </summary>
-		/// <param name="url">The Url object</param>
-		/// <returns>The System.Uri object</returns>
-		public static implicit operator Uri(Url url)
-		{
-			return new Uri(url.ToString());
 		}
 	}
 }
