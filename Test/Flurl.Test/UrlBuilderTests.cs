@@ -330,11 +330,10 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void Url_converts_to_uri()
-		{
+		public void Url_converts_to_uri() {
 			var url = new Url("http://www.mysite.com/more?x=1&y=2");
-			var someMethodThatTakesAUri = new Action<Uri>(s => { });
-			someMethodThatTakesAUri(url.ToUri()); // if this compiles, test passed.
+			var uri = url.ToUri();
+			Assert.AreEqual("http://www.mysite.com/more?x=1&y=2", uri.AbsoluteUri);
 		}
 
 		[Test]
