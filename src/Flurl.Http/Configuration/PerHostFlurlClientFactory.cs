@@ -20,6 +20,6 @@ namespace Flurl.Http.Configuration
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <returns>The cache key</returns>
-		protected override string GetCacheKey(Url url) => new Uri(url).Host;
+		protected override string GetCacheKey(Url url) => url.ToUri().Host;
 	}
 }

@@ -16,7 +16,7 @@ namespace Flurl.Test
 		public void extension_methods_consistently_supported() {
 			var urlMethods = typeof(Url).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Where(m => !m.IsSpecialName);
 			var stringExts = ReflectionHelper.GetAllExtensionMethods<string>(typeof(Url).GetTypeInfo().Assembly);
-			var whitelist = new[] { "ToString", "IsValid" }; // cases where string extension of the same name was excluded intentionally
+			var whitelist = new[] { "ToString", "IsValid", "ToUri" }; // cases where string extension of the same name was excluded intentionally
 
 			foreach (var method in urlMethods) {
 				if (whitelist.Contains(method.Name))
@@ -327,6 +327,14 @@ namespace Flurl.Test
 			var url = new Url("http://www.mysite.com/more?x=1&y=2");
 			var someMethodThatTakesAString = new Action<string>(s => { });
 			someMethodThatTakesAString(url); // if this compiles, test passed.
+		}
+
+		[Test]
+		public void Url_converts_to_uri()
+		{
+			var url = new Url("http://www.mysite.com/more?x=1&y=2");
+			var someMethodThatTakesAUri = new Action<Uri>(s => { });
+			someMethodThatTakesAUri(url.ToUri()); // if this compiles, test passed.
 		}
 
 		[Test]
