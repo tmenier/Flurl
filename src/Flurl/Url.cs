@@ -426,5 +426,17 @@ namespace Flurl
 		/// </summary>
 		/// <returns>The string</returns>
 		public static implicit operator Url(Uri uri) => new Url(uri.ToString());
+
+		/// <summary>
+		/// True if obj is an instance of Url and its string representation is equal to this instance's string representation.
+		/// </summary>
+		/// <param name="obj">The object to compare to this instance.</param>
+		/// <returns></returns>
+		public override bool Equals(object obj) => obj is Url url && this.ToString().Equals(url.ToString());
+
+		/// <summary>
+		/// Returns the hashcode for this Url.
+		/// </summary>
+		public override int GetHashCode() => this.ToString().GetHashCode();
 	}
 }
