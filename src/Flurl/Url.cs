@@ -306,9 +306,7 @@ namespace Flurl
 		/// </summary>
 		/// <param name="names">Names of query parameters</param>
 		/// <returns>The Url object with the query parameter added.</returns>
-		public Url SetQueryParams(params string[] names) {
-			return SetQueryParams(names as IEnumerable<string>);
-		}
+		public Url SetQueryParams(params string[] names) => SetQueryParams(names as IEnumerable<string>);
 
 		/// <summary>
 		/// Removes a name/value pair from the query by name.
@@ -357,9 +355,7 @@ namespace Flurl
 		/// Removes the URL fragment including the #.
 		/// </summary>
 		/// <returns>The Url object with the fragment removed</returns>
-		public Url RemoveFragment() {
-			return SetFragment("");
-		}
+		public Url RemoveFragment() => SetFragment("");
 
 		/// <summary>
 		/// Checks if this URL is a well-formed.
@@ -372,9 +368,7 @@ namespace Flurl
 		/// </summary>
 		/// <param name="url">The string to check</param>
 		/// <returns>true if s is a well-formed URL</returns>
-		public static bool IsValid(string url) {
-			return url != null && Uri.IsWellFormedUriString(url, UriKind.Absolute);
-		}
+		public static bool IsValid(string url) => url != null && Uri.IsWellFormedUriString(url, UriKind.Absolute);
 
 		/// <summary>
 		/// Resets the URL to its root, including the scheme, any user info, host, and port (if specified).
@@ -391,9 +385,7 @@ namespace Flurl
 		/// Converts this Url object to its string representation.
 		/// </summary>
 		/// <returns></returns>
-		public override string ToString() {
-			return ToString(false);
-		}
+		public override string ToString() => ToString(false);
 
 		/// <summary>
 		/// Converts this Url object to its string representation.
@@ -410,29 +402,41 @@ namespace Flurl
 		}
 
 		/// <summary>
+		/// Converts this Url object to System.Uri
+		/// </summary>
+		/// <returns>The System.Uri object</returns>
+		public Uri ToUri() => new Uri(this);
+
+		/// <summary>
 		/// Implicit conversion from Url to String.
 		/// </summary>
-		/// <param name="url">the Url object</param>
+		/// <param name="url">The Url object</param>
 		/// <returns>The string</returns>
-		public static implicit operator string(Url url) {
-			return url?.ToString();
-		}
+		public static implicit operator string(Url url) => url?.ToString();
 
 		/// <summary>
 		/// Implicit conversion from String to Url.
 		/// </summary>
-		/// <param name="url">the String representation of the URL</param>
+		/// <param name="url">The String representation of the URL</param>
 		/// <returns>The string</returns>
-		public static implicit operator Url(string url) {
-			return new Url(url);
-		}
+		public static implicit operator Url(string url) => new Url(url);
 
 		/// <summary>
 		/// Implicit conversion from System.Uri to Flurl.Url.
 		/// </summary>
 		/// <returns>The string</returns>
-		public static implicit operator Url(Uri uri) {
-			return new Url(uri.ToString());
-		}
+		public static implicit operator Url(Uri uri) => new Url(uri.ToString());
+
+		/// <summary>
+		/// True if obj is an instance of Url and its string representation is equal to this instance's string representation.
+		/// </summary>
+		/// <param name="obj">The object to compare to this instance.</param>
+		/// <returns></returns>
+		public override bool Equals(object obj) => obj is Url url && this.ToString().Equals(url.ToString());
+
+		/// <summary>
+		/// Returns the hashcode for this Url.
+		/// </summary>
+		public override int GetHashCode() => this.ToString().GetHashCode();
 	}
 }

@@ -16,7 +16,7 @@ namespace Flurl.Test
 		public void extension_methods_consistently_supported() {
 			var urlMethods = typeof(Url).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Where(m => !m.IsSpecialName);
 			var stringExts = ReflectionHelper.GetAllExtensionMethods<string>(typeof(Url).GetTypeInfo().Assembly);
-			var whitelist = new[] { "ToString", "IsValid" }; // cases where string extension of the same name was excluded intentionally
+			var whitelist = new[] { "ToString", "IsValid", "ToUri", "Equals", "GetHashCode" }; // cases where string extension of the same name was excluded intentionally
 
 			foreach (var method in urlMethods) {
 				if (whitelist.Contains(method.Name))
@@ -330,6 +330,13 @@ namespace Flurl.Test
 		}
 
 		[Test]
+		public void Url_converts_to_uri() {
+			var url = new Url("http://www.mysite.com/more?x=1&y=2");
+			var uri = url.ToUri();
+			Assert.AreEqual("http://www.mysite.com/more?x=1&y=2", uri.AbsoluteUri);
+		}
+
+		[Test]
 		public void interprets_plus_as_space() {
 			var url = new Url("http://www.mysite.com/foo+bar?x=1+2");
 			Assert.AreEqual("1 2", url.QueryParams["x"]);
@@ -440,6 +447,31 @@ namespace Flurl.Test
 			// don't interpret + as space, encoded and decoded should be the same
 			decoded = Url.Decode(encoded, false);
 			Assert.AreEqual(encoded, decoded);
+		}
+
+		[Test]
+		public void Equals_returns_true_for_same_values() {
+			var url1 = new Url("http://mysite.com/hello");
+			var url2 = new Url("http://mysite.com").AppendPathSegment("hello");
+			var url3 = new Url("http://mysite.com/hello/"); // trailing slash - not equal
+
+			Assert.IsTrue(url1.Equals(url2));
+			Assert.IsTrue(url2.Equals(url1));
+			Assert.AreEqual(url1.GetHashCode(), url2.GetHashCode());
+
+			Assert.IsFalse(url1.Equals(url3));
+			Assert.IsFalse(url3.Equals(url1));
+			Assert.AreNotEqual(url1.GetHashCode(), url3.GetHashCode());
+
+			Assert.IsFalse(url1.Equals("http://mysite.com/hello"));
+			Assert.IsFalse(url1.Equals(null));
+		}
+
+		[Test]
+		public void equality_operator_always_false_for_different_instances() {
+			var url1 = new Url("http://mysite.com/hello");
+			var url2 = new Url("http://mysite.com/hello");
+			Assert.IsFalse(url1 == url2);
 		}
 	}
 }
