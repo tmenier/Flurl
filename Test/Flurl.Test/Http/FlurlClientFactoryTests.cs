@@ -32,8 +32,8 @@ namespace Flurl.Test.Http
 
 	    [Test]
 	    public void can_configure_client_from_factory() {
-		    var fac = new PerHostFlurlClientFactory();
-		    fac.ConfigureClient("http://api.com/foo", c => c.Settings.CookiesEnabled = true);
+		    var fac = new PerHostFlurlClientFactory()
+			    .ConfigureClient("http://api.com/foo", c => c.Settings.CookiesEnabled = true);
 		    Assert.IsTrue(fac.Get("https://api.com/bar").Settings.CookiesEnabled);
 		    Assert.IsFalse(fac.Get("http://api2.com/foo").Settings.CookiesEnabled);
 	    }
@@ -42,23 +42,31 @@ namespace Flurl.Test.Http
 	    public void ConfigureClient_is_thread_safe() {
 		    var fac = new PerHostFlurlClientFactory();
 
-		    var x = "";
+		    var sequence = new List<int>();
 
-		    var t1 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {
-			    x = "in thread 1";
+		    var task1 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {
+			    sequence.Add(1);
 			    Thread.Sleep(200);
-			    Assert.AreEqual("in thread 1", x);
-			    x = "still in thread 1";
+			    sequence.Add(3);
 		    }));
 
-		    Thread.Sleep(100);
-		    var t2 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {
-			    Assert.AreEqual("still in thread 1", x);
-			    x = "in thread 2";
+		    Thread.Sleep(50);
+
+			// modifies same client as task1, should get blocked until task1 is done
+		    var task2 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {
+			    sequence.Add(4);
 		    }));
 
-		    Task.WaitAll(t1, t2);
-		    Assert.AreEqual("in thread 2", x);
+		    Thread.Sleep(50);
+
+		    // modifies different client, should run immediately
+		    var task3 = Task.Run(() => fac.ConfigureClient("http://api2.com", c => {
+			    sequence.Add(2);
+		    }));
+
+
+			Task.WaitAll(task1, task2);
+		    CollectionAssert.AreEqual(new[] { 1, 2, 3, 4 }, sequence);
 	    }
 	}
 }
