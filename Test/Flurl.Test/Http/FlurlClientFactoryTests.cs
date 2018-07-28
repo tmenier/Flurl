@@ -65,7 +65,7 @@ namespace Flurl.Test.Http
 		    }));
 
 
-			Task.WaitAll(task1, task2);
+			Task.WaitAll(task1, task2, task3);
 		    CollectionAssert.AreEqual(new[] { 1, 2, 3, 4 }, sequence);
 	    }
 	}

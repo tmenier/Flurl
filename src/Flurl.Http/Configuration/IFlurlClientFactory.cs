@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 
 namespace Flurl.Http.Configuration
 {
@@ -23,9 +23,7 @@ namespace Flurl.Http.Configuration
 	public static class FlurlClientFactoryExtensions
 	{
 		// https://stackoverflow.com/questions/51563732/how-do-i-lock-when-the-ideal-scope-of-the-lock-object-is-known-only-at-runtime
-		// a client's hashcode isn't guananteed unique, but in the unlikely event of a collision, it just means you can't configure
-		// 2 clients at the same time, which though not ideal is totally safe.
-		private static ConcurrentDictionary<int, object> _clientLocks = new ConcurrentDictionary<int, object>();
+		private static readonly ConditionalWeakTable<IFlurlClient, object> _clientLocks = new ConditionalWeakTable<IFlurlClient, object>();
 
 		/// <summary>
 		/// Provides thread-safe access to a specific IFlurlClient, typically to configure settings and default headers.
@@ -36,7 +34,7 @@ namespace Flurl.Http.Configuration
 		/// <param name="configAction">the action to perform against the IFlurlClient.</param>
 		public static IFlurlClientFactory ConfigureClient(this IFlurlClientFactory factory, string url, Action<IFlurlClient> configAction) {
 			var client = factory.Get(url);
-			lock (_clientLocks.GetOrAdd(client.GetHashCode(), new object())) {
+			lock (_clientLocks.GetOrCreateValue(client)) {
 				configAction(client);
 			}
 			return factory;
