@@ -34,11 +34,12 @@ namespace Flurl.Http.Configuration
 		/// <param name="factory">This IFlurlClientFactory.</param>
 		/// <param name="url">the URL used to find the IFlurlClient.</param>
 		/// <param name="configAction">the action to perform against the IFlurlClient.</param>
-		public static void ConfigureClient(this IFlurlClientFactory factory, string url, Action<IFlurlClient> configAction) {
+		public static IFlurlClientFactory ConfigureClient(this IFlurlClientFactory factory, string url, Action<IFlurlClient> configAction) {
 			var client = factory.Get(url);
 			lock (_clientLocks.GetOrAdd(client.GetHashCode(), new object())) {
 				configAction(client);
 			}
+			return factory;
 		}
 	}
 }
