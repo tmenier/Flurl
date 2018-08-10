@@ -90,7 +90,7 @@ namespace Flurl.Http.CodeGen
 					else
 			            writer.WriteLine("/// <param name=\"content\">Contents of the request body.</param>");
 	            }
-				writer.WriteLine("/// <param name=\"cancellationToken\">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>");
+				writer.WriteLine("/// <param name=\"cancellationToken\">The token to monitor for cancellation requests.</param>");
 				writer.WriteLine("/// <param name=\"completionOption\">The HttpCompletionOption used in the request. Optional.</param>");
 				writer.WriteLine("/// <returns>A Task whose result is @0.</returns>", xm.ReturnTypeDescription);
 

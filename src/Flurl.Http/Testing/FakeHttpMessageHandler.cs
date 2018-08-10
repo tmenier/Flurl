@@ -15,7 +15,7 @@ namespace Flurl.Http.Testing
 		/// Sends the request asynchronous.
 		/// </summary>
 		/// <param name="request">The request.</param>
-		/// <param name="cancellationToken">The cancellation token.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
 			if (HttpTest.Current != null) {
 				var call = request.GetHttpCall();
