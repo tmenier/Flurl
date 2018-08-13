@@ -36,7 +36,7 @@ namespace Flurl.Http
 		string BaseUrl { get; set; }
 
 		/// <summary>
-		/// Instantiates a new IFlurClient, optionally appending path segments to the BaseUrl.
+		/// Creates a new IFlurlRequest that can be further built and sent fluently.
 		/// </summary>
 		/// <param name="urlSegments">The URL or URL segments for the request. If BaseUrl is defined, it is assumed that these are path segments off that base.</param>
 		/// <returns>A new IFlurlRequest</returns>
