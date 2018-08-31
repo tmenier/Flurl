@@ -23,18 +23,19 @@ namespace Flurl.Http
 		/// <example>x = await url.PostAsync(data).ReceiveJson&lt;T&gt;()</example>
 		/// <exception cref="FlurlHttpException">Condition.</exception>
 		public static async Task<T> ReceiveJson<T>(this Task<HttpResponseMessage> response) {
-			var resp = await response.ConfigureAwait(false);
-			if (resp == null) return default(T);
-
-			var call = resp.RequestMessage.GetHttpCall();
-			using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false)) {
-				try {
-					return call.FlurlRequest.Settings.JsonSerializer.Deserialize<T>(stream);
-				}
-				catch (Exception ex) {
-					call.Exception = new FlurlParsingException(call, "JSON", ex);
-					await FlurlRequest.HandleExceptionAsync(call, call.Exception, CancellationToken.None).ConfigureAwait(false);
-					return default(T);
+			using (var resp = await response.ConfigureAwait(false)) {
+				if (resp == null) return default(T);
+				var call = resp.RequestMessage.GetHttpCall();
+				using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false)) {
+					try {
+						return call.FlurlRequest.Settings.JsonSerializer.Deserialize<T>(stream);
+					}
+					catch (Exception ex) {
+						var body = await resp.Content.ReadAsStringAsync();
+						call.Exception = new FlurlParsingException(call, "JSON", body, ex);
+						await FlurlRequest.HandleExceptionAsync(call, call.Exception, CancellationToken.None).ConfigureAwait(false);
+						return default(T);
+					}
 				}
 			}
 		}
@@ -70,10 +71,10 @@ namespace Flurl.Http
 			// https://stackoverflow.com/questions/46119872/encoding-issues-with-net-core-2 (#86)
 			System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 #endif
-			var resp = await response.ConfigureAwait(false);
-			if (resp == null) return null;
-
-			return await resp.Content.StripCharsetQuotes().ReadAsStringAsync().ConfigureAwait(false);
+			using (var resp = await response.ConfigureAwait(false)) {
+				if (resp == null) return null;
+				return await resp.Content.StripCharsetQuotes().ReadAsStringAsync().ConfigureAwait(false);
+			}
 		}
 
 		/// <summary>
@@ -82,10 +83,17 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is the response body as a stream.</returns>
 		/// <example>stream = await url.PostAsync(data).ReceiveStream()</example>
 		public static async Task<Stream> ReceiveStream(this Task<HttpResponseMessage> response) {
+			// do not wrap resp in a using statement or we'll dispose the stream. caller is responsible for this.
 			var resp = await response.ConfigureAwait(false);
 			if (resp == null) return null;
 
-			return await resp.Content.ReadAsStreamAsync().ConfigureAwait(false);
+			try {
+				return await resp.Content.ReadAsStreamAsync().ConfigureAwait(false);
+			}
+			catch {
+				resp.Dispose();
+				throw;
+			}
 		}
 
 		/// <summary>
@@ -94,10 +102,10 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is the response body as a byte array.</returns>
 		/// <example>bytes = await url.PostAsync(data).ReceiveBytes()</example>
 		public static async Task<byte[]> ReceiveBytes(this Task<HttpResponseMessage> response) {
-			var resp = await response.ConfigureAwait(false);
-			if (resp == null) return null;
-
-			return await resp.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+			using (var resp = await response.ConfigureAwait(false)) {
+				if (resp == null) return null;
+				return await resp.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+			}
 		}
 
 		/// <summary>

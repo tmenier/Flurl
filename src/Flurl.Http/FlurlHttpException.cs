@@ -10,6 +10,8 @@ namespace Flurl.Http
 	/// </summary>
 	public class FlurlHttpException : Exception
 	{
+		private readonly string _capturedResponseBody;
+
 		/// <summary>
 		/// An object containing details about the failed HTTP call
 		/// </summary>
@@ -21,8 +23,18 @@ namespace Flurl.Http
 		/// <param name="call">The call.</param>
 		/// <param name="message">The message.</param>
 		/// <param name="inner">The inner.</param>
-		public FlurlHttpException(HttpCall call, string message, Exception inner) : base(message, inner) {
+		public FlurlHttpException(HttpCall call, string message, Exception inner) : this(call, message, null, inner) { }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlHttpException"/> class.
+		/// </summary>
+		/// <param name="call">The call.</param>
+		/// <param name="message">The message.</param>
+		/// <param name="capturedResponseBody">The captured response body, if available.</param>
+		/// <param name="inner">The inner.</param>
+		public FlurlHttpException(HttpCall call, string message, string capturedResponseBody, Exception inner) : base(message, inner) {
 			Call = call;
+			_capturedResponseBody = capturedResponseBody;
 		}
 
 		/// <summary>
@@ -49,9 +61,10 @@ namespace Flurl.Http
 		/// Gets the response body of the failed call.
 		/// </summary>
 		/// <returns>A task whose result is the string contents of the response body.</returns>
-		public async Task<string> GetResponseStringAsync() {
+		public Task<string> GetResponseStringAsync() {
+			if (_capturedResponseBody != null) return Task.FromResult(_capturedResponseBody);
 			var task = Call?.Response?.Content?.ReadAsStringAsync();
-			return (task == null) ? null : await task.ConfigureAwait(false);
+			return task ?? Task.FromResult((string)null);
 		}
 
 		/// <summary>
@@ -60,10 +73,14 @@ namespace Flurl.Http
 		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
 		/// <returns>A task whose result is an object containing data in the response body.</returns>
 		public async Task<T> GetResponseJsonAsync<T>() {
-			var task = Call?.Response?.Content?.ReadAsStreamAsync();
-			if (task == null) return default(T);
 			var ser = Call.FlurlRequest?.Settings?.JsonSerializer;
 			if (ser == null) return default(T);
+
+			if (_capturedResponseBody != null)
+				return ser.Deserialize<T>(_capturedResponseBody);
+
+			var task = Call?.Response?.Content?.ReadAsStreamAsync();
+			if (task == null) return default(T);
 			return ser.Deserialize<T>(await task.ConfigureAwait(false));
 		}
 
@@ -101,8 +118,9 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="call">The HttpCall instance.</param>
 		/// <param name="expectedFormat">The format that could not be parsed to, i.e. JSON.</param>
+		/// <param name="responseBody">The response body.</param>
 		/// <param name="inner">The inner exception.</param>
-		public FlurlParsingException(HttpCall call, string expectedFormat, Exception inner) : base(call, BuildMessage(call, expectedFormat), inner) {
+		public FlurlParsingException(HttpCall call, string expectedFormat, string responseBody, Exception inner) : base(call, BuildMessage(call, expectedFormat), responseBody, inner) {
 			ExpectedFormat = expectedFormat;
 		}
 

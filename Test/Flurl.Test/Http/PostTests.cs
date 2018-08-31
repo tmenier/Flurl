@@ -27,19 +27,19 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_post_object_as_json() {
-			var expectedEndpoint = "http://some-api.com";
-			var expectedBody = new {a = 1, b = 2};
-			await expectedEndpoint.PostJsonAsync(expectedBody);
-			HttpTest.ShouldHaveCalled(expectedEndpoint)
+			var body = new {a = 1, b = 2};
+			await "http://some-api.com".PostJsonAsync(body);
+			HttpTest.ShouldHaveCalled("http://some-api.com")
 				.WithVerb(HttpMethod.Post)
 				.WithContentType("application/json")
-				.WithRequestJson(expectedBody)
+				.WithRequestBody("{\"a\":1,\"b\":2}")
 				.Times(1);
 		}
 
 		[Test]
 		public async Task can_post_url_encoded() {
-			await "http://some-api.com".PostUrlEncodedAsync(new { a = 1, b = 2, c = "hi there", d = new[] { 1, 2, 3 } });
+			var body = new { a = 1, b = 2, c = "hi there", d = new[] { 1, 2, 3 } };
+			await "http://some-api.com".PostUrlEncodedAsync(body);
 			HttpTest.ShouldHaveCalled("http://some-api.com")
 				.WithVerb(HttpMethod.Post)
 				.WithContentType("application/x-www-form-urlencoded")

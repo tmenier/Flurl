@@ -22,7 +22,7 @@ namespace Flurl.Http
 		/// <param name="url">The URL.</param>
 		/// <param name="verb">The HTTP method used to make the request.</param>
 		/// <param name="content">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> SendAsync(this Url url, HttpMethod verb, HttpContent content, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -35,7 +35,7 @@ namespace Flurl.Http
 		/// <param name="url">The URL.</param>
 		/// <param name="verb">The HTTP method used to make the request.</param>
 		/// <param name="content">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> SendAsync(this string url, HttpMethod verb, HttpContent content, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -48,7 +48,7 @@ namespace Flurl.Http
 		/// <param name="request">The IFlurlRequest instance.</param>
 		/// <param name="verb">The HTTP method used to make the request.</param>
 		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> SendJsonAsync(this IFlurlRequest request, HttpMethod verb, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -62,7 +62,7 @@ namespace Flurl.Http
 		/// <param name="url">The URL.</param>
 		/// <param name="verb">The HTTP method used to make the request.</param>
 		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> SendJsonAsync(this Url url, HttpMethod verb, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -75,7 +75,7 @@ namespace Flurl.Http
 		/// <param name="url">The URL.</param>
 		/// <param name="verb">The HTTP method used to make the request.</param>
 		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> SendJsonAsync(this string url, HttpMethod verb, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -88,7 +88,7 @@ namespace Flurl.Http
 		/// <param name="request">The IFlurlRequest instance.</param>
 		/// <param name="verb">The HTTP method used to make the request.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> SendStringAsync(this IFlurlRequest request, HttpMethod verb, string data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -102,7 +102,7 @@ namespace Flurl.Http
 		/// <param name="url">The URL.</param>
 		/// <param name="verb">The HTTP method used to make the request.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> SendStringAsync(this Url url, HttpMethod verb, string data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -115,7 +115,7 @@ namespace Flurl.Http
 		/// <param name="url">The URL.</param>
 		/// <param name="verb">The HTTP method used to make the request.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> SendStringAsync(this string url, HttpMethod verb, string data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -128,7 +128,7 @@ namespace Flurl.Http
 		/// <param name="request">The IFlurlRequest instance.</param>
 		/// <param name="verb">The HTTP method used to make the request.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> SendUrlEncodedAsync(this IFlurlRequest request, HttpMethod verb, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -142,7 +142,7 @@ namespace Flurl.Http
 		/// <param name="url">The URL.</param>
 		/// <param name="verb">The HTTP method used to make the request.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> SendUrlEncodedAsync(this Url url, HttpMethod verb, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -155,7 +155,7 @@ namespace Flurl.Http
 		/// <param name="url">The URL.</param>
 		/// <param name="verb">The HTTP method used to make the request.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> SendUrlEncodedAsync(this string url, HttpMethod verb, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -166,7 +166,7 @@ namespace Flurl.Http
 		/// Sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> GetAsync(this IFlurlRequest request, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -177,7 +177,7 @@ namespace Flurl.Http
 		/// Sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the JSON response body deserialized to an object of type T.</returns>
 		public static Task<T> GetJsonAsync<T>(this IFlurlRequest request, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -188,7 +188,7 @@ namespace Flurl.Http
 		/// Sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the JSON response body deserialized to a dynamic.</returns>
 		public static Task<dynamic> GetJsonAsync(this IFlurlRequest request, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -199,7 +199,7 @@ namespace Flurl.Http
 		/// Sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the JSON response body deserialized to a list of dynamics.</returns>
 		public static Task<IList<dynamic>> GetJsonListAsync(this IFlurlRequest request, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -210,7 +210,7 @@ namespace Flurl.Http
 		/// Sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the response body as a string.</returns>
 		public static Task<string> GetStringAsync(this IFlurlRequest request, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -221,7 +221,7 @@ namespace Flurl.Http
 		/// Sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the response body as a Stream.</returns>
 		public static Task<Stream> GetStreamAsync(this IFlurlRequest request, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -232,7 +232,7 @@ namespace Flurl.Http
 		/// Sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the response body as a byte array.</returns>
 		public static Task<byte[]> GetBytesAsync(this IFlurlRequest request, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -243,7 +243,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> GetAsync(this Url url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -254,7 +254,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the JSON response body deserialized to an object of type T.</returns>
 		public static Task<T> GetJsonAsync<T>(this Url url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -265,7 +265,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the JSON response body deserialized to a dynamic.</returns>
 		public static Task<dynamic> GetJsonAsync(this Url url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -276,7 +276,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the JSON response body deserialized to a list of dynamics.</returns>
 		public static Task<IList<dynamic>> GetJsonListAsync(this Url url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -287,7 +287,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the response body as a string.</returns>
 		public static Task<string> GetStringAsync(this Url url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -298,7 +298,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the response body as a Stream.</returns>
 		public static Task<Stream> GetStreamAsync(this Url url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -309,7 +309,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the response body as a byte array.</returns>
 		public static Task<byte[]> GetBytesAsync(this Url url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -320,7 +320,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> GetAsync(this string url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -331,7 +331,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the JSON response body deserialized to an object of type T.</returns>
 		public static Task<T> GetJsonAsync<T>(this string url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -342,7 +342,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the JSON response body deserialized to a dynamic.</returns>
 		public static Task<dynamic> GetJsonAsync(this string url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -353,7 +353,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the JSON response body deserialized to a list of dynamics.</returns>
 		public static Task<IList<dynamic>> GetJsonListAsync(this string url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -364,7 +364,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the response body as a string.</returns>
 		public static Task<string> GetStringAsync(this string url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -375,7 +375,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the response body as a Stream.</returns>
 		public static Task<Stream> GetStreamAsync(this string url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -386,7 +386,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous GET request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the response body as a byte array.</returns>
 		public static Task<byte[]> GetBytesAsync(this string url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -398,7 +398,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
 		/// <param name="content">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostAsync(this IFlurlRequest request, HttpContent content, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -410,7 +410,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="content">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostAsync(this Url url, HttpContent content, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -422,7 +422,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="content">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostAsync(this string url, HttpContent content, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -434,7 +434,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
 		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostJsonAsync(this IFlurlRequest request, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -447,7 +447,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostJsonAsync(this Url url, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -459,7 +459,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostJsonAsync(this string url, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -471,7 +471,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostStringAsync(this IFlurlRequest request, string data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -484,7 +484,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostStringAsync(this Url url, string data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -496,7 +496,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostStringAsync(this string url, string data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -508,7 +508,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostUrlEncodedAsync(this IFlurlRequest request, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -521,7 +521,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostUrlEncodedAsync(this Url url, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -533,7 +533,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PostUrlEncodedAsync(this string url, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -544,7 +544,7 @@ namespace Flurl.Http
 		/// Sends an asynchronous HEAD request.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> HeadAsync(this IFlurlRequest request, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -555,7 +555,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous HEAD request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> HeadAsync(this Url url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -566,7 +566,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous HEAD request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> HeadAsync(this string url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -578,7 +578,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
 		/// <param name="content">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PutAsync(this IFlurlRequest request, HttpContent content, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -590,7 +590,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="content">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PutAsync(this Url url, HttpContent content, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -602,7 +602,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="content">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PutAsync(this string url, HttpContent content, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -614,7 +614,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
 		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PutJsonAsync(this IFlurlRequest request, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -627,7 +627,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PutJsonAsync(this Url url, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -639,7 +639,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PutJsonAsync(this string url, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -651,7 +651,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PutStringAsync(this IFlurlRequest request, string data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -664,7 +664,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PutStringAsync(this Url url, string data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -676,7 +676,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PutStringAsync(this string url, string data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -687,7 +687,7 @@ namespace Flurl.Http
 		/// Sends an asynchronous DELETE request.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> DeleteAsync(this IFlurlRequest request, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -698,7 +698,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous DELETE request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> DeleteAsync(this Url url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -709,7 +709,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous DELETE request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> DeleteAsync(this string url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -721,7 +721,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
 		/// <param name="content">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PatchAsync(this IFlurlRequest request, HttpContent content, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -733,7 +733,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="content">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PatchAsync(this Url url, HttpContent content, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -745,7 +745,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="content">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PatchAsync(this string url, HttpContent content, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -757,7 +757,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
 		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PatchJsonAsync(this IFlurlRequest request, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -770,7 +770,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PatchJsonAsync(this Url url, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -782,7 +782,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="data">An object representing the request body, which will be serialized to JSON.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PatchJsonAsync(this string url, object data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -794,7 +794,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PatchStringAsync(this IFlurlRequest request, string data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -807,7 +807,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PatchStringAsync(this Url url, string data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -819,7 +819,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL.</param>
 		/// <param name="data">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> PatchStringAsync(this string url, string data, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -830,7 +830,7 @@ namespace Flurl.Http
 		/// Sends an asynchronous OPTIONS request.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest instance.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> OptionsAsync(this IFlurlRequest request, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -841,7 +841,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous OPTIONS request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> OptionsAsync(this Url url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -852,7 +852,7 @@ namespace Flurl.Http
 		/// Creates a FlurlRequest from the URL and sends an asynchronous OPTIONS request.
 		/// </summary>
 		/// <param name="url">The URL.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
 		public static Task<HttpResponseMessage> OptionsAsync(this string url, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {

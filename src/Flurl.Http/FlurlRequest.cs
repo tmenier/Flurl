@@ -31,10 +31,10 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="verb">The HTTP method used to make the request.</param>
 		/// <param name="content">Contents of the request body.</param>
-		/// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
-		Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead);
+		Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead);
 	}
 
 	/// <summary>
@@ -108,7 +108,7 @@ namespace Flurl.Http
 		public IDictionary<string, Cookie> Cookies => Client.Cookies;
 
 		/// <inheritdoc />
-		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken? cancellationToken = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
+		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			var request = new HttpRequestMessage(verb, Url) { Content = content };
 			var call = new HttpCall { FlurlRequest = this, Request = request };
 			request.SetHttpCall(call);
@@ -116,13 +116,12 @@ namespace Flurl.Http
 			await HandleEventAsync(Settings.BeforeCall, Settings.BeforeCallAsync, call).ConfigureAwait(false);
 			request.RequestUri = Url.ToUri(); // in case it was modifed in the handler above
 
-			var userToken = cancellationToken ?? CancellationToken.None;
-			var token = userToken;
+			var cancellationTokenWithTimeout = cancellationToken;
 
 			if (Settings.Timeout.HasValue) {
-				var cts = CancellationTokenSource.CreateLinkedTokenSource(userToken);
+				var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 				cts.CancelAfter(Settings.Timeout.Value);
-				token = cts.Token;
+				cancellationTokenWithTimeout = cts.Token;
 			}
 
 			call.StartedUtc = DateTime.UtcNow;
@@ -134,10 +133,7 @@ namespace Flurl.Http
 				if (Settings.CookiesEnabled)
 					WriteRequestCookies(request);
 
-				if (Client.CheckAndRenewConnectionLease())
-					request.Headers.ConnectionClose = true;
-
-				call.Response = await Client.HttpClient.SendAsync(request, completionOption, token).ConfigureAwait(false);
+				call.Response = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
 				call.Response.RequestMessage = request;
 
 				if (call.Succeeded)
@@ -146,7 +142,7 @@ namespace Flurl.Http
 				throw new FlurlHttpException(call, null);
 			}
 			catch (Exception ex) {
-				return await HandleExceptionAsync(call, ex, userToken);
+				return await HandleExceptionAsync(call, ex, cancellationToken);
 			}
 			finally {
 				request.Dispose();

@@ -266,36 +266,17 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task connection_lease_timeout_sets_connection_close_header() {
-			using (var test = new HttpTest()) {
-				var cli = new FlurlClient("http://api.com");
-				cli.Settings.ConnectionLeaseTimeout = TimeSpan.FromMilliseconds(50);
+		public async Task connection_lease_timeout_creates_new_HttpClient() {
+			var cli = new FlurlClient("http://api.com");
+			cli.Settings.ConnectionLeaseTimeout = TimeSpan.FromMilliseconds(50);
+			var hc = cli.HttpClient;
 
-				await cli.Request("1").GetAsync();
-				test.ShouldHaveCalled("http://api.com/1").WithoutHeader("Connection");
+			await Task.Delay(25);
+			Assert.That(hc == cli.HttpClient);
 
-				// exceed the timeout
-				await Task.Delay(51);
-
-				// slam it many times concurrently
-				await Task.WhenAll(
-					cli.Request("2").GetAsync(),
-					cli.Request("2").GetAsync(),
-					cli.Request("2").GetAsync(),
-					cli.Request("2").GetAsync(),
-					cli.Request("2").GetAsync(),
-					cli.Request("2").GetAsync(),
-					cli.Request("2").GetAsync(),
-					cli.Request("2").GetAsync());
-
-				// connection:close header should get sent exactly once
-				test.ShouldHaveCalled("http://api.com/2").WithHeader("Connection", "close").Times(1);
-
-				await Task.Delay(10);
-
-				await cli.Request("3").GetAsync();
-				test.ShouldHaveCalled("http://api.com/3").WithoutHeader("Connection");
-			}
+			// exceed the timeout
+			await Task.Delay(25);
+			Assert.That(hc != cli.HttpClient);
 		}
 	}
 

@@ -21,7 +21,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Provides thread-safe access to Flurl.Http's global configuration settings. Should only be called once at application startup.
 		/// </summary>
-		/// <param name="configAction">the action to perform against the GlobalSettings</param>
+		/// <param name="configAction">the action to perform against the GlobalSettings.</param>
 		public static void Configure(Action<GlobalFlurlHttpSettings> configAction) {
 			lock (_configLock) {
 				configAction(GlobalSettings);
@@ -32,13 +32,9 @@ namespace Flurl.Http
 		/// Provides thread-safe access to a specific IFlurlClient, typically to configure settings and default headers.
 		/// The URL is used to find the client, but keep in mind that the same client will be used in all calls to the same host by default.
 		/// </summary>
-		/// <param name="url">the URL used to find the IFlurlClient</param>
-		/// <param name="configAction">the action to perform against the IFlurlClient</param>
-		public static void ConfigureClient(string url, Action<IFlurlClient> configAction) {
-			var client = GlobalSettings.FlurlClientFactory.Get(url);
-			lock (_configLock) {
-				configAction(client);
-			}
-		}
+		/// <param name="url">the URL used to find the IFlurlClient.</param>
+		/// <param name="configAction">the action to perform against the IFlurlClient.</param>
+		public static void ConfigureClient(string url, Action<IFlurlClient> configAction) => 
+			GlobalSettings.FlurlClientFactory.ConfigureClient(url, configAction);
 	}
 }

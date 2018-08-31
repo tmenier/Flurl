@@ -69,6 +69,22 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public async Task can_assert_json_request() {
+			var body = new { a = 1, b = 2 };
+			await "http://some-api.com".PostJsonAsync(body);
+
+			HttpTest.ShouldHaveMadeACall().WithRequestJson(body);
+		}
+
+		[Test]
+		public async Task can_assert_url_encoded_request() {
+			var body = new { a = 1, b = 2, c = "hi there", d = new[] { 1, 2, 3 } };
+			await "http://some-api.com".PostUrlEncodedAsync(body);
+
+			HttpTest.ShouldHaveMadeACall().WithRequestUrlEncoded(body);
+		}
+
+		[Test]
 		public async Task can_assert_query_params() {
 			await "http://www.api.com?x=111&y=222&z=333#abcd".GetAsync();
 

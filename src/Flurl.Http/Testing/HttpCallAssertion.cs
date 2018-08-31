@@ -168,11 +168,20 @@ namespace Flurl.Http.Testing
 		}
 
 		/// <summary>
-		/// Asserts whether calls were made containing given request body.
+		/// Asserts whether calls were made containing given JSON-encoded request body.
 		/// </summary>
 		/// <param name="body"></param>
 		public HttpCallAssertion WithRequestJson(object body) {
 			var serializedBody = FlurlHttp.GlobalSettings.JsonSerializer.Serialize(body);
+			return WithRequestBody(serializedBody);
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made containing given URL-encoded request body.
+		/// </summary>
+		/// <param name="body"></param>
+		public HttpCallAssertion WithRequestUrlEncoded(object body) {
+			var serializedBody = FlurlHttp.GlobalSettings.UrlEncodedSerializer.Serialize(body);
 			return WithRequestBody(serializedBody);
 		}
 
