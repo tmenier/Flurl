@@ -9,10 +9,8 @@ pull_requests:
   do_not_increment_build_number: true
 
 build_script:
-  - cmd: call cmd /C "cd .\build & build.cmd"  
-
-test_script:
-  - cmd: call cmd /C "cd .\build & test.cmd"
+  - cmd: dotnet build -c Release src\Flurl.Http
+  - cmd: dotnet build -c Release test\Flurl.Test
 
 artifacts:
   - path: '**\*.nupkg'
