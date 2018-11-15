@@ -9,6 +9,7 @@ pull_requests:
   do_not_increment_build_number: true
 
 build_script:
+  - cmd: dotnet build -c Release src\Flurl
   - cmd: dotnet build -c Release src\Flurl.Http
   - cmd: dotnet build -c Release test\Flurl.Test
 
