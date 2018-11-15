@@ -28,6 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{B6BF9238
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 		Build\build.cmd = Build\build.cmd
+		Directory.Build.props = Directory.Build.props
 		Build\test.cmd = Build\test.cmd
 	EndProjectSection
 EndProject
