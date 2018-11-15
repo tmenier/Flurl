@@ -13,5 +13,11 @@ build_script:
   - cmd: dotnet build -c Release src\Flurl.Http
   - cmd: dotnet build -c Release test\Flurl.Test
 
+after_test:
+  - choco install opencover.portable
+  - choco install codecov
+  - OpenCover.Console.exe -register:user -target:"C:\Program Files\dotnet\dotnet.exe" -targetargs:"test --framework net45 --verbosity q"
+  - codecov -f "results.xml" 
+
 artifacts:
   - path: '**\*.nupkg'
