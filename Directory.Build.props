@@ -1,0 +1,25 @@
+<Project>
+  <PropertyGroup>
+    <DebugType>pdbonly</DebugType>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <LangVersion>latest</LangVersion>
+    <Deterministic>true</Deterministic>
+    <Features>pdb-path-determinism</Features>
+    <!-- NU5125: The 'licenseUrl' element will be deprecated. Consider using the 'license' element instead. -->
+    <!-- VSTHRD200: Use "Async" suffix in names of methods that return an awaitable type. -->    
+    <NoWarn>NU5125;VSTHRD200;$(NoWarn)</NoWarn>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Net.Compilers" Version="2.9.0">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <!--<PackageReference Include="SonarAnalyzer.CSharp" Version="7.8.0.7320">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>-->
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="15.8.168">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
