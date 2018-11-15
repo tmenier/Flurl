@@ -100,7 +100,7 @@ namespace Flurl.Http
 		/// <inheritdoc />
 		public HttpClient HttpClient => HttpTest.Current?.HttpClient ?? _injectedClient ?? GetHttpClient();
 
-		private DateTime? _clientCreatedAt;
+		private DateTimeOffset? _clientCreatedAt;
 		private HttpClient _zombieClient;
 		private readonly object _connectionLeaseLock = new object();
 
@@ -115,7 +115,7 @@ namespace Flurl.Http
 						_zombieClient = _httpClient.Value;
 						_httpClient = new Lazy<HttpClient>(CreateHttpClient);
 						_httpMessageHandler = new Lazy<HttpMessageHandler>(() => Settings.HttpClientFactory.CreateMessageHandler());
-						_clientCreatedAt = DateTime.UtcNow;
+						_clientCreatedAt = DateTimeOffset.UtcNow;
 					}
 				}
 			}
@@ -124,7 +124,7 @@ namespace Flurl.Http
 
 		private HttpClient CreateHttpClient() {
 			var cli = Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler);
-			_clientCreatedAt = DateTime.UtcNow;
+			_clientCreatedAt = DateTimeOffset.UtcNow;
 			return cli;
 		}
 
@@ -137,7 +137,7 @@ namespace Flurl.Http
 				_httpClient.IsValueCreated &&
 				createdAt.HasValue &&
 				timeout.HasValue &&
-				DateTime.UtcNow - createdAt.Value > timeout.Value;
+				DateTimeOffset.UtcNow - createdAt.Value > timeout.Value;
 		}
 
 		/// <inheritdoc />

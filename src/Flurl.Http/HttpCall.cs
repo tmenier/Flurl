@@ -42,15 +42,15 @@ namespace Flurl.Http
 		/// </summary>
 		public bool ExceptionHandled { get; set; }
 
-		/// <summary>
-		/// DateTime the moment the request was sent.
-		/// </summary>
-		public DateTime StartedUtc { get; set; }
+        /// <summary>
+        /// DateTimeOffset the moment the request was sent.
+        /// </summary>
+        public DateTimeOffset StartedUtc { get; set; }
 
-		/// <summary>
-		/// DateTime the moment a response was received.
-		/// </summary>
-		public DateTime? EndedUtc { get; set; }
+        /// <summary>
+        /// DateTimeOffset the moment a response was received.
+        /// </summary>
+        public DateTimeOffset? EndedUtc { get; set; }
 
 		/// <summary>
 		/// Total duration of the call if it completed, otherwise null.

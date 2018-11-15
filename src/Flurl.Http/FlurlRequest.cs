@@ -124,7 +124,7 @@ namespace Flurl.Http
 				cancellationTokenWithTimeout = cts.Token;
 			}
 
-			call.StartedUtc = DateTime.UtcNow;
+			call.StartedUtc = DateTimeOffset.UtcNow;
 			try {
 				Headers.Merge(Client.Headers);
 				foreach (var header in Headers)
@@ -149,7 +149,7 @@ namespace Flurl.Http
 				if (Settings.CookiesEnabled)
 					ReadResponseCookies(call.Response);
 
-				call.EndedUtc = DateTime.UtcNow;
+				call.EndedUtc = DateTimeOffset.UtcNow;
 				await HandleEventAsync(Settings.AfterCall, Settings.AfterCallAsync, call).ConfigureAwait(false);
 			}
 		}
