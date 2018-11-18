@@ -130,7 +130,7 @@ Some less common scenarios:
 // use a "raw" System.Net.Http.HttpContent object
 await url.PostAsync(httpContent);
 // use an atypical verb
-await url.SendJsonAsync(HttpMehtod.Options, poco);
+await url.SendJsonAsync(HttpMethod.Options, poco);
 // go about as low-level as it gets
 await url.SendAsync(
     HttpMethod.Trace,
