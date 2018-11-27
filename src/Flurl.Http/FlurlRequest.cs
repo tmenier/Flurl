@@ -25,22 +25,22 @@ namespace Flurl.Http
 		/// </summary>
 		Url Url { get; set; }
 
-        /// <summary>
-        /// Creates and asynchronously sends an HttpRequestMethod.
-        /// Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
-        /// </summary>
-        /// <param name="verb">The HTTP method used to make the request.</param>
-        /// <param name="content">Contents of the request body.</param>
-        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
-        /// <returns>A Task whose result is the received HttpResponseMessage.</returns>
-        Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead);
-    }
+		/// <summary>
+		/// Creates and asynchronously sends an HttpRequestMethod.
+		/// Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
+		/// </summary>
+		/// <param name="verb">The HTTP method used to make the request.</param>
+		/// <param name="content">Contents of the request body.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
+		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
+		Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead);
+	}
 
-    /// <summary>
-    /// A chainable wrapper around HttpClient and Flurl.Url.
-    /// </summary>
-    public class FlurlRequest : IFlurlRequest
+	/// <summary>
+	/// A chainable wrapper around HttpClient and Flurl.Url.
+	/// </summary>
+	public class FlurlRequest : IFlurlRequest
 	{
 		private FlurlHttpSettings _settings;
 		private IFlurlClient _client;
@@ -116,13 +116,13 @@ namespace Flurl.Http
 			await HandleEventAsync(Settings.BeforeCall, Settings.BeforeCallAsync, call).ConfigureAwait(false);
 			request.RequestUri = Url.ToUri(); // in case it was modifed in the handler above
 
-            var cancellationTokenWithTimeout = cancellationToken;
-            CancellationTokenSource timeoutTokenSource = null;
+			var cancellationTokenWithTimeout = cancellationToken;
+			CancellationTokenSource timeoutTokenSource = null;
 
-            if (Settings.Timeout.HasValue) {
-                timeoutTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                timeoutTokenSource.CancelAfter(Settings.Timeout.Value);
-                cancellationTokenWithTimeout = timeoutTokenSource.Token;
+			if (Settings.Timeout.HasValue) {
+				timeoutTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+				timeoutTokenSource.CancelAfter(Settings.Timeout.Value);
+				cancellationTokenWithTimeout = timeoutTokenSource.Token;
 			}
 
 			call.StartedUtc = DateTime.UtcNow;
@@ -134,8 +134,8 @@ namespace Flurl.Http
 				if (Settings.CookiesEnabled)
 					WriteRequestCookies(request);
 
-                call.Response = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
-                call.Response.RequestMessage = request;
+				call.Response = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
+				call.Response.RequestMessage = request;
 
 				if (call.Succeeded)
 					return call.Response;
@@ -147,12 +147,12 @@ namespace Flurl.Http
 			}
 			finally {
 				request.Dispose();
-                timeoutTokenSource?.Dispose();
+				timeoutTokenSource?.Dispose();
 
-                if (Settings.CookiesEnabled)
+				if (Settings.CookiesEnabled)
 					ReadResponseCookies(call.Response);
 
-                call.EndedUtc = DateTime.UtcNow;
+				call.EndedUtc = DateTime.UtcNow;
 				await HandleEventAsync(Settings.AfterCall, Settings.AfterCallAsync, call).ConfigureAwait(false);
 			}
 		}
