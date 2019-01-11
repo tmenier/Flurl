@@ -7,4 +7,6 @@ assignees: ''
 
 ---
 
-If you have a specific programming question, please [ask on Stack Overflow](https://stackoverflow.com/questions/ask?tags=flurl). It will be answered more quickly and reach a broader audience. Thanks!
+If you have a specific programming question, please ask on Stack Overflow. It will be answered more quickly and reach a broader audience. Thanks!
+
+https://stackoverflow.com/questions/ask?tags=flurl
