@@ -114,7 +114,7 @@ namespace Flurl.Test
 			}
 		}
 
-		[Test]
+		[Test] // #373
 		public void object_to_kv_ignores_props_not_publicly_readable() {
 			var kv = new ToKvMe {
 				PrivateRead2 = "foo",

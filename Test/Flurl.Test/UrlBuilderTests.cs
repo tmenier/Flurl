@@ -123,10 +123,21 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void can_set_multiple_query_params_from_dictionary() {
+		public void can_set_query_params_from_dictionary() {
 			// let's challenge it a little with non-string keys
 			var url = "http://www.mysite.com".SetQueryParams(new Dictionary<int, string> { { 1, "x" }, { 2, "y" } });
 			Assert.AreEqual("http://www.mysite.com?1=x&2=y", url.ToString());
+		}
+
+		[Test, Ignore("tricky to do while maintaining param order. deferring until append param w/o overwriting is fully supported.")]
+		public void can_set_query_params_from_kv_pairs() {
+			var url = "http://foo.com".SetQueryParams(new[] {
+				new { key = "x", value = 1 },
+				new { key = "y", value = 2 },
+				new { key = "x", value = 3 } // this should append, not overwrite (#370)
+			});
+
+			Assert.AreEqual("http://foo.com?x=1&y=2&x=3", url.ToString());
 		}
 
 		private IEnumerable<string> GetQueryParamNames() {
