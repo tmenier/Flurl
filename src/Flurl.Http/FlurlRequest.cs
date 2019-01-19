@@ -114,7 +114,7 @@ namespace Flurl.Http
 			request.SetHttpCall(call);
 
 			await HandleEventAsync(Settings.BeforeCall, Settings.BeforeCallAsync, call).ConfigureAwait(false);
-			request.RequestUri = Url.ToUri(); // in case it was modifed in the handler above
+			request.RequestUri = Url.ToUri(); // in case it was modified in the handler above
 
 			var cancellationTokenWithTimeout = cancellationToken;
 
