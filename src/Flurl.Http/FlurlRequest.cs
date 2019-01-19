@@ -117,11 +117,12 @@ namespace Flurl.Http
 			request.RequestUri = Url.ToUri(); // in case it was modified in the handler above
 
 			var cancellationTokenWithTimeout = cancellationToken;
+			CancellationTokenSource timeoutTokenSource = null;
 
 			if (Settings.Timeout.HasValue) {
-				var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-				cts.CancelAfter(Settings.Timeout.Value);
-				cancellationTokenWithTimeout = cts.Token;
+				timeoutTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+				timeoutTokenSource.CancelAfter(Settings.Timeout.Value);
+				cancellationTokenWithTimeout = timeoutTokenSource.Token;
 			}
 
 			call.StartedUtc = DateTime.UtcNow;
@@ -146,6 +147,8 @@ namespace Flurl.Http
 			}
 			finally {
 				request.Dispose();
+				timeoutTokenSource?.Dispose();
+
 				if (Settings.CookiesEnabled)
 					ReadResponseCookies(call.Response);
 
