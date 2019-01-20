@@ -40,8 +40,11 @@ namespace Flurl.Http
 
 		public void SetHeader(string name, object value, bool createContentIfNecessary) {
 			switch (name.ToLower()) {
-				// https://msdn.microsoft.com/en-us/library/system.net.http.headers.httpcontentheaders.aspx
+				// https://docs.microsoft.com/en-us/dotnet/api/system.net.http.headers.httpcontentheaders
+				case "allow":
 				case "content-disposition":
+				case "content-encoding":
+				case "content-language":
 				case "content-length":
 				case "content-location":
 				case "content-md5":
