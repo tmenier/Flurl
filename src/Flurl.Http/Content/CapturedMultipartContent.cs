@@ -105,9 +105,10 @@ namespace Flurl.Http.Content
 		/// <param name="path">The local path to the file.</param>
 		/// <param name="mediaType">The media type of the file.</param>
 		/// <param name="bufferSize">The buffer size of the stream upload in bytes. Defaults to 4096.</param>
+		/// <param name="fileName">The filename, added to the Content-Disposition header of the part. Defaults to local file name.</param>
 		/// <returns>This CapturedMultipartContent instance (supports method chaining).</returns>
-		public CapturedMultipartContent AddFile(string name, string path, string mediaType = null, int bufferSize = 4096) {
-			var fileName = FileUtil.GetFileName(path);
+		public CapturedMultipartContent AddFile(string name, string path, string mediaType = null, int bufferSize = 4096, string fileName = null) {
+			fileName = fileName ?? FileUtil.GetFileName(path);
 			var content = new FileContent(path, bufferSize);
 			if (mediaType != null)
 				content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
