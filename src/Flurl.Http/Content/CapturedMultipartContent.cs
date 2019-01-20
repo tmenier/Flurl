@@ -35,9 +35,7 @@ namespace Flurl.Http.Content
 		/// <param name="name">The control name of the part.</param>
 		/// <param name="content">The HttpContent of the part.</param>
 		/// <returns>This CapturedMultipartContent instance (supports method chaining).</returns>
-		public CapturedMultipartContent Add(string name, HttpContent content) {
-			return AddInternal(name, content, null);
-		}
+		public CapturedMultipartContent Add(string name, HttpContent content) => AddInternal(name, content, true, null);
 
 		/// <summary>
 		/// Add a simple string part to the multipart request.
@@ -47,9 +45,8 @@ namespace Flurl.Http.Content
 		/// <param name="encoding">The encoding of the part.</param>
 		/// <param name="mediaType">The media type of the part.</param>
 		/// <returns>This CapturedMultipartContent instance (supports method chaining).</returns>
-		public CapturedMultipartContent AddString(string name, string content, Encoding encoding = null, string mediaType = null) {
-			return Add(name, new CapturedStringContent(content, encoding, mediaType));
-		}
+		public CapturedMultipartContent AddString(string name, string content, Encoding encoding = null, string mediaType = null) =>
+			AddInternal(name, new CapturedStringContent(content, encoding, mediaType), false, null);
 
 		/// <summary>
 		/// Add multiple string parts to the multipart request by parsing an object's properties into control name/content pairs.
@@ -73,9 +70,8 @@ namespace Flurl.Http.Content
 		/// <param name="name">The control name of the part.</param>
 		/// <param name="data">The content of the part, which will be serialized to JSON.</param>
 		/// <returns>This CapturedMultipartContent instance (supports method chaining).</returns>
-		public CapturedMultipartContent AddJson(string name, object data) {
-			return Add(name, new CapturedJsonContent(_settings.JsonSerializer.Serialize(data)));
-		}
+		public CapturedMultipartContent AddJson(string name, object data) =>
+			AddInternal(name, new CapturedJsonContent(_settings.JsonSerializer.Serialize(data)), false, null);
 
 		/// <summary>
 		/// Add a URL-encoded part to the multipart request.
@@ -83,9 +79,8 @@ namespace Flurl.Http.Content
 		/// <param name="name">The control name of the part.</param>
 		/// <param name="data">The content of the part, whose properties will be parsed and serialized to URL-encoded format.</param>
 		/// <returns>This CapturedMultipartContent instance (supports method chaining).</returns>
-		public CapturedMultipartContent AddUrlEncoded(string name, object data) {
-			return Add(name, new CapturedUrlEncodedContent(_settings.UrlEncodedSerializer.Serialize(data)));
-		}
+		public CapturedMultipartContent AddUrlEncoded(string name, object data) =>
+			AddInternal(name, new CapturedUrlEncodedContent(_settings.UrlEncodedSerializer.Serialize(data)), false, null);
 
 		/// <summary>
 		/// Adds a file to the multipart request from a stream.
@@ -100,7 +95,7 @@ namespace Flurl.Http.Content
 			var content = new StreamContent(stream, bufferSize);
 			if (mediaType != null)
 				content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
-			return AddInternal(name, content, fileName);
+			return AddInternal(name, content, true, fileName);
 		}
 
 		/// <summary>
@@ -116,12 +111,17 @@ namespace Flurl.Http.Content
 			var content = new FileContent(path, bufferSize);
 			if (mediaType != null)
 				content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
-			return AddInternal(name, content, fileName);
+			return AddInternal(name, content, true, fileName);
 		}
 
-		private CapturedMultipartContent AddInternal(string name, HttpContent content, string fileName) {
+		private CapturedMultipartContent AddInternal(string name, HttpContent content, bool allowContentType, string fileName) {
 			if (string.IsNullOrWhiteSpace(name))
 				throw new ArgumentException("name must not be empty", nameof(name));
+
+			// StringContent is the simplest way to add a string part, but it always
+			// includes Content-Type, and per HTML spec that's not allowed (#392)
+			if (!allowContentType && content.Headers.Contains("Content-Type"))
+				content.Headers.Remove("Content-Type");
 
 			content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") {
 				Name = name,

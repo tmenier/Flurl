@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Flurl.Http;
 using Flurl.Http.Content;
 using NUnit.Framework;
 
@@ -25,30 +24,24 @@ namespace Flurl.Test.Http
 
 			Assert.AreEqual(6, content.Parts.Length);
 
-			Assert.AreEqual("string", content.Parts[0].Headers.ContentDisposition.Name);
-			Assert.IsInstanceOf<CapturedStringContent>(content.Parts[0]);
-			Assert.AreEqual("foo", (content.Parts[0] as CapturedStringContent).Content);
-
-			Assert.AreEqual("part1", content.Parts[1].Headers.ContentDisposition.Name);
-			Assert.IsInstanceOf<CapturedStringContent>(content.Parts[1]);
-			Assert.AreEqual("1", (content.Parts[1] as CapturedStringContent).Content);
-
-			Assert.AreEqual("part2", content.Parts[2].Headers.ContentDisposition.Name);
-			Assert.IsInstanceOf<CapturedStringContent>(content.Parts[2]);
-			Assert.AreEqual("2", (content.Parts[2] as CapturedStringContent).Content);
+			AssertStringPart<CapturedStringContent>(content.Parts[0], "string", "foo");
+			AssertStringPart<CapturedStringContent>(content.Parts[1], "part1", "1");
+			AssertStringPart<CapturedStringContent>(content.Parts[2], "part2", "2");
+			AssertStringPart<CapturedJsonContent>(content.Parts[4], "json", "{\"foo\":\"bar\"}");
+			AssertStringPart<CapturedUrlEncodedContent>(content.Parts[5], "urlEnc", "fizz=buzz");
 
 			Assert.AreEqual("file", content.Parts[3].Headers.ContentDisposition.Name);
 			Assert.AreEqual("image.jpg", content.Parts[3].Headers.ContentDisposition.FileName);
 			Assert.IsInstanceOf<FileContent>(content.Parts[3]);
-
-			Assert.AreEqual("json", content.Parts[4].Headers.ContentDisposition.Name);
-			Assert.IsInstanceOf<CapturedJsonContent>(content.Parts[4]);
-			Assert.AreEqual("{\"foo\":\"bar\"}", (content.Parts[4] as CapturedJsonContent).Content);
-
-			Assert.AreEqual("urlEnc", content.Parts[5].Headers.ContentDisposition.Name);
-			Assert.IsInstanceOf<CapturedUrlEncodedContent>(content.Parts[5]);
-			Assert.AreEqual("fizz=buzz", (content.Parts[5] as CapturedUrlEncodedContent).Content);
+			Assert.AreEqual("image/jpeg", content.Parts[3].Headers.ContentType?.MediaType);
 		}
+
+	    private void AssertStringPart<TContent>(HttpContent part, string name, string content) {
+		    Assert.AreEqual(name, part.Headers.ContentDisposition.Name);
+		    Assert.AreEqual(content, (part as CapturedStringContent)?.Content);
+		    Assert.IsInstanceOf<TContent>(part);
+		    Assert.IsFalse(part.Headers.Contains("Content-Type")); // #392
+	    }
 
 		[Test]
 		public void must_provide_required_args_to_builder() {
