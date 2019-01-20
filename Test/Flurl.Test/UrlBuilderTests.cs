@@ -38,6 +38,14 @@ namespace Flurl.Test
 		}
 
 		[Test]
+		public void can_construct_from_uri() {
+			var s = "http://www.mysite.com/more?x=1&y=2#foo";
+			var uri = new Uri(s);
+			var url = new Url(uri);
+			Assert.AreEqual(s, url.ToString());
+		}
+
+		[Test]
 		public void can_parse_query_params() {
 			var q = new Url("http://www.mysite.com/more?x=1&y=2&z=3&y=4&abc&xyz&foo=&=bar&y=6").QueryParams;
 
@@ -199,7 +207,8 @@ namespace Flurl.Test
 
 		[Test]
 		public void constructor_requires_nonnull_arg() {
-			Assert.Throws<ArgumentNullException>(() => new Url(null));
+			Assert.Throws<ArgumentNullException>(() => new Url((string)null));
+			Assert.Throws<ArgumentNullException>(() => new Url((Uri)null));
 		}
 
 		[Test]
