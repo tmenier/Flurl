@@ -283,6 +283,40 @@ namespace Flurl.Test.Http
 				CollectionAssert.IsEmpty(httpTest.CallLog);
 			}
 		}
+
+		[Test] // #366 (cannot repro)
+		public async Task can_use_response_queue_in_parallel() {
+			for (var i = 0; i < 100; i++) {
+				using (var test = new HttpTest()) {
+					test
+						.RespondWith("0")
+						.RespondWith("1")
+						.RespondWith("2")
+						.RespondWith("3")
+						.RespondWith("4")
+						.RespondWith("5")
+						.RespondWith("6")
+						.RespondWith("7")
+						.RespondWith("8")
+						.RespondWith("9");
+
+					var results = await Task.WhenAll(
+						"http://api.com".GetStringAsync(),
+						"http://api.com".GetStringAsync(),
+						"http://api.com".GetStringAsync(),
+						"http://api.com".GetStringAsync(),
+						"http://api.com".GetStringAsync(),
+						"http://api.com".GetStringAsync(),
+						"http://api.com".GetStringAsync(),
+						"http://api.com".GetStringAsync(),
+						"http://api.com".GetStringAsync(),
+						"http://api.com".GetStringAsync());
+
+					CollectionAssert.IsEmpty(test.ResponseQueue);
+					CollectionAssert.AllItemsAreUnique(results);
+				}
+			}
+		}
 	}
 
 	[TestFixture]
