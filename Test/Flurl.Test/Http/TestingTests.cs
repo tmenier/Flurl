@@ -284,4 +284,26 @@ namespace Flurl.Test.Http
 			}
 		}
 	}
+
+	[TestFixture]
+	public class AsyncSetupTests
+	{
+		protected HttpTest HttpTest { get; private set; }
+
+		[SetUp]
+		public async Task CreateHttpTest() => HttpTest = new HttpTest();
+
+		// #375
+		[Test, Ignore("waiting on fix or explanation from test frameworks")]
+		public async Task can_create_HttpTest_in_async_setup() {
+			// should fail fast
+			Assert.IsNotNull(HttpTest.Current);
+
+			// but just to be sure
+			HttpTest.RespondWith("fake google");
+			var s = await "https://www.google.com".GetStringAsync();
+			Assert.AreEqual("fake google", s);
+			Assert.AreEqual(1, HttpTest.CallLog.Count);
+		}
+	}
 }
