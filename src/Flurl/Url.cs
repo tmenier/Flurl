@@ -7,12 +7,12 @@ using System.Text.RegularExpressions;
 namespace Flurl
 {
 	/// <summary>
-	/// Represents a URL that can be built fluently
+	/// A mutable object for fluently building URLs.
 	/// </summary>
 	public class Url
 	{
 		/// <summary>
-		/// The full absolute path part of the URL (everthing except the query and fragment).
+		/// The full absolute path part of the URL (everything except the query and fragment).
 		/// </summary>
 		public string Path { get; set; }
 
@@ -402,6 +402,11 @@ namespace Flurl
 		/// </summary>
 		/// <returns></returns>
 		public override string ToString() => ToString(false);
+
+		/// <summary>
+		/// Creates a copy of this Url.
+		/// </summary>
+		public Url Clone() => new Url(this);
 
 		/// <summary>
 		/// Converts this Url object to its string representation.

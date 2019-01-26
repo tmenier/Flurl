@@ -493,5 +493,15 @@ namespace Flurl.Test
 			var url2 = new Url("http://mysite.com/hello");
 			Assert.IsFalse(url1 == url2);
 		}
+
+		[Test]
+		public void clone_creates_copy() {
+			var url1 = new Url("http://mysite.com").SetQueryParam("x", 1);
+			var url2 = url1.Clone().AppendPathSegment("foo").SetQueryParam("y", 2);
+			url1.SetQueryParam("z", 3);
+
+			Assert.AreEqual("http://mysite.com?x=1&z=3", url1.ToString());
+			Assert.AreEqual("http://mysite.com/foo?x=1&y=2", url2.ToString());
+		}
 	}
 }
