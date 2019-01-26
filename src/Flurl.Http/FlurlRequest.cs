@@ -109,6 +109,8 @@ namespace Flurl.Http
 
 		/// <inheritdoc />
 		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
+			_client = Client; // "freeze" the client at this point to avoid excessive calls to FlurlClientFactory.Get (#374)
+
 			var request = new HttpRequestMessage(verb, Url) { Content = content };
 			var call = new HttpCall { FlurlRequest = this, Request = request };
 			request.SetHttpCall(call);
