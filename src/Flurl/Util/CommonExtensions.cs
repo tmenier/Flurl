@@ -125,8 +125,9 @@ namespace Flurl.Util
 		/// Merges the key/value pairs from d2 into d1, without overwriting those already set in d1.
 		/// </summary>
 		public static void Merge<TKey, TValue>(this IDictionary<TKey, TValue> d1, IDictionary<TKey, TValue> d2) {
-			foreach (var kv in d2.Where(x => !d1.Keys.Contains(x.Key)))
-				d1.Add(kv);
+			foreach (var kv in d2.Where(x => !d1.ContainsKey(x.Key)).ToList()) {
+				d1[kv.Key] = kv.Value;
+			}
 		}
 
 		/// <summary>
