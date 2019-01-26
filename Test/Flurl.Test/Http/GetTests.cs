@@ -17,11 +17,11 @@ namespace Flurl.Test.Http
 		protected override Task<HttpResponseMessage> CallOnStringAsync(string url) => url.GetAsync();
 		protected override Task<HttpResponseMessage> CallOnUrlAsync(Url url) => url.GetAsync();
 		protected override Task<HttpResponseMessage> CallOnFlurlRequestAsync(IFlurlRequest req) => req.GetAsync();
-		protected override HttpResponseMessage CallOnString(string url) => url.Get();
-		protected override HttpResponseMessage CallOnUrl(Url url) => url.Get();
-		protected override HttpResponseMessage CallOnFlurlRequest(IFlurlRequest req) => req.Get();
+        protected override HttpResponseMessage CallOnString(string url) => url.Get();
+        protected override HttpResponseMessage CallOnUrl(Url url) => url.Get();
+        protected override HttpResponseMessage CallOnFlurlRequest(IFlurlRequest req) => req.Get();
 
-		[Test]
+        [Test]
 		public async Task can_get_json() {
 			HttpTest.RespondWithJson(new TestData { id = 1, name = "Frank" });
 
@@ -129,14 +129,14 @@ namespace Flurl.Test.Http
 			}
 		}
 
-		[Test]
-		public async Task can_get_null_json_when_timeout_and_exception_handled() {
-			HttpTest.SimulateTimeout();
-			var data = await "http://api.com"
-				.ConfigureRequest(c => c.OnError = call => call.ExceptionHandled = true)
-				.GetJsonAsync<TestData>();
-			Assert.IsNull(data);
-		}
+        [Test]
+        public async Task can_get_null_json_when_timeout_and_exception_handled() {
+            HttpTest.SimulateTimeout();
+            var data = await "http://api.com"
+                .ConfigureRequest(c => c.OnError = call => call.ExceptionHandled = true)
+                .GetJsonAsync<TestData>();
+            Assert.IsNull(data);
+        }
 
 		// https://github.com/tmenier/Flurl/pull/76
 		// quotes around charset value is technically legal but there's a bug in .NET we want to avoid: https://github.com/dotnet/corefx/issues/5014
