@@ -10,11 +10,14 @@ namespace Flurl.Test.Http
 	{
 		public PostTests() : base(HttpMethod.Post) { }
 
-		protected override Task<HttpResponseMessage> CallOnString(string url) => url.PostAsync(null);
-		protected override Task<HttpResponseMessage> CallOnUrl(Url url) => url.PostAsync(null);
-		protected override Task<HttpResponseMessage> CallOnFlurlRequest(IFlurlRequest req) => req.PostAsync(null);
+		protected override Task<HttpResponseMessage> CallOnStringAsync(string url) => url.PostAsync(null);
+		protected override Task<HttpResponseMessage> CallOnUrlAsync(Url url) => url.PostAsync(null);
+		protected override Task<HttpResponseMessage> CallOnFlurlRequestAsync(IFlurlRequest req) => req.PostAsync(null);
+        protected override HttpResponseMessage CallOnString(string url) => url.Post(null);
+        protected override HttpResponseMessage CallOnUrl(Url url) => url.Post(null);
+        protected override HttpResponseMessage CallOnFlurlRequest(IFlurlRequest req) => req.Post(null);
 
-		[Test]
+        [Test]
 		public async Task can_post_string() {
 			var expectedEndpoint = "http://some-api.com";
 			var expectedBody = "abc123";
