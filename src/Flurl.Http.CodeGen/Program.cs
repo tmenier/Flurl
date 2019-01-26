@@ -107,7 +107,7 @@ namespace Flurl.Http.CodeGen
 				args.Add("CancellationToken cancellationToken = default(CancellationToken)");
 	            args.Add("HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead");
 
-				writer.WriteLine("public static Task<@0> @1@2(@3) {", xm.TaskArg, xm.Name, xm.IsGeneric ? "<T>" : "", string.Join(", ", args));
+				writer.WriteLine("public static @0 @1@2(@3) {", xm.ReturnType, xm.Name, xm.IsGeneric ? "<T>" : "", string.Join(", ", args));
 
                 if (xm.ExtentionOfType == "IFlurlRequest")
                 {
@@ -131,13 +131,15 @@ namespace Flurl.Http.CodeGen
 
                     var request = (xm.ExtentionOfType == "IFlurlRequest") ? "request" : "new FlurlRequest(url)";
                     var receive = (xm.ResponseBodyType == null) ? "" : string.Format(".Receive{0}{1}()", xm.ResponseBodyType, xm.IsGeneric ? "<T>" : "");
-                    writer.WriteLine("return @0.SendAsync(@1)@2;", request, string.Join(", ", args), receive);
+                    var result = xm.AllowAsync ? string.Empty : ".Result";
+                    writer.WriteLine("return @0.SendAsync(@1)@2@3;", request, string.Join(", ", args), receive, result);
                 }
                 else
                 {
-                    writer.WriteLine("return new FlurlRequest(url).@0(@1);",
-                        xm.Name + (xm.IsGeneric ? "<T>" : ""),
-                        string.Join(", ", args.Skip(1).Select(a => a.Split(' ')[1])));
+                    writer.WriteLine("return new FlurlRequest(url).@0(@1)@2;",
+                        (xm.AllowAsync ? xm.Name : $"{xm.Name}Async") + (xm.IsGeneric ? "<T>" : ""),
+                        string.Join(", ", args.Skip(1).Select(a => a.Split(' ')[1])),
+                        xm.AllowAsync ? string.Empty : ".Result");
                 }
 
                 writer.WriteLine("}").WriteLine();

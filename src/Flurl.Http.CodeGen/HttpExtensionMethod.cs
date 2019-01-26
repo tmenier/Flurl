@@ -3,11 +3,11 @@ using System.Linq;
 
 namespace Flurl.Http.CodeGen
 {
-	public class HttpExtensionMethod
+    public class HttpExtensionMethod
 	{
 		public static IEnumerable<HttpExtensionMethod> GetAll() {
-			return
-				from httpVerb in new[] { null, "Get", "Post", "Head", "Put", "Delete", "Patch", "Options" }
+            return
+                from httpVerb in new[] { null, "Get", "Post", "Head", "Put", "Delete", "Patch", "Options" }
 				from reqType in new[] { null, "Json", /*"Xml",*/ "String", "UrlEncoded" }
 				from extensionType in new[] { "IFlurlRequest", "Url", "string" }
 				where SupportedCombo(httpVerb, reqType, extensionType)
@@ -15,12 +15,14 @@ namespace Flurl.Http.CodeGen
 				where httpVerb == "Get" || respType == null
 				from isGeneric in new[] { true, false }
 				where AllowDeserializeToGeneric(respType) || !isGeneric
-				select new HttpExtensionMethod {
+                from allowAsync in new[] { true, false }
+                select new HttpExtensionMethod {
 					HttpVerb = httpVerb,
 					RequestBodyType = reqType,
 					ExtentionOfType = extensionType,
 					ResponseBodyType = respType,
-					IsGeneric = isGeneric
+					IsGeneric = isGeneric,
+                    AllowAsync = allowAsync
 				};
 		}
 
@@ -47,27 +49,37 @@ namespace Flurl.Http.CodeGen
 			}
 		}
 
-		public string HttpVerb { get; set; }
+        public string HttpVerb { get; set; }
 		public string RequestBodyType { get; set; }
 		public string ExtentionOfType { get; set; }
 		public string ResponseBodyType { get; set; }
 		public bool IsGeneric { get; set; }
+        public bool AllowAsync { get; set; }
 
-		public string Name => $"{HttpVerb ?? "Send"}{RequestBodyType ?? ResponseBodyType}Async";
+        public string Name => $"{HttpVerb ?? "Send"}{RequestBodyType ?? ResponseBodyType}{(AllowAsync ? "Async" : string.Empty)}";
 
-		public string TaskArg {
+		public string ReturnType {
 			get {
-				switch (ResponseBodyType) {
-					case "Json": return IsGeneric ? "T" : "dynamic";
-					case "JsonList": return "IList<dynamic>";
-					//case "Xml": return ?;
-					case "String": return "string";
-					case "Stream": return "Stream";
-					case "Bytes": return "byte[]";
-					default: return "HttpResponseMessage";
-				}
-			}
-		}
+                string taskArg()
+                {
+                    switch (ResponseBodyType)
+                    {
+                        case "Json": return IsGeneric ? "T" : "dynamic";
+                        case "JsonList": return "IList<dynamic>";
+                        //case "Xml": return ?;
+                        case "String": return "string";
+                        case "Stream": return "Stream";
+                        case "Bytes": return "byte[]";
+                        default: return "HttpResponseMessage";
+                    }
+                }
+
+                if (AllowAsync)
+                    return $"Task<{taskArg()}>";
+                else
+                    return taskArg();
+            }
+        }
 
 		public string ReturnTypeDescription {
 			get {
