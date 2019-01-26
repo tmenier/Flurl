@@ -12,7 +12,7 @@ namespace Flurl.Http.Configuration
 		private readonly ConcurrentDictionary<string, IFlurlClient> _clients = new ConcurrentDictionary<string, IFlurlClient>();
 
 		/// <summary>
-		/// By defaykt, uses a caching strategy of one FlurlClient per host. This maximizes reuse of
+		/// By default, uses a caching strategy of one FlurlClient per host. This maximizes reuse of
 		/// underlying HttpClient/Handler while allowing things like cookies to be host-specific.
 		/// </summary>
 		/// <param name="url">The URL.</param>

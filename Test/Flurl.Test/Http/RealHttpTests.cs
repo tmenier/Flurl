@@ -323,17 +323,17 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task connection_lease_timeout_doesnt_disrupt_calls() {
-			// Specific behavior associated with ConnectionLeaseTimeout is coverd in SettingsTests.
-			// Here let's just make sure it isn't disruptive in any way in real calls.
-
+			// testing this quickly is tricky. HttpClient will be replaced by a new instance after 1 timeout and disposed
+			// after another, so the timeout period (typically minutes in real-world scenarios) needs to be long enough
+			// that we don't dispose before the response from google is received. 1 second seems to work.
 			var cli = new FlurlClient("http://www.google.com");
-			cli.Settings.ConnectionLeaseTimeout = TimeSpan.FromMilliseconds(20);
+			cli.Settings.ConnectionLeaseTimeout = TimeSpan.FromMilliseconds(1000);
 
-			// initiate a call to google every 10ms for 100ms.
+			// ping google for about 2.5 seconds
 			var tasks = new List<Task>();
-			for (var i = 0; i < 10; i++) {
-				tasks.Add(cli.Request().GetAsync());
-				await Task.Delay(10);
+			for (var i = 0; i < 100; i++) {
+				tasks.Add(cli.Request().HeadAsync());
+				await Task.Delay(25);
 			}
 			await Task.WhenAll(tasks); // failed HTTP status, etc, would throw here and fail the test.
 		}

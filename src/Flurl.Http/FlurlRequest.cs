@@ -114,14 +114,15 @@ namespace Flurl.Http
 			request.SetHttpCall(call);
 
 			await HandleEventAsync(Settings.BeforeCall, Settings.BeforeCallAsync, call).ConfigureAwait(false);
-			request.RequestUri = Url.ToUri(); // in case it was modifed in the handler above
+			request.RequestUri = Url.ToUri(); // in case it was modified in the handler above
 
 			var cancellationTokenWithTimeout = cancellationToken;
+			CancellationTokenSource timeoutTokenSource = null;
 
 			if (Settings.Timeout.HasValue) {
-				var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-				cts.CancelAfter(Settings.Timeout.Value);
-				cancellationTokenWithTimeout = cts.Token;
+				timeoutTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+				timeoutTokenSource.CancelAfter(Settings.Timeout.Value);
+				cancellationTokenWithTimeout = timeoutTokenSource.Token;
 			}
 
 			call.StartedUtc = DateTime.UtcNow;
@@ -132,9 +133,6 @@ namespace Flurl.Http
 
 				if (Settings.CookiesEnabled)
 					WriteRequestCookies(request);
-
-				if (Client.CheckAndRenewConnectionLease())
-					request.Headers.ConnectionClose = true;
 
 				call.Response = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
 				call.Response.RequestMessage = request;
@@ -149,6 +147,8 @@ namespace Flurl.Http
 			}
 			finally {
 				request.Dispose();
+				timeoutTokenSource?.Dispose();
+
 				if (Settings.CookiesEnabled)
 					ReadResponseCookies(call.Response);
 
