@@ -16,7 +16,7 @@ namespace Flurl.Test
 		public void extension_methods_consistently_supported() {
 			var urlMethods = typeof(Url).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Where(m => !m.IsSpecialName);
 			var stringExts = ReflectionHelper.GetAllExtensionMethods<string>(typeof(Url).GetTypeInfo().Assembly);
-			var whitelist = new[] { "ToString", "IsValid", "ToUri", "Equals", "GetHashCode" }; // cases where string extension of the same name was excluded intentionally
+			var whitelist = new[] { "ToString", "IsValid", "ToUri", "Equals", "GetHashCode", "Clone" }; // cases where string extension of the same name was excluded intentionally
 
 			foreach (var method in urlMethods) {
 				if (whitelist.Contains(method.Name))
