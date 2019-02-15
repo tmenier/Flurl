@@ -284,8 +284,11 @@ namespace Flurl.Test.Http
 			}
 		}
 
-		[Test] // #366 (cannot repro)
+		[Test, Ignore("bug repro, not yet fixed")] // #366 & #398
 		public async Task can_use_response_queue_in_parallel() {
+			var cli = new FlurlClient("http://api.com");
+			cli.Settings.BeforeCallAsync = call => Task.Delay(500);
+
 			for (var i = 0; i < 100; i++) {
 				using (var test = new HttpTest()) {
 					test
@@ -301,19 +304,19 @@ namespace Flurl.Test.Http
 						.RespondWith("9");
 
 					var results = await Task.WhenAll(
-						"http://api.com".GetStringAsync(),
-						"http://api.com".GetStringAsync(),
-						"http://api.com".GetStringAsync(),
-						"http://api.com".GetStringAsync(),
-						"http://api.com".GetStringAsync(),
-						"http://api.com".GetStringAsync(),
-						"http://api.com".GetStringAsync(),
-						"http://api.com".GetStringAsync(),
-						"http://api.com".GetStringAsync(),
-						"http://api.com".GetStringAsync());
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync());
 
-					CollectionAssert.IsEmpty(test.ResponseQueue);
 					CollectionAssert.AllItemsAreUnique(results);
+					CollectionAssert.IsEmpty(test.ResponseQueue);
 				}
 			}
 		}
