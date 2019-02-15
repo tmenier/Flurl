@@ -58,7 +58,7 @@ namespace Flurl
 
 		/// <summary>
 		/// Replaces an existing QueryParameter or appends one to the end. If object is a collection type (array, IEnumerable, etc.),
-		/// multiple paramters are added, i.e. x=1&amp;x=2. If any of the same name already exist, they are overwritten one by one
+		/// multiple parameters are added, i.e. x=1&amp;x=2. If any of the same name already exist, they are overwritten one by one
 		/// (preserving order) and any remaining are appended to the end. If fewer values are specified than already exist,
 		/// remaining existing values are removed.
 		/// </summary>

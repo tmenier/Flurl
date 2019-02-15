@@ -48,37 +48,23 @@ namespace Flurl.Test.Http
 			Assert.IsTrue(result.has_more);
 		}
 
-		[Test]
-		public async Task can_download_file() {
+		[TestCase("https://httpbin.org/image/jpeg", null, "my-image.jpg", "my-image.jpg")]
+		// should use last path segment url-decoded (foo?bar:ding), then replace illegal path characters with _
+		[TestCase("https://httpbin.org/anything/foo%3Fbar%3Ading", null, null, "foo_bar_ding")]
+		// should use filename from content-disposition excluding any leading/trailing quotes
+		[TestCase("https://httpbin.org/response-headers", "attachment; filename=\"myfile.txt\"", null, "myfile.txt")]
+		// should prefer filename* over filename, per https://tools.ietf.org/html/rfc6266#section-4.3
+		[TestCase("https://httpbin.org/response-headers", "attachment; filename=filename.txt; filename*=utf-8''filenamestar.txt", null, "filenamestar.txt")]
+		// has Content-Disposition header but no filename in it, should use last part of URL
+		[TestCase("https://httpbin.org/response-headers", "attachment", null, "response-headers")]
+		public async Task can_download_file(string url, string contentDisposition, string suppliedFilename, string expectedFilename) {
 			var folder = Path.Combine(Path.GetTempPath(), $"flurl-test-{Guid.NewGuid()}"); // random so parallel tests don't trip over each other
+
 			try {
-				var path = await "https://www.google.com".DownloadFileAsync(folder, "google.txt");
-				Assert.AreEqual(Path.Combine(folder, "google.txt"), path);
-				Assert.That(File.Exists(path));
-			}
-			finally {
-				Directory.Delete(folder, true);
-			}
-		}
-
-		[Test]
-		public async Task can_download_file_with_default_name() {
-			var folder = Path.Combine(Path.GetTempPath(), $"flurl-test-{Guid.NewGuid()}"); // random so parallel tests don't trip over each other
-			try {
-				// no Content-Dispositon header, use last part of URL
-				var path = await "https://www.google.com".DownloadFileAsync(folder);
-				Assert.AreEqual(Path.Combine(folder, "www.google.com"), path);
-				Assert.That(File.Exists(path));
-
-				// has Content-Disposition header but no filename in it, use last part of URL
-				path = await "https://httpbin.org/response-headers?Content-Disposition=attachment".DownloadFileAsync(folder);
-				Assert.AreEqual(Path.Combine(folder, "response-headers"), path);
-				Assert.That(File.Exists(path));
-
-				// has header Content-Disposition: attachment; filename="myfile.txt"
-				path = await "https://httpbin.org/response-headers?Content-Disposition=attachment%3B%20filename%3D%22myfile.txt%22".DownloadFileAsync(folder);
-				Assert.AreEqual(Path.Combine(folder, "myfile.txt"), path);
-				Assert.That(File.Exists(path));
+				var path = await url.SetQueryParam("Content-Disposition", contentDisposition).DownloadFileAsync(folder, suppliedFilename);
+				var expected = Path.Combine(folder, expectedFilename);
+				Assert.AreEqual(expected, path);
+				Assert.That(File.Exists(expected));
 			}
 			finally {
 				Directory.Delete(folder, true);

@@ -16,7 +16,7 @@ namespace Flurl.Test
 		public void extension_methods_consistently_supported() {
 			var urlMethods = typeof(Url).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Where(m => !m.IsSpecialName);
 			var stringExts = ReflectionHelper.GetAllExtensionMethods<string>(typeof(Url).GetTypeInfo().Assembly);
-			var whitelist = new[] { "ToString", "IsValid", "ToUri", "Equals", "GetHashCode" }; // cases where string extension of the same name was excluded intentionally
+			var whitelist = new[] { "ToString", "IsValid", "ToUri", "Equals", "GetHashCode", "Clone" }; // cases where string extension of the same name was excluded intentionally
 
 			foreach (var method in urlMethods) {
 				if (whitelist.Contains(method.Name))
@@ -35,6 +35,14 @@ namespace Flurl.Test
 			Assert.AreEqual("http://www.mysite.com/more", url.Path);
 			Assert.AreEqual("x=1&y=2", url.Query);
 			Assert.AreEqual("foo", url.Fragment);
+		}
+
+		[Test]
+		public void can_construct_from_uri() {
+			var s = "http://www.mysite.com/more?x=1&y=2#foo";
+			var uri = new Uri(s);
+			var url = new Url(uri);
+			Assert.AreEqual(s, url.ToString());
 		}
 
 		[Test]
@@ -123,10 +131,21 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void can_set_multiple_query_params_from_dictionary() {
+		public void can_set_query_params_from_dictionary() {
 			// let's challenge it a little with non-string keys
 			var url = "http://www.mysite.com".SetQueryParams(new Dictionary<int, string> { { 1, "x" }, { 2, "y" } });
 			Assert.AreEqual("http://www.mysite.com?1=x&2=y", url.ToString());
+		}
+
+		[Test, Ignore("tricky to do while maintaining param order. deferring until append param w/o overwriting is fully supported.")]
+		public void can_set_query_params_from_kv_pairs() {
+			var url = "http://foo.com".SetQueryParams(new[] {
+				new { key = "x", value = 1 },
+				new { key = "y", value = 2 },
+				new { key = "x", value = 3 } // this should append, not overwrite (#370)
+			});
+
+			Assert.AreEqual("http://foo.com?x=1&y=2&x=3", url.ToString());
 		}
 
 		private IEnumerable<string> GetQueryParamNames() {
@@ -188,7 +207,8 @@ namespace Flurl.Test
 
 		[Test]
 		public void constructor_requires_nonnull_arg() {
-			Assert.Throws<ArgumentNullException>(() => new Url(null));
+			Assert.Throws<ArgumentNullException>(() => new Url((string)null));
+			Assert.Throws<ArgumentNullException>(() => new Url((Uri)null));
 		}
 
 		[Test]
@@ -472,6 +492,16 @@ namespace Flurl.Test
 			var url1 = new Url("http://mysite.com/hello");
 			var url2 = new Url("http://mysite.com/hello");
 			Assert.IsFalse(url1 == url2);
+		}
+
+		[Test]
+		public void clone_creates_copy() {
+			var url1 = new Url("http://mysite.com").SetQueryParam("x", 1);
+			var url2 = url1.Clone().AppendPathSegment("foo").SetQueryParam("y", 2);
+			url1.SetQueryParam("z", 3);
+
+			Assert.AreEqual("http://mysite.com?x=1&z=3", url1.ToString());
+			Assert.AreEqual("http://mysite.com/foo?x=1&y=2", url2.ToString());
 		}
 	}
 }

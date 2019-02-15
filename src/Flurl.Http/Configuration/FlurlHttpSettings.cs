@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using Flurl.Http.Testing;
 
 namespace Flurl.Http.Configuration
@@ -36,8 +37,8 @@ namespace Flurl.Http.Configuration
 		/// Gets or sets the HTTP request timeout.
 		/// </summary>
 		public TimeSpan? Timeout {
-			get => Get(() => Timeout);
-			set => Set(() => Timeout, value);
+			get => Get<TimeSpan?>();
+			set => Set(value);
 		}
 
 		/// <summary>
@@ -46,64 +47,64 @@ namespace Flurl.Http.Configuration
 		/// 2xx will never throw regardless of this setting.
 		/// </summary>
 		public string AllowedHttpStatusRange {
-			get => Get(() => AllowedHttpStatusRange);
-			set => Set(() => AllowedHttpStatusRange, value);
+			get => Get<string>();
+			set => Set(value);
 		}
 
 		/// <summary>
 		/// Gets or sets a value indicating whether cookies should be sent/received with each HTTP request.
 		/// </summary>
 		public bool CookiesEnabled {
-			get => Get(() => CookiesEnabled);
-			set => Set(() => CookiesEnabled, value);
+			get => Get<bool>();
+			set => Set(value);
 		}
 
 		/// <summary>
 		/// Gets or sets object used to serialize and deserialize JSON. Default implementation uses Newtonsoft Json.NET.
 		/// </summary>
 		public ISerializer JsonSerializer {
-			get => Get(() => JsonSerializer);
-			set => Set(() => JsonSerializer, value);
+			get => Get<ISerializer>();
+			set => Set(value);
 		}
 
 		/// <summary>
 		/// Gets or sets object used to serialize URL-encoded data. (Deserialization not supported in default implementation.)
 		/// </summary>
 		public ISerializer UrlEncodedSerializer {
-			get => Get(() => UrlEncodedSerializer);
-			set => Set(() => UrlEncodedSerializer, value);
+			get => Get<ISerializer>();
+			set => Set(value);
 		}
 
 		/// <summary>
 		/// Gets or sets a callback that is called immediately before every HTTP request is sent.
 		/// </summary>
 		public Action<HttpCall> BeforeCall {
-			get => Get(() => BeforeCall);
-			set => Set(() => BeforeCall, value);
+			get => Get<Action<HttpCall>>();
+			set => Set(value);
 		}
 
 		/// <summary>
 		/// Gets or sets a callback that is asynchronously called immediately before every HTTP request is sent.
 		/// </summary>
 		public Func<HttpCall, Task> BeforeCallAsync {
-			get => Get(() => BeforeCallAsync);
-			set => Set(() => BeforeCallAsync, value);
+			get => Get<Func<HttpCall, Task>>();
+			set => Set(value);
 		}
 
 		/// <summary>
 		/// Gets or sets a callback that is called immediately after every HTTP response is received.
 		/// </summary>
 		public Action<HttpCall> AfterCall {
-			get => Get(() => AfterCall);
-			set => Set(() => AfterCall, value);
+			get => Get<Action<HttpCall>>();
+			set => Set(value);
 		}
 
 		/// <summary>
 		/// Gets or sets a callback that is asynchronously called immediately after every HTTP response is received.
 		/// </summary>
 		public Func<HttpCall, Task> AfterCallAsync {
-			get => Get(() => AfterCallAsync);
-			set => Set(() => AfterCallAsync, value);
+			get => Get<Func<HttpCall, Task>>();
+			set => Set(value);
 		}
 
 		/// <summary>
@@ -111,8 +112,8 @@ namespace Flurl.Http.Configuration
 		/// HTTP status code is returned in the response. Response should be null-checked if used in the event handler.
 		/// </summary>
 		public Action<HttpCall> OnError {
-			get => Get(() => OnError);
-			set => Set(() => OnError, value);
+			get => Get<Action<HttpCall>>();
+			set => Set(value);
 		}
 
 		/// <summary>
@@ -120,8 +121,8 @@ namespace Flurl.Http.Configuration
 		/// HTTP status code is returned in the response. Response should be null-checked if used in the event handler.
 		/// </summary>
 		public Func<HttpCall, Task> OnErrorAsync {
-			get => Get(() => OnErrorAsync);
-			set => Set(() => OnErrorAsync, value);
+			get => Get<Func<HttpCall, Task>>();
+			set => Set(value);
 		}
 
 		/// <summary>
@@ -135,22 +136,20 @@ namespace Flurl.Http.Configuration
 		/// <summary>
 		/// Gets a settings value from this instance if explicitly set, otherwise from the default settings that back this instance.
 		/// </summary>
-		protected T Get<T>(Expression<Func<T>> property) {
-			var p = (property.Body as MemberExpression).Member as PropertyInfo;
+		protected T Get<T>([CallerMemberName]string propName = null) {
 			var testVals = HttpTest.Current?.Settings._vals;
 			return
-				testVals?.ContainsKey(p.Name) == true ? (T)testVals[p.Name] :
-				_vals.ContainsKey(p.Name) ? (T)_vals[p.Name] :
-				Defaults != null ? (T)p.GetValue(Defaults) :
+				testVals?.ContainsKey(propName) == true ? (T)testVals[propName] :
+				_vals.ContainsKey(propName) ? (T)_vals[propName] :
+				Defaults != null ? (T)Defaults.Get<T>(propName) :
 				default(T);
 		}
 
 		/// <summary>
 		/// Sets a settings value for this instance.
 		/// </summary>
-		protected void Set<T>(Expression<Func<T>> property, T value) {
-			var p = (property.Body as MemberExpression).Member as PropertyInfo;
-			_vals[p.Name] = value;
+		protected void Set<T>(T value, [CallerMemberName]string propName = null) {
+			_vals[propName] = value;
 		}
 	}
 
@@ -165,8 +164,8 @@ namespace Flurl.Http.Configuration
 		/// Default is null, effectively disabling the behavior.
 		/// </summary>
 		public TimeSpan? ConnectionLeaseTimeout {
-			get => Get(() => ConnectionLeaseTimeout);
-			set => Set(() => ConnectionLeaseTimeout, value);
+			get => Get<TimeSpan?>();
+			set => Set(value);
 		}
 
 		/// <summary>
@@ -175,8 +174,8 @@ namespace Flurl.Http.Configuration
 		/// only override the method(s) needed, call the base method, and modify the result.
 		/// </summary>
 		public IHttpClientFactory HttpClientFactory {
-			get => Get(() => HttpClientFactory);
-			set => Set(() => HttpClientFactory, value);
+			get => Get<IHttpClientFactory>();
+			set => Set(value);
 		}
 	}
 
@@ -202,8 +201,8 @@ namespace Flurl.Http.Configuration
 		/// by proxy, HttpClient instances.
 		/// </summary>
 		public IFlurlClientFactory FlurlClientFactory {
-			get => Get(() => FlurlClientFactory);
-			set => Set(() => FlurlClientFactory, value);
+			get => Get<IFlurlClientFactory>();
+			set => Set(value);
 		}
 
 		/// <summary>

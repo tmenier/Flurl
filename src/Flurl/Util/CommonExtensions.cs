@@ -16,8 +16,10 @@ namespace Flurl.Util
 	public static class CommonExtensions
 	{
 		/// <summary>
-		/// Converts an object's public properties to a collection of string-based key-value pairs. If the object happens
-		/// to be an IDictionary, the IDictionary's keys and values converted to strings and returned.
+		/// Returns a key-value-pairs representation of the object.
+		/// For strings, URL query string format assumed and pairs are parsed from that.
+		/// For objects that already implement IEnumerable&lt;KeyValuePair&gt;, the object itself is simply returned.
+		/// For all other objects, all publicly readable properties are extracted and returned as pairs.
 		/// </summary>
 		/// <param name="obj">The object to parse into key-value pairs</param>
 		/// <returns></returns>
@@ -50,7 +52,7 @@ namespace Flurl.Util
 		}
 
 		/// <summary>
-		/// Splits at the first occurence of the given seperator.
+		/// Splits at the first occurence of the given separator.
 		/// </summary>
 		/// <param name="s">The string to split.</param>
 		/// <param name="separator">The separator to split on.</param>
@@ -74,12 +76,16 @@ namespace Flurl.Util
 		private static IEnumerable<KeyValuePair<string, object>> ObjectToKV(object obj) {
 #if NETSTANDARD1_0
 			return from prop in obj.GetType().GetRuntimeProperties()
-				let val = prop.GetValue(obj, null)
+				let getter = prop.GetMethod
+				where getter?.IsPublic == true
+				let val = getter.Invoke(obj, null)
 				select new KeyValuePair<string, object>(prop.Name, val);
 #else
-			return from prop in obj.GetType().GetProperties() 
-				   let val = prop.GetValue(obj, null)
-				   select new KeyValuePair<string, object>(prop.Name, val);
+			return from prop in obj.GetType().GetProperties()
+				let getter = prop.GetGetMethod(false)
+				where getter != null
+				let val = getter.Invoke(obj, null)
+				select new KeyValuePair<string, object>(prop.Name, val);
 #endif
 		}
 
@@ -119,8 +125,9 @@ namespace Flurl.Util
 		/// Merges the key/value pairs from d2 into d1, without overwriting those already set in d1.
 		/// </summary>
 		public static void Merge<TKey, TValue>(this IDictionary<TKey, TValue> d1, IDictionary<TKey, TValue> d2) {
-			foreach (var kv in d2.Where(x => !d1.Keys.Contains(x.Key)))
-				d1.Add(kv);
+			foreach (var kv in d2.Where(x => !d1.ContainsKey(x.Key)).ToList()) {
+				d1[kv.Key] = kv.Value;
+			}
 		}
 
 		/// <summary>

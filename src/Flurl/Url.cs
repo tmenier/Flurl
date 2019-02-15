@@ -7,12 +7,12 @@ using System.Text.RegularExpressions;
 namespace Flurl
 {
 	/// <summary>
-	/// Represents a URL that can be built fluently
+	/// A mutable object for fluently building URLs.
 	/// </summary>
 	public class Url
 	{
 		/// <summary>
-		/// The full absolute path part of the URL (everthing except the query and fragment).
+		/// The full absolute path part of the URL (everything except the query and fragment).
 		/// </summary>
 		public string Path { get; set; }
 
@@ -34,16 +34,32 @@ namespace Flurl
 		/// </summary>
 		public QueryParamCollection QueryParams { get; private set; }
 
-	    /// <summary>
-	    /// Constructs a Url object from a string.
-	    /// </summary>
-	    /// <param name="baseUrl">The URL to use as a starting point (required)</param>
-	    /// <exception cref="ArgumentNullException"><paramref name="baseUrl"/> is <see langword="null" />.</exception>
-	    public Url(string baseUrl) {
+		/// <summary>
+		/// Constructs a Url object from a string.
+		/// </summary>
+		/// <param name="baseUrl">The URL to use as a starting point (required)</param>
+		/// <exception cref="ArgumentNullException"><paramref name="baseUrl"/> is <see langword="null" />.</exception>
+		public Url(string baseUrl) {
 			if (baseUrl == null)
 				throw new ArgumentNullException(nameof(baseUrl));
 
-			var parts = baseUrl.SplitOnFirstOccurence('#');
+			Parse(baseUrl);
+		}
+
+		/// <summary>
+		/// Constructs a Url object from a System.Uri.
+		/// </summary>
+		/// <param name="uri">The System.Uri (required)</param>
+		/// <exception cref="ArgumentNullException"><paramref name="uri"/> is <see langword="null" />.</exception>
+		public Url(Uri uri) {
+			if (uri == null)
+				throw new ArgumentNullException(nameof(uri));
+
+			Parse(uri.ToString());
+		}
+
+		private void Parse(string url) {
+			var parts = url.SplitOnFirstOccurence('#');
 			Fragment = (parts.Length == 2) ? parts[1] : "";
 			parts = parts[0].SplitOnFirstOccurence('?');
 			Query = (parts.Length == 2) ? parts[1] : "";
@@ -386,6 +402,11 @@ namespace Flurl
 		/// </summary>
 		/// <returns></returns>
 		public override string ToString() => ToString(false);
+
+		/// <summary>
+		/// Creates a copy of this Url.
+		/// </summary>
+		public Url Clone() => new Url(this);
 
 		/// <summary>
 		/// Converts this Url object to its string representation.

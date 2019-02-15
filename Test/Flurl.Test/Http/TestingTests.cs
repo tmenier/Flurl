@@ -283,5 +283,42 @@ namespace Flurl.Test.Http
 				CollectionAssert.IsEmpty(httpTest.CallLog);
 			}
 		}
+
+		[Test, Ignore("bug repro, not yet fixed")] // #366 & #398
+		public async Task can_use_response_queue_in_parallel() {
+			var cli = new FlurlClient("http://api.com");
+			cli.Settings.BeforeCallAsync = call => Task.Delay(500);
+
+			for (var i = 0; i < 100; i++) {
+				using (var test = new HttpTest()) {
+					test
+						.RespondWith("0")
+						.RespondWith("1")
+						.RespondWith("2")
+						.RespondWith("3")
+						.RespondWith("4")
+						.RespondWith("5")
+						.RespondWith("6")
+						.RespondWith("7")
+						.RespondWith("8")
+						.RespondWith("9");
+
+					var results = await Task.WhenAll(
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync(),
+						cli.Request().GetStringAsync());
+
+					CollectionAssert.AllItemsAreUnique(results);
+					CollectionAssert.IsEmpty(test.ResponseQueue);
+				}
+			}
+		}
 	}
 }

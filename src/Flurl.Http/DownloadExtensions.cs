@@ -24,17 +24,30 @@ namespace Flurl.Http
 			using (var resp = await request.SendAsync(HttpMethod.Get, cancellationToken: cancellationToken, completionOption: HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false)) {
 				localFileName =
 					localFileName ??
-					resp.Content?.Headers.ContentDisposition?.FileName?.StripQuotes() ??
-					request.Url.Path.Split('/').Last();
+					GetFileNameFromHeaders(resp) ??
+					GetFileNameFromPath(request);
 
 				// http://codereview.stackexchange.com/a/18679
 				using (var httpStream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false))
-				using (var filestream = await FileUtil.OpenWriteAsync(localFolderPath, localFileName, bufferSize).ConfigureAwait(false)) {
-					await httpStream.CopyToAsync(filestream, bufferSize, cancellationToken).ConfigureAwait(false);
+				using (var fileStream = await FileUtil.OpenWriteAsync(localFolderPath, localFileName, bufferSize).ConfigureAwait(false)) {
+					await httpStream.CopyToAsync(fileStream, bufferSize, cancellationToken).ConfigureAwait(false);
 				}
 			}
 
 			return FileUtil.CombinePath(localFolderPath, localFileName);
+		}
+
+		private static string GetFileNameFromHeaders(HttpResponseMessage resp) {
+			var header = resp.Content?.Headers.ContentDisposition;
+			if (header == null) return null;
+			// prefer filename* per https://tools.ietf.org/html/rfc6266#section-4.3
+			var val = (header.FileNameStar ?? header.FileName)?.StripQuotes();
+			if (val == null) return null;
+			return FileUtil.MakeValidName(val);
+		}
+
+		private static string GetFileNameFromPath(IFlurlRequest req) {
+			return FileUtil.MakeValidName(Url.Decode(req.Url.Path.Split('/').Last(), false));
 		}
 
 		/// <summary>
