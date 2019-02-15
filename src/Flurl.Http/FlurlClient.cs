@@ -12,7 +12,8 @@ namespace Flurl.Http
 	/// <summary>
 	/// Interface defining FlurlClient's contract (useful for mocking and DI)
 	/// </summary>
-	public interface IFlurlClient : IHttpSettingsContainer, IDisposable {
+	public interface IFlurlClient : IHttpSettingsContainer, IDisposableObservable
+    {
 		/// <summary>
 		/// Gets or sets the FlurlHttpSettings object used by this client.
 		/// </summary>
@@ -41,17 +42,12 @@ namespace Flurl.Http
 		/// <param name="urlSegments">The URL or URL segments for the request. If BaseUrl is defined, it is assumed that these are path segments off that base.</param>
 		/// <returns>A new IFlurlRequest</returns>
 		IFlurlRequest Request(params object[] urlSegments);
-
-		/// <summary>
-		/// Gets a value indicating whether this instance (and its underlying HttpClient) has been disposed.
-		/// </summary>
-		bool IsDisposed { get; }
 	}
 
 	/// <summary>
 	/// A reusable object for making HTTP calls.
 	/// </summary>
-	public class FlurlClient : IFlurlClient
+	public class FlurlClient : DisposableBase, IFlurlClient
 	{
 		private ClientFlurlHttpSettings _settings;
 		private Lazy<HttpClient> _httpClient;
@@ -162,23 +158,14 @@ namespace Flurl.Http
 			set => Settings = value as ClientFlurlHttpSettings;
 		}
 
-		/// <inheritdoc />
-		public bool IsDisposed { get; private set; }
-
-		/// <summary>
-		/// Disposes the underlying HttpClient and HttpMessageHandler.
-		/// </summary>
-		public virtual void Dispose() {
-			if (IsDisposed)
-				return;
-
+        /// <inheritdoc />
+        protected override void DisposeResources()
+        {
 			_injectedClient?.Dispose();
 			if (_httpMessageHandler?.IsValueCreated == true)
-				_httpMessageHandler.Value.Dispose();
+				_httpMessageHandler.Value?.Dispose();
 			if (_httpClient?.IsValueCreated == true)
-				_httpClient.Value.Dispose();
-
-			IsDisposed = true;
+				_httpClient.Value?.Dispose();
 		}
 	}
 }

@@ -111,52 +111,58 @@ namespace Flurl.Http
 		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			_client = Client; // "freeze" the client at this point to avoid excessive calls to FlurlClientFactory.Get (#374)
 
-			var request = new HttpRequestMessage(verb, Url) { Content = content };
-			var call = new HttpCall { FlurlRequest = this, Request = request };
-			request.SetHttpCall(call);
+            using (var disposableContainer = new DisposableContainer())
+            {
+                var request = new HttpRequestMessage(verb, Url) { Content = content };
+                disposableContainer.Register(request);
 
-			await HandleEventAsync(Settings.BeforeCall, Settings.BeforeCallAsync, call).ConfigureAwait(false);
-			request.RequestUri = Url.ToUri(); // in case it was modified in the handler above
+                var call = new HttpCall { FlurlRequest = this, Request = request };
+                request.SetHttpCall(call);
 
-			var cancellationTokenWithTimeout = cancellationToken;
-			CancellationTokenSource timeoutTokenSource = null;
+                await HandleEventAsync(Settings.BeforeCall, Settings.BeforeCallAsync, call).ConfigureAwait(false);
+                request.RequestUri = Url.ToUri(); // in case it was modified in the handler above
 
-			if (Settings.Timeout.HasValue) {
-				timeoutTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-				timeoutTokenSource.CancelAfter(Settings.Timeout.Value);
-				cancellationTokenWithTimeout = timeoutTokenSource.Token;
-			}
+                var cancellationTokenWithTimeout = cancellationToken;
 
-			call.StartedUtc = DateTime.UtcNow;
-			try {
-				Headers.Merge(Client.Headers);
-				foreach (var header in Headers)
-					request.SetHeader(header.Key, header.Value);
+                if (Settings.Timeout.HasValue)
+                {
+                    var timeoutTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    disposableContainer.Register(timeoutTokenSource);
+                    timeoutTokenSource.CancelAfter(Settings.Timeout.Value);
+                    cancellationTokenWithTimeout = timeoutTokenSource.Token;
+                }
 
-				if (Settings.CookiesEnabled)
-					WriteRequestCookies(request);
+                call.StartedUtc = DateTime.UtcNow;
+                try
+                {
+                    Headers.Merge(Client.Headers);
+                    foreach (var header in Headers)
+                        request.SetHeader(header.Key, header.Value);
 
-				call.Response = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
-				call.Response.RequestMessage = request;
+                    if (Settings.CookiesEnabled)
+                        WriteRequestCookies(request);
 
-				if (call.Succeeded)
-					return call.Response;
+                    call.Response = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
+                    call.Response.RequestMessage = request;
 
-				throw new FlurlHttpException(call, null);
-			}
-			catch (Exception ex) {
-				return await HandleExceptionAsync(call, ex, cancellationToken);
-			}
-			finally {
-				request.Dispose();
-				timeoutTokenSource?.Dispose();
+                    if (call.Succeeded)
+                        return call.Response;
 
-				if (Settings.CookiesEnabled)
-					ReadResponseCookies(call.Response);
+                    throw new FlurlHttpException(call, null);
+                }
+                catch (Exception ex)
+                {
+                    return await HandleExceptionAsync(call, ex, cancellationToken);
+                }
+                finally
+                {
+                    if (Settings.CookiesEnabled)
+                        ReadResponseCookies(call.Response);
 
-				call.EndedUtc = DateTime.UtcNow;
-				await HandleEventAsync(Settings.AfterCall, Settings.AfterCallAsync, call).ConfigureAwait(false);
-			}
+                    call.EndedUtc = DateTime.UtcNow;
+                    await HandleEventAsync(Settings.AfterCall, Settings.AfterCallAsync, call).ConfigureAwait(false);
+                }
+            }
 		}
 
 		private void WriteRequestCookies(HttpRequestMessage request) {
