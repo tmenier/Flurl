@@ -149,7 +149,12 @@ namespace Flurl.Http.Configuration
 		/// Sets a settings value for this instance.
 		/// </summary>
 		protected void Set<T>(T value, [CallerMemberName]string propName = null) {
-			_vals[propName] = value;
+            if(_vals.TryGetValue(propName, out var oldValue)
+                && oldValue is IDisposable disposableOldValue){
+                using (disposableOldValue) { }
+            }
+
+            _vals[propName] = value;
 		}
 	}
 

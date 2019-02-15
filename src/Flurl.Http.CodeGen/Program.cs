@@ -8,7 +8,7 @@ namespace Flurl.Http.CodeGen
     class Program
     {
         static int Main(string[] args) {
-	        var codePath = (args.Length > 0) ? args[0] : @"..\..\..\..\Flurl.Http\GeneratedExtensions.cs";
+	        var codePath = (args.Length > 0) ? args[0] : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Flurl.Http\GeneratedExtensions.cs");
 
 			if (!File.Exists(codePath)) {
 				Console.ForegroundColor = ConsoleColor.Red;
@@ -107,11 +107,10 @@ namespace Flurl.Http.CodeGen
 				args.Add("CancellationToken cancellationToken = default(CancellationToken)");
 	            args.Add("HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead");
 
-				writer.WriteLine("public static Task<@0> @1@2(@3) {", xm.TaskArg, xm.Name, xm.IsGeneric ? "<T>" : "", string.Join(", ", args));
-
                 if (xm.ExtentionOfType == "IFlurlRequest")
                 {
-	                args.Clear();
+                    writer.WriteLine("public static async Task<@0> @1@2(@3) {", xm.TaskArg, xm.Name, xm.IsGeneric ? "<T>" : "", string.Join(", ", args));
+                    args.Clear();
                     args.Add(
 						xm.HttpVerb == null ? "verb" :
 						xm.HttpVerb == "Patch" ? "new HttpMethod(\"PATCH\")" : // there's no HttpMethod.Patch
@@ -123,18 +122,25 @@ namespace Flurl.Http.CodeGen
 					args.Add("cancellationToken: cancellationToken");
 					args.Add("completionOption: completionOption");
 
+                    bool isClosingBracketNeededForUsingStatement = false;
 					if (xm.RequestBodyType != null) {
-		                writer.WriteLine("var content = new Captured@0Content(@1);",
+                        isClosingBracketNeededForUsingStatement = true;
+
+                        writer.WriteLine("using (var content = new Captured@0Content(@1)){",
 			                xm.RequestBodyType,
 			                xm.RequestBodyType == "String" ? "data" : $"request.Settings.{xm.RequestBodyType}Serializer.Serialize(data)");
 	                }
 
                     var request = (xm.ExtentionOfType == "IFlurlRequest") ? "request" : "new FlurlRequest(url)";
                     var receive = (xm.ResponseBodyType == null) ? "" : string.Format(".Receive{0}{1}()", xm.ResponseBodyType, xm.IsGeneric ? "<T>" : "");
-                    writer.WriteLine("return @0.SendAsync(@1)@2;", request, string.Join(", ", args), receive);
+                    writer.WriteLine("return await @0.SendAsync(@1)@2.ConfigureAwait(false);", request, string.Join(", ", args), receive);
+                    if (isClosingBracketNeededForUsingStatement) {
+                        writer.WriteLine("}");
+                    }
                 }
                 else
                 {
+                    writer.WriteLine("public static Task<@0> @1@2(@3) {", xm.TaskArg, xm.Name, xm.IsGeneric ? "<T>" : "", string.Join(", ", args));
                     writer.WriteLine("return new FlurlRequest(url).@0(@1);",
                         xm.Name + (xm.IsGeneric ? "<T>" : ""),
                         string.Join(", ", args.Skip(1).Select(a => a.Split(' ')[1])));
