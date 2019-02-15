@@ -109,19 +109,22 @@ namespace Flurl.Http
 
 		/// <inheritdoc />
 		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
+			_client = Client; // "freeze" the client at this point to avoid excessive calls to FlurlClientFactory.Get (#374)
+
 			var request = new HttpRequestMessage(verb, Url) { Content = content };
 			var call = new HttpCall { FlurlRequest = this, Request = request };
 			request.SetHttpCall(call);
 
 			await HandleEventAsync(Settings.BeforeCall, Settings.BeforeCallAsync, call).ConfigureAwait(false);
-			request.RequestUri = Url.ToUri(); // in case it was modifed in the handler above
+			request.RequestUri = Url.ToUri(); // in case it was modified in the handler above
 
 			var cancellationTokenWithTimeout = cancellationToken;
+			CancellationTokenSource timeoutTokenSource = null;
 
 			if (Settings.Timeout.HasValue) {
-				var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-				cts.CancelAfter(Settings.Timeout.Value);
-				cancellationTokenWithTimeout = cts.Token;
+				timeoutTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+				timeoutTokenSource.CancelAfter(Settings.Timeout.Value);
+				cancellationTokenWithTimeout = timeoutTokenSource.Token;
 			}
 
 			call.StartedUtc = DateTime.UtcNow;
@@ -146,6 +149,8 @@ namespace Flurl.Http
 			}
 			finally {
 				request.Dispose();
+				timeoutTokenSource?.Dispose();
+
 				if (Settings.CookiesEnabled)
 					ReadResponseCookies(call.Response);
 

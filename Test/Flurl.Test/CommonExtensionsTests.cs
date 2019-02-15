@@ -98,6 +98,35 @@ namespace Flurl.Test
 			Assert.Throws<ArgumentNullException>(() => obj.ToKeyValuePairs());
 		}
 
+		private class ToKvMe
+		{
+			public string Read1 { get; private set; }
+			public string Read2 { get; private set; }
+
+			private string PrivateRead1 { get; set; } = "c";
+			public string PrivateRead2 { private get; set; }
+
+			public string WriteOnly {
+				set {
+					Read1 = value.Split(',')[0];
+					Read2 = value.Split(',')[1];
+				}
+			}
+		}
+
+		[Test] // #373
+		public void object_to_kv_ignores_props_not_publicly_readable() {
+			var kv = new ToKvMe {
+				PrivateRead2 = "foo",
+				WriteOnly = "a,b"
+			}.ToKeyValuePairs();
+
+			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
+				{ "Read1", "a" },
+				{ "Read2", "b" }
+			}, kv);
+		}
+
 		[Test]
 		public void SplitOnFirstOccurence_works() {
 			var result = "hello/how/are/you".SplitOnFirstOccurence('/');

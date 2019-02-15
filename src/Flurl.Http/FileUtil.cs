@@ -46,5 +46,11 @@ namespace Flurl.Http
 			return Task.FromResult<Stream>(new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, useAsync: true));
 		}
 #endif
+		/// <summary>
+		/// Replaces invalid path characters with underscores.
+		/// </summary>
+		internal static string MakeValidName(string s) {
+			return string.Join("_", s.Split(Path.GetInvalidFileNameChars()));
+		}
 	}
 }
