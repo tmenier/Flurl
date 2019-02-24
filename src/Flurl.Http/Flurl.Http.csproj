@@ -10,7 +10,6 @@
     <Description>A fluent, portable, testable HTTP client library.</Description>
     <PackageProjectUrl>https://flurl.io</PackageProjectUrl>
     <PackageIconUrl>https://pbs.twimg.com/profile_images/534024476296376320/IuPGZ_bX_400x400.png</PackageIconUrl>
-    <PackageLicenseUrl></PackageLicenseUrl>
     <RepositoryUrl>https://github.com/tmenier/Flurl.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>httpclient rest json http fluent url uri tdd assert async</PackageTags>
