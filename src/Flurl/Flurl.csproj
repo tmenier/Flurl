@@ -10,7 +10,7 @@
     <Description>A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.</Description>
     <PackageProjectUrl>https://flurl.io</PackageProjectUrl>
     <PackageIconUrl>https://pbs.twimg.com/profile_images/534024476296376320/IuPGZ_bX_400x400.png</PackageIconUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/tmenier/Flurl/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <RepositoryUrl>https://github.com/tmenier/Flurl.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>fluent url uri querystring builder</PackageTags>
