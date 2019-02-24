@@ -3,10 +3,10 @@
 @call dotnet restore -v m ../
 
 @if ERRORLEVEL 1 (
-echo Error! Restoring dependicies failed.
+echo Error! Restoring dependencies failed.
 exit /b 1
 ) else (
-echo Restoring dependicies was successful.
+echo Restoring dependencies was successful.
 )
 
 @set project=..\src\Flurl.Http.CodeGen\Flurl.Http.CodeGen.csproj
