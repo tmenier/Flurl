@@ -13,3 +13,4 @@ publish
 TestResult.xml
 *.bak
 .idea
+lcov.info
