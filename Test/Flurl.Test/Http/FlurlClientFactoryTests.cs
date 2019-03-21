@@ -39,6 +39,20 @@ namespace Flurl.Test.Http
 	    }
 
 	    [Test]
+	    public void can_multithread_on_appveyor() {
+		    var sequence = new List<int>();
+
+		    var task = Task.Run(() => {
+			    Thread.Sleep(2000);
+			    sequence.Add(2);
+		    });
+		    sequence.Add(1);
+		    task.Wait();
+
+		    Assert.AreEqual("1,2", string.Join(",", sequence));
+		}
+
+		[Test, Ignore("troubleshooting")]
 	    public async Task ConfigureClient_is_thread_safe() {
 		    var fac = new PerHostFlurlClientFactory();
 
