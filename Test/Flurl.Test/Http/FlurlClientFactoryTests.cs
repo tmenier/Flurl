@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Flurl.Http;
 using Flurl.Http.Configuration;
 using NUnit.Framework;
 
@@ -40,26 +38,7 @@ namespace Flurl.Test.Http
 		    Assert.IsFalse(fac.Get("http://api2.com/foo").Settings.CookiesEnabled);
 	    }
 
-	    private static readonly ConditionalWeakTable<IFlurlClient, object> _clientLocks = new ConditionalWeakTable<IFlurlClient, object>();
-
 		[Test]
-	    public void can_multithread_on_appveyor() {
-		    var sequence = new List<int>();
-			var client = new FlurlClient();
-
-		    var task = Task.Run(() => {
-				lock (_clientLocks.GetOrCreateValue(client)) {
-					Thread.Sleep(2000);
-				    sequence.Add(2);
-			    }
-		    });
-		    sequence.Add(1);
-		    task.Wait();
-
-		    Assert.AreEqual("1,2", string.Join(",", sequence));
-		}
-
-		[Test, Ignore("troubleshooting")]
 	    public async Task ConfigureClient_is_thread_safe() {
 		    var fac = new PerHostFlurlClientFactory();
 
@@ -67,23 +46,23 @@ namespace Flurl.Test.Http
 
 		    var task1 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {
 			    sequence.Add(1);
-				Thread.Sleep(200);
+				Thread.Sleep(4000);
 			    sequence.Add(3);
 		    }));
 
-		    await Task.Delay(50);
-
-		    sequence.Add(2);
+			await Task.Delay(1000);
 
 			// modifies same client as task1, should get blocked until task1 is done
-		    var task2 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {
+			var task2 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {
 			    sequence.Add(4);
 		    }));
 
-			//await Task.Delay(50);
-		    //var task3 = Task.Run(() => fac.ConfigureClient("http://api2.com", c => {
+			await Task.Delay(1000);
+			sequence.Add(2);
+
+			//var task3 = Task.Run(() => fac.ConfigureClient("http://api2.com", c => {
 			//	sequence.Add(2);
-		    //}));
+			//}));
 
 			await Task.WhenAll(task1, task2);
 		    Assert.AreEqual("1,2,3,4", string.Join(",", sequence));
