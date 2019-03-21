@@ -38,13 +38,17 @@ namespace Flurl.Test.Http
 		    Assert.IsFalse(fac.Get("http://api2.com/foo").Settings.CookiesEnabled);
 	    }
 
+	    private static object _lock = new object();
+
 	    [Test]
 	    public void can_multithread_on_appveyor() {
 		    var sequence = new List<int>();
 
 		    var task = Task.Run(() => {
-			    Thread.Sleep(2000);
-			    sequence.Add(2);
+			    lock (_lock) {
+				    Thread.Sleep(2000);
+				    sequence.Add(2);
+			    }
 		    });
 		    sequence.Add(1);
 		    task.Wait();
