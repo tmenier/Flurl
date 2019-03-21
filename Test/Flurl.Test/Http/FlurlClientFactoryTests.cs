@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Flurl.Http;
 using Flurl.Http.Configuration;
 using NUnit.Framework;
 
@@ -38,15 +40,16 @@ namespace Flurl.Test.Http
 		    Assert.IsFalse(fac.Get("http://api2.com/foo").Settings.CookiesEnabled);
 	    }
 
-	    private static object _lock = new object();
+	    private static readonly ConditionalWeakTable<IFlurlClient, object> _clientLocks = new ConditionalWeakTable<IFlurlClient, object>();
 
-	    [Test]
+		[Test]
 	    public void can_multithread_on_appveyor() {
 		    var sequence = new List<int>();
+			var client = new FlurlClient();
 
 		    var task = Task.Run(() => {
-			    lock (_lock) {
-				    Thread.Sleep(2000);
+				lock (_clientLocks.GetOrCreateValue(client)) {
+					Thread.Sleep(2000);
 				    sequence.Add(2);
 			    }
 		    });
