@@ -45,7 +45,6 @@ namespace Flurl.Test.Http
 		    var sequence = new List<int>();
 
 		    var task1 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {
-			    c.Headers.Add("foo", "bar");
 			    sequence.Add(1);
 				Thread.Sleep(200);
 			    sequence.Add(3);
@@ -53,26 +52,19 @@ namespace Flurl.Test.Http
 
 		    await Task.Delay(50);
 
+		    sequence.Add(2);
+
 			// modifies same client as task1, should get blocked until task1 is done
 		    var task2 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {
-			    Assert.IsTrue(c.Headers.ContainsKey("foo"), "same FlurlClient should contain header");
 			    sequence.Add(4);
 		    }));
 
-		    await Task.Delay(50);
+			//await Task.Delay(50);
+		    //var task3 = Task.Run(() => fac.ConfigureClient("http://api2.com", c => {
+			//	sequence.Add(2);
+		    //}));
 
-		    // modifies different client, should run immediately
-		    var task3 = Task.Run(() => fac.ConfigureClient("http://api2.com", c => {
-			    Assert.IsFalse(c.Headers.ContainsKey("foo"), "different FlurlClient shouldn't contain header");
-			    sequence.Add(2);
-		    }));
-
-		    var fc1 = fac.Get("http://api.com");
-		    var fc2 = fac.Get("http://api2.com");
-		    Assert.AreNotEqual(fc1, fc2);
-		    Assert.AreNotSame(fc1, fc2);
-
-			await Task.WhenAll(task1, task2, task3);
+			await Task.WhenAll(task1, task2);
 		    Assert.AreEqual("1,2,3,4", string.Join(",", sequence));
 	    }
 	}
