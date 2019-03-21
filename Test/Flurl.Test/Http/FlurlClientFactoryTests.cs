@@ -41,30 +41,29 @@ namespace Flurl.Test.Http
 		[Test]
 	    public async Task ConfigureClient_is_thread_safe() {
 		    var fac = new PerHostFlurlClientFactory();
-
 		    var sequence = new List<int>();
 
 		    var task1 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {
 			    sequence.Add(1);
-				Thread.Sleep(4000);
+				Thread.Sleep(2000);
 			    sequence.Add(3);
 		    }));
 
-			await Task.Delay(1000);
+			await Task.Delay(200);
 
 			// modifies same client as task1, should get blocked until task1 is done
 			var task2 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {
 			    sequence.Add(4);
 		    }));
 
-			await Task.Delay(1000);
-			sequence.Add(2);
+			await Task.Delay(200);
 
-			//var task3 = Task.Run(() => fac.ConfigureClient("http://api2.com", c => {
-			//	sequence.Add(2);
-			//}));
+			// modifies different client, should run immediately
+			var task3 = Task.Run(() => fac.ConfigureClient("http://api2.com", c => {
+				sequence.Add(2);
+			}));
 
-			await Task.WhenAll(task1, task2);
+			await Task.WhenAll(task1, task2, task3);
 		    Assert.AreEqual("1,2,3,4", string.Join(",", sequence));
 	    }
 	}
