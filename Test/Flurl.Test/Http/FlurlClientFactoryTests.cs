@@ -45,7 +45,7 @@ namespace Flurl.Test.Http
 
 		    var task1 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {
 			    sequence.Add(1);
-				Thread.Sleep(2000);
+				Thread.Sleep(5000);
 			    sequence.Add(3);
 		    }));
 
