@@ -375,6 +375,14 @@ namespace Flurl.Test
 			Assert.AreEqual("http://www.mysite.com/a+b?c+d=1+2", url.ToString(true));
 		}
 
+		[Test] // #437
+		public void interprets_encoded_plus_as_plus() {
+			var urlStr = "http://google.com/search?q=param_with_%2B";
+			var url = new Url(urlStr);
+			var paramValue = url.QueryParams["q"];
+			Assert.AreEqual("param_with_+", paramValue);
+		}
+
 		[TestCase("http://www.mysite.com/more", true)]
 		[TestCase("http://www.mysite.com/more?x=1&y=2", true)]
 		[TestCase("http://www.mysite.com/more?x=1&y=2#frag", true)]
