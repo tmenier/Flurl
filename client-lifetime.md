@@ -1,5 +1,6 @@
 ---
 layout: redirect
+redirect_seconds: 10
 redirect_to: /docs/client-lifetime/
 ---
 
