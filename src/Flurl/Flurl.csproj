@@ -8,7 +8,7 @@
     <Version>2.8.1</Version>
     <Authors>Todd Menier</Authors>
     <Description>A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.</Description>
-    <PackageProjectUrl>https://flurl.io</PackageProjectUrl>
+    <PackageProjectUrl>https://flurl.dev</PackageProjectUrl>
     <PackageIconUrl>https://pbs.twimg.com/profile_images/534024476296376320/IuPGZ_bX_400x400.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/tmenier/Flurl.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

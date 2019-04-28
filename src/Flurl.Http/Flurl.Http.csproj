@@ -8,7 +8,7 @@
     <Version>2.4.1</Version>
     <Authors>Todd Menier</Authors>
     <Description>A fluent, portable, testable HTTP client library.</Description>
-    <PackageProjectUrl>https://flurl.io</PackageProjectUrl>
+    <PackageProjectUrl>https://flurl.dev</PackageProjectUrl>
     <PackageIconUrl>https://pbs.twimg.com/profile_images/534024476296376320/IuPGZ_bX_400x400.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/tmenier/Flurl.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
