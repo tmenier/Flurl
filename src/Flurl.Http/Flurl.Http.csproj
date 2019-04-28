@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net45;net46;netstandard1.1;netstandard1.3;netstandard2.0;</TargetFrameworks>
@@ -12,6 +12,7 @@
     <PackageIconUrl>https://pbs.twimg.com/profile_images/534024476296376320/IuPGZ_bX_400x400.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/tmenier/Flurl.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>httpclient rest json http fluent url uri tdd assert async</PackageTags>
 	  <PackageReleaseNotes>https://github.com/tmenier/Flurl/releases</PackageReleaseNotes>
     <IncludeProjectPriFile>false</IncludeProjectPriFile>
