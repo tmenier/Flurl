@@ -38,35 +38,33 @@ namespace Flurl.Test.Http
 		    Assert.IsFalse(fac.Get("http://api2.com/foo").Settings.CookiesEnabled);
 	    }
 
-	    [Test]
-	    public void ConfigureClient_is_thread_safe() {
+		[Test]
+	    public async Task ConfigureClient_is_thread_safe() {
 		    var fac = new PerHostFlurlClientFactory();
-
 		    var sequence = new List<int>();
 
 		    var task1 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {
 			    sequence.Add(1);
-			    Thread.Sleep(200);
+				Thread.Sleep(5000);
 			    sequence.Add(3);
 		    }));
 
-		    Thread.Sleep(50);
+			await Task.Delay(200);
 
 			// modifies same client as task1, should get blocked until task1 is done
-		    var task2 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {
+			var task2 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {
 			    sequence.Add(4);
 		    }));
 
-		    Thread.Sleep(50);
+			await Task.Delay(200);
 
-		    // modifies different client, should run immediately
-		    var task3 = Task.Run(() => fac.ConfigureClient("http://api2.com", c => {
-			    sequence.Add(2);
-		    }));
+			// modifies different client, should run immediately
+			var task3 = Task.Run(() => fac.ConfigureClient("http://api2.com", c => {
+				sequence.Add(2);
+			}));
 
-
-			Task.WaitAll(task1, task2, task3);
-		    CollectionAssert.AreEqual(new[] { 1, 2, 3, 4 }, sequence);
+			await Task.WhenAll(task1, task2, task3);
+		    Assert.AreEqual("1,2,3,4", string.Join(",", sequence));
 	    }
 	}
 }

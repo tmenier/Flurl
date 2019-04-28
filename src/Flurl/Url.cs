@@ -144,8 +144,7 @@ namespace Flurl
 			if (string.IsNullOrEmpty(s))
 				return s;
 
-			s = Uri.UnescapeDataString(s);
-			return interpretPlusAsSpace ? s.Replace("+", " ") : s;
+			return Uri.UnescapeDataString(interpretPlusAsSpace ? s.Replace("+", " ") : s);
 		}
 
 		private const int MAX_URL_LENGTH = 65519;

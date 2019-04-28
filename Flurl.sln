@@ -28,7 +28,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{B6BF9238
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 		Build\build.cmd = Build\build.cmd
+		Build\build.sh = Build\build.sh
+		Build\Flurl.netstandard.sln = Build\Flurl.netstandard.sln
 		Build\test.cmd = Build\test.cmd
+		Build\test.coverage.cmd = Build\test.coverage.cmd
+		Build\test.coverage.sh = Build\test.coverage.sh
+		Build\test.sh = Build\test.sh
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTester.NET45", "PackageTesters\PackageTester.NET45\PackageTester.NET45.csproj", "{63FD500A-7449-46E6-92C3-24CE92E817C7}"

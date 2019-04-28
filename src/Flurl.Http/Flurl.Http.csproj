@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net45;net46;netstandard1.1;netstandard1.3;netstandard2.0;</TargetFrameworks>
@@ -8,11 +8,11 @@
     <Version>2.4.1</Version>
     <Authors>Todd Menier</Authors>
     <Description>A fluent, portable, testable HTTP client library.</Description>
-    <PackageProjectUrl>https://flurl.io</PackageProjectUrl>
+    <PackageProjectUrl>https://flurl.dev</PackageProjectUrl>
     <PackageIconUrl>https://pbs.twimg.com/profile_images/534024476296376320/IuPGZ_bX_400x400.png</PackageIconUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/tmenier/Flurl/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/tmenier/Flurl.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>httpclient rest json http fluent url uri tdd assert async</PackageTags>
 	  <PackageReleaseNotes>https://github.com/tmenier/Flurl/releases</PackageReleaseNotes>
     <IncludeProjectPriFile>false</IncludeProjectPriFile>
