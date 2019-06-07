@@ -425,7 +425,7 @@ namespace Flurl
 		/// Converts this Url object to System.Uri
 		/// </summary>
 		/// <returns>The System.Uri object</returns>
-		public Uri ToUri() => new Uri(this);
+		public Uri ToUri() => new Uri(this, UriKind.RelativeOrAbsolute);
 
 		/// <summary>
 		/// Implicit conversion from Url to String.

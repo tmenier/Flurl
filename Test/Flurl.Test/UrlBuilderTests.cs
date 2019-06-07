@@ -349,11 +349,14 @@ namespace Flurl.Test
 			someMethodThatTakesAString(url); // if this compiles, test passed.
 		}
 
-		[Test]
-		public void Url_converts_to_uri() {
-			var url = new Url("http://www.mysite.com/more?x=1&y=2");
+		[TestCase("http://www.mysite.com/more?x=1&y=2", true)]
+		[TestCase("how/about/this#hi", false)] // #407
+		[TestCase("", false)] // #407
+		public void Url_converts_to_uri(string s, bool isAbsolute) {
+			var url = new Url(s);
 			var uri = url.ToUri();
-			Assert.AreEqual("http://www.mysite.com/more?x=1&y=2", uri.AbsoluteUri);
+			Assert.AreEqual(s, uri.OriginalString);
+			Assert.AreEqual(isAbsolute, uri.IsAbsoluteUri);
 		}
 
 		[Test]
