@@ -107,7 +107,7 @@ namespace Flurl.Util
 		}
 
 		// Credits to Stefan Steinegger, https://stackoverflow.com/a/863944/2001970
-		public static bool IsSimple(this Type type) {
+		private static bool IsSimple(this Type type) {
 #if NET40
 			if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) {
 				// nullable type, check if the nested type is simple.
