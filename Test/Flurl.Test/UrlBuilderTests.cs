@@ -514,5 +514,25 @@ namespace Flurl.Test
 			Assert.AreEqual("http://mysite.com?x=1&z=3", url1.ToString());
 			Assert.AreEqual("http://mysite.com/foo?x=1&y=2", url2.ToString());
 		}
+
+		[Test]
+		public void set_query_params_can_parse_nested_object() {
+			var url = "http://www.mysite.com".SetQueryParams(new {
+				x = 1,
+				y = 2,
+				z = new { a = 3, b = 4 }
+			});
+			Assert.AreEqual("http://www.mysite.com?x=1&y=2&z.a=3&z.b=4", url.ToString());
+		}
+
+		[Test]
+		public void set_query_params_can_parse_second_level_nested_objects() {
+			var url = "http://www.mysite.com".SetQueryParams(new {
+				x = 1,
+				y = 2,
+				z = new { a = new { b = 3 } }
+			});
+			Assert.AreEqual("http://www.mysite.com?x=1&y=2&z.a.b=3", url.ToString());
+		}
 	}
 }

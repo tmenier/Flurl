@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-#if !NET40
 using System.Reflection;
-#endif
 
 namespace Flurl.Util
 {
@@ -73,19 +71,63 @@ namespace Flurl.Util
 			return Url.ParseQueryParams(s).Select(p => new KeyValuePair<string, object>(p.Name, p.Value));
 		}
 
-		private static IEnumerable<KeyValuePair<string, object>> ObjectToKV(object obj) {
+		private static IEnumerable<KeyValuePair<string, object>> ObjectToKV(object obj, string prefix = "") {
+			var objProperties = new List<KeyValuePair<PropertyInfo, object>>();
+
 #if NETSTANDARD1_0
-			return from prop in obj.GetType().GetRuntimeProperties()
-				let getter = prop.GetMethod
-				where getter?.IsPublic == true
-				let val = getter.Invoke(obj, null)
-				select new KeyValuePair<string, object>(prop.Name, val);
+			objProperties.AddRange(obj
+				.GetType()
+				.GetRuntimeProperties()
+				.Where(p => p.GetMethod.IsPublic)
+				.Select(p =>
+					new KeyValuePair<PropertyInfo, object>(p , p.GetMethod.Invoke(obj, null))
+				));
+
 #else
-			return from prop in obj.GetType().GetProperties()
-				let getter = prop.GetGetMethod(false)
-				where getter != null
-				let val = getter.Invoke(obj, null)
-				select new KeyValuePair<string, object>(prop.Name, val);
+			objProperties.AddRange(obj
+				.GetType()
+				.GetProperties()
+				.Where(p=>p.GetGetMethod(false) != null)
+				.Select(p =>
+					new KeyValuePair<PropertyInfo, object>(p, p.GetGetMethod(false).Invoke(obj, null))
+				));
+#endif
+
+			foreach (var prop in objProperties) {
+				var propertyName = prop.Key.Name;
+				var propertyPath = $"{prefix}{propertyName}";
+				if (prop.Value is IEnumerable || prop.Value?.GetType()?.IsSimple() != false) {
+					yield return new KeyValuePair<string, object>(propertyPath, prop.Value);
+				}
+				else {
+					foreach (var kv in ObjectToKV(prop.Value, $"{propertyPath}."))
+						yield return kv;
+				}
+			}
+		}
+
+		// Credits to Stefan Steinegger, https://stackoverflow.com/a/863944/2001970
+		public static bool IsSimple(this Type type) {
+#if NET40
+			if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) {
+				// nullable type, check if the nested type is simple.
+				return IsSimple(type.GetGenericArguments()[0]);
+			}
+			return type.IsPrimitive
+			       || type.IsEnum
+			       || type == typeof(string)
+			       || type == typeof(decimal);
+
+#else
+			var typeInfo = type.GetTypeInfo();
+			if (typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>)) {
+				// nullable type, check if the nested type is simple.
+				return IsSimple(typeInfo.GenericTypeArguments[0]);
+			}
+			return typeInfo.IsPrimitive
+			       || typeInfo.IsEnum
+			       || type == typeof(string)
+			       || type == typeof(decimal);
 #endif
 		}
 
