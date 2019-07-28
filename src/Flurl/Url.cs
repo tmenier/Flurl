@@ -2,19 +2,37 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Flurl
 {
 	/// <summary>
-	/// A mutable object for fluently building URLs.
+	/// A mutable object for fluently building and parsing URLs.
 	/// </summary>
 	public class Url
 	{
+		private bool _leadingSlash = false;
+		private bool _trailingSlash = false;
+
 		/// <summary>
 		/// The absolute path of the URL starting with "/", or empty string if not present.
 		/// </summary>
-		public string Path { get; set; }
+		public string Path {
+			get {
+				var sb = new StringBuilder();
+				if (_leadingSlash) sb.Append("/");
+				sb.Append(string.Join("/", PathSegments));
+				if (_trailingSlash) sb.Append("/");
+				return sb.ToString();
+			}
+			set {
+				PathSegments.Clear();
+				AppendPathSegment(value);
+			}
+		}
+
+		public IList<string> PathSegments { get; } = new List<string>();
 
 		public string Scheme { get; set; }
 		public string UserInfo { get; set; }
@@ -30,7 +48,7 @@ namespace Flurl
 		/// </summary>
 		public string Authority {
 			get {
-				var sb = new System.Text.StringBuilder();
+				var sb = new StringBuilder();
 				if (!string.IsNullOrEmpty(UserInfo))
 					sb.Append(UserInfo).Append("@");
 				sb.Append(Host);
@@ -45,7 +63,7 @@ namespace Flurl
 		/// </summary>
 		public string Root {
 			get {
-				var sb = new System.Text.StringBuilder();
+				var sb = new StringBuilder();
 				if (!string.IsNullOrEmpty(Scheme))
 					sb.Append(Scheme).Append(":");
 				var a = Authority; // avoid parsing it twice
@@ -103,30 +121,30 @@ namespace Flurl
 				UserInfo = uri.UserInfo;
 				Host = uri.Host;
 				Port = uri.Authority.EndsWith($":{uri.Port}") ? uri.Port : (int?)null; // don't default Port if not included
-				Path = uri.AbsolutePath;
+				if (uri.AbsolutePath.Length > 1)
+					AppendPathSegment(uri.AbsolutePath);
 				Query = uri.Query;
 				Fragment = uri.Fragment.TrimStart('#'); // quirk - formal def of fragment does not include the #
 
-				// more quirk fixes
-				if (Path == "/" && !uri.OriginalString.StartsWith(Root + "/"))
-					Path = "";
+				_leadingSlash = uri.OriginalString.StartsWith(Root + "/");
+				_trailingSlash = PathSegments.Any() && uri.AbsolutePath.EndsWith("/");
 
+				// more quirk fixes
 				var hasAuthority = uri.OriginalString.StartsWith($"{Scheme}://");
-				if (hasAuthority && Authority.Length == 0 && Path.Length > 0) {
+				if (hasAuthority && Authority.Length == 0 && PathSegments.Any()) {
 					// Uri didn't parse Authority when it should have
-					var parts = Path.SplitOnFirstOccurence("/");
-					Host = parts[0];
-					Path = (parts.Length == 2) ? parts[1] : "";
+					Host = PathSegments[0];
+					PathSegments.RemoveAt(0);
 				}
 				else if (!hasAuthority && Authority.Length > 0) {
 					// Uri parsed Authority when it should not have
-					Path = Authority + Path;
+					PathSegments.Insert(0, Authority);
 					UserInfo = "";
 					Host = "";
 					Port = null;
 				}
 			}
-			// if it's relative, System.Uri refuses to parse any of it. this series of hacks will force the matter
+			// if it's relative, System.Uri refuses to parse any of it. these hacks will force the matter
 			else if (uri.OriginalString.StartsWith("//")) {
 				ParseInternal(new Uri("http:" + uri.OriginalString));
 				Scheme = "";
@@ -135,12 +153,13 @@ namespace Flurl
 				ParseInternal(new Uri("http://temp.com" + uri.OriginalString));
 				Scheme = "";
 				Host = "";
+				_leadingSlash = true;
 			}
 			else {
 				ParseInternal(new Uri("http://temp.com/" + uri.OriginalString));
 				Scheme = "";
 				Host = "";
-				Path = Path.TrimStart('/');
+				_leadingSlash = false;
 			}
 		}
 
@@ -190,15 +209,15 @@ namespace Flurl
 				    continue;
 
 				if (result.EndsWith("?") || part.StartsWith("?"))
-					result = CombineEnsureSingleSeperator(result, part, '?');
+					result = CombineEnsureSingleSeparator(result, part, '?');
 				else if (result.EndsWith("#") || part.StartsWith("#"))
-					result = CombineEnsureSingleSeperator(result, part, '#');
+					result = CombineEnsureSingleSeparator(result, part, '#');
 				else if (inFragment)
 					result += part;
 				else if (inQuery)
-					result = CombineEnsureSingleSeperator(result, part, '&');
+					result = CombineEnsureSingleSeparator(result, part, '&');
 				else
-					result = CombineEnsureSingleSeperator(result, part, '/');
+					result = CombineEnsureSingleSeparator(result, part, '/');
 
 			    if (part.Contains("#")) {
 					inQuery = false;
@@ -281,7 +300,7 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Appends a segment to the URL path, ensuring there is one and only one '/' character as a seperator.
+		/// Appends a segment to the URL path, ensuring there is one and only one '/' character as a separator.
 		/// </summary>
 		/// <param name="segment">The segment to append</param>
 		/// <param name="fullyEncode">If true, URL-encodes reserved characters such as '/', '+', and '%'. Otherwise, only encodes strictly illegal characters (including '%' but only when not followed by 2 hex characters).</param>
@@ -291,18 +310,23 @@ namespace Flurl
 			if (segment == null)
 				throw new ArgumentNullException(nameof(segment));
 
-			var encoded = fullyEncode ? 
-				Uri.EscapeDataString(segment.ToInvariantString()) :
-				EncodeIllegalCharacters(segment.ToInvariantString());
+			if (fullyEncode)
+				PathSegments.Add(Uri.EscapeDataString(segment.ToInvariantString()));
+			else {
+				var encoded = EncodeIllegalCharacters(segment.ToInvariantString()).Replace("?", "%3F");
+				foreach (var s in encoded.Trim('/').Split('/'))
+					PathSegments.Add(s);
+				_trailingSlash = encoded.EndsWith("/");
+			}
 
-			Path = CombineEnsureSingleSeperator(Path == "" ? "/" : Path, encoded.Replace("?", "%3F"), '/');
+			_leadingSlash = true;
 			return this;
 		}
 
-		private static string CombineEnsureSingleSeperator(string a, string b, char seperator) {
+		private static string CombineEnsureSingleSeparator(string a, string b, char separator) {
 			if (string.IsNullOrEmpty(a)) return b;
 			if (string.IsNullOrEmpty(b)) return a;
-			return a.TrimEnd(seperator) + seperator + b.TrimStart(seperator);
+			return a.TrimEnd(separator) + separator + b.TrimStart(separator);
 		}
 
 		/// <summary>
@@ -467,9 +491,10 @@ namespace Flurl
 		/// </summary>
 		/// <returns>The Url object trimmed to its root.</returns>
 		public Url ResetToRoot() {
-			Path = "";
+			PathSegments.Clear();
 			QueryParams.Clear();
 			Fragment = "";
+			_leadingSlash = _trailingSlash = false;
 			return this;
 		}
 
@@ -490,7 +515,7 @@ namespace Flurl
 		/// <param name="encodeSpaceAsPlus">Indicates whether to encode spaces with the "+" character instead of "%20"</param>
 		/// <returns></returns>
 		public string ToString(bool encodeSpaceAsPlus) {
-			var sb = new System.Text.StringBuilder(Root);
+			var sb = new StringBuilder(Root);
 			sb.Append(encodeSpaceAsPlus ? Path.Replace("%20", "+") : Path);
 			if (Query.Length > 0)
 				sb.Append("?").Append(QueryParams.ToString(encodeSpaceAsPlus));
