@@ -31,8 +31,12 @@ namespace Flurl.Test
 
 		[Test]
 		public void can_parse_url_parts() {
-			var url = new Url("http://www.mysite.com/more?x=1&y=2#foo");
-			Assert.AreEqual("http://www.mysite.com/more", url.Path);
+			var url = new Url("http://www.mysite.com/more/stuff?x=1&y=2#foo");
+			Assert.AreEqual("http", url.Scheme);
+			Assert.AreEqual("www.mysite.com", url.Host);
+			Assert.AreEqual("", url.UserInfo);
+			Assert.IsNull(url.Port);
+			Assert.AreEqual("/more/stuff", url.Path);
 			Assert.AreEqual("x=1&y=2", url.Query);
 			Assert.AreEqual("foo", url.Fragment);
 		}
@@ -234,17 +238,6 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void GetRoot_works() {
-			// simple case
-			var root = Url.GetRoot("http://mysite.com/one/two/three");
-			Assert.AreEqual("http://mysite.com", root);
-
-			// a litte more fancy
-			root = Url.GetRoot("https://me:you@www.site.com:8080/hello/goodbye?foo=bar");
-			Assert.AreEqual("https://me:you@www.site.com:8080", root);
-		}
-
-		[Test]
 		public void can_append_path_segment() {
 			var url = "http://www.mysite.com".AppendPathSegment("endpoint");
 			Assert.AreEqual("http://www.mysite.com/endpoint", url.ToString());
@@ -350,8 +343,10 @@ namespace Flurl.Test
 		}
 
 		[TestCase("http://www.mysite.com/more?x=1&y=2", true)]
-		[TestCase("how/about/this#hi", false)] // #407
-		[TestCase("", false)] // #407
+		[TestCase("//how/about/this#hi", false)]
+		[TestCase("/how/about/this#hi", false)]
+		[TestCase("how/about/this#hi", false)]
+		[TestCase("", false)]
 		public void Url_converts_to_uri(string s, bool isAbsolute) {
 			var url = new Url(s);
 			var uri = url.ToUri();
@@ -433,16 +428,49 @@ namespace Flurl.Test
 			Assert.AreEqual("http://www.mysite.com/more?x=3&y=4#first", url.ToString());
 		}
 
-		[TestCase("http://www.mysite.com/with/path?x=1", "http://www.mysite.com/with/path", "x=1", "")]
-		[TestCase("http://www.mysite.com/with/path?x=1#foo", "http://www.mysite.com/with/path", "x=1", "foo")]
-		[TestCase("http://www.mysite.com/with/path?x=1?y=2", "http://www.mysite.com/with/path", "x=1?y=2", "")]
-		[TestCase("http://www.mysite.com/#with/path?x=1?y=2", "http://www.mysite.com/", "", "with/path?x=1?y=2")]
-		public void constructor_parses_url_correctly(string full, string path, string query, string fragment) {
+		[TestCase("http://www.mysite.com/with/path?x=1", "http", "", "www.mysite.com", null, "/with/path", "x=1", "")]
+		[TestCase("https://www.mysite.com/with/path?x=1#foo", "https", "", "www.mysite.com", null, "/with/path", "x=1", "foo")]
+		[TestCase("http://user:pass@www.mysite.com:8080/with/path?x=1?y=2", "http", "user:pass", "www.mysite.com", 8080, "/with/path", "x=1?y=2", "")]
+		[TestCase("http://www.mysite.com/#with/path?x=1?y=2", "http", "", "www.mysite.com", null, "/", "", "with/path?x=1?y=2")]
+		public void constructor_parses_url_correctly(string full, string scheme, string userInfo, string host, int? port, string path, string query, string fragment) {
 			var url = new Url(full);
+			Assert.AreEqual(scheme, url.Scheme);
+			Assert.AreEqual(userInfo, url.UserInfo);
+			Assert.AreEqual(host, url.Host);
+			Assert.AreEqual(port, url.Port);
 			Assert.AreEqual(path, url.Path);
 			Assert.AreEqual(query, url.Query);
 			Assert.AreEqual(fragment, url.Fragment);
 			Assert.AreEqual(full, url.ToString());
+		}
+
+		// https://en.wikipedia.org/wiki/Uniform_Resource_Identifier#Examples
+		[Test]
+		public void can_parse_wikipedia_examples() {
+			var url = Url.Parse("https://john.doe@www.example.com:123/forum/questions/?tag=networking&order=newest#top");
+			AssertParts(url, "https", "john.doe@www.example.com:123", "john.doe", "www.example.com", 123, "/forum/questions/", "tag=networking&order=newest", "top");
+
+			url = Url.Parse("ldap://[2001:db8::7]/c=GB?objectClass?one");
+			AssertParts(url, "ldap", "[2001:db8::7]", "", "[2001:db8::7]", null, "/c=GB", "objectClass?one", "");
+
+			url = Url.Parse("mailto:John.Doe@example.com");
+			AssertParts(url, "mailto", "", "", "", null, "John.Doe@example.com", "", "");
+
+			url = Url.Parse("news:comp.infosystems.www.servers.unix");
+			url = Url.Parse("tel:+1-816-555-1212");
+			url = Url.Parse("telnet://192.0.2.16:80/");
+			url = Url.Parse("urn:oasis:names:specification:docbook:dtd:xml:4.1.2");
+		}
+
+		private void AssertParts(Url url, string scheme, string authority, string userInfo, string host, int? port, string path, string query, string fragment) {
+			Assert.AreEqual(scheme, url.Scheme);
+			Assert.AreEqual(authority, url.Authority);
+			Assert.AreEqual(userInfo, url.UserInfo);
+			Assert.AreEqual(host, url.Host);
+			Assert.AreEqual(port, url.Port);
+			Assert.AreEqual(path, url.Path);
+			Assert.AreEqual(query, url.Query);
+			Assert.AreEqual(fragment, url.Fragment);
 		}
 
 		// https://github.com/tmenier/Flurl/issues/185

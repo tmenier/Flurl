@@ -129,7 +129,7 @@ namespace Flurl.Test
 
 		[Test]
 		public void SplitOnFirstOccurence_works() {
-			var result = "hello/how/are/you".SplitOnFirstOccurence('/');
+			var result = "hello/how/are/you".SplitOnFirstOccurence("/");
 			Assert.AreEqual(new[] { "hello", "how/are/you" }, result);
 		}
 

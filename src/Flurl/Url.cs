@@ -12,9 +12,48 @@ namespace Flurl
 	public class Url
 	{
 		/// <summary>
-		/// The full absolute path part of the URL (everything except the query and fragment).
+		/// The absolute path of the URL starting with "/", or empty string if not present.
 		/// </summary>
 		public string Path { get; set; }
+
+		public string Scheme { get; set; }
+		public string UserInfo { get; set; }
+		public string Host { get; set; }
+
+		/// <summary>
+		/// Port number of the URL. Null if not explicitly specified.
+		/// </summary>
+		public int? Port { get; set; }
+
+		/// <summary>
+		/// UserInfo (if present), Host, and Port (if present).
+		/// </summary>
+		public string Authority {
+			get {
+				var sb = new System.Text.StringBuilder();
+				if (!string.IsNullOrEmpty(UserInfo))
+					sb.Append(UserInfo).Append("@");
+				sb.Append(Host);
+				if (Port.HasValue)
+					sb.Append(":").Append(Port);
+				return sb.ToString();
+			}
+		}
+
+		/// <summary>
+		/// The Scheme and Authority of the URL (everything before the Path)
+		/// </summary>
+		public string Root {
+			get {
+				var sb = new System.Text.StringBuilder();
+				if (!string.IsNullOrEmpty(Scheme))
+					sb.Append(Scheme).Append(":");
+				var a = Authority; // avoid parsing it twice
+				if (!string.IsNullOrEmpty(a))
+					sb.Append("//").Append(a);
+				return sb.ToString();
+			}
+		}
 
 		/// <summary>
 		/// The query part of the URL (after the ?, RFC 3986).
@@ -43,7 +82,7 @@ namespace Flurl
 			if (baseUrl == null)
 				throw new ArgumentNullException(nameof(baseUrl));
 
-			Parse(baseUrl);
+			ParseInternal(new Uri(baseUrl.Trim(), UriKind.RelativeOrAbsolute));
 		}
 
 		/// <summary>
@@ -55,15 +94,61 @@ namespace Flurl
 			if (uri == null)
 				throw new ArgumentNullException(nameof(uri));
 
-			Parse(uri.ToString());
+			ParseInternal(uri);
+		}
+		
+		private void ParseInternal(Uri uri) {
+			if (uri.IsAbsoluteUri) {
+				Scheme = uri.Scheme;
+				UserInfo = uri.UserInfo;
+				Host = uri.Host;
+				Port = uri.Authority.EndsWith($":{uri.Port}") ? uri.Port : (int?)null; // don't default Port if not included
+				Path = uri.AbsolutePath;
+				Query = uri.Query;
+				Fragment = uri.Fragment.TrimStart('#'); // quirk - formal def of fragment does not include the #
+
+				// more quirk fixes
+				if (Path == "/" && !uri.OriginalString.StartsWith(Root + "/"))
+					Path = "";
+
+				var hasAuthority = uri.OriginalString.StartsWith($"{Scheme}://");
+				if (hasAuthority && Authority.Length == 0 && Path.Length > 0) {
+					// Uri didn't parse Authority when it should have
+					var parts = Path.SplitOnFirstOccurence("/");
+					Host = parts[0];
+					Path = (parts.Length == 2) ? parts[1] : "";
+				}
+				else if (!hasAuthority && Authority.Length > 0) {
+					// Uri parsed Authority when it should not have
+					Path = Authority + Path;
+					UserInfo = "";
+					Host = "";
+					Port = null;
+				}
+			}
+			// if it's relative, System.Uri refuses to parse any of it. this series of hacks will force the matter
+			else if (uri.OriginalString.StartsWith("//")) {
+				ParseInternal(new Uri("http:" + uri.OriginalString));
+				Scheme = "";
+			}
+			else if (uri.OriginalString.StartsWith("/")) {
+				ParseInternal(new Uri("http://temp.com" + uri.OriginalString));
+				Scheme = "";
+				Host = "";
+			}
+			else {
+				ParseInternal(new Uri("http://temp.com/" + uri.OriginalString));
+				Scheme = "";
+				Host = "";
+				Path = Path.TrimStart('/');
+			}
 		}
 
-		private void Parse(string url) {
-			var parts = url.SplitOnFirstOccurence('#');
-			Fragment = (parts.Length == 2) ? parts[1] : "";
-			parts = parts[0].SplitOnFirstOccurence('?');
-			Query = (parts.Length == 2) ? parts[1] : "";
-			Path = parts[0];
+		/// <summary>
+		/// Parses a URL string into a Flurl.Url object.
+		/// </summary>
+		public static Url Parse(string url) {
+			return new Url(url);
 		}
 
 		/// <summary>
@@ -79,7 +164,7 @@ namespace Flurl
 
 			result.AddRange(
 				from p in query.Split('&')
-				let pair = p.SplitOnFirstOccurence('=')
+				let pair = p.SplitOnFirstOccurence("=")
 				let name = pair[0]
 				let value = (pair.Length == 1) ? null : pair[1]
 				select new QueryParameter(name, value, true));
@@ -124,14 +209,6 @@ namespace Flurl
 				}
 			}
 			return EncodeIllegalCharacters(result);
-		}
-
-		/// <summary>
-		/// Returns the root URL of the given full URL, including the scheme, any user info, host, and port (if specified).
-		/// </summary>
-		public static string GetRoot(string url) {
-			// http://stackoverflow.com/a/27473521/62600
-			return new Uri(url).GetComponents(UriComponents.SchemeAndServer | UriComponents.UserInfo, UriFormat.Unescaped);
 		}
 
 		/// <summary>
@@ -218,7 +295,7 @@ namespace Flurl
 				Uri.EscapeDataString(segment.ToInvariantString()) :
 				EncodeIllegalCharacters(segment.ToInvariantString());
 
-			Path = CombineEnsureSingleSeperator(Path, encoded.Replace("?", "%3F"), '/');
+			Path = CombineEnsureSingleSeperator(Path == "" ? "/" : Path, encoded.Replace("?", "%3F"), '/');
 			return this;
 		}
 
@@ -390,7 +467,7 @@ namespace Flurl
 		/// </summary>
 		/// <returns>The Url object trimmed to its root.</returns>
 		public Url ResetToRoot() {
-			Path = GetRoot(Path);
+			Path = "";
 			QueryParams.Clear();
 			Fragment = "";
 			return this;
@@ -413,7 +490,8 @@ namespace Flurl
 		/// <param name="encodeSpaceAsPlus">Indicates whether to encode spaces with the "+" character instead of "%20"</param>
 		/// <returns></returns>
 		public string ToString(bool encodeSpaceAsPlus) {
-			var sb = new System.Text.StringBuilder(encodeSpaceAsPlus ? Path.Replace("%20", "+") : Path);
+			var sb = new System.Text.StringBuilder(Root);
+			sb.Append(encodeSpaceAsPlus ? Path.Replace("%20", "+") : Path);
 			if (Query.Length > 0)
 				sb.Append("?").Append(QueryParams.ToString(encodeSpaceAsPlus));
 			if (Fragment.Length > 0)
