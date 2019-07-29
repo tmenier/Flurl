@@ -4,7 +4,7 @@ using System.Linq;
 using NUnit.Framework;
 using Flurl.Util;
 
-namespace Flurl.Test
+namespace Flurl.Test.UrlBuilder
 {
 	[TestFixture, Parallelizable]
 	public class CommonExtensionsTests

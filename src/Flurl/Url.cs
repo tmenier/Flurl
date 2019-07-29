@@ -15,8 +15,9 @@ namespace Flurl
 		private bool _leadingSlash = false;
 		private bool _trailingSlash = false;
 
+		#region properties
 		/// <summary>
-		/// The absolute path of the URL starting with "/", or empty string if not present.
+		/// i.e. "/path" in "https://www.site.com/path". Empty string if not present. Leading and trailing "/" retained exactly as specified by user.
 		/// </summary>
 		public string Path {
 			get {
@@ -32,10 +33,24 @@ namespace Flurl
 			}
 		}
 
+		/// <summary>
+		/// The "/"-delimited segments of the path, not including leading or trailing "/" characters.
+		/// </summary>
 		public IList<string> PathSegments { get; } = new List<string>();
 
+		/// <summary>
+		/// The scheme of the URL, i.e. "http". Does not include ":" delimiter. Empty string if the URL is relative.
+		/// </summary>
 		public string Scheme { get; set; }
+
+		/// <summary>
+		/// i.e. "user:pass" in "https://user:pass@www.site.com". Empty string if not present.
+		/// </summary>
 		public string UserInfo { get; set; }
+
+		/// <summary>
+		/// i.e. "www.site.com" in "https://www.site.com:8080/path". Does not include user info or port.
+		/// </summary>
 		public string Host { get; set; }
 
 		/// <summary>
@@ -44,7 +59,7 @@ namespace Flurl
 		public int? Port { get; set; }
 
 		/// <summary>
-		/// UserInfo (if present), Host, and Port (if present).
+		/// i.e. "www.site.com:8080" in "https://www.site.com:8080/path". Includes both user info and port, if included.
 		/// </summary>
 		public string Authority {
 			get {
@@ -59,7 +74,7 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// The Scheme and Authority of the URL (everything before the Path)
+		/// i.e. "https://www.site.com:8080" in "https://www.site.com:8080/path" (everything before the path).
 		/// </summary>
 		public string Root {
 			get {
@@ -74,7 +89,7 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// The query part of the URL (after the ?, RFC 3986).
+		/// i.e. "x=1&y=2" in "https://www.site.com/path?x=1&y=2". Does not include "?".
 		/// </summary>
 		public string Query {
 			get => QueryParams.ToString();
@@ -82,7 +97,7 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// The fragment part of the URL (after the #, RFC 3986).
+		/// i.e. "frag" in "https://www.site.com/path?x=y#frag". Does not include "#".
 		/// </summary>
 		public string Fragment { get; set; }
 
@@ -91,6 +106,13 @@ namespace Flurl
 		/// </summary>
 		public QueryParamCollection QueryParams { get; private set; }
 
+		/// <summary>
+		/// True if URL does not start with a non-empty scheme. i.e. true for "https://www.site.com", false for "//www.site.com".
+		/// </summary>
+		public bool IsRelative => string.IsNullOrEmpty(Scheme);
+		#endregion
+
+		#region ctors and parsing methods
 		/// <summary>
 		/// Constructs a Url object from a string.
 		/// </summary>
@@ -115,6 +137,13 @@ namespace Flurl
 			ParseInternal(uri);
 		}
 		
+		/// <summary>
+		/// Parses a URL string into a Flurl.Url object.
+		/// </summary>
+		public static Url Parse(string url) {
+			return new Url(url);
+		}
+
 		private void ParseInternal(Uri uri) {
 			if (uri.IsAbsoluteUri) {
 				Scheme = uri.Scheme;
@@ -164,13 +193,6 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Parses a URL string into a Flurl.Url object.
-		/// </summary>
-		public static Url Parse(string url) {
-			return new Url(url);
-		}
-
-		/// <summary>
 		/// Parses a URL query to a QueryParamCollection dictionary.
 		/// </summary>
 		/// <param name="query">The URL query to parse.</param>
@@ -190,115 +212,9 @@ namespace Flurl
 
 			return result;
 		}
+		#endregion
 
-		/// <summary>
-		/// Basically a Path.Combine for URLs. Ensures exactly one '/' seperates each segment,
-		/// and exactly on '&amp;' seperates each query parameter.
-		/// URL-encodes illegal characters but not reserved characters.
-		/// </summary>
-		/// <param name="parts">URL parts to combine.</param>
-		public static string Combine(params string[] parts) {
-			if (parts == null)
-				throw new ArgumentNullException(nameof(parts));
-
-			string result = "";
-			bool inQuery = false, inFragment = false;
-
-		    foreach (var part in parts) {
-			    if (string.IsNullOrEmpty(part))
-				    continue;
-
-				if (result.EndsWith("?") || part.StartsWith("?"))
-					result = CombineEnsureSingleSeparator(result, part, '?');
-				else if (result.EndsWith("#") || part.StartsWith("#"))
-					result = CombineEnsureSingleSeparator(result, part, '#');
-				else if (inFragment)
-					result += part;
-				else if (inQuery)
-					result = CombineEnsureSingleSeparator(result, part, '&');
-				else
-					result = CombineEnsureSingleSeparator(result, part, '/');
-
-			    if (part.Contains("#")) {
-					inQuery = false;
-					inFragment = true;
-			    }
-				else if (!inFragment && part.Contains("?")) {
-					inQuery = true;
-				}
-			}
-			return EncodeIllegalCharacters(result);
-		}
-
-		/// <summary>
-		/// Decodes a URL-encoded string.
-		/// </summary>
-		/// <param name="s">The URL-encoded string.</param>
-		/// <param name="interpretPlusAsSpace">If true, any '+' character will be decoded to a space.</param>
-		/// <returns></returns>
-		public static string Decode(string s, bool interpretPlusAsSpace) {
-			if (string.IsNullOrEmpty(s))
-				return s;
-
-			return Uri.UnescapeDataString(interpretPlusAsSpace ? s.Replace("+", " ") : s);
-		}
-
-		private const int MAX_URL_LENGTH = 65519;
-
-		/// <summary>
-		/// URL-encodes a string, including reserved characters such as '/' and '?'.
-		/// </summary>
-		/// <param name="s">The string to encode.</param>
-		/// <param name="encodeSpaceAsPlus">If true, spaces will be encoded as + signs. Otherwise, they'll be encoded as %20.</param>
-		/// <returns>The encoded URL.</returns>
-		public static string Encode(string s, bool encodeSpaceAsPlus = false) {
-			if (string.IsNullOrEmpty(s))
-				return s;
-
-			if (s.Length > MAX_URL_LENGTH) {
-				// Uri.EscapeDataString is going to throw because the string is "too long", so break it into pieces and concat them
-				var parts = new string[(int)Math.Ceiling((double)s.Length / MAX_URL_LENGTH)];
-				for (var i = 0; i < parts.Length; i++) {
-					var start = i * MAX_URL_LENGTH;
-					var len = Math.Min(MAX_URL_LENGTH, s.Length - start);
-					parts[i] = Uri.EscapeDataString(s.Substring(start, len));
-				}
-				s = string.Concat(parts);
-			}
-			else {
-				s = Uri.EscapeDataString(s);
-			}
-			return encodeSpaceAsPlus ? s.Replace("%20", "+") : s;
-		}
-
-		/// <summary>
-		/// URL-encodes characters in a string that are neither reserved nor unreserved. Avoids encoding reserved characters such as '/' and '?'. Avoids encoding '%' if it begins a %-hex-hex sequence (i.e. avoids double-encoding).
-		/// </summary>
-		/// <param name="s">The string to encode.</param>
-		/// <param name="encodeSpaceAsPlus">If true, spaces will be encoded as + signs. Otherwise, they'll be encoded as %20.</param>
-		/// <returns>The encoded URL.</returns>
-		public static string EncodeIllegalCharacters(string s, bool encodeSpaceAsPlus = false) {
-			if (string.IsNullOrEmpty(s))
-				return s;
-
-			if (encodeSpaceAsPlus)
-				s = s.Replace(" ", "+");
-
-			// Uri.EscapeUriString mostly does what we want - encodes illegal characters only - but it has a quirk
-			// in that % isn't illegal if it's the start of a %-encoded sequence https://stackoverflow.com/a/47636037/62600
-
-			// no % characters, so avoid the regex overhead
-			if (!s.Contains("%"))
-				return Uri.EscapeUriString(s);
-
-			// pick out all %-hex-hex matches and avoid double-encoding 
-			return Regex.Replace(s, "(.*?)((%[0-9A-Fa-f]{2})|$)", c => {
-				var a = c.Groups[1].Value; // group 1 is a sequence with no %-encoding - encode illegal characters
-				var b = c.Groups[2].Value; // group 2 is a valid 3-character %-encoded sequence - leave it alone!
-				return Uri.EscapeUriString(a) + b;
-			});
-		}
-
+		#region fluent builder methods
 		/// <summary>
 		/// Appends a segment to the URL path, ensuring there is one and only one '/' character as a separator.
 		/// </summary>
@@ -321,12 +237,6 @@ namespace Flurl
 
 			_leadingSlash = true;
 			return this;
-		}
-
-		private static string CombineEnsureSingleSeparator(string a, string b, char separator) {
-			if (string.IsNullOrEmpty(a)) return b;
-			if (string.IsNullOrEmpty(b)) return a;
-			return a.TrimEnd(separator) + separator + b.TrimStart(separator);
 		}
 
 		/// <summary>
@@ -474,19 +384,6 @@ namespace Flurl
 		public Url RemoveFragment() => SetFragment("");
 
 		/// <summary>
-		/// Checks if this URL is a well-formed.
-		/// </summary>
-		/// <returns>true if this is a well-formed URL</returns>
-		public bool IsValid() => IsValid(ToString());
-
-		/// <summary>
-		/// Checks if a string is a well-formed URL.
-		/// </summary>
-		/// <param name="url">The string to check</param>
-		/// <returns>true if s is a well-formed URL</returns>
-		public static bool IsValid(string url) => url != null && Uri.IsWellFormedUriString(url, UriKind.Absolute);
-
-		/// <summary>
 		/// Resets the URL to its root, including the scheme, any user info, host, and port (if specified).
 		/// </summary>
 		/// <returns>The Url object trimmed to its root.</returns>
@@ -499,16 +396,12 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Converts this Url object to its string representation.
-		/// </summary>
-		/// <returns></returns>
-		public override string ToString() => ToString(false);
-
-		/// <summary>
 		/// Creates a copy of this Url.
 		/// </summary>
 		public Url Clone() => new Url(this);
+		#endregion
 
+		#region conversion, equality, etc.
 		/// <summary>
 		/// Converts this Url object to its string representation.
 		/// </summary>
@@ -523,6 +416,12 @@ namespace Flurl
 				sb.Append("#").Append(Fragment);
 			return sb.ToString();
 		}
+
+		/// <summary>
+		/// Converts this Url object to its string representation.
+		/// </summary>
+		/// <returns></returns>
+		public override string ToString() => ToString(false);
 
 		/// <summary>
 		/// Converts this Url object to System.Uri
@@ -561,5 +460,129 @@ namespace Flurl
 		/// Returns the hashcode for this Url.
 		/// </summary>
 		public override int GetHashCode() => this.ToString().GetHashCode();
+		#endregion
+
+		#region static utility methods
+		/// <summary>
+		/// Basically a Path.Combine for URLs. Ensures exactly one '/' separates each segment,
+		/// and exactly on '&amp;' separates each query parameter.
+		/// URL-encodes illegal characters but not reserved characters.
+		/// </summary>
+		/// <param name="parts">URL parts to combine.</param>
+		public static string Combine(params string[] parts) {
+			if (parts == null)
+				throw new ArgumentNullException(nameof(parts));
+
+			string result = "";
+			bool inQuery = false, inFragment = false;
+
+			string CombineEnsureSingleSeparator(string a, string b, char separator) {
+				if (string.IsNullOrEmpty(a)) return b;
+				if (string.IsNullOrEmpty(b)) return a;
+				return a.TrimEnd(separator) + separator + b.TrimStart(separator);
+			}
+
+			foreach (var part in parts) {
+				if (string.IsNullOrEmpty(part))
+					continue;
+
+				if (result.EndsWith("?") || part.StartsWith("?"))
+					result = CombineEnsureSingleSeparator(result, part, '?');
+				else if (result.EndsWith("#") || part.StartsWith("#"))
+					result = CombineEnsureSingleSeparator(result, part, '#');
+				else if (inFragment)
+					result += part;
+				else if (inQuery)
+					result = CombineEnsureSingleSeparator(result, part, '&');
+				else
+					result = CombineEnsureSingleSeparator(result, part, '/');
+
+				if (part.Contains("#")) {
+					inQuery = false;
+					inFragment = true;
+				}
+				else if (!inFragment && part.Contains("?")) {
+					inQuery = true;
+				}
+			}
+			return EncodeIllegalCharacters(result);
+		}
+
+		/// <summary>
+		/// Decodes a URL-encoded string.
+		/// </summary>
+		/// <param name="s">The URL-encoded string.</param>
+		/// <param name="interpretPlusAsSpace">If true, any '+' character will be decoded to a space.</param>
+		/// <returns></returns>
+		public static string Decode(string s, bool interpretPlusAsSpace) {
+			if (string.IsNullOrEmpty(s))
+				return s;
+
+			return Uri.UnescapeDataString(interpretPlusAsSpace ? s.Replace("+", " ") : s);
+		}
+
+		private const int MAX_URL_LENGTH = 65519;
+
+		/// <summary>
+		/// URL-encodes a string, including reserved characters such as '/' and '?'.
+		/// </summary>
+		/// <param name="s">The string to encode.</param>
+		/// <param name="encodeSpaceAsPlus">If true, spaces will be encoded as + signs. Otherwise, they'll be encoded as %20.</param>
+		/// <returns>The encoded URL.</returns>
+		public static string Encode(string s, bool encodeSpaceAsPlus = false) {
+			if (string.IsNullOrEmpty(s))
+				return s;
+
+			if (s.Length > MAX_URL_LENGTH) {
+				// Uri.EscapeDataString is going to throw because the string is "too long", so break it into pieces and concat them
+				var parts = new string[(int)Math.Ceiling((double)s.Length / MAX_URL_LENGTH)];
+				for (var i = 0; i < parts.Length; i++) {
+					var start = i * MAX_URL_LENGTH;
+					var len = Math.Min(MAX_URL_LENGTH, s.Length - start);
+					parts[i] = Uri.EscapeDataString(s.Substring(start, len));
+				}
+				s = string.Concat(parts);
+			}
+			else {
+				s = Uri.EscapeDataString(s);
+			}
+			return encodeSpaceAsPlus ? s.Replace("%20", "+") : s;
+		}
+
+		/// <summary>
+		/// URL-encodes characters in a string that are neither reserved nor unreserved. Avoids encoding reserved characters such as '/' and '?'. Avoids encoding '%' if it begins a %-hex-hex sequence (i.e. avoids double-encoding).
+		/// </summary>
+		/// <param name="s">The string to encode.</param>
+		/// <param name="encodeSpaceAsPlus">If true, spaces will be encoded as + signs. Otherwise, they'll be encoded as %20.</param>
+		/// <returns>The encoded URL.</returns>
+		public static string EncodeIllegalCharacters(string s, bool encodeSpaceAsPlus = false) {
+			if (string.IsNullOrEmpty(s))
+				return s;
+
+			if (encodeSpaceAsPlus)
+				s = s.Replace(" ", "+");
+
+			// Uri.EscapeUriString mostly does what we want - encodes illegal characters only - but it has a quirk
+			// in that % isn't illegal if it's the start of a %-encoded sequence https://stackoverflow.com/a/47636037/62600
+
+			// no % characters, so avoid the regex overhead
+			if (!s.Contains("%"))
+				return Uri.EscapeUriString(s);
+
+			// pick out all %-hex-hex matches and avoid double-encoding 
+			return Regex.Replace(s, "(.*?)((%[0-9A-Fa-f]{2})|$)", c => {
+				var a = c.Groups[1].Value; // group 1 is a sequence with no %-encoding - encode illegal characters
+				var b = c.Groups[2].Value; // group 2 is a valid 3-character %-encoded sequence - leave it alone!
+				return Uri.EscapeUriString(a) + b;
+			});
+		}
+
+		/// <summary>
+		/// Checks if a string is a well-formed absolute URL.
+		/// </summary>
+		/// <param name="url">The string to check</param>
+		/// <returns>true if s is a well-formed absolute URL</returns>
+		public static bool IsValid(string url) => url != null && Uri.IsWellFormedUriString(url, UriKind.Absolute);
+		#endregion
 	}
 }

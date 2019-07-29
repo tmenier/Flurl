@@ -6,10 +6,10 @@ using System.Reflection;
 using System.Threading;
 using NUnit.Framework;
 
-namespace Flurl.Test
+namespace Flurl.Test.UrlBuilder
 {
 	[TestFixture, Parallelizable]
-	public class UrlBuilderTests
+	public class UrlBuildingTests
 	{
 		[Test]
 		// check that for every Url method, we have an equivalent string extension
@@ -30,40 +30,11 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void can_parse_url_parts() {
-			var url = new Url("http://www.mysite.com/more/stuff?x=1&y=2#foo");
-			Assert.AreEqual("http", url.Scheme);
-			Assert.AreEqual("www.mysite.com", url.Host);
-			Assert.AreEqual("", url.UserInfo);
-			Assert.IsNull(url.Port);
-			Assert.AreEqual("/more/stuff", url.Path);
-			Assert.AreEqual("x=1&y=2", url.Query);
-			Assert.AreEqual("foo", url.Fragment);
-		}
-
-		[Test]
 		public void can_construct_from_uri() {
 			var s = "http://www.mysite.com/more?x=1&y=2#foo";
 			var uri = new Uri(s);
 			var url = new Url(uri);
 			Assert.AreEqual(s, url.ToString());
-		}
-
-		[Test]
-		public void can_parse_query_params() {
-			var q = new Url("http://www.mysite.com/more?x=1&y=2&z=3&y=4&abc&xyz&foo=&=bar&y=6").QueryParams;
-
-			Assert.AreEqual(9, q.Count);
-			Assert.AreEqual(new[] { "x", "y", "z", "y", "abc", "xyz", "foo", "", "y", }, q.Select(p => p.Name));
-			Assert.AreEqual(new[] { "1", "2", "3", "4", null, null, "", "bar", "6", }, q.Select(p => p.Value));
-
-			Assert.AreEqual("1", q["x"]);
-			Assert.AreEqual(new[] { "2", "4", "6" }, q["y"]); // group values of same name into array
-			Assert.AreEqual("3", q["z"]);
-			Assert.AreEqual(null, q["abc"]);
-			Assert.AreEqual(null, q["xyz"]);
-			Assert.AreEqual("", q["foo"]);
-			Assert.AreEqual("bar", q[""]);
 		}
 
 		[Test]
@@ -216,28 +187,6 @@ namespace Flurl.Test
 		}
 
 		[Test]
-		public void Combine_works() {
-			var url = Url.Combine("http://www.foo.com/", "/too/", "/many/", "/slashes/", "too", "few", "one/two/");
-			Assert.AreEqual("http://www.foo.com/too/many/slashes/too/few/one/two/", url);
-		}
-
-		[TestCase("segment?", "foo=bar", "x=1&y=2&")]
-		[TestCase("segment", "?foo=bar&x=1", "y=2&")]
-		[TestCase("segment", "?", "foo=bar&x=1&y=2&")]
-		[TestCase("/segment?foo=bar&", "&x=1&", "&y=2&")]
-		[TestCase(null, "segment?foo=bar&x=1&y=2&", "")]
-		public void Combine_supports_query(string a, string b, string c) {
-			var url = Url.Combine("http://root.com", a, b, c);
-			Assert.AreEqual("http://root.com/segment?foo=bar&x=1&y=2&", url);
-		}
-
-		[Test]
-		public void Combine_encodes_illegal_chars() {
-			var url = Url.Combine("http://www.foo.com", "hi there", "?", "x=hi there", "#", "hi there");
-			Assert.AreEqual("http://www.foo.com/hi%20there?x=hi%20there#hi%20there", url);
-		}
-
-		[Test]
 		public void can_append_path_segment() {
 			var url = "http://www.mysite.com".AppendPathSegment("endpoint");
 			Assert.AreEqual("http://www.mysite.com/endpoint", url.ToString());
@@ -342,24 +291,6 @@ namespace Flurl.Test
 			someMethodThatTakesAString(url); // if this compiles, test passed.
 		}
 
-		[TestCase("http://www.mysite.com/more?x=1&y=2", true)]
-		[TestCase("//how/about/this#hi", false)]
-		[TestCase("/how/about/this#hi", false)]
-		[TestCase("how/about/this#hi", false)]
-		[TestCase("", false)]
-		public void Url_converts_to_uri(string s, bool isAbsolute) {
-			var url = new Url(s);
-			var uri = url.ToUri();
-			Assert.AreEqual(s, uri.OriginalString);
-			Assert.AreEqual(isAbsolute, uri.IsAbsoluteUri);
-		}
-
-		[Test]
-		public void interprets_plus_as_space() {
-			var url = new Url("http://www.mysite.com/foo+bar?x=1+2");
-			Assert.AreEqual("1 2", url.QueryParams["x"]);
-		}
-
 		[Test]
 		public void encodes_plus() {
 			var url = new Url("http://www.mysite.com").SetQueryParam("x", "1+2");
@@ -373,37 +304,7 @@ namespace Flurl.Test
 			Assert.AreEqual("http://www.mysite.com/a+b?c+d=1+2", url.ToString(true));
 		}
 
-		[Test] // #437
-		public void interprets_encoded_plus_as_plus() {
-			var urlStr = "http://google.com/search?q=param_with_%2B";
-			var url = new Url(urlStr);
-			var paramValue = url.QueryParams["q"];
-			Assert.AreEqual("param_with_+", paramValue);
-		}
-
-		[TestCase("http://www.mysite.com/more", true)]
-		[TestCase("http://www.mysite.com/more?x=1&y=2", true)]
-		[TestCase("http://www.mysite.com/more?x=1&y=2#frag", true)]
-		[TestCase("http://www.mysite.com#frag", true)]
-		[TestCase("", false)]
-		[TestCase("blah", false)]
-		[TestCase("http:/www.mysite.com", false)]
-		[TestCase("www.mysite.com", false)]
-		public void IsUrl_works(string s, bool isValid) {
-			Assert.AreEqual(isValid, Url.IsValid(s));
-			Assert.AreEqual(isValid, new Url(s).IsValid());
-		}
-
-		// #56
-		[Test]
-		public void does_not_alter_url_passed_to_constructor() {
-			var expected = "http://www.mysite.com/hi%20there/more?x=%CD%EE%E2%FB%E9%20%E3%EE%E4";
-			var url = new Url(expected);
-			Assert.AreEqual(expected, url.ToString());
-		}
-
-		// #29
-		[Test]
+		[Test] // #29
 		public void can_add_and_remove_fragment_fluently() {
 			var url = "http://www.mysite.com".SetFragment("foo");
 			Assert.AreEqual("http://www.mysite.com#foo", url.ToString());
@@ -426,86 +327,6 @@ namespace Flurl.Test
 				.SetQueryParam("x", 3)
 				.SetQueryParam("y", 4);
 			Assert.AreEqual("http://www.mysite.com/more?x=3&y=4#first", url.ToString());
-		}
-
-		[TestCase("http://www.mysite.com/with/path?x=1", "http", "", "www.mysite.com", null, "/with/path", "x=1", "")]
-		[TestCase("https://www.mysite.com/with/path?x=1#foo", "https", "", "www.mysite.com", null, "/with/path", "x=1", "foo")]
-		[TestCase("http://user:pass@www.mysite.com:8080/with/path?x=1?y=2", "http", "user:pass", "www.mysite.com", 8080, "/with/path", "x=1?y=2", "")]
-		[TestCase("http://www.mysite.com/#with/path?x=1?y=2", "http", "", "www.mysite.com", null, "/", "", "with/path?x=1?y=2")]
-		public void constructor_parses_url_correctly(string full, string scheme, string userInfo, string host, int? port, string path, string query, string fragment) {
-			var url = new Url(full);
-			Assert.AreEqual(scheme, url.Scheme);
-			Assert.AreEqual(userInfo, url.UserInfo);
-			Assert.AreEqual(host, url.Host);
-			Assert.AreEqual(port, url.Port);
-			Assert.AreEqual(path, url.Path);
-			Assert.AreEqual(query, url.Query);
-			Assert.AreEqual(fragment, url.Fragment);
-			Assert.AreEqual(full, url.ToString());
-		}
-
-		// https://en.wikipedia.org/wiki/Uniform_Resource_Identifier#Examples
-		[Test]
-		public void can_parse_wikipedia_examples() {
-			var url = Url.Parse("https://john.doe@www.example.com:123/forum/questions/?tag=networking&order=newest#top");
-			AssertParts(url, "https", "john.doe@www.example.com:123", "john.doe", "www.example.com", 123, "/forum/questions/", "tag=networking&order=newest", "top");
-
-			url = Url.Parse("ldap://[2001:db8::7]/c=GB?objectClass?one");
-			AssertParts(url, "ldap", "[2001:db8::7]", "", "[2001:db8::7]", null, "/c=GB", "objectClass?one", "");
-
-			url = Url.Parse("mailto:John.Doe@example.com");
-			AssertParts(url, "mailto", "", "", "", null, "John.Doe@example.com", "", "");
-
-			url = Url.Parse("news:comp.infosystems.www.servers.unix");
-			url = Url.Parse("tel:+1-816-555-1212");
-			url = Url.Parse("telnet://192.0.2.16:80/");
-			url = Url.Parse("urn:oasis:names:specification:docbook:dtd:xml:4.1.2");
-		}
-
-		private void AssertParts(Url url, string scheme, string authority, string userInfo, string host, int? port, string path, string query, string fragment) {
-			Assert.AreEqual(scheme, url.Scheme);
-			Assert.AreEqual(authority, url.Authority);
-			Assert.AreEqual(userInfo, url.UserInfo);
-			Assert.AreEqual(host, url.Host);
-			Assert.AreEqual(port, url.Port);
-			Assert.AreEqual(path, url.Path);
-			Assert.AreEqual(query, url.Query);
-			Assert.AreEqual(fragment, url.Fragment);
-		}
-
-		// https://github.com/tmenier/Flurl/issues/185
-		[Test]
-		public void can_encode_and_decode_very_long_value() {
-			// 65,520 chars is the tipping point for Uri.EscapeDataString https://github.com/dotnet/corefx/issues/1936
-			var len = 500000;
-
-			// every 10th char needs to be encoded
-			var s = string.Concat(Enumerable.Repeat("xxxxxxxxx ", len / 10));
-			Assert.AreEqual(len, s.Length); // just a sanity check
-
-			// encode space as %20
-			var encoded = Url.Encode(s, false);
-			// hex encoding will add 2 addtional chars for every char that needs to be encoded
-			Assert.AreEqual(len + (2 * len / 10), encoded.Length);
-			var expected = string.Concat(Enumerable.Repeat("xxxxxxxxx%20", len / 10));
-			Assert.AreEqual(expected, encoded);
-
-			var decoded = Url.Decode(encoded, false);
-			Assert.AreEqual(s, decoded);
-
-			// encode space as +
-			encoded = Url.Encode(s, true);
-			Assert.AreEqual(len, encoded.Length);
-			expected = string.Concat(Enumerable.Repeat("xxxxxxxxx+", len / 10));
-			Assert.AreEqual(expected, encoded);
-
-			// interpret + as space
-			decoded = Url.Decode(encoded, true);
-			Assert.AreEqual(s, decoded);
-
-			// don't interpret + as space, encoded and decoded should be the same
-			decoded = Url.Decode(encoded, false);
-			Assert.AreEqual(encoded, decoded);
 		}
 
 		[Test]
