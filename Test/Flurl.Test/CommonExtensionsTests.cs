@@ -26,6 +26,18 @@ namespace Flurl.Test
 		}
 
 		[Test]
+		public void can_parse_nested_object_to_kv() {
+			var kv = new {
+				one = new { two = "foo", three = new { four = "bar"}},
+			}.ToKeyValuePairs();
+
+			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
+				{ "one.two", "foo" },
+				{ "one.three.four", "bar" },
+			}, kv);
+		}
+
+		[Test]
 		public void can_parse_dictionary_to_kv()
 		{
 			var kv = new Dictionary<string, object> {
@@ -88,6 +100,16 @@ namespace Flurl.Test
 				{ "one", "1" },
 				{ "two", "foo" },
 				{ "three", null }
+			}, kv);
+		}
+
+		[Test]
+		public void can_parse_string_with_nested_objects_to_kv() {
+			var kv = "one.two=foo&one.three.four=bar".ToKeyValuePairs();
+
+			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
+				{ "one.two", "foo" },
+				{ "one.three.four", "bar" }
 			}, kv);
 		}
 

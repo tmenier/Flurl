@@ -270,7 +270,7 @@ namespace Flurl.Test.Http
 				cts.Cancel();
 				await task;
 			});
-			Assert.That(ex.InnerException is TaskCanceledException);
+			Assert.That(ex.InnerException is OperationCanceledException);
 			Assert.IsTrue(cts.Token.IsCancellationRequested);
 
 			// timeout with cancellation token set
@@ -280,7 +280,7 @@ namespace Flurl.Test.Http
 					.WithTimeout(TimeSpan.FromMilliseconds(50))
 					.GetAsync(cts.Token);
 			});
-			Assert.That(ex.InnerException is TaskCanceledException);
+			Assert.That(ex.InnerException is OperationCanceledException);
 			Assert.IsFalse(cts.Token.IsCancellationRequested);
 		}
 
