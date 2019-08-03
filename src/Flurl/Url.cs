@@ -1,8 +1,7 @@
-﻿using Flurl.Util;
+using Flurl.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Flurl
@@ -12,20 +11,30 @@ namespace Flurl
 	/// </summary>
 	public class Url
 	{
-		private bool _leadingSlash = false;
-		private bool _trailingSlash = false;
+		private string _baseUrl;
+		private bool _parsed;
 
-		#region properties
+		private string _scheme;
+		private string _userInfo;
+		private string _host;
+		private List<string> _pathSegments;
+		private QueryParamCollection _queryParams;
+		private string _fragment;
+		private int? _port;
+		private bool _leadingSlash;
+		private bool _trailingSlash;
+
+		#region public properties
 		/// <summary>
 		/// i.e. "/path" in "https://www.site.com/path". Empty string if not present. Leading and trailing "/" retained exactly as specified by user.
 		/// </summary>
 		public string Path {
 			get {
-				var sb = new StringBuilder();
-				if (_leadingSlash) sb.Append("/");
-				sb.Append(string.Join("/", PathSegments));
-				if (_trailingSlash) sb.Append("/");
-				return sb.ToString();
+				EnsureParsed();
+				return string.Concat(
+					_leadingSlash ? "/" : "",
+					string.Join("/", PathSegments),
+					_trailingSlash ? "/" : "");
 			}
 			set {
 				PathSegments.Clear();
@@ -36,75 +45,82 @@ namespace Flurl
 		/// <summary>
 		/// The "/"-delimited segments of the path, not including leading or trailing "/" characters.
 		/// </summary>
-		public IList<string> PathSegments { get; } = new List<string>();
+		public IList<string> PathSegments => EnsureParsed()._pathSegments;
 
 		/// <summary>
 		/// The scheme of the URL, i.e. "http". Does not include ":" delimiter. Empty string if the URL is relative.
 		/// </summary>
-		public string Scheme { get; set; }
+		public string Scheme {
+			get => EnsureParsed()._scheme;
+			set => EnsureParsed()._scheme = value;
+		}
 
 		/// <summary>
 		/// i.e. "user:pass" in "https://user:pass@www.site.com". Empty string if not present.
 		/// </summary>
-		public string UserInfo { get; set; }
+		public string UserInfo {
+			get => EnsureParsed()._userInfo;
+			set => EnsureParsed()._userInfo = value;
+		}
 
 		/// <summary>
 		/// i.e. "www.site.com" in "https://www.site.com:8080/path". Does not include user info or port.
 		/// </summary>
-		public string Host { get; set; }
+		public string Host {
+			get => EnsureParsed()._host;
+			set => EnsureParsed()._host = value;
+		}
 
 		/// <summary>
 		/// Port number of the URL. Null if not explicitly specified.
 		/// </summary>
-		public int? Port { get; set; }
+		public int? Port {
+			get => EnsureParsed()._port;
+			set => EnsureParsed()._port = value;
+		}
 
 		/// <summary>
 		/// i.e. "www.site.com:8080" in "https://www.site.com:8080/path". Includes both user info and port, if included.
 		/// </summary>
-		public string Authority {
-			get {
-				var sb = new StringBuilder();
-				if (!string.IsNullOrEmpty(UserInfo))
-					sb.Append(UserInfo).Append("@");
-				sb.Append(Host);
-				if (Port.HasValue)
-					sb.Append(":").Append(Port);
-				return sb.ToString();
-			}
-		}
+		public string Authority => string.Concat(
+			UserInfo,
+			UserInfo?.Length > 0 ? "@" : "",
+			Host,
+			Port.HasValue ? ":" : "",
+			Port);
 
 		/// <summary>
 		/// i.e. "https://www.site.com:8080" in "https://www.site.com:8080/path" (everything before the path).
 		/// </summary>
-		public string Root {
-			get {
-				var sb = new StringBuilder();
-				if (!string.IsNullOrEmpty(Scheme))
-					sb.Append(Scheme).Append(":");
-				var a = Authority; // avoid parsing it twice
-				if (!string.IsNullOrEmpty(a))
-					sb.Append("//").Append(a);
-				return sb.ToString();
-			}
-		}
+		public string Root => string.Concat(
+			Scheme,
+			Scheme?.Length > 0 ? ":" : "",
+			Authority?.Length > 0 ? "//" : "",
+			Authority);
 
 		/// <summary>
 		/// i.e. "x=1&y=2" in "https://www.site.com/path?x=1&y=2". Does not include "?".
 		/// </summary>
 		public string Query {
 			get => QueryParams.ToString();
-			set => QueryParams = ParseQueryParams(value);
+			set {
+				QueryParams.Clear();
+				QueryParams.AddRange(ParseQueryParams(value));
+			}
 		}
 
 		/// <summary>
 		/// i.e. "frag" in "https://www.site.com/path?x=y#frag". Does not include "#".
 		/// </summary>
-		public string Fragment { get; set; }
+		public string Fragment {
+			get => EnsureParsed()._fragment;
+			set => EnsureParsed()._fragment = value;
+		}
 
 		/// <summary>
 		/// Query parsed to name/value pairs.
 		/// </summary>
-		public QueryParamCollection QueryParams { get; private set; }
+		public QueryParamCollection QueryParams => EnsureParsed()._queryParams;
 
 		/// <summary>
 		/// True if URL does not start with a non-empty scheme. i.e. true for "https://www.site.com", false for "//www.site.com".
@@ -119,10 +135,7 @@ namespace Flurl
 		/// <param name="baseUrl">The URL to use as a starting point (required)</param>
 		/// <exception cref="ArgumentNullException"><paramref name="baseUrl"/> is <see langword="null" />.</exception>
 		public Url(string baseUrl) {
-			if (baseUrl == null)
-				throw new ArgumentNullException(nameof(baseUrl));
-
-			ParseInternal(new Uri(baseUrl.Trim(), UriKind.RelativeOrAbsolute));
+			_baseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
 		}
 
 		/// <summary>
@@ -131,10 +144,8 @@ namespace Flurl
 		/// <param name="uri">The System.Uri (required)</param>
 		/// <exception cref="ArgumentNullException"><paramref name="uri"/> is <see langword="null" />.</exception>
 		public Url(Uri uri) {
-			if (uri == null)
-				throw new ArgumentNullException(nameof(uri));
-
-			ParseInternal(uri);
+			_baseUrl = (uri ?? throw new ArgumentNullException(nameof(uri))).OriginalString;
+			ParseInternal(uri); // parse eagerly, taking advantage of the fact that we already have a parsed Uri
 		}
 		
 		/// <summary>
@@ -144,16 +155,27 @@ namespace Flurl
 			return new Url(url);
 		}
 
-		private void ParseInternal(Uri uri) {
+		private Url EnsureParsed() {
+			if (!_parsed)
+				ParseInternal();
+			return this;
+		}
+
+		private void ParseInternal(Uri uri = null) {
+			_parsed = true;
+
+			uri = uri ?? new Uri(_baseUrl, UriKind.RelativeOrAbsolute);
+
 			if (uri.IsAbsoluteUri) {
-				Scheme = uri.Scheme;
-				UserInfo = uri.UserInfo;
-				Host = uri.Host;
-				Port = uri.Authority.EndsWith($":{uri.Port}") ? uri.Port : (int?)null; // don't default Port if not included
-				if (uri.AbsolutePath.Length > 1)
+				_scheme = uri.Scheme;
+				_userInfo = uri.UserInfo;
+				_host = uri.Host;
+				_port = uri.Authority.EndsWith($":{uri.Port}") ? uri.Port : (int?)null; // don't default Port if not included
+				_pathSegments = new List<string>();
+				if (uri.AbsolutePath.Length > 0 && uri.AbsolutePath != "/")
 					AppendPathSegment(uri.AbsolutePath);
-				Query = uri.Query;
-				Fragment = uri.Fragment.TrimStart('#'); // quirk - formal def of fragment does not include the #
+				_queryParams = new QueryParamCollection(uri.Query);
+				_fragment = uri.Fragment.TrimStart('#'); // quirk - formal def of fragment does not include the #
 
 				_leadingSlash = uri.OriginalString.StartsWith(Root + "/");
 				_trailingSlash = PathSegments.Any() && uri.AbsolutePath.EndsWith("/");
@@ -162,32 +184,32 @@ namespace Flurl
 				var hasAuthority = uri.OriginalString.StartsWith($"{Scheme}://");
 				if (hasAuthority && Authority.Length == 0 && PathSegments.Any()) {
 					// Uri didn't parse Authority when it should have
-					Host = PathSegments[0];
-					PathSegments.RemoveAt(0);
+					_host = _pathSegments[0];
+					_pathSegments.RemoveAt(0);
 				}
 				else if (!hasAuthority && Authority.Length > 0) {
 					// Uri parsed Authority when it should not have
-					PathSegments.Insert(0, Authority);
-					UserInfo = "";
-					Host = "";
-					Port = null;
+					_pathSegments.Insert(0, Authority);
+					_userInfo = "";
+					_host = "";
+					_port = null;
 				}
 			}
 			// if it's relative, System.Uri refuses to parse any of it. these hacks will force the matter
 			else if (uri.OriginalString.StartsWith("//")) {
 				ParseInternal(new Uri("http:" + uri.OriginalString));
-				Scheme = "";
+				_scheme = "";
 			}
 			else if (uri.OriginalString.StartsWith("/")) {
 				ParseInternal(new Uri("http://temp.com" + uri.OriginalString));
-				Scheme = "";
-				Host = "";
+				_scheme = "";
+				_host = "";
 				_leadingSlash = true;
 			}
 			else {
 				ParseInternal(new Uri("http://temp.com/" + uri.OriginalString));
-				Scheme = "";
-				Host = "";
+				_scheme = "";
+				_host = "";
 				_leadingSlash = false;
 			}
 		}
@@ -299,7 +321,6 @@ namespace Flurl
 			return this;
 		}
 
-
 		/// <summary>
 		/// Parses values (usually an anonymous object or dictionary) into name/value pairs and adds them to the query, overwriting any that already exist.
 		/// </summary>
@@ -370,7 +391,7 @@ namespace Flurl
 		/// <summary>
 		/// Set the URL fragment fluently.
 		/// </summary>
-		/// <param name="fragment">The part of the URL afer #</param>
+		/// <param name="fragment">The part of the URL after #</param>
 		/// <returns>The Url object with the new fragment set</returns>
 		public Url SetFragment(string fragment) {
 			Fragment = fragment ?? "";
@@ -408,13 +429,16 @@ namespace Flurl
 		/// <param name="encodeSpaceAsPlus">Indicates whether to encode spaces with the "+" character instead of "%20"</param>
 		/// <returns></returns>
 		public string ToString(bool encodeSpaceAsPlus) {
-			var sb = new StringBuilder(Root);
-			sb.Append(encodeSpaceAsPlus ? Path.Replace("%20", "+") : Path);
-			if (Query.Length > 0)
-				sb.Append("?").Append(QueryParams.ToString(encodeSpaceAsPlus));
-			if (Fragment.Length > 0)
-				sb.Append("#").Append(Fragment);
-			return sb.ToString();
+			if (!_parsed)
+				return _baseUrl;
+
+			return string.Concat(
+				Root,
+				encodeSpaceAsPlus ? Path.Replace("%20", "+") : Path,
+				QueryParams.Any() ? "?" : "",
+				QueryParams.ToString(encodeSpaceAsPlus),
+				Fragment?.Length > 0 ? "#" : "",
+				Fragment);
 		}
 
 		/// <summary>
