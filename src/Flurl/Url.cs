@@ -105,7 +105,7 @@ namespace Flurl
 		public IList<string> PathSegments => EnsureParsed()._pathSegments;
 
 		/// <summary>
-		/// i.e. "x=1&y=2" in "https://www.site.com/path?x=1&y=2". Does not include "?".
+		/// i.e. "x=1&amp;y=2" in "https://www.site.com/path?x=1&amp;y=2". Does not include "?".
 		/// </summary>
 		public string Query {
 			get => QueryParams.ToString();
