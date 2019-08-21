@@ -11,6 +11,15 @@ namespace Flurl
 	public class QueryParamCollection : List<QueryParameter>
 	{
 		/// <summary>
+		/// Returns a new instance of QueryParamCollection
+		/// </summary>
+		/// <param name="query">Optional query string to parse.</param>
+		public QueryParamCollection(string query = null) {
+			if (query != null)
+				AddRange(Url.ParseQueryParams(query));
+		}
+
+		/// <summary>
 		/// Returns serialized, encoded query string. Insertion order is preserved.
 		/// </summary>
 		/// <returns></returns>
@@ -23,7 +32,7 @@ namespace Flurl
 		/// </summary>
 		/// <returns></returns>
 		public string ToString(bool encodeSpaceAsPlus) {
-			return string.Join("&", this.Select(p => p.ToString(encodeSpaceAsPlus)));
+			return string.Join("&", this.Where(p => p != null).Select(p => p.ToString(encodeSpaceAsPlus)));
 		}
 
 		/// <summary>

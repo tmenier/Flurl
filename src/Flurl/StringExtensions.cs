@@ -46,6 +46,22 @@ namespace Flurl
 		}
 
 		/// <summary>
+		/// Removes the last path segment from the URL.
+		/// </summary>
+		/// <returns>The Url object.</returns>
+		public static Url RemovePathSegment(this string url) {
+			return new Url(url).RemovePathSegment();
+		}
+
+		/// <summary>
+		/// Removes the entire path component of the URL.
+		/// </summary>
+		/// <returns>The Url object.</returns>
+		public static Url RemovePath(this string url) {
+			return new Url(url).RemovePath();
+		}
+
+		/// <summary>
 		/// Creates a new Url object from the string and adds a parameter to the query, overwriting the value if name exists.
 		/// </summary>
 		/// <param name="url">The URL.</param>
@@ -150,6 +166,14 @@ namespace Flurl
 		/// </returns>
 		public static Url RemoveQueryParams(this string url, IEnumerable<string> names) {
 			return new Url(url).RemoveQueryParams(names);
+		}
+
+		/// <summary>
+		/// Removes the entire query component of the URL.
+		/// </summary>
+		/// <returns>The Url object.</returns>
+		public static Url RemoveQuery(this string url) {
+			return new Url(url).RemoveQuery();
 		}
 
 		/// <summary>

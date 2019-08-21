@@ -16,7 +16,7 @@ namespace Flurl.Test.UrlBuilder
 		public void extension_methods_consistently_supported() {
 			var urlMethods = typeof(Url).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Where(m => !m.IsSpecialName);
 			var stringExts = ReflectionHelper.GetAllExtensionMethods<string>(typeof(Url).GetTypeInfo().Assembly);
-			var whitelist = new[] { "ToString", "IsValid", "ToUri", "Equals", "GetHashCode", "Clone" }; // cases where string extension of the same name was excluded intentionally
+			var whitelist = new[] { "ToString", "IsValid", "ToUri", "Equals", "GetHashCode", "Clone", "Reset" }; // cases where string extension of the same name was excluded intentionally
 
 			foreach (var method in urlMethods) {
 				if (whitelist.Contains(method.Name))
@@ -49,20 +49,6 @@ namespace Flurl.Test.UrlBuilder
 				.SetQueryParam("", "bar");
 
 			Assert.AreEqual("http://www.mysite.com/more?x=1&y=2&y=4&y=6&z=3&abc&xyz&foo=&=bar", url.ToString());
-		}
-
-		[Test]
-		public void can_modify_query_param_array() {
-			var url = new Url("http://www.mysite.com/more?x=1&y=2&x=2&z=4");
-			// go from 2 values to 3, order should be preserved
-			url.QueryParams["x"] = new[] { 8, 9, 10 };
-			Assert.AreEqual("http://www.mysite.com/more?x=8&y=2&x=9&z=4&x=10", url.ToString());
-			// go from 3 values to 2, order should be preserved
-			url.QueryParams["x"] = new[] { 101, 102 };
-			Assert.AreEqual("http://www.mysite.com/more?x=101&y=2&x=102&z=4", url.ToString());
-			// wipe them out. all of them.
-			url.QueryParams["x"] = null;
-			Assert.AreEqual("http://www.mysite.com/more?y=2&z=4", url.ToString());
 		}
 
 		[Test] // #301
@@ -160,17 +146,18 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual("http://www.mysite.com/more?y=2", url.ToString());
 		}
 
+		[TestCase("http://www.mysite.com/?x=1&y=2&z=3#foo", "http://www.mysite.com/#foo")]
+		[TestCase("http://www.mysite.com/more?x=1&y=2&z=3#foo", "http://www.mysite.com/more#foo")]
+		[TestCase("relative/path?foo", "relative/path")]
+		public void can_remove_query(string original, string expected) {
+			var url = original.RemoveQuery();
+			Assert.AreEqual(expected, url.ToString());
+		}
+
 		[Test]
 		public void removing_nonexisting_query_params_is_ignored() {
 			var url = "http://www.mysite.com/more".RemoveQueryParams("x", "y");
 			Assert.AreEqual("http://www.mysite.com/more", url.ToString());
-		}
-
-		[Test]
-		public void can_sort_query_params() {
-			var url = new Url("http://www.mysite.com/more?z=1&y=2&x=3");
-			url.QueryParams.Sort((x, y) => x.Name.CompareTo(y.Name));
-			Assert.AreEqual("http://www.mysite.com/more?x=3&y=2&z=1", url.ToString());
 		}
 
 		[TestCase(NullValueHandling.Ignore, ExpectedResult = "http://www.mysite.com?y=2&x=1&z=foo")]
@@ -210,6 +197,31 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual("http://www.mysite.com/category/endpoint", url.ToString());
 		}
 
+		[TestCase("http://www.site.com/path1/path2/?x=y", "http://www.site.com/path1/?x=y")]
+		[TestCase("http://www.site.com/path1/path2?x=y", "http://www.site.com/path1?x=y")]
+		[TestCase("http://www.site.com/path1/", "http://www.site.com/")]
+		[TestCase("http://www.site.com/path1", "http://www.site.com/")]
+		[TestCase("http://www.site.com/", "http://www.site.com/")]
+		[TestCase("http://www.site.com", "http://www.site.com")]
+		[TestCase("/path1/path2", "/path1")]
+		[TestCase("path1/path2", "path1")]
+		public void can_remove_path_segment(string original, string expected) {
+			var url = original.RemovePathSegment();
+			Assert.AreEqual(expected, url.ToString());
+		}
+
+		[TestCase("http://www.site.com/path1/path2/?x=y", "http://www.site.com?x=y")]
+		[TestCase("http://www.site.com/path1/path2?x=y", "http://www.site.com?x=y")]
+		[TestCase("http://www.site.com/", "http://www.site.com")]
+		[TestCase("http://www.site.com", "http://www.site.com")]
+		[TestCase("/path1/path2", "")]
+		[TestCase("path1/path2", "")]
+		[TestCase("news:comp.infosystems.www.servers.unix", "news:")]
+		public void can_remove_path(string original, string expected) {
+			var url = original.RemovePath();
+			Assert.AreEqual(expected, url.ToString());
+		}
+
 #if !NETCOREAPP1_1
 		[Test]
 		public void url_ToString_uses_invariant_culture() {
@@ -223,6 +235,23 @@ namespace Flurl.Test.UrlBuilder
 		public void can_reset_to_root() {
 			var url = "http://www.mysite.com/more?x=1&y=2#foo".ResetToRoot();
 			Assert.AreEqual("http://www.mysite.com", url.ToString());
+		}
+
+		[Test]
+		public void can_reset() {
+			var orignal = "http://www.mysite.com/more?x=1&y=2#foo";
+			var url = orignal.AppendPathSegment("path2").RemoveQueryParam("y").SetFragment("bar");
+			url.Scheme = "https";
+			url.Port = 1234;
+			url.Host = "www.yoursite.com";
+			Assert.AreEqual("https://www.yoursite.com:1234/more/path2?x=1#bar", url.ToString());
+			Assert.AreEqual(orignal, url.Reset().ToString());
+		}
+
+		[Test]
+		public void can_parse_path_segments() {
+			var path = "/segment 1//segment 3/?segment#4/";
+			CollectionAssert.AreEqual(new[] { "segment%201", "", "segment%203", "%3Fsegment%234" }, Url.ParsePathSegments(path));
 		}
 
 		[Test]
@@ -363,5 +392,153 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual("http://mysite.com?x=1&z=3", url1.ToString());
 			Assert.AreEqual("http://mysite.com/foo?x=1&y=2", url2.ToString());
 		}
+
+		#region writable properties
+		[Test]
+		public void can_write_scheme() {
+			var url = new Url("https://api.com/foo");
+			url.Scheme = "ftp";
+			Assert.AreEqual("ftp://api.com/foo", url.ToString());
+		}
+
+		[Test]
+		public void can_write_user_info() {
+			var url = new Url("https://api.com/foo");
+			url.UserInfo = "user:pass";
+			Assert.AreEqual("https://user:pass@api.com/foo", url.ToString());
+
+			// null or empty should remove it
+			url.UserInfo = null;
+			Assert.AreEqual("https://api.com/foo", url.ToString());
+			url.UserInfo = "";
+			Assert.AreEqual("https://api.com/foo", url.ToString());
+		}
+
+		[Test]
+		public void can_write_host() {
+			var url = new Url("https://api.com/foo");
+			url.Host = "www.othersite.net";
+			Assert.AreEqual("https://www.othersite.net/foo", url.ToString());
+
+			// don't squash userinfo/port
+			url = new Url("https://user:pass@api.com:8080/foo");
+			url.Host = "www.othersite.net";
+			Assert.AreEqual("https://user:pass@www.othersite.net:8080/foo", url.ToString());
+		}
+
+		[Test]
+		public void can_write_port() {
+			var url = new Url("https://api.com/foo");
+			url.Port = 1234;
+			Assert.AreEqual("https://api.com:1234/foo", url.ToString());
+
+			// null should remove it
+			url.Port = null;
+			Assert.AreEqual("https://api.com/foo", url.ToString());
+		}
+
+		[Test]
+		public void can_write_path() {
+			var url = new Url("https://api.com/foo");
+			url.Path = "/a/b/c/";
+			Assert.AreEqual("https://api.com/a/b/c/", url.ToString());
+			url.Path = "a/b/c";
+			Assert.AreEqual("https://api.com/a/b/c", url.ToString());
+			url.Path = "/";
+			Assert.AreEqual("https://api.com/", url.ToString());
+
+			// null or empty should remove it (including leading slash)
+			url.Path = null;
+			Assert.AreEqual("https://api.com", url.ToString());
+			url.Path = "";
+			Assert.AreEqual("https://api.com", url.ToString());
+		}
+
+		[Test]
+		public void can_manipulate_path_segments() {
+			var url = new Url("https://api.com/foo?x=0");
+			url.PathSegments.Add("bar");
+			Assert.AreEqual("https://api.com/foo/bar?x=0", url.ToString());
+			// when manipulating PathSegments directly, there's no double-slash check like with AppendPathSegment
+			url.PathSegments.Add("/hi/there/");
+			Assert.AreEqual("https://api.com/foo/bar//hi/there/?x=0", url.ToString());
+			url.PathSegments.RemoveAt(1);
+			Assert.AreEqual("https://api.com/foo//hi/there/?x=0", url.ToString());
+			url.PathSegments.RemoveAt(1);
+			Assert.AreEqual("https://api.com/foo?x=0", url.ToString());
+			url.PathSegments.Clear();
+			Assert.AreEqual("https://api.com/?x=0", url.ToString());
+		}
+
+		[Test]
+		public void can_write_query() {
+			var url = new Url("https://api.com/foo?x=0#bar");
+			url.Query = "y=1&z=2";
+			Assert.AreEqual("https://api.com/foo?y=1&z=2#bar", url.ToString());
+
+			// null or empty should remove
+			url.Query = null;
+			Assert.AreEqual("https://api.com/foo#bar", url.ToString());
+			url.Query = "";
+			Assert.AreEqual("https://api.com/foo#bar", url.ToString());
+		}
+
+		[Test]
+		public void can_manipulate_query_params() {
+			var url = new Url("https://api.com/foo#bar");
+			url.QueryParams.Add(new QueryParameter("x", 0));
+			Assert.AreEqual("https://api.com/foo?x=0#bar", url.ToString());
+			url.QueryParams.Add("y", 1);
+			Assert.AreEqual("https://api.com/foo?x=0&y=1#bar", url.ToString());
+			url.QueryParams["x"] = "hi!";
+			Assert.AreEqual("https://api.com/foo?x=hi%21&y=1#bar", url.ToString());
+			url.QueryParams["z"] = new[] { 8, 9, 10 };
+			Assert.AreEqual("https://api.com/foo?x=hi%21&y=1&z=8&z=9&z=10#bar", url.ToString());
+			url.QueryParams.Remove("y");
+			Assert.AreEqual("https://api.com/foo?x=hi%21&z=8&z=9&z=10#bar", url.ToString());
+			url.QueryParams.RemoveAt(2);
+			Assert.AreEqual("https://api.com/foo?x=hi%21&z=8&z=10#bar", url.ToString());
+			url.QueryParams[0] = null;
+			Assert.AreEqual("https://api.com/foo?z=8&z=10#bar", url.ToString());
+			url.QueryParams.Clear();
+			Assert.AreEqual("https://api.com/foo#bar", url.ToString());
+		}
+
+		[Test]
+		public void can_sort_query_params() {
+			var url = new Url("http://www.mysite.com/more?z=1&y=2&x=3");
+			url.QueryParams.Sort((x, y) => x.Name.CompareTo(y.Name));
+			Assert.AreEqual("http://www.mysite.com/more?x=3&y=2&z=1", url.ToString());
+		}
+
+		[Test]
+		public void can_modify_query_param_array() {
+			var url = new Url("http://www.mysite.com/more?x=1&y=2&x=2&z=4");
+			// go from 2 values to 3, order should be preserved
+			url.QueryParams["x"] = new[] { 8, 9, 10 };
+			Assert.AreEqual("http://www.mysite.com/more?x=8&y=2&x=9&z=4&x=10", url.ToString());
+			// go from 3 values to 2, order should be preserved
+			url.QueryParams["x"] = new[] { 101, 102 };
+			Assert.AreEqual("http://www.mysite.com/more?x=101&y=2&x=102&z=4", url.ToString());
+			// wipe them out. all of them.
+			url.QueryParams["x"] = null;
+			Assert.AreEqual("http://www.mysite.com/more?y=2&z=4", url.ToString());
+		}
+
+		[Test]
+		public void can_write_fragment() {
+			var url = new Url("https://api.com/");
+			url.Fragment = "hello";
+			Assert.AreEqual("https://api.com/#hello", url.ToString());
+			url.Fragment = "#goodbye"; // # isn't technically part of the fragment, so this should give us 2 of them
+			Assert.AreEqual("https://api.com/##goodbye", url.ToString());
+
+			// null or empty should remove
+			url.Fragment = null;
+			Assert.AreEqual("https://api.com/", url.ToString());
+			url.Fragment = "";
+			Assert.AreEqual("https://api.com/", url.ToString());
+		}
+		#endregion
 	}
 }

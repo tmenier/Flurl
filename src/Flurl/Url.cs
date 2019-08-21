@@ -1,4 +1,4 @@
-using Flurl.Util;
+﻿using Flurl.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,28 +25,6 @@ namespace Flurl
 		private bool _trailingSlash;
 
 		#region public properties
-		/// <summary>
-		/// i.e. "/path" in "https://www.site.com/path". Empty string if not present. Leading and trailing "/" retained exactly as specified by user.
-		/// </summary>
-		public string Path {
-			get {
-				EnsureParsed();
-				return string.Concat(
-					_leadingSlash ? "/" : "",
-					string.Join("/", PathSegments),
-					_trailingSlash ? "/" : "");
-			}
-			set {
-				PathSegments.Clear();
-				AppendPathSegment(value);
-			}
-		}
-
-		/// <summary>
-		/// The "/"-delimited segments of the path, not including leading or trailing "/" characters.
-		/// </summary>
-		public IList<string> PathSegments => EnsureParsed()._pathSegments;
-
 		/// <summary>
 		/// The scheme of the URL, i.e. "http". Does not include ":" delimiter. Empty string if the URL is relative.
 		/// </summary>
@@ -99,6 +77,34 @@ namespace Flurl
 			Authority);
 
 		/// <summary>
+		/// i.e. "/path" in "https://www.site.com/path". Empty string if not present. Leading and trailing "/" retained exactly as specified by user.
+		/// </summary>
+		public string Path {
+			get {
+				EnsureParsed();
+				return string.Concat(
+					_leadingSlash ? "/" : "",
+					string.Join("/", PathSegments),
+					_trailingSlash && PathSegments.Any() ? "/" : "");
+			}
+			set {
+				PathSegments.Clear();
+				_trailingSlash = false;
+				if (string.IsNullOrEmpty(value))
+					_leadingSlash = false;
+				else if (value == "/")
+					_leadingSlash = true;
+				else
+					AppendPathSegment(value ?? "");
+			}
+		}
+
+		/// <summary>
+		/// The "/"-delimited segments of the path, not including leading or trailing "/" characters.
+		/// </summary>
+		public IList<string> PathSegments => EnsureParsed()._pathSegments;
+
+		/// <summary>
 		/// i.e. "x=1&y=2" in "https://www.site.com/path?x=1&y=2". Does not include "?".
 		/// </summary>
 		public string Query {
@@ -110,17 +116,17 @@ namespace Flurl
 		}
 
 		/// <summary>
+		/// Query parsed to name/value pairs.
+		/// </summary>
+		public QueryParamCollection QueryParams => EnsureParsed()._queryParams;
+
+		/// <summary>
 		/// i.e. "frag" in "https://www.site.com/path?x=y#frag". Does not include "#".
 		/// </summary>
 		public string Fragment {
 			get => EnsureParsed()._fragment;
 			set => EnsureParsed()._fragment = value;
 		}
-
-		/// <summary>
-		/// Query parsed to name/value pairs.
-		/// </summary>
-		public QueryParamCollection QueryParams => EnsureParsed()._queryParams;
 
 		/// <summary>
 		/// True if URL does not start with a non-empty scheme. i.e. true for "https://www.site.com", false for "//www.site.com".
@@ -178,7 +184,7 @@ namespace Flurl
 				_fragment = uri.Fragment.TrimStart('#'); // quirk - formal def of fragment does not include the #
 
 				_leadingSlash = uri.OriginalString.StartsWith(Root + "/");
-				_trailingSlash = PathSegments.Any() && uri.AbsolutePath.EndsWith("/");
+				_trailingSlash = _pathSegments.Any() && uri.AbsolutePath.EndsWith("/");
 
 				// more quirk fixes
 				var hasAuthority = uri.OriginalString.StartsWith($"{Scheme}://");
@@ -218,21 +224,30 @@ namespace Flurl
 		/// Parses a URL query to a QueryParamCollection dictionary.
 		/// </summary>
 		/// <param name="query">The URL query to parse.</param>
-		public static QueryParamCollection ParseQueryParams(string query) {
-			var result = new QueryParamCollection();
-
+		public static IEnumerable<QueryParameter> ParseQueryParams(string query) {
 			query = query?.TrimStart('?');
 			if (string.IsNullOrEmpty(query))
-				return result;
+				return Enumerable.Empty<QueryParameter>();
 
-			result.AddRange(
+			return
 				from p in query.Split('&')
 				let pair = p.SplitOnFirstOccurence("=")
 				let name = pair[0]
 				let value = (pair.Length == 1) ? null : pair[1]
-				select new QueryParameter(name, value, true));
+				select new QueryParameter(name, value, true);
+		}
 
-			return result;
+		/// <summary>
+		/// Splits the given path into segments, encoding illegal characters, "?", and "#".
+		/// </summary>
+		/// <param name="path">The path to split.</param>
+		/// <returns></returns>
+		public static IEnumerable<string> ParsePathSegments(string path) {
+			return EncodeIllegalCharacters(path)
+				.Replace("?", "%3F")
+				.Replace("#", "%23")
+				.Trim('/')
+				.Split('/');
 		}
 		#endregion
 
@@ -248,13 +263,15 @@ namespace Flurl
 			if (segment == null)
 				throw new ArgumentNullException(nameof(segment));
 
-			if (fullyEncode)
+			if (fullyEncode) {
 				PathSegments.Add(Uri.EscapeDataString(segment.ToInvariantString()));
+				_trailingSlash = false;
+			}
 			else {
-				var encoded = EncodeIllegalCharacters(segment.ToInvariantString()).Replace("?", "%3F");
-				foreach (var s in encoded.Trim('/').Split('/'))
+				var subpath = segment.ToInvariantString();
+				foreach (var s in ParsePathSegments(subpath))
 					PathSegments.Add(s);
-				_trailingSlash = encoded.EndsWith("/");
+				_trailingSlash = subpath.EndsWith("/");
 			}
 
 			_leadingSlash = true;
@@ -282,6 +299,26 @@ namespace Flurl
 			foreach(var s in segments)
 				AppendPathSegment(s);
 
+			return this;
+		}
+
+		/// <summary>
+		/// Removes the last path segment from the URL.
+		/// </summary>
+		/// <returns>The Url object.</returns>
+		public Url RemovePathSegment() {
+			if (PathSegments.Any())
+				PathSegments.RemoveAt(PathSegments.Count - 1);
+			return this;
+		}
+
+		/// <summary>
+		/// Removes the entire path component of the URL, including the leading slash.
+		/// </summary>
+		/// <returns>The Url object.</returns>
+		public Url RemovePath() {
+			PathSegments.Clear();
+			_leadingSlash = _trailingSlash = false;
 			return this;
 		}
 
@@ -369,10 +406,19 @@ namespace Flurl
 		/// Removes multiple name/value pairs from the query by name.
 		/// </summary>
 		/// <param name="names">Query string parameter names to remove</param>
-		/// <returns>The Url object with the query parameters removed</returns>
+		/// <returns>The Url object.</returns>
 		public Url RemoveQueryParams(params string[] names) {
 			foreach(var name in names)
 				QueryParams.Remove(name);
+			return this;
+		}
+
+		/// <summary>
+		/// Removes the entire query component of the URL.
+		/// </summary>
+		/// <returns>The Url object.</returns>
+		public Url RemoveQuery() {
+			QueryParams.Clear();
 			return this;
 		}
 
@@ -412,7 +458,27 @@ namespace Flurl
 			PathSegments.Clear();
 			QueryParams.Clear();
 			Fragment = "";
-			_leadingSlash = _trailingSlash = false;
+			_leadingSlash = false;
+			_trailingSlash = false;
+			return this;
+		}
+
+		/// <summary>
+		/// Resets the URL to its original state as set in the constructor.
+		/// </summary>
+		public Url Reset() {
+			if (_parsed) {
+				_scheme = null;
+				_userInfo = null;
+				_host = null;
+				_port = null;
+				_pathSegments = null;
+				_queryParams = null;
+				_fragment = null;
+				_leadingSlash = false;
+				_trailingSlash = false;
+				_parsed = false;
+			}
 			return this;
 		}
 

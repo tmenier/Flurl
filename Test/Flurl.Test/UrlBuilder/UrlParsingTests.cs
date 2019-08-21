@@ -47,7 +47,7 @@ namespace Flurl.Test.UrlBuilder
 		[TestCase("http://www.no-trailing-slash.com", "")]
 		[TestCase("http://www.no-trailing-slash.com/a/b", "/a/b")]
 		[TestCase("http://www.no-trailing-slash.com/a/b?x=y", "/a/b")]
-		public void retains_trailing_slash_on_path(string url, string path) {
+		public void path_retains_trailing_slash(string url, string path) {
 			Assert.AreEqual(path, new Url(url).Path);
 		}
 
