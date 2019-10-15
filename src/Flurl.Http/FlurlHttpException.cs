@@ -73,15 +73,25 @@ namespace Flurl.Http
 		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
 		/// <returns>A task whose result is an object containing data in the response body.</returns>
 		public async Task<T> GetResponseJsonAsync<T>() {
+			var result = await GetResponseJsonAsync(typeof(T));
+			return result == null ? default(T) : (T)result;
+		}
+
+		/// <summary>
+		/// Deserializes the JSON response body to an object of the given type.
+		/// </summary>
+		/// <param name="type">The Type of object being deserialized.</param>
+		/// <returns>A task whose result is an object containing data in the response body.</returns>
+		public async Task<object> GetResponseJsonAsync(Type type) {
 			var ser = Call.FlurlRequest?.Settings?.JsonSerializer;
-			if (ser == null) return default(T);
+			if (ser == null) return null;
 
 			if (_capturedResponseBody != null)
-				return ser.Deserialize<T>(_capturedResponseBody);
+				return ser.Deserialize(_capturedResponseBody, type);
 
 			var task = Call?.Response?.Content?.ReadAsStreamAsync();
-			if (task == null) return default(T);
-			return ser.Deserialize<T>(await task.ConfigureAwait(false));
+			if (task == null) return null;
+			return ser.Deserialize(await task.ConfigureAwait(false), type);
 		}
 
 		/// <summary>

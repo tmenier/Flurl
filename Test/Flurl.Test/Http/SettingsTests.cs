@@ -246,6 +246,8 @@ namespace Flurl.Test.Http
 			public string Serialize(object obj) => "foo";
 			public T Deserialize<T>(string s) => default(T);
 			public T Deserialize<T>(Stream stream) => default(T);
+			public object Deserialize(string s, Type type) => default(object);
+			public object Deserialize(Stream stream, Type type) => default(object);
 		}
 	}
 

@@ -57,6 +57,23 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("Frank", data.name);
 		}
 
+
+		[Test]
+		public async Task can_receive_json_object() {
+			HttpTest.RespondWithJson(new { id = 1, name = "Frank" });
+
+			var data = await "http://some-api.com".PostJsonAsync(new { a = 1, b = 2 }).ReceiveJson(typeof(TestData));
+
+			Assert.IsNotNull(data);
+			Assert.AreEqual(data.GetType(), typeof(TestData));
+
+			var testdata = (TestData)data;
+
+			Assert.AreEqual(1, testdata.id);
+			Assert.AreEqual("Frank", testdata.name);
+		}
+
+
 		[Test]
 		public async Task can_receive_json_dynamic() {
 			HttpTest.RespondWithJson(new { id = 1, name = "Frank" });

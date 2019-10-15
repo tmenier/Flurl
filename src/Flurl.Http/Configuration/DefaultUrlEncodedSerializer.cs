@@ -33,5 +33,17 @@ namespace Flurl.Http.Configuration
 		public T Deserialize<T>(Stream stream) {
 			throw new NotImplementedException("Deserializing to UrlEncoded is not supported.");
 		}
+
+		/// <inheritdoc cref="ISerializer.Deserialize(string, Type)" />
+		/// <exception cref="NotImplementedException">Deserializing to UrlEncoded not supported.</exception>
+		public object Deserialize(string s, Type type) {
+			throw new NotImplementedException("Deserializing to UrlEncoded is not supported.");
+		}
+
+		/// <inheritdoc cref="ISerializer.Deserialize(Stream, Type)" />
+		/// <exception cref="NotImplementedException">Deserializing to UrlEncoded not supported.</exception>
+		public object Deserialize(Stream stream, Type type) {
+			throw new NotImplementedException("Deserializing to UrlEncoded is not supported.");
+		}
 	}
 }

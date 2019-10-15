@@ -23,18 +23,31 @@ namespace Flurl.Http
 		/// <example>x = await url.PostAsync(data).ReceiveJson&lt;T&gt;()</example>
 		/// <exception cref="FlurlHttpException">Condition.</exception>
 		public static async Task<T> ReceiveJson<T>(this Task<HttpResponseMessage> response) {
+			var result = await ReceiveJson(response, typeof(T));
+			return result == null ? default(T) : (T)result;
+		}
+
+		/// <summary>
+		/// Deserializes JSON-formatted HTTP response body to object of type T. Intended to chain off an async HTTP.
+		/// </summary>
+		/// <param name="response">The current HttpResponseMessage.</param>
+		/// <param name="type">The Type of object being deserialized.</param>
+		/// <returns>A Task whose result is an object containing data in the response body.</returns>
+		/// <example>x = await url.PostAsync(data).ReceiveJson&lt;T&gt;()</example>
+		/// <exception cref="FlurlHttpException">Condition.</exception>
+		public static async Task<object> ReceiveJson(this Task<HttpResponseMessage> response, Type type) {
 			using (var resp = await response.ConfigureAwait(false)) {
-				if (resp == null) return default(T);
+				if (resp == null) return null;
 				var call = resp.RequestMessage.GetHttpCall();
 				using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false)) {
 					try {
-						return call.FlurlRequest.Settings.JsonSerializer.Deserialize<T>(stream);
+						return call.FlurlRequest.Settings.JsonSerializer.Deserialize(stream, type);
 					}
 					catch (Exception ex) {
 						var body = await resp.Content.ReadAsStringAsync();
 						call.Exception = new FlurlParsingException(call, "JSON", body, ex);
 						await FlurlRequest.HandleExceptionAsync(call, call.Exception, CancellationToken.None).ConfigureAwait(false);
-						return default(T);
+						return null;
 					}
 				}
 			}

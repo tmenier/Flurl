@@ -32,5 +32,21 @@ namespace Flurl.Http.Configuration
 		/// <param name="stream">The JSON stream to deserialize.</param>
 		/// <returns>The deserialized object from the JSON stram.</returns>
 		T Deserialize<T>(Stream stream);
+
+		/// <summary>
+		/// Deserializes an object from a string representation.
+		/// </summary>
+		/// <param name="s">The JSON to deserialize.</param>
+		/// <param name="type">The Type of object being deserialized.</param>
+		/// <returns>The deserialized object from the JSON string.</returns>
+		object Deserialize(string s, Type type);
+
+		/// <summary>
+		/// Deserializes an object from a stream representation.
+		/// </summary>
+		/// <param name="stream">The JSON stream to deserialize.</param>
+		/// <param name="type">The Type of object being deserialized.</param>
+		/// <returns>The deserialized object from the JSON string.</returns>
+		object Deserialize(Stream stream, Type type);
 	}
 }

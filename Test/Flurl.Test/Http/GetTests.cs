@@ -112,6 +112,26 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public async Task can_get_error_json_as_object() {
+			HttpTest.RespondWithJson(new { code = 999, message = "our server crashed" }, 500);
+
+			try {
+				await "http://api.com".GetStringAsync();
+			}
+			catch (FlurlHttpException ex) {
+				var error = await ex.GetResponseJsonAsync(typeof(TestError));
+
+				Assert.IsNotNull(error);
+				Assert.AreEqual(typeof(TestError), error.GetType());
+
+				var errordata = (TestError)error;
+				
+				Assert.AreEqual(999, errordata.code);
+				Assert.AreEqual("our server crashed", errordata.message);
+			}
+		}
+
+		[Test]
 		public async Task can_get_error_json_untyped() {
 			HttpTest.RespondWithJson(new { code = 999, message = "our server crashed" }, 500);
 

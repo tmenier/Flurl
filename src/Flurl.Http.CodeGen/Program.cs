@@ -90,6 +90,9 @@ namespace Flurl.Http.CodeGen
 					else
 			            writer.WriteLine("/// <param name=\"content\">Contents of the request body.</param>");
 	            }
+	            if (xm.WithType)
+		            writer.WriteLine("/// <param name=\"type\">The Type of object being deserialized.</param>");
+
 				writer.WriteLine("/// <param name=\"cancellationToken\">The token to monitor for cancellation requests.</param>");
 				writer.WriteLine("/// <param name=\"completionOption\">The HttpCompletionOption used in the request. Optional.</param>");
 				writer.WriteLine("/// <returns>A Task whose result is @0.</returns>", xm.ReturnTypeDescription);
@@ -102,6 +105,9 @@ namespace Flurl.Http.CodeGen
                     args.Add((xm.RequestBodyType == "String" ? "string" : "object") + " data");
 				else if (hasRequestBody)
 					args.Add("HttpContent content");
+
+				if(xm.WithType)
+					args.Add("Type type");
 
 				// http://stackoverflow.com/questions/22359706/default-parameter-for-cancellationtoken
 				args.Add("CancellationToken cancellationToken = default(CancellationToken)");
@@ -130,7 +136,12 @@ namespace Flurl.Http.CodeGen
 	                }
 
                     var request = (xm.ExtentionOfType == "IFlurlRequest") ? "request" : "new FlurlRequest(url)";
-                    var receive = (xm.ResponseBodyType == null) ? "" : string.Format(".Receive{0}{1}()", xm.ResponseBodyType, xm.IsGeneric ? "<T>" : "");
+
+					var receiveArgs = new List<string>();
+					if(xm.WithType)
+						receiveArgs.Add("type: type");
+					
+					var receive = (xm.ResponseBodyType == null) ? "" : string.Format(".Receive{0}{1}({2})", xm.ResponseBodyType, xm.IsGeneric ? "<T>" : "", string.Join(", ", receiveArgs));
                     writer.WriteLine("return @0.SendAsync(@1)@2;", request, string.Join(", ", args), receive);
                 }
                 else
