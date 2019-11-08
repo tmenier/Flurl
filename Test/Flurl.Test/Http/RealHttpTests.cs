@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -17,35 +17,15 @@ namespace Flurl.Test.Http
 	[TestFixture, Parallelizable]
 	public class RealHttpTests
 	{
-		class StackExResponse
-		{
-			public object[] items { get; set; }
-			public bool has_more { get; set; }
-			public int backoff { get; set; }
+		[TestCase("gzip", "gzipped")]
+		[TestCase("deflate", "deflated"), Ignore("#474")]
+		public async Task decompresses_automatically(string encoding, string jsonKey) {
+			var result = await "https://httpbin.org"
+				.AppendPathSegment(encoding)
+				.WithHeader("Accept-encoding", encoding)
+				.GetJsonAsync<Dictionary<string, object>>();
 
-			internal static int last_page = 0;
-			internal static int last_backoff = 0;
-		}
-
-		[TestCase("gzip")]
-		[TestCase("deflate")]
-		[NonParallelizable]
-		public async Task decompresses_automatically(string encoding) {
-			if (StackExResponse.last_backoff > 0) {
-				Console.WriteLine($"Backing off StackExchange for {StackExResponse.last_backoff} seconds...");
-				await Task.Delay(TimeSpan.FromSeconds(StackExResponse.last_backoff));
-			}
-
-			StackExResponse.last_page++;
-			var result = await $"https://api.stackexchange.com/2.2/answers?site=stackoverflow&pagesize=10"
-				.SetQueryParam("page", ++StackExResponse.last_page)
-				.WithHeader("Accept-Encoding", encoding)
-				.GetJsonAsync<StackExResponse>();
-
-			StackExResponse.last_backoff = result.backoff;
-
-			Assert.AreEqual(10, result.items.Length);
-			Assert.IsTrue(result.has_more);
+			Assert.AreEqual(true, result[jsonKey]);
 		}
 
 		[TestCase("https://httpbin.org/image/jpeg", null, "my-image.jpg", "my-image.jpg")]

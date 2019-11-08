@@ -31,6 +31,7 @@ namespace Flurl.Http.Configuration
 		public virtual HttpMessageHandler CreateMessageHandler() {
 			return new HttpClientHandler {
 				// #266
+				// deflate not working? see #474
 				AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
 			};
 		}
