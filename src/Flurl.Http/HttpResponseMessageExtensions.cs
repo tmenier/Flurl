@@ -10,7 +10,7 @@ using Flurl.Util;
 namespace Flurl.Http
 {
 	/// <summary>
-	/// Extension methods off HttpResponseMessage, and async extension methods off Task&lt;HttpResponseMessage&gt;
+	/// Extension methods off HttpResponseMessage, and async extension methods off Task&lt;IFlurlResponse&gt;
 	/// that allow chaining off methods like SendAsync without the need for nested awaits.
 	/// </summary>
 	public static class HttpResponseMessageExtensions
@@ -22,21 +22,10 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is an object containing data in the response body.</returns>
 		/// <example>x = await url.PostAsync(data).ReceiveJson&lt;T&gt;()</example>
 		/// <exception cref="FlurlHttpException">Condition.</exception>
-		public static async Task<T> ReceiveJson<T>(this Task<HttpResponseMessage> response) {
+		public static async Task<T> ReceiveJson<T>(this Task<IFlurlResponse> response) {
 			using (var resp = await response.ConfigureAwait(false)) {
 				if (resp == null) return default(T);
-				var call = resp.RequestMessage.GetHttpCall();
-				using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false)) {
-					try {
-						return call.FlurlRequest.Settings.JsonSerializer.Deserialize<T>(stream);
-					}
-					catch (Exception ex) {
-						var body = await resp.Content.ReadAsStringAsync();
-						call.Exception = new FlurlParsingException(call, "JSON", body, ex);
-						await FlurlRequest.HandleExceptionAsync(call, call.Exception, CancellationToken.None).ConfigureAwait(false);
-						return default(T);
-					}
-				}
+				return await resp.GetJsonAsync<T>().ConfigureAwait(false);
 			}
 		}
 
@@ -46,8 +35,11 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is a dynamic object containing data in the response body.</returns>
 		/// <example>d = await url.PostAsync(data).ReceiveJson()</example>
 		/// <exception cref="FlurlHttpException">Condition.</exception>
-		public static async Task<dynamic> ReceiveJson(this Task<HttpResponseMessage> response) {
-			return await response.ReceiveJson<ExpandoObject>().ConfigureAwait(false);
+		public static async Task<dynamic> ReceiveJson(this Task<IFlurlResponse> response) {
+			using (var resp = await response.ConfigureAwait(false)) {
+				if (resp == null) return null;
+				return await resp.GetJsonAsync().ConfigureAwait(false);
+			}
 		}
 
 		/// <summary>
@@ -56,9 +48,11 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is a list of dynamic objects containing data in the response body.</returns>
 		/// <example>d = await url.PostAsync(data).ReceiveJsonList()</example>
 		/// <exception cref="FlurlHttpException">Condition.</exception>
-		public static async Task<IList<dynamic>> ReceiveJsonList(this Task<HttpResponseMessage> response) {
-			dynamic[] d = await response.ReceiveJson<ExpandoObject[]>().ConfigureAwait(false);
-			return d;
+		public static async Task<IList<dynamic>> ReceiveJsonList(this Task<IFlurlResponse> response) {
+			using (var resp = await response.ConfigureAwait(false)) {
+				if (resp == null) return null;
+				return await resp.GetJsonListAsync().ConfigureAwait(false);
+			}
 		}
 
 		/// <summary>
@@ -66,14 +60,10 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the response body as a string.</returns>
 		/// <example>s = await url.PostAsync(data).ReceiveString()</example>
-		public static async Task<string> ReceiveString(this Task<HttpResponseMessage> response) {
-#if NETSTANDARD1_3 || NETSTANDARD2_0
-			// https://stackoverflow.com/questions/46119872/encoding-issues-with-net-core-2 (#86)
-			System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-#endif
+		public static async Task<string> ReceiveString(this Task<IFlurlResponse> response) {
 			using (var resp = await response.ConfigureAwait(false)) {
 				if (resp == null) return null;
-				return await resp.Content.StripCharsetQuotes().ReadAsStringAsync().ConfigureAwait(false);
+				return await resp.GetStringAsync().ConfigureAwait(false);
 			}
 		}
 
@@ -82,15 +72,15 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the response body as a stream.</returns>
 		/// <example>stream = await url.PostAsync(data).ReceiveStream()</example>
-		public static async Task<Stream> ReceiveStream(this Task<HttpResponseMessage> response) {
-			// do not wrap resp in a using statement or we'll dispose the stream. caller is responsible for this.
+		public static async Task<Stream> ReceiveStream(this Task<IFlurlResponse> response) {
+			// don't wrap in a using, otherwise we'll dispose the stream too early.
+			// we can dispose it if there's an error, otherwise the user is on the hook for it.
 			var resp = await response.ConfigureAwait(false);
 			if (resp == null) return null;
-
 			try {
-				return await resp.Content.ReadAsStreamAsync().ConfigureAwait(false);
+				return await resp.GetStreamAsync().ConfigureAwait(false);
 			}
-			catch {
+			catch (Exception) {
 				resp.Dispose();
 				throw;
 			}
@@ -101,10 +91,10 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>A Task whose result is the response body as a byte array.</returns>
 		/// <example>bytes = await url.PostAsync(data).ReceiveBytes()</example>
-		public static async Task<byte[]> ReceiveBytes(this Task<HttpResponseMessage> response) {
+		public static async Task<byte[]> ReceiveBytes(this Task<IFlurlResponse> response) {
 			using (var resp = await response.ConfigureAwait(false)) {
 				if (resp == null) return null;
-				return await resp.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+				return await resp.GetBytesAsync().ConfigureAwait(false);
 			}
 		}
 

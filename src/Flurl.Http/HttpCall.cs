@@ -27,6 +27,11 @@ namespace Flurl.Http
 		public string RequestBody => (Request.Content as CapturedStringContent)?.Content;
 
 		/// <summary>
+		/// The IFlurlResponse associated with this call if the call completed, otherwise null.
+		/// </summary>
+		public IFlurlResponse FlurlResponse { get; set; }
+
+		/// <summary>
 		/// HttpResponseMessage associated with the call if the call completed, otherwise null.
 		/// </summary>
 		public HttpResponseMessage Response { get; set; }

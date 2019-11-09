@@ -17,8 +17,8 @@ namespace Flurl.Http
 		/// <param name="buildContent">A delegate for building the content parts.</param>
 		/// <param name="request">The IFlurlRequest.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
-		public static Task<HttpResponseMessage> PostMultipartAsync(this IFlurlRequest request, Action<CapturedMultipartContent> buildContent, CancellationToken cancellationToken = default(CancellationToken)) {
+		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
+		public static Task<IFlurlResponse> PostMultipartAsync(this IFlurlRequest request, Action<CapturedMultipartContent> buildContent, CancellationToken cancellationToken = default(CancellationToken)) {
 			var cmc = new CapturedMultipartContent(request.Settings);
 			buildContent(cmc);
 			return request.SendAsync(HttpMethod.Post, cmc, cancellationToken);
@@ -30,8 +30,8 @@ namespace Flurl.Http
 		/// <param name="buildContent">A delegate for building the content parts.</param>
 		/// <param name="url">The URL.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
-		public static Task<HttpResponseMessage> PostMultipartAsync(this Url url, Action<CapturedMultipartContent> buildContent, CancellationToken cancellationToken = default(CancellationToken)) {
+		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
+		public static Task<IFlurlResponse> PostMultipartAsync(this Url url, Action<CapturedMultipartContent> buildContent, CancellationToken cancellationToken = default(CancellationToken)) {
 			return new FlurlRequest(url).PostMultipartAsync(buildContent, cancellationToken);
 		}
 
@@ -41,8 +41,8 @@ namespace Flurl.Http
 		/// <param name="buildContent">A delegate for building the content parts.</param>
 		/// <param name="url">The URL.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
-		public static Task<HttpResponseMessage> PostMultipartAsync(this string url, Action<CapturedMultipartContent> buildContent, CancellationToken cancellationToken = default(CancellationToken)) {
+		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
+		public static Task<IFlurlResponse> PostMultipartAsync(this string url, Action<CapturedMultipartContent> buildContent, CancellationToken cancellationToken = default(CancellationToken)) {
 			return new FlurlRequest(url).PostMultipartAsync(buildContent, cancellationToken);
 		}
 	}

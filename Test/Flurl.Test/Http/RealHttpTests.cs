@@ -128,21 +128,21 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_allow_non_success_status() {
-			await "https://httpbin.org/status/418".AllowHttpStatus("4xx").GetAsync();
+			var resp = await "https://httpbin.org/status/418".AllowHttpStatus("4xx").GetAsync();
+			Assert.AreEqual(418, resp.StatusCode);
 		}
 
 		[Test]
 		public async Task can_post_multipart() {
 			var folder = "c:\\flurl-test-" + Guid.NewGuid(); // random so parallel tests don't trip over each other
-			Directory.CreateDirectory(folder);
-
 			var path1 = Path.Combine(folder, "upload1.txt");
 			var path2 = Path.Combine(folder, "upload2.txt");
 
-			File.WriteAllText(path1, "file contents 1");
-			File.WriteAllText(path2, "file contents 2");
-
+			Directory.CreateDirectory(folder);
 			try {
+				File.WriteAllText(path1, "file contents 1");
+				File.WriteAllText(path2, "file contents 2");
+
 				using (var stream = File.OpenRead(path2)) {
 					var resp = await "https://httpbin.org/post"
 						.PostMultipartAsync(content => {
@@ -183,7 +183,7 @@ namespace Flurl.Test.Http
 				Assert.IsTrue(handlerCalled, "error handler should have been called.");
 			}
 			catch (FlurlHttpException) {
-				Assert.Fail("exception should have been supressed.");
+				Assert.Fail("exception should have been suppressed.");
 			}
 		}
 

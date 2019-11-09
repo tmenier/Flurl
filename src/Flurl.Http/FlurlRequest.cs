@@ -11,7 +11,8 @@ using Flurl.Util;
 namespace Flurl.Http
 {
 	/// <summary>
-	/// Interface defining FlurlRequest's contract (useful for mocking and DI)
+	/// Represents an HTTP request. Can be created explicitly via new FlurlRequest(), fluently via Url.Request(),
+	/// or implicitly when a call is made via methods like Url.GetAsync().
 	/// </summary>
 	public interface IFlurlRequest : IHttpSettingsContainer
 	{
@@ -26,20 +27,18 @@ namespace Flurl.Http
 		Url Url { get; set; }
 
 		/// <summary>
-		/// Creates and asynchronously sends an HttpRequestMethod.
+		/// Asynchronously sends the HTTP request.
 		/// Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
 		/// </summary>
 		/// <param name="verb">The HTTP method used to make the request.</param>
 		/// <param name="content">Contents of the request body.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
-		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
-		Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead);
+		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
+		Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead);
 	}
 
-	/// <summary>
-	/// A chainable wrapper around HttpClient and Flurl.Url.
-	/// </summary>
+	/// <inheritdoc />
 	public class FlurlRequest : IFlurlRequest
 	{
 		private FlurlHttpSettings _settings;
@@ -108,7 +107,7 @@ namespace Flurl.Http
 		public IDictionary<string, Cookie> Cookies => Client.Cookies;
 
 		/// <inheritdoc />
-		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
+		public async Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			_client = Client; // "freeze" the client at this point to avoid excessive calls to FlurlClientFactory.Get (#374)
 
 			var request = new HttpRequestMessage(verb, Url) { Content = content };
@@ -138,9 +137,10 @@ namespace Flurl.Http
 
 				call.Response = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
 				call.Response.RequestMessage = request;
+				call.FlurlResponse = new FlurlResponse(call.Response);
 
 				if (call.Succeeded)
-					return call.Response;
+					return call.FlurlResponse;
 
 				throw new FlurlHttpException(call, null);
 			}
@@ -218,12 +218,12 @@ namespace Flurl.Http
 			return null;
 		}
 
-		internal static async Task<HttpResponseMessage> HandleExceptionAsync(HttpCall call, Exception ex, CancellationToken token) {
+		internal static async Task<IFlurlResponse> HandleExceptionAsync(HttpCall call, Exception ex, CancellationToken token) {
 			call.Exception = ex;
 			await HandleEventAsync(call.FlurlRequest.Settings.OnError, call.FlurlRequest.Settings.OnErrorAsync, call).ConfigureAwait(false);
 
 			if (call.ExceptionHandled)
-				return call.Response;
+				return call.FlurlResponse;
 
 			if (ex is OperationCanceledException && !token.IsCancellationRequested)
 				throw new FlurlHttpTimeoutException(call, ex);

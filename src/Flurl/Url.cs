@@ -414,15 +414,6 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Removes the entire query component of the URL.
-		/// </summary>
-		/// <returns>The Url object.</returns>
-		public Url RemoveQuery() {
-			QueryParams.Clear();
-			return this;
-		}
-
-		/// <summary>
 		/// Removes multiple name/value pairs from the query by name.
 		/// </summary>
 		/// <param name="names">Query string parameter names to remove</param>
@@ -431,6 +422,15 @@ namespace Flurl
 			foreach(var name in names)
 				QueryParams.Remove(name);
 
+			return this;
+		}
+
+		/// <summary>
+		/// Removes the entire query component of the URL.
+		/// </summary>
+		/// <returns>The Url object.</returns>
+		public Url RemoveQuery() {
+			QueryParams.Clear();
 			return this;
 		}
 
@@ -671,7 +671,7 @@ namespace Flurl
 		/// Checks if a string is a well-formed absolute URL.
 		/// </summary>
 		/// <param name="url">The string to check</param>
-		/// <returns>true if s is a well-formed absolute URL</returns>
+		/// <returns>true if the string is a well-formed absolute URL</returns>
 		public static bool IsValid(string url) => url != null && Uri.IsWellFormedUriString(url, UriKind.Absolute);
 		#endregion
 	}

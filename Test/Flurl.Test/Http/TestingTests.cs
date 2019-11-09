@@ -200,17 +200,17 @@ namespace Flurl.Test.Http
 			var resp = await "http://www.api.com".GetAsync();
 			Assert.AreEqual(1, resp.Headers.Count());
 			Assert.AreEqual("h1", resp.Headers.First().Key);
-			Assert.AreEqual("foo", resp.Headers.First().Value.First());
+			Assert.AreEqual("foo", resp.Headers.First().Value);
 		}
 
 		[Test]
 		public async Task can_fake_cookies() {
 			HttpTest.RespondWith(cookies: new { c1 = "foo" });
 
-			var rec = "http://www.api.com".EnableCookies();
-			await rec.GetAsync();
-			Assert.AreEqual(1, rec.Cookies.Count);
-			Assert.AreEqual("foo", rec.Cookies["c1"].Value);
+			var req = "http://www.api.com".EnableCookies();
+			await req.GetAsync();
+			Assert.AreEqual(1, req.Cookies.Count);
+			Assert.AreEqual("foo", req.Cookies["c1"].Value);
 		}
 
 		// https://github.com/tmenier/Flurl/issues/175

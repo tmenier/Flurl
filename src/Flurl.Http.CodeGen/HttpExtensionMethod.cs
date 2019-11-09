@@ -64,7 +64,7 @@ namespace Flurl.Http.CodeGen
 					case "String": return "string";
 					case "Stream": return "Stream";
 					case "Bytes": return "byte[]";
-					default: return "HttpResponseMessage";
+					default: return "IFlurlResponse";
 				}
 			}
 		}
@@ -79,7 +79,7 @@ namespace Flurl.Http.CodeGen
 					case "String": return "the response body as a string";
 					case "Stream": return "the response body as a Stream";
 					case "Bytes": return "the response body as a byte array";
-					default: return "the received HttpResponseMessage";
+					default: return "the received IFlurlResponse";
 				}
 			}
 		}

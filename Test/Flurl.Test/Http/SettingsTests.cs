@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -27,7 +28,7 @@ namespace Flurl.Test.Http
 				test.RespondWith("I'm a teapot", 418);
 				try {
 					var result = await GetRequest().GetAsync();
-					Assert.IsFalse(result.IsSuccessStatusCode);
+					Assert.AreEqual(418, result.StatusCode);
 				}
 				catch (Exception) {
 					Assert.Fail("Exception should not have been thrown.");
@@ -98,7 +99,7 @@ namespace Flurl.Test.Http
 				test.RespondWith("server error", 500);
 				try {
 					var result = await GetRequest().GetAsync();
-					Assert.IsFalse(result.IsSuccessStatusCode);
+					Assert.AreEqual(500, result.StatusCode);
 				}
 				catch (FlurlHttpException) {
 					Assert.Fail("Flurl should not have thrown exception.");

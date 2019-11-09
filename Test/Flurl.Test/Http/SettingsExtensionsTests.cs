@@ -123,7 +123,7 @@ namespace Flurl.Test.Http
 				try {
 					var sc = GetSettingsContainer().AllowAnyHttpStatus();
 					var result = await GetRequest(sc).GetAsync();
-					Assert.IsFalse(result.IsSuccessStatusCode);
+					Assert.AreEqual(500, result.StatusCode);
 				}
 				catch (Exception) {
 					Assert.Fail("Exception should not have been thrown.");

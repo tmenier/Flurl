@@ -14,9 +14,9 @@ namespace Flurl.Test.Http
 	{
 		public GetTests() : base(HttpMethod.Get) { }
 
-		protected override Task<HttpResponseMessage> CallOnString(string url) => url.GetAsync();
-		protected override Task<HttpResponseMessage> CallOnUrl(Url url) => url.GetAsync();
-		protected override Task<HttpResponseMessage> CallOnFlurlRequest(IFlurlRequest req) => req.GetAsync();
+		protected override Task<IFlurlResponse> CallOnString(string url) => url.GetAsync();
+		protected override Task<IFlurlResponse> CallOnUrl(Url url) => url.GetAsync();
+		protected override Task<IFlurlResponse> CallOnFlurlRequest(IFlurlRequest req) => req.GetAsync();
 
 		[Test]
 		public async Task can_get_json() {
@@ -24,6 +24,22 @@ namespace Flurl.Test.Http
 
 			var data = await "http://some-api.com".GetJsonAsync<TestData>();
 
+			Assert.AreEqual(1, data.id);
+			Assert.AreEqual("Frank", data.name);
+		}
+
+		[Test]
+		public async Task can_get_response_then_deserialize() {
+			// FlurlResponse was introduced in 3.0. I don't think we need to go crazy with new tests, because existing
+			// methods like FlurlRequest.GetJson, ReceiveJson, etc all go through FlurlResponse now.
+			HttpTest.RespondWithJson(new TestData { id = 1, name = "Frank" }, 234, new { my_header = "hi" }, null, true);
+
+			var resp = await "http://some-api.com".GetAsync();
+			Assert.AreEqual(234, resp.StatusCode);
+			Assert.IsTrue(resp.Headers.TryGetValue("my-header", out var headerVal));
+			Assert.AreEqual("hi", headerVal);
+
+			var data = await resp.GetJsonAsync<TestData>();
 			Assert.AreEqual(1, data.id);
 			Assert.AreEqual("Frank", data.name);
 		}
