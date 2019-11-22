@@ -19,7 +19,7 @@ public void Can_Create_Person() {
     // fake & record all http calls in the test subject
     using (var httpTest = new HttpTest()) {
         // arrange
-        httpTest.RespondWith("OK",200);
+        httpTest.RespondWith("OK", 200);
 
         // act
         await sut.CreatePersonAsync("Claire", "Underwood");
