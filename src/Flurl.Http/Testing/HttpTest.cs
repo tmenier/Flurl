@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -27,7 +28,7 @@ namespace Flurl.Http.Testing
 		/// <exception cref="Exception">A delegate callback throws an exception.</exception>
 		public HttpTest() {
 		    Settings = new TestFlurlHttpSettings();
-			ResponseQueue = new Queue<HttpResponseMessage>();
+			ResponseQueue = new ConcurrentQueue<HttpResponseMessage>();
 			CallLog = new List<HttpCall>();
 			_httpClient = new Lazy<HttpClient>(() => Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler));
 			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => Settings.HttpClientFactory.CreateMessageHandler());
@@ -50,7 +51,7 @@ namespace Flurl.Http.Testing
 		/// <summary>
 		/// Queue of HttpResponseMessages to be returned in place of real responses during testing.
 		/// </summary>
-		public Queue<HttpResponseMessage> ResponseQueue { get; set; }
+		public ConcurrentQueue<HttpResponseMessage> ResponseQueue { get; }
 
 		/// <summary>
 		/// List of all (fake) HTTP calls made since this HttpTest was created.
@@ -133,7 +134,7 @@ namespace Flurl.Http.Testing
 		}
 
 		internal HttpResponseMessage GetNextResponse() {
-			return ResponseQueue.Any() ? ResponseQueue.Dequeue() : new HttpResponseMessage {
+			return ResponseQueue.TryDequeue(out var message) ? message : new HttpResponseMessage {
 				StatusCode = HttpStatusCode.OK,
 				Content = new StringContent("")
 			};
