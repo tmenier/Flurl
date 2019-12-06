@@ -284,12 +284,17 @@ namespace Flurl.Test.Http
 			}
 		}
 
-		[Test, Ignore("bug repro, not yet fixed")] // #366 & #398
+		[Test] // #366 & #398
 		public async Task can_use_response_queue_in_parallel() {
+			// this was hard to test. numbers used (200 ms delay, 10 calls, repeat 5 times) were not
+			// arrived at by any exact science. they just seemed to be the point where failure is
+			// virtually guaranteed without thread-safe collections backing ResponseQueue and CallLog,
+			// but without making the test unbearably slow.
 			var cli = new FlurlClient("http://api.com");
-			cli.Settings.BeforeCallAsync = call => Task.Delay(500);
+			cli.Settings.BeforeCallAsync = call => Task.Delay(200);
 
-			for (var i = 0; i < 100; i++) {
+			for (var i = 0; i < 5; i++) {
+				Console.WriteLine(i);
 				using (var test = new HttpTest()) {
 					test
 						.RespondWith("0")

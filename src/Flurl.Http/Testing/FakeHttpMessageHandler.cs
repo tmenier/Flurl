@@ -20,7 +20,7 @@ namespace Flurl.Http.Testing
 			if (HttpTest.Current != null) {
 				var call = request.GetHttpCall();
 				if (call != null)
-					HttpTest.Current.CallLog.Add(call);
+					HttpTest.Current.LogCall(call);
 			}
 
 			var tcs = new TaskCompletionSource<HttpResponseMessage>();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -21,6 +22,7 @@ namespace Flurl.Http.Testing
 	{
 		private readonly Lazy<HttpClient> _httpClient;
 		private readonly Lazy<HttpMessageHandler> _httpMessageHandler;
+		private readonly ConcurrentQueue<HttpCall> _calls;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="HttpTest"/> class.
@@ -29,7 +31,7 @@ namespace Flurl.Http.Testing
 		public HttpTest() {
 		    Settings = new TestFlurlHttpSettings();
 			ResponseQueue = new ConcurrentQueue<HttpResponseMessage>();
-			CallLog = new List<HttpCall>();
+			_calls = new ConcurrentQueue<HttpCall>();
 			_httpClient = new Lazy<HttpClient>(() => Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler));
 			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => Settings.HttpClientFactory.CreateMessageHandler());
 		    SetCurrentTest(this);
@@ -37,6 +39,7 @@ namespace Flurl.Http.Testing
 
 		internal HttpClient HttpClient => _httpClient.Value;
 		internal HttpMessageHandler HttpMessageHandler => _httpMessageHandler.Value;
+		internal void LogCall(HttpCall call) => _calls.Enqueue(call);
 
 		/// <summary>
 		/// Gets or sets the FlurlHttpSettings object used by this test.
@@ -56,7 +59,7 @@ namespace Flurl.Http.Testing
 		/// <summary>
 		/// List of all (fake) HTTP calls made since this HttpTest was created.
 		/// </summary>
-		public List<HttpCall> CallLog { get; }
+		public IReadOnlyList<HttpCall> CallLog => new ReadOnlyCollection<HttpCall>(_calls.ToList());
 
 		/// <summary>
 		/// Change FlurlHttpSettings for the scope of this HttpTest.
@@ -189,5 +192,5 @@ namespace Flurl.Http.Testing
 		private static void SetCurrentTest(HttpTest test) => _test.Value = test;
 		private static HttpTest GetCurrentTest() => _test.Value;
 #endif
-    }
+	}
 }
