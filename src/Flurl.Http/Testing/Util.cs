@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -17,6 +18,14 @@ namespace Flurl.Http.Testing
 		internal static bool MatchesPattern(string textToCheck, string pattern) {
 			var regex = Regex.Escape(pattern).Replace("\\*", "(.*)");
 			return Regex.IsMatch(textToCheck ?? "", regex);
+		}
+
+		internal static bool HasAnyVerb(this HttpCall call, HttpMethod[] verbs) {
+			return verbs.Any(verb => call.Request.Method == verb);
+		}
+
+		internal static bool HasAnyVerb(this HttpCall call, string[] verbs) {
+			return verbs.Any(verb => call.Request.Method.Method.Equals(verb, StringComparison.OrdinalIgnoreCase));
 		}
 
 		internal static bool HasQueryParam(this HttpCall call, string name, object value) {
@@ -38,15 +47,11 @@ namespace Flurl.Http.Testing
 			return paramVals.Any(v => v == value.ToInvariantString());
 		}
 
-		internal static bool HasQueryParams(this HttpCall call, string[] names) {
+		internal static bool HasAllQueryParams(this HttpCall call, string[] names) {
 			return call.FlurlRequest.Url.QueryParams
 			   .Select(p => p.Name)
 			   .Intersect(names)
 			   .Count() == names.Length;
-		}
-
-		internal static bool HasQueryParams(this HttpCall call, object values, NullValueHandling nullValueHandling) {
-			return values.ToKeyValuePairs().All(kv => call.HasQueryParam(kv.Key, kv.Value));
 		}
 
 		internal static bool HasAnyQueryParam(this HttpCall call, string[] names) {
@@ -55,6 +60,10 @@ namespace Flurl.Http.Testing
 			   .Select(p => p.Name)
 			   .Intersect(names)
 			   .Any() : qp.Any();
+		}
+
+		internal static bool HasQueryParams(this HttpCall call, object values) {
+			return values.ToKeyValuePairs().All(kv => call.HasQueryParam(kv.Key, kv.Value));
 		}
 
 		internal static bool HasHeader(this HttpCall call, string name, string valuePattern) {

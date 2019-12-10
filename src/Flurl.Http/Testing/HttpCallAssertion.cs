@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
-using System.Text.RegularExpressions;
 using Flurl.Util;
 
 namespace Flurl.Http.Testing
 {
 	/// <summary>
-	/// Provides fluent helpers for asserting against (faked) HTTP calls. This class is normally not
-	/// instantiated directly; you can get an instance via HttpTest.ShouldHaveCalled or
-	/// HttpTest.ShouldNotHaveCalled
+	/// Provides fluent helpers for asserting against fake HTTP calls. Usually created fluently
+	/// via HttpTest.ShouldHaveCalled or HttpTest.ShouldNotHaveCalled, rather than instantiated directly.
 	/// </summary>
 	public class HttpCallAssertion
 	{
@@ -21,8 +18,11 @@ namespace Flurl.Http.Testing
 
 		private IList<HttpCall> _calls;
 
+		/// <summary>
+		/// Constructs a new instance of HttpCallAssertion.
+		/// </summary>
 		/// <param name="loggedCalls">Set of calls (usually from HttpTest.CallLog) to assert against.</param>
-		/// <param name="negate">if true, assertions pass when calls matching criteria were NOT made.</param>
+		/// <param name="negate">If true, assertions pass when calls matching criteria were NOT made.</param>
 		public HttpCallAssertion(IEnumerable<HttpCall> loggedCalls, bool negate = false) {
 			_calls = loggedCalls.ToList();
 			_negate = negate;
@@ -41,236 +41,185 @@ namespace Flurl.Http.Testing
 			Assert(expectedCount);
 		}
 
+	    /// <summary>
+	    /// Asserts whether calls were made matching the given predicate function.
+	    /// </summary>
+	    /// <param name="match">Predicate (usually a lambda expression) that tests an HttpCall and returns a bool.</param>
+	    /// <param name="descrip">A description of what is being asserted.</param>
+	    public HttpCallAssertion With(Func<HttpCall, bool> match, string descrip = null) {
+		    if (!string.IsNullOrEmpty(descrip))
+			    _expectedConditions.Add(descrip);
+		    _calls = _calls.Where(match).ToList();
+		    Assert();
+		    return this;
+	    }
+
+	    /// <summary>
+	    /// Asserts whether calls were made that do NOT match the given predicate function.
+	    /// </summary>
+	    /// <param name="match">Predicate (usually a lambda expression) that tests an HttpCall and returns a bool.</param>
+	    /// <param name="descrip">A description of what is being asserted.</param>
+	    public HttpCallAssertion Without(Func<HttpCall, bool> match, string descrip = null) {
+		    return With(c => !match(c), descrip);
+	    }
+
 		/// <summary>
 		/// Asserts whether calls were made matching given URL or URL pattern.
 		/// </summary>
 		/// <param name="urlPattern">Can contain * wildcard.</param>
 		public HttpCallAssertion WithUrlPattern(string urlPattern) {
-			if (urlPattern == "*") {
-				Assert();
-				return this;
-			}
-			_expectedConditions.Add($"URL pattern {urlPattern}");
-			return With(c => MatchesPattern(c.FlurlRequest.Url, urlPattern));
+			return With(c => Util.MatchesPattern(c.FlurlRequest.Url, urlPattern), $"URL pattern {urlPattern}");
 		}
 
 		/// <summary>
-		/// Asserts whether calls were made containing the given query parameter (regardless of its value).
+		/// Asserts whether calls were made with any of the given HTTP verbs.
 		/// </summary>
-		/// <param name="name">The query parameter name.</param>
-		/// <returns></returns>
-		public HttpCallAssertion WithQueryParam(string name) {
-			_expectedConditions.Add($"query parameter {name}");
-			return With(c => c.FlurlRequest.Url.QueryParams.Any(q => q.Name == name));
+		public HttpCallAssertion WithVerb(params HttpMethod[] verbs) {
+			var list = string.Join(", ", verbs.Select(v => v.Method));
+			return With(call => call.HasAnyVerb(verbs), $"verb {list}");
 		}
 
 		/// <summary>
-		/// Asserts whether calls were made NOT containing the given query parameter.
+		/// Asserts whether calls were made with any of the given HTTP verbs.
 		/// </summary>
-		/// <param name="name">The query parameter name.</param>
-		/// <returns></returns>
-		public HttpCallAssertion WithoutQueryParam(string name) {
-			_expectedConditions.Add($"no query parameter {name}");
-			return Without(c => c.FlurlRequest.Url.QueryParams.Any(q => q.Name == name));
+		public HttpCallAssertion WithVerb(params string[] verbs) {
+			var list = string.Join(", ", verbs);
+			return With(call => call.HasAnyVerb(verbs), $"verb {list}");
 		}
 
 		/// <summary>
-		/// Asserts whether calls were made containing all the given query parameters (regardless of their values).
+		/// Asserts whether calls were made containing the given query parameter name and (optionally) value.
 		/// </summary>
-		/// <param name="names">The query parameter names.</param>
-		/// <returns></returns>
+		public HttpCallAssertion WithQueryParam(string name, object value = null) {
+			var qp = (value == null) ? name : $"{name}={value}";
+			return With(c => c.HasQueryParam(name, value), $"query parameter {qp}");
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made NOT containing the given query parameter and (optionally) value.
+		/// </summary>
+		public HttpCallAssertion WithoutQueryParam(string name, object value = null) {
+			var qp = (value == null) ? name : $"{name}={value}";
+			return Without(c => c.HasQueryParam(name, value), $"no query parameter {qp}");
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made containing ALL the given query parameters (regardless of their values).
+		/// </summary>
 		public HttpCallAssertion WithQueryParams(params string[] names) {
-			if (!names.Any()) {
-				_expectedConditions.Add("any query parameters");
-				return With(c => c.FlurlRequest.Url.QueryParams.Any());
-			}
-			return names.Select(WithQueryParam).LastOrDefault() ?? this;
+			return names.Select(n => WithQueryParam(n)).LastOrDefault() ?? this;
 		}
 
 		/// <summary>
-		/// Asserts whether calls were made NOT containing ANY of the given query parameters.
+		/// Asserts whether calls were made NOT containing any of the given query parameters.
+		/// If no names are provided, asserts no calls were made with any query parameters.
 		/// </summary>
-		/// <param name="names">The query parameter names.</param>
-		/// <returns></returns>
 		public HttpCallAssertion WithoutQueryParams(params string[] names) {
-			if (!names.Any()) {
-				_expectedConditions.Add("no query parameters");
-				return Without(c => c.FlurlRequest.Url.QueryParams.Any());
-			}
-			return names.Select(WithoutQueryParam).LastOrDefault() ?? this;
+			if (!names.Any())
+				return With(c => !c.FlurlRequest.Url.QueryParams.Any(), "no query parameters");
+			return names.Select(n => WithoutQueryParam(n)).LastOrDefault() ?? this;
 		}
 
 		/// <summary>
-		/// Asserts whether calls were made containing the given query parameter name and value.
+		/// Asserts whether calls were made containing ANY the given query parameters (regardless of their values).
+		/// If no names are provided, asserts that calls were made containing at least one query parameter with any name.
 		/// </summary>
-		/// <param name="name">The query parameter name.</param>
-		/// <param name="value">The query parameter value. Can contain * wildcard.</param>
-		/// <returns></returns>
-		public HttpCallAssertion WithQueryParamValue(string name, object value) {
-			if (!(value is string) && value is IEnumerable en) {
-				foreach (var val in en)
-					WithQueryParamValue(name, val);
-				return this;
-			}
-			_expectedConditions.Add($"query parameter {name}={value}");
-			return With(c => c.FlurlRequest.Url.QueryParams.Any(qp => QueryParamMatches(qp, name, value)));
-		}
-
-		/// <summary>
-		/// Asserts whether calls were made NOT containing the given query parameter name and value.
-		/// </summary>
-		/// <param name="name">The query parameter name.</param>
-		/// <param name="value">The query parameter value. Can contain * wildcard.</param>
-		/// <returns></returns>
-		public HttpCallAssertion WithoutQueryParamValue(string name, object value) {
-			if (!(value is string) && value is IEnumerable en) {
-				foreach (var val in en)
-					WithoutQueryParamValue(name, val);
-				return this;
-			}
-			_expectedConditions.Add($"no query parameter {name}={value}");
-			return Without(c => c.FlurlRequest.Url.QueryParams.Any(qp => QueryParamMatches(qp, name, value)));
+		public HttpCallAssertion WithAnyQueryParam(params string[] names) {
+			var descrip = names.Any() ? $"any of query parameters {string.Join(", ", names)}" : "any query parameters";
+			return With(c => c.HasAnyQueryParam(names), descrip);
 		}
 
 		/// <summary>
 		/// Asserts whether calls were made containing all of the given query parameter values.
 		/// </summary>
-		/// <param name="values">Object (usually anonymous) or dictionary that is parsed to name/value query parameters to check for.</param>
-		/// <returns></returns>
-		public HttpCallAssertion WithQueryParamValues(object values) {
-			return values.ToKeyValuePairs().Select(kv => WithQueryParamValue(kv.Key, kv.Value)).LastOrDefault() ?? this;
+		/// <param name="values">Object (usually anonymous) or dictionary that is parsed to name/value query parameters to check for. Values may contain * wildcard.</param>
+		public HttpCallAssertion WithQueryParams(object values) {
+			return values.ToKeyValuePairs().Select(kv => WithQueryParam(kv.Key, kv.Value)).LastOrDefault() ?? this;
 		}
 
 		/// <summary>
-		/// Asserts whether calls were made NOT containing ANY of the given query parameter values.
+		/// Asserts whether calls were made NOT containing any of the given query parameter values.
 		/// </summary>
-		/// <param name="values">Object (usually anonymous) or dictionary that is parsed to name/value query parameters to check for.</param>
-		/// <returns></returns>
-		public HttpCallAssertion WithoutQueryParamValues(object values) {
-			return values.ToKeyValuePairs().Select(kv => WithoutQueryParamValue(kv.Key, kv.Value)).LastOrDefault() ?? this;
-		}
-
-		private bool QueryParamMatches(QueryParameter qp, string name, object value) {
-			if (qp.Name != name)
-				return false;
-			if (value is string s)
-				return MatchesPattern(qp.Value?.ToString(), s);
-			return qp.Value?.ToString() == value?.ToString();
+		/// <param name="values">Object (usually anonymous) or dictionary that is parsed to name/value query parameters to check for. Values may contain * wildcard.</param>
+		public HttpCallAssertion WithoutQueryParams(object values) {
+			return values.ToKeyValuePairs().Select(kv => WithoutQueryParam(kv.Key, kv.Value)).LastOrDefault() ?? this;
 		}
 
 		/// <summary>
-		/// Asserts whether calls were made containing given request body or request body pattern.
+		/// Asserts whether calls were made containing given request body. body may contain * wildcard.
 		/// </summary>
-		/// <param name="bodyPattern">Can contain * wildcard.</param>
 		public HttpCallAssertion WithRequestBody(string bodyPattern) {
-			_expectedConditions.Add($"body matching pattern {bodyPattern}");
-			return With(c => MatchesPattern(c.RequestBody, bodyPattern));
+			return With(c => Util.MatchesPattern(c.RequestBody, bodyPattern), $"body matching pattern {bodyPattern}");
 		}
 
 		/// <summary>
-		/// Asserts whether calls were made containing given JSON-encoded request body.
+		/// Asserts whether calls were made containing given JSON-encoded request body. body may contain * wildcard.
 		/// </summary>
-		/// <param name="body"></param>
 		public HttpCallAssertion WithRequestJson(object body) {
 			var serializedBody = FlurlHttp.GlobalSettings.JsonSerializer.Serialize(body);
 			return WithRequestBody(serializedBody);
 		}
 
 		/// <summary>
-		/// Asserts whether calls were made containing given URL-encoded request body.
+		/// Asserts whether calls were made containing given URL-encoded request body. body may contain * wildcard.
 		/// </summary>
-		/// <param name="body"></param>
 		public HttpCallAssertion WithRequestUrlEncoded(object body) {
 			var serializedBody = FlurlHttp.GlobalSettings.UrlEncodedSerializer.Serialize(body);
 			return WithRequestBody(serializedBody);
 		}
 
 		/// <summary>
-		/// Asserts whether calls were made with given HTTP verb.
+		/// Asserts whether calls were made containing the given request header and (optionally) value.
+		/// value may contain * wildcard.
 		/// </summary>
-		public HttpCallAssertion WithVerb(HttpMethod httpMethod) {
-			_expectedConditions.Add("verb " + httpMethod);
-			return With(c => c.Request.Method == httpMethod);
+		public HttpCallAssertion WithHeader(string name, string valuePattern = "*", string descrip = null) {
+			descrip = descrip ?? $"header {name}: {valuePattern}";
+			return With(c => c.HasHeader(name, valuePattern), descrip);
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made that do NOT contain the given request header and (optionally) value.
+		/// value may contain * wildcard.
+		/// </summary>
+		public HttpCallAssertion WithoutHeader(string name, string valuePattern = "*") {
+			return Without(c => c.HasHeader(name, valuePattern), $"no header {name}: {valuePattern}");
 		}
 
 		/// <summary>
 		/// Asserts whether calls were made with a request body of the given content (MIME) type.
 		/// </summary>
 		public HttpCallAssertion WithContentType(string mediaType) {
-			_expectedConditions.Add("content type " + mediaType);
-			return With(c => c.Request.Content?.Headers?.ContentType?.MediaType == mediaType);
+			return WithHeader("Content-Type", mediaType, "content type " + mediaType);
 		}
 
 		/// <summary>
-		/// Asserts whether the Authorization header was set with OAuth.
+		/// Asserts whether an Authorization header was set with the given Bearer token, or any Bearer token if excluded.
+		/// Token can contain * wildcard.
 		/// </summary>
-		/// <param name="token">Expected token value</param>
-		/// <returns></returns>
-		public HttpCallAssertion WithOAuthBearerToken(string token) {
-			_expectedConditions.Add("OAuth bearer token " + token);
-			return With(c => c.Request.Headers.Authorization?.Scheme == "Bearer"
-				&& c.Request.Headers.Authorization?.Parameter == token);
+		public HttpCallAssertion WithOAuthBearerToken(string token = "*") {
+			return WithHeader("Authorization", $"Bearer {token}", "bearer token " + token);
 		}
 
 		/// <summary>
-		/// Asserts whther the calls were made containing the given request header.
+		/// Asserts whether the Authorization header was set with Basic auth and (optionally) the given credentials.
+		/// Username and password can contain * wildcard.
 		/// </summary>
-		/// <param name="name">Expected header name</param>
-		/// <param name="valuePattern">Expected header value pattern</param>
-		/// <returns></returns>
-		public HttpCallAssertion WithHeader(string name, string valuePattern = "*") {
-			_expectedConditions.Add($"header {name}: {valuePattern}");
-			return With(c => {
-				var val = c.Request.GetHeaderValue(name);
-				return val != null && MatchesPattern(val, valuePattern);
+		public HttpCallAssertion WithBasicAuth(string username = "*", string password = "*") {
+			return With(call => {
+				var val = call.Request.GetHeaderValue("Authorization");
+				if (val == null) return false;
+				if (!val.StartsWith("Basic ")) return false;
+				if ((username ?? "*") == "*" && (password ?? "*") == "*") return true;
+				var encodedCreds = val.Substring(6);
+				try {
+					var bytes = Convert.FromBase64String(encodedCreds);
+					var creds = Encoding.UTF8.GetString(bytes, 0, bytes.Length).SplitOnFirstOccurence(":");
+					return creds.Length == 2 && Util.MatchesPattern(creds[0], username) && Util.MatchesPattern(creds[1], password);
+				}
+				catch (FormatException) {
+					return false;
+				}
 			});
-		}
-
-		/// <summary>
-		/// Asserts whther the calls were made that do not contain the given request header.
-		/// </summary>
-		/// <param name="name">Expected header name</param>
-		/// <param name="valuePattern">Expected header value pattern</param>
-		/// <returns></returns>
-		public HttpCallAssertion WithoutHeader(string name, string valuePattern = "*") {
-			_expectedConditions.Add($"no header {name}: {valuePattern}");
-			return Without(c => {
-				var val = c.Request.GetHeaderValue(name);
-				return val != null && MatchesPattern(val, valuePattern);
-			});
-		}
-
-		/// <summary>
-		/// Asserts whether the Authorization header was set with basic auth.
-		/// </summary>
-		/// <param name="username">Expected username</param>
-		/// <param name="password">Expected password</param>
-		/// <returns></returns>
-		public HttpCallAssertion WithBasicAuth(string username, string password) {
-			_expectedConditions.Add($"basic auth credentials {username}/{password}");
-			var value = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}"));
-			return With(c => c.Request.Headers.Authorization?.Scheme == "Basic"
-				&& c.Request.Headers.Authorization?.Parameter == value);
-		}
-
-		/// <summary>
-		/// Asserts whether calls were made matching the given predicate function.
-		/// </summary>
-		/// <param name="match">Predicate (usually a lambda expression) that tests an HttpCall and returns a bool.</param>
-		public HttpCallAssertion With(Func<HttpCall, bool> match) {
-			_calls = _calls.Where(match).ToList();
-			Assert();
-			return this;
-		}
-
-		/// <summary>
-		/// Asserts whether calls were made that do NOT match the given predicate function.
-		/// </summary>
-		/// <param name="match">Predicate (usually a lambda expression) that tests an HttpCall and returns a bool.</param>
-		public HttpCallAssertion Without(Func<HttpCall, bool> match) {
-			_calls = _calls.Where(c => !match(c)).ToList();
-			Assert();
-			return this;
 		}
 
 		private void Assert(int? count = null) {
@@ -278,12 +227,7 @@ namespace Flurl.Http.Testing
 			if (_negate) pass = !pass;
 
 			if (!pass)
-				throw new HttpCallAssertException(_expectedConditions, count, _calls.Count);
-		}
-
-		private bool MatchesPattern(string textToCheck, string pattern) {
-			var regex = Regex.Escape(pattern).Replace("\\*", "(.*)");
-			return Regex.IsMatch(textToCheck ?? "", regex);
+				throw new HttpTestException(_expectedConditions, count, _calls.Count);
 		}
 	}
 }

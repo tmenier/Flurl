@@ -13,8 +13,8 @@ using Flurl.Util;
 namespace Flurl.Http.Testing
 {
 	/// <summary>
-	/// Represents a collection of fake responses and other test configurations for requests that match specific criteria.
-	/// Usually created fluently via HttpTest.ForCallsTo(...), rather than instantiated directly.
+	/// Represents a set of request conditions and fake responses for faking HTTP calls in tests.
+	/// Usually created fluently via HttpTest.ForCallsTo, rather than instantiated directly.
 	/// </summary>
 	public class HttpTestSetup
 	{
@@ -28,6 +28,8 @@ namespace Flurl.Http.Testing
 		/// <summary>
 		/// Constructs a new instance of HttpTestSetup.
 		/// </summary>
+		/// <param name="settings">FlurlHttpSettings used in fake calls.</param>
+		/// <param name="urlPatterns">URL(s) or URL pattern(s) that this HttpTestSetup applies to. Can contain * wildcard.</param>
 		public HttpTestSetup(TestFlurlHttpSettings settings, params string[] urlPatterns) {
 			Settings = settings;
 			if (urlPatterns.Any())
@@ -35,12 +37,12 @@ namespace Flurl.Http.Testing
 		}
 
 		/// <summary>
-		/// Gets the FlurlHttpSettings object used by this test.
+		/// The FlurlHttpSettings used in fake calls.
 		/// </summary>
 		public TestFlurlHttpSettings Settings { get; }
 
 		/// <summary>
-		/// Returns true if the giving HttpCall matches one of the URL patterns and all other criteria defined for this HttpTestSetup.
+		/// Returns true if the given HttpCall matches one of the URL patterns and all other criteria defined for this HttpTestSetup.
 		/// </summary>
 		public bool IsMatch(HttpCall call) => _filters.All(f => f(call));
 
@@ -64,14 +66,14 @@ namespace Flurl.Http.Testing
 		/// Defines one or more HTTP verbs, any of which a call must match in order for this HttpTestSetup to apply.
 		/// </summary>
 		public HttpTestSetup WithVerb(params HttpMethod[] verbs) {
-			return With(call => verbs.Any(verb => call.Request.Method == verb));
+			return With(call => call.HasAnyVerb(verbs));
 		}
 
 		/// <summary>
 		/// Defines one or more HTTP verbs, any of which a call must match in order for this HttpTestSetup to apply.
 		/// </summary>
 		public HttpTestSetup WithVerb(params string[] verbs) {
-			return With(call => verbs.Any(verb => call.Request.Method.Method.Equals(verb, StringComparison.OrdinalIgnoreCase)));
+			return With(call => call.HasAnyVerb(verbs));
 		}
 
 		/// <summary>
@@ -92,23 +94,7 @@ namespace Flurl.Http.Testing
 		/// Defines query parameter names, ALL of which a call must contain in order for this HttpTestSetup to apply.
 		/// </summary>
 		public HttpTestSetup WithQueryParams(params string[] names) {
-			return With(c => c.HasQueryParams(names));
-		}
-
-		/// <summary>
-		/// Defines query parameter name-value pairs, expressed as properties of an object, ALL of which a call must contain
-		/// in order for this HttpTestSetup to apply.
-		/// </summary>
-		public HttpTestSetup WithQueryParams(object values, NullValueHandling nullValueHandling = NullValueHandling.NameOnly) {
-			return With(c => c.HasQueryParams(values, nullValueHandling));
-		}
-
-		/// <summary>
-		/// Defines query parameter names, ANY of which a call must contain in order for this HttpTestSetup to apply.
-		/// If no names are provided, call must contain at least one query parameter with any name.
-		/// </summary>
-		public HttpTestSetup WithAnyQueryParam(params string[] names) {
-			return With(c => c.HasAnyQueryParam(names));
+			return With(c => c.HasAllQueryParams(names));
 		}
 
 		/// <summary>
@@ -117,6 +103,30 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		public HttpTestSetup WithoutQueryParams(params string[] names) {
 			return Without(c => c.HasAnyQueryParam(names));
+		}
+
+		/// <summary>
+		/// Defines query parameters, ALL of which a call must contain in order for this HttpTestSetup to apply.
+		/// </summary>
+		/// <param name="values">Object (usually anonymous) or dictionary that is parsed to name/value query parameters to check for. Values may contain * wildcard.</param>
+		public HttpTestSetup WithQueryParams(object values) {
+			return With(c => c.HasQueryParams(values));
+		}
+
+		/// <summary>
+		/// Defines query parameters, NONE of which a call must contain in order for this HttpTestSetup to apply.
+		/// </summary>
+		/// <param name="values">Object (usually anonymous) or dictionary that is parsed to name/value query parameters to check for. Values may contain * wildcard.</param>
+		public HttpTestSetup WithoutQueryParams(object values) {
+			return Without(c => c.HasQueryParams(values));
+		}
+
+		/// <summary>
+		/// Defines query parameter names, ANY of which a call must contain in order for this HttpTestSetup to apply.
+		/// If no names are provided, call must contain at least one query parameter with any name.
+		/// </summary>
+		public HttpTestSetup WithAnyQueryParam(params string[] names) {
+			return With(c => c.HasAnyQueryParam(names));
 		}
 
 		/// <summary>
@@ -132,7 +142,6 @@ namespace Flurl.Http.Testing
 		public HttpTestSetup WithoutHeader(string name, string valuePattern = null) {
 			return Without(c => c.HasHeader(name, valuePattern));
 		}
-
 
 		/// <summary>
 		/// Defines a request body that must exist in order for this HttpTestSetup to apply.
