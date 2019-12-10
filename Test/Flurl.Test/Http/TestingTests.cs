@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -69,6 +69,22 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public async Task can_setup_different_responses_for_different_urls() {
+			HttpTest.RespondWith("never");
+			HttpTest.ForCallsTo("*/1").RespondWith("one");
+			HttpTest.ForCallsTo("*/2").RespondWith("two");
+			HttpTest.ForCallsTo("*/3").RespondWith("three");
+			HttpTest.ForCallsTo("http://www.api.com/*").RespondWith("foo!");
+
+			Assert.AreEqual("foo!", await "http://www.api.com/4".GetStringAsync());
+			Assert.AreEqual("three", await "http://www.api.com/3".GetStringAsync());
+			Assert.AreEqual("two", await "http://www.api.com/2".GetStringAsync());
+			Assert.AreEqual("one", await "http://www.api.com/1".GetStringAsync());
+
+			Assert.AreEqual(4, HttpTest.CallLog.Count);
+		}
+
+		[Test]
 		public async Task can_assert_json_request() {
 			var body = new { a = 1, b = 2 };
 			await "http://some-api.com".PostJsonAsync(body);
@@ -102,26 +118,26 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveMadeACall().WithoutQueryParamValues(new { x = 112, y = 223, z = 666 });
 
 			// failures
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithQueryParam("w"));
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithQueryParamValue("y", 223));
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithQueryParamValue("z", "*4"));
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithQueryParamValues(new { x = 111, y = 666 }));
 
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithoutQueryParams());
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithoutQueryParam("x"));
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithoutQueryParams("z", "y"));
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithoutQueryParamValue("y", 222));
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithoutQueryParamValue("z", "*3"));
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithoutQueryParamValues(new { z = 333, y = 222 }));
 		}
 
@@ -139,9 +155,9 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveMadeACall().WithQueryParamValue("x", new[] { 2, 1 }); // order shouldn't matter
 			HttpTest.ShouldHaveMadeACall().WithQueryParamValues(new { x = new[] { 3, 2, 1 } }); // order shouldn't matter
 
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithQueryParamValue("x", new[] { 1, 2, 4 }));
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithQueryParamValues(new { x = new[] { 1, 2, 4 } }));
 		}
 
@@ -165,9 +181,9 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveMadeACall().WithoutHeader("h2", "val1");
 			HttpTest.ShouldHaveMadeACall().WithoutHeader("h1", "foo*");
 
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithHeader("h3"));
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithoutHeader("h1"));
 		}
 
@@ -294,7 +310,6 @@ namespace Flurl.Test.Http
 			cli.Settings.BeforeCallAsync = call => Task.Delay(200);
 
 			for (var i = 0; i < 5; i++) {
-				Console.WriteLine(i);
 				using (var test = new HttpTest()) {
 					test
 						.RespondWith("0")
@@ -321,7 +336,7 @@ namespace Flurl.Test.Http
 						cli.Request().GetStringAsync());
 
 					CollectionAssert.AllItemsAreUnique(results);
-					CollectionAssert.IsEmpty(test.ResponseQueue);
+					test.ShouldHaveMadeACall().Times(10);
 				}
 			}
 		}

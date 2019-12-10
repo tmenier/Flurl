@@ -365,12 +365,7 @@ namespace Flurl
 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
 		/// <returns>The Url object with the query parameters added</returns>
 		public Url SetQueryParams(object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
-			if (values == null)
-				return this;
-
-			foreach (var kv in values.ToKeyValuePairs())
-				QueryParams.Merge(kv.Key, kv.Value, false, nullValueHandling);
-
+			QueryParams.Merge(values, nullValueHandling);
 			return this;
 		}
 

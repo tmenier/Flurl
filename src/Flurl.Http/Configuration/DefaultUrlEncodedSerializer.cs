@@ -19,9 +19,7 @@ namespace Flurl.Http.Configuration
 				return null;
 
 			var qp = new QueryParamCollection();
-            foreach (var kv in obj.ToKeyValuePairs())
-	            qp.Merge(kv.Key, kv.Value, false, NullValueHandling.Ignore);
-
+			qp.Merge(obj, NullValueHandling.Ignore);
 			return qp.ToString(true);
 		}
 

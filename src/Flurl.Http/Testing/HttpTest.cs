@@ -1,13 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using Flurl.Http.Configuration;
-using Flurl.Http.Content;
-using Flurl.Util;
 
 namespace Flurl.Http.Testing
 {
@@ -18,20 +16,18 @@ namespace Flurl.Http.Testing
 #if NET45
 	[Serializable]
 #endif
-	public class HttpTest : IDisposable
+	public class HttpTest : HttpTestSetup, IDisposable
 	{
+		private readonly ConcurrentQueue<HttpCall> _calls = new ConcurrentQueue<HttpCall>();
+		private readonly List<HttpTestSetup> _filteredSetups = new List<HttpTestSetup>();
 		private readonly Lazy<HttpClient> _httpClient;
 		private readonly Lazy<HttpMessageHandler> _httpMessageHandler;
-		private readonly ConcurrentQueue<HttpCall> _calls;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="HttpTest"/> class.
 		/// </summary>
 		/// <exception cref="Exception">A delegate callback throws an exception.</exception>
-		public HttpTest() {
-		    Settings = new TestFlurlHttpSettings();
-			ResponseQueue = new ConcurrentQueue<HttpResponseMessage>();
-			_calls = new ConcurrentQueue<HttpCall>();
+		public HttpTest() : base(new TestFlurlHttpSettings()) {
 			_httpClient = new Lazy<HttpClient>(() => Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler));
 			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => Settings.HttpClientFactory.CreateMessageHandler());
 		    SetCurrentTest(this);
@@ -42,19 +38,9 @@ namespace Flurl.Http.Testing
 		internal void LogCall(HttpCall call) => _calls.Enqueue(call);
 
 		/// <summary>
-		/// Gets or sets the FlurlHttpSettings object used by this test.
-		/// </summary>
-		public TestFlurlHttpSettings Settings { get; set; }
-
-		/// <summary>
 		/// Gets the current HttpTest from the logical (async) call context
 		/// </summary>
 		public static HttpTest Current => GetCurrentTest();
-
-		/// <summary>
-		/// Queue of HttpResponseMessages to be returned in place of real responses during testing.
-		/// </summary>
-		public ConcurrentQueue<HttpResponseMessage> ResponseQueue { get; }
 
 		/// <summary>
 		/// List of all (fake) HTTP calls made since this HttpTest was created.
@@ -72,75 +58,20 @@ namespace Flurl.Http.Testing
 		}
 
 		/// <summary>
-		/// Adds an HttpResponseMessage to the response queue.
+		/// Fluently creates and returns a new request-specific test setup. 
 		/// </summary>
-		/// <param name="body">The simulated response body string.</param>
-		/// <param name="status">The simulated HTTP status. Default is 200.</param>
-		/// <param name="headers">The simulated response headers (optional).</param>
-		/// <param name="cookies">The simulated response cookies (optional).</param>
-		/// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names of headers will be replaced by hyphens. Default is true.</param>
-		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
-		public HttpTest RespondWith(string body, int status = 200, object headers = null, object cookies = null, bool replaceUnderscoreWithHyphen = true) {
-			return RespondWith(new StringContent(body), status, headers, cookies, replaceUnderscoreWithHyphen);
+		public HttpTestSetup ForCallsTo(params string[] urlPatterns) {
+			var setup = new HttpTestSetup(Settings, urlPatterns);
+			_filteredSetups.Add(setup);
+			return setup;
 		}
 
-		/// <summary>
-		/// Adds an HttpResponseMessage to the response queue with the given data serialized to JSON as the content body.
-		/// </summary>
-		/// <param name="body">The object to be JSON-serialized and used as the simulated response body.</param>
-		/// <param name="status">The simulated HTTP status. Default is 200.</param>
-		/// <param name="headers">The simulated response headers (optional).</param>
-		/// <param name="cookies">The simulated response cookies (optional).</param>
-		/// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names of headers will be replaced by hyphens. Default is true.</param>
-		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
-		public HttpTest RespondWithJson(object body, int status = 200, object headers = null, object cookies = null, bool replaceUnderscoreWithHyphen = true) {
-			var content = new CapturedJsonContent(Settings.JsonSerializer.Serialize(body));
-			return RespondWith(content, status, headers, cookies, replaceUnderscoreWithHyphen);
-		}
+		internal HttpResponseMessage GetNextResponse(HttpCall call) {
+			var setup = _filteredSetups
+				.Concat(new[] { this })
+				.FirstOrDefault(ts => ts.IsMatch(call));
 
-		/// <summary>
-		/// Adds an HttpResponseMessage to the response queue.
-		/// </summary>
-		/// <param name="content">The simulated response body content (optional).</param>
-		/// <param name="status">The simulated HTTP status. Default is 200.</param>
-		/// <param name="headers">The simulated response headers (optional).</param>
-		/// <param name="cookies">The simulated response cookies (optional).</param>
-		/// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names of headers will be replaced by hyphens. Default is true.</param>
-		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
-		public HttpTest RespondWith(HttpContent content = null, int status = 200, object headers = null, object cookies = null, bool replaceUnderscoreWithHyphen = true) {
-			var response = new HttpResponseMessage {
-				StatusCode = (HttpStatusCode)status,
-				Content = content
-			};
-			if (headers != null) {
-				foreach (var kv in headers.ToKeyValuePairs()) {
-					var key = replaceUnderscoreWithHyphen ? kv.Key.Replace("_", "-") : kv.Key;
-					response.SetHeader(key, kv.Value.ToInvariantString());
-				}
-			}
-			if (cookies != null) {
-				foreach (var kv in cookies.ToKeyValuePairs()) {
-					var value = new Cookie(kv.Key, kv.Value.ToInvariantString()).ToString();
-					response.Headers.Add("Set-Cookie", value);
-				}
-			}
-			ResponseQueue.Enqueue(response);
-			return this;
-		}
-
-		/// <summary>
-		/// Adds a simulated timeout response to the response queue.
-		/// </summary>
-		public HttpTest SimulateTimeout() {
-			ResponseQueue.Enqueue(new TimeoutResponseMessage());
-			return this;
-		}
-
-		internal HttpResponseMessage GetNextResponse() {
-			return ResponseQueue.TryDequeue(out var message) ? message : new HttpResponseMessage {
-				StatusCode = HttpStatusCode.OK,
-				Content = new StringContent("")
-			};
+			return (setup != null && setup.ResponseQueue.TryDequeue(out var resp)) ? resp : null;
 		}
 
 		/// <summary>
