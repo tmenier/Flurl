@@ -155,10 +155,12 @@ namespace Flurl.Test.Http
 		// quotes around charset value is technically legal but there's a bug in .NET we want to avoid: https://github.com/dotnet/corefx/issues/5014
 		[Test]
 		public async Task can_get_string_with_quoted_charset_header() {
-			var content = new StringContent("foo");
-			content.Headers.Clear();
-			content.Headers.Add("Content-Type", "text/javascript; charset=\"UTF-8\"");
-			HttpTest.RespondWith(content);
+			HttpTest.RespondWith(() => {
+				var content = new StringContent("foo");
+				content.Headers.Clear();
+				content.Headers.Add("Content-Type", "text/javascript; charset=\"UTF-8\"");
+				return content;
+			});
 
 			var resp = await "http://api.com".GetStringAsync(); // without StripCharsetQuotes, this fails
 			Assert.AreEqual("foo", resp);

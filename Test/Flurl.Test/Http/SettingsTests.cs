@@ -42,7 +42,7 @@ namespace Flurl.Test.Http
 			using (var test = new HttpTest()) {
 				test.RespondWith("ok");
 				GetSettings().BeforeCall = call => {
-					CollectionAssert.IsNotEmpty(test.ResponseQueue); // verifies that callback is running before HTTP call is made
+					Assert.Null(call.Response); // verifies that callback is running before HTTP call is made
 					callbackCalled = true;
 				};
 				Assert.IsFalse(callbackCalled);
@@ -57,7 +57,7 @@ namespace Flurl.Test.Http
 			using (var test = new HttpTest()) {
 				test.RespondWith("ok");
 				GetSettings().AfterCall = call => {
-					CollectionAssert.IsEmpty(test.ResponseQueue); // verifies that callback is running after HTTP call is made
+					Assert.NotNull(call.Response); // verifies that callback is running after HTTP call is made
 					callbackCalled = true;
 				};
 				Assert.IsFalse(callbackCalled);
@@ -73,7 +73,7 @@ namespace Flurl.Test.Http
 			using (var test = new HttpTest()) {
 				test.RespondWith("server error", 500);
 				GetSettings().OnError = call => {
-					CollectionAssert.IsEmpty(test.ResponseQueue); // verifies that callback is running after HTTP call is made
+					Assert.NotNull(call.Response); // verifies that callback is running after HTTP call is made
 					callbackCalled = true;
 					call.ExceptionHandled = markExceptionHandled;
 				};

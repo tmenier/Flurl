@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using Flurl.Http.Configuration;
 using Flurl.Http.Content;
 using Flurl.Util;
@@ -19,11 +17,8 @@ namespace Flurl.Http.Testing
 	public class HttpTestSetup
 	{
 		private List<Func<HttpCall, bool>> _filters = new List<Func<HttpCall, bool>>();
-
-		/// <summary>
-		/// Queue of fake responses to return for calls matching this setup.
-		/// </summary>
-		public ConcurrentQueue<HttpResponseMessage> ResponseQueue { get; } = new ConcurrentQueue<HttpResponseMessage>();
+		private List<Func<HttpResponseMessage>> _responses = new List<Func<HttpResponseMessage>>();
+		private int _respIndex = 0;
 
 		/// <summary>
 		/// Constructs a new instance of HttpTestSetup.
@@ -170,7 +165,7 @@ namespace Flurl.Http.Testing
 		/// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names of headers will be replaced by hyphens. Default is true.</param>
 		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
 		public HttpTestSetup RespondWith(string body, int status = 200, object headers = null, object cookies = null, bool replaceUnderscoreWithHyphen = true) {
-			return RespondWith(new StringContent(body), status, headers, cookies, replaceUnderscoreWithHyphen);
+			return RespondWith(() => new CapturedStringContent(body), status, headers, cookies, replaceUnderscoreWithHyphen);
 		}
 
 		/// <summary>
@@ -183,37 +178,40 @@ namespace Flurl.Http.Testing
 		/// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names of headers will be replaced by hyphens. Default is true.</param>
 		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
 		public HttpTestSetup RespondWithJson(object body, int status = 200, object headers = null, object cookies = null, bool replaceUnderscoreWithHyphen = true) {
-			var content = new CapturedJsonContent(Settings.JsonSerializer.Serialize(body));
-			return RespondWith(content, status, headers, cookies, replaceUnderscoreWithHyphen);
+			var s = Settings.JsonSerializer.Serialize(body);
+			return RespondWith(() => new CapturedJsonContent(s), status, headers, cookies, replaceUnderscoreWithHyphen);
 		}
 
 		/// <summary>
 		/// Adds an HttpResponseMessage to the response queue.
 		/// </summary>
-		/// <param name="content">The simulated response body content (optional).</param>
-		/// <param name="status">The simulated HTTP status. Default is 200.</param>
-		/// <param name="headers">The simulated response headers (optional).</param>
-		/// <param name="cookies">The simulated response cookies (optional).</param>
+		/// <param name="buildContent">A function that builds the simulated response body content. Optional.</param>
+		/// <param name="status">The simulated HTTP status. Optional. Default is 200.</param>
+		/// <param name="headers">The simulated response headers. Optional.</param>
+		/// <param name="cookies">The simulated response cookies. Optional.</param>
 		/// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names of headers will be replaced by hyphens. Default is true.</param>
 		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
-		public HttpTestSetup RespondWith(HttpContent content = null, int status = 200, object headers = null, object cookies = null, bool replaceUnderscoreWithHyphen = true) {
-			var response = new HttpResponseMessage {
-				StatusCode = (HttpStatusCode)status,
-				Content = content
-			};
-			if (headers != null) {
-				foreach (var kv in headers.ToKeyValuePairs()) {
-					var key = replaceUnderscoreWithHyphen ? kv.Key.Replace("_", "-") : kv.Key;
-					response.SetHeader(key, kv.Value.ToInvariantString());
+		public HttpTestSetup RespondWith(Func<HttpContent> buildContent = null, int status = 200, object headers = null, object cookies = null, bool replaceUnderscoreWithHyphen = true) {
+			_responses.Add(() => {
+				var response = new HttpResponseMessage {
+					StatusCode = (HttpStatusCode)status,
+					Content = buildContent?.Invoke()
+				};
+				if (headers != null) {
+					foreach (var kv in headers.ToKeyValuePairs()) {
+						var key = replaceUnderscoreWithHyphen ? kv.Key.Replace("_", "-") : kv.Key;
+						response.SetHeader(key, kv.Value.ToInvariantString());
+					}
 				}
-			}
-			if (cookies != null) {
-				foreach (var kv in cookies.ToKeyValuePairs()) {
-					var value = new Cookie(kv.Key, kv.Value.ToInvariantString()).ToString();
-					response.Headers.Add("Set-Cookie", value);
+
+				if (cookies != null) {
+					foreach (var kv in cookies.ToKeyValuePairs()) {
+						var value = new Cookie(kv.Key, kv.Value.ToInvariantString()).ToString();
+						response.Headers.Add("Set-Cookie", value);
+					}
 				}
-			}
-			ResponseQueue.Enqueue(response);
+				return response;
+			});
 			return this;
 		}
 
@@ -221,9 +219,18 @@ namespace Flurl.Http.Testing
 		/// Adds a simulated timeout response to the response queue.
 		/// </summary>
 		public HttpTestSetup SimulateTimeout() {
-			ResponseQueue.Enqueue(new TimeoutResponseMessage());
+			_responses.Add(() => new TimeoutResponseMessage());
 			return this;
 		}
+
 		#endregion
+
+		internal HttpResponseMessage GetNextResponse() {
+			if (!_responses.Any())
+				return null;
+
+			// atomically get the next response in the list, or the last one if we're past the end
+			return _responses[Math.Min(Interlocked.Increment(ref _respIndex), _responses.Count) - 1]();
+		}
 	}
 }

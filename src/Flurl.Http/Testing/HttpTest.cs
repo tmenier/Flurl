@@ -71,7 +71,7 @@ namespace Flurl.Http.Testing
 				.Concat(new[] { this })
 				.FirstOrDefault(ts => ts.IsMatch(call));
 
-			return (setup != null && setup.ResponseQueue.TryDequeue(out var resp)) ? resp : null;
+			return setup?.GetNextResponse();
 		}
 
 		/// <summary>

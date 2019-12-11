@@ -84,6 +84,39 @@ namespace Flurl.Test.Http
 			Assert.AreEqual(4, HttpTest.CallLog.Count);
 		}
 
+		[Test] // #482
+		public async Task last_response_is_sticky() {
+			HttpTest.RespondWith("1").RespondWith("2").RespondWith("3");
+
+			Assert.AreEqual("1", await "http://api.com".GetStringAsync());
+			Assert.AreEqual("2", await "http://api.com".GetStringAsync());
+			Assert.AreEqual("3", await "http://api.com".GetStringAsync());
+			Assert.AreEqual("3", await "http://api.com".GetStringAsync());
+			Assert.AreEqual("3", await "http://api.com".GetStringAsync());
+		}
+
+		[Test]
+		public async Task can_setup_different_responses_for_different_verbs() {
+			HttpTest.RespondWith("catch-all");
+
+			HttpTest
+				.ForCallsTo("http://www.api.com*")
+				.WithVerb(HttpMethod.Post)
+				.RespondWith("I posted.");
+
+			HttpTest
+				.ForCallsTo("http://www.api.com*")
+				.WithVerb("put", "PATCH")
+				.RespondWith("I put or patched.");
+
+			Assert.AreEqual("I put or patched.", await "http://www.api.com/1".PatchAsync(null).ReceiveString());
+			Assert.AreEqual("I posted.", await "http://www.api.com/2".PostAsync(null).ReceiveString());
+			Assert.AreEqual("I put or patched.", await "http://www.api.com/3".SendAsync(HttpMethod.Put, null).ReceiveString());
+			Assert.AreEqual("catch-all", await "http://www.api.com/4".DeleteAsync().ReceiveString());
+
+			Assert.AreEqual(4, HttpTest.CallLog.Count);
+		}
+
 		[Test]
 		public async Task can_assert_verb() {
 			await "http://www.api.com/1".PostStringAsync("");
