@@ -41,6 +41,14 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		public bool IsMatch(HttpCall call) => _filters.All(f => f(call));
 
+		internal HttpResponseMessage GetNextResponse() {
+			if (!_responses.Any())
+				return null;
+
+			// atomically get the next response in the list, or the last one if we're past the end
+			return _responses[Math.Min(Interlocked.Increment(ref _respIndex), _responses.Count) - 1]();
+		}
+
 		#region filtering
 		/// <summary>
 		/// Defines a condition for which this HttpTestSetup applies.
@@ -154,7 +162,7 @@ namespace Flurl.Http.Testing
 		}
 		#endregion
 
-		#region responses
+		#region responding
 		/// <summary>
 		/// Adds an HttpResponseMessage to the response queue.
 		/// </summary>
@@ -222,15 +230,6 @@ namespace Flurl.Http.Testing
 			_responses.Add(() => new TimeoutResponseMessage());
 			return this;
 		}
-
 		#endregion
-
-		internal HttpResponseMessage GetNextResponse() {
-			if (!_responses.Any())
-				return null;
-
-			// atomically get the next response in the list, or the last one if we're past the end
-			return _responses[Math.Min(Interlocked.Increment(ref _respIndex), _responses.Count) - 1]();
-		}
 	}
 }
