@@ -68,8 +68,19 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldNotHaveCalled("http://www.otherapi.com/*");
 		}
 
+		[Test] // #482
+		public async Task last_response_is_sticky() {
+			HttpTest.RespondWith("1").RespondWith("2").RespondWith("3");
+
+			Assert.AreEqual("1", await "http://api.com".GetStringAsync());
+			Assert.AreEqual("2", await "http://api.com".GetStringAsync());
+			Assert.AreEqual("3", await "http://api.com".GetStringAsync());
+			Assert.AreEqual("3", await "http://api.com".GetStringAsync());
+			Assert.AreEqual("3", await "http://api.com".GetStringAsync());
+		}
+
 		[Test]
-		public async Task can_setup_different_responses_for_different_urls() {
+		public async Task can_respond_based_on_url() {
 			HttpTest.RespondWith("never");
 			HttpTest.ForCallsTo("*/1").RespondWith("one");
 			HttpTest.ForCallsTo("*/2").RespondWith("two");
@@ -84,19 +95,8 @@ namespace Flurl.Test.Http
 			Assert.AreEqual(4, HttpTest.CallLog.Count);
 		}
 
-		[Test] // #482
-		public async Task last_response_is_sticky() {
-			HttpTest.RespondWith("1").RespondWith("2").RespondWith("3");
-
-			Assert.AreEqual("1", await "http://api.com".GetStringAsync());
-			Assert.AreEqual("2", await "http://api.com".GetStringAsync());
-			Assert.AreEqual("3", await "http://api.com".GetStringAsync());
-			Assert.AreEqual("3", await "http://api.com".GetStringAsync());
-			Assert.AreEqual("3", await "http://api.com".GetStringAsync());
-		}
-
 		[Test]
-		public async Task can_setup_different_responses_for_different_verbs() {
+		public async Task can_respond_based_on_verb() {
 			HttpTest.RespondWith("catch-all");
 
 			HttpTest
@@ -115,6 +115,69 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("catch-all", await "http://www.api.com/4".DeleteAsync().ReceiveString());
 
 			Assert.AreEqual(4, HttpTest.CallLog.Count);
+		}
+
+		[Test]
+		public async Task can_respond_based_on_query_params() {
+			HttpTest
+				.ForCallsTo("*")
+				.WithQueryParam("x", 1)
+				.WithQueryParams(new { y = 2, z = 3 })
+				.WithAnyQueryParam("a", "b", "c")
+				.WithoutQueryParam("d")
+				.WithoutQueryParams(new { c = "n*" })
+				.RespondWith("query param conditions met!");
+
+			Assert.AreEqual("", await "http://api.com?x=1&y=2&a=yes".GetStringAsync());
+			Assert.AreEqual("", await "http://api.com?y=2&z=3&b=yes".GetStringAsync());
+			Assert.AreEqual("", await "http://api.com?x=1&y=2&z=3&c=yes&d=yes".GetStringAsync());
+			Assert.AreEqual("", await "http://api.com?x=1&y=2&z=3&c=no".GetStringAsync());
+			Assert.AreEqual("query param conditions met!", await "http://api.com?x=1&y=2&z=3&c=yes".GetStringAsync());
+		}
+
+		[Test]
+		public async Task can_respond_based_on_headers() {
+			HttpTest
+				.ForCallsTo("*")
+				.WithHeader("x")
+				.WithHeader("y", "f*o")
+				.WithoutHeader("y", "flo")
+				.WithoutHeader("z")
+				.RespondWith("header conditions met!");
+
+			Assert.AreEqual("", await "http://api.com".WithHeaders(new { y = "foo" }).GetStringAsync());
+			Assert.AreEqual("", await "http://api.com".WithHeaders(new { x = 1, y = "flo" }).GetStringAsync());
+			Assert.AreEqual("", await "http://api.com".WithHeaders(new { x = 1, y = "foo", z = 2 }).GetStringAsync());
+			Assert.AreEqual("header conditions met!", await "http://api.com".WithHeaders(new { x = 1, y = "foo" }).GetStringAsync());
+		}
+
+		[Test]
+		public async Task can_respond_based_on_body() {
+			HttpTest
+				.ForCallsTo("*")
+				.WithRequestBody("*something*")
+				.WithRequestJson(new { a = "*", b = new { c = "*", d = "yes" } })
+				.RespondWith("body conditions met!");
+
+			Assert.AreEqual("", await "http://api.com".PostStringAsync("something").ReceiveString());
+			Assert.AreEqual("", await "http://api.com".PostJsonAsync(
+				new { a = "hi", b = new { c = "bye", d = "yes" } }).ReceiveString());
+
+			Assert.AreEqual("body conditions met!", await "http://api.com".PostJsonAsync(
+				new { a = "hi", b = new { c = "this is something!", d = "yes" } }).ReceiveString());
+		}
+
+		[Test]
+		public async Task can_respond_based_on_any_call_condition() {
+			HttpTest
+				.ForCallsTo("*")
+				.With(call => call.FlurlRequest.Url.Fragment.StartsWith("abc"))
+				.Without(call => call.FlurlRequest.Url.Fragment.EndsWith("xyz"))
+				.RespondWith("arbitrary conditions met!");
+
+			Assert.AreEqual("", await "http://api.com#abcxyz".GetStringAsync());
+			Assert.AreEqual("", await "http://api.com#xyz".GetStringAsync());
+			Assert.AreEqual("arbitrary conditions met!", await "http://api.com#abcxy".GetStringAsync());
 		}
 
 		[Test]

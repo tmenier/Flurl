@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Flurl.Util;
@@ -16,6 +15,7 @@ namespace Flurl.Http.Testing
 	internal static class Util
 	{
 		internal static bool MatchesPattern(string textToCheck, string pattern) {
+			if ((pattern ?? "*") == "*") return true;
 			var regex = Regex.Escape(pattern).Replace("\\*", "(.*)");
 			return Regex.IsMatch(textToCheck ?? "", regex);
 		}

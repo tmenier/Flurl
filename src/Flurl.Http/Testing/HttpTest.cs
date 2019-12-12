@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,7 +18,7 @@ namespace Flurl.Http.Testing
 	public class HttpTest : HttpTestSetup, IDisposable
 	{
 		private readonly ConcurrentQueue<HttpCall> _calls = new ConcurrentQueue<HttpCall>();
-		private readonly List<HttpTestSetup> _filteredSetups = new List<HttpTestSetup>();
+		private readonly List<FilteredHttpTestSetup> _filteredSetups = new List<FilteredHttpTestSetup>();
 		private readonly Lazy<HttpClient> _httpClient;
 		private readonly Lazy<HttpMessageHandler> _httpMessageHandler;
 
@@ -60,14 +59,14 @@ namespace Flurl.Http.Testing
 		/// <summary>
 		/// Fluently creates and returns a new request-specific test setup. 
 		/// </summary>
-		public HttpTestSetup ForCallsTo(params string[] urlPatterns) {
-			var setup = new HttpTestSetup(Settings, urlPatterns);
+		public FilteredHttpTestSetup ForCallsTo(params string[] urlPatterns) {
+			var setup = new FilteredHttpTestSetup(Settings, urlPatterns);
 			_filteredSetups.Add(setup);
 			return setup;
 		}
 
 		internal HttpTestSetup FindSetup(HttpCall call) {
-			return _filteredSetups.FirstOrDefault(ts => ts.IsMatch(call)) ?? this;
+			return _filteredSetups.FirstOrDefault(ts => ts.IsMatch(call)) ?? (HttpTestSetup)this;
 		}
 
 		/// <summary>

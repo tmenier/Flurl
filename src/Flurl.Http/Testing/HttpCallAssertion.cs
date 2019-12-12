@@ -91,16 +91,14 @@ namespace Flurl.Http.Testing
 		/// Asserts whether calls were made containing the given query parameter name and (optionally) value.
 		/// </summary>
 		public HttpCallAssertion WithQueryParam(string name, object value = null) {
-			var qp = (value == null) ? name : $"{name}={value}";
-			return With(c => c.HasQueryParam(name, value), $"query parameter {qp}");
+			return With(c => c.HasQueryParam(name, value), BuildDescrip("query param", name, value));
 		}
 
 		/// <summary>
 		/// Asserts whether calls were made NOT containing the given query parameter and (optionally) value.
 		/// </summary>
 		public HttpCallAssertion WithoutQueryParam(string name, object value = null) {
-			var qp = (value == null) ? name : $"{name}={value}";
-			return Without(c => c.HasQueryParam(name, value), $"no query parameter {qp}");
+			return Without(c => c.HasQueryParam(name, value), BuildDescrip("no query param", name, value));
 		}
 
 		/// <summary>
@@ -125,7 +123,7 @@ namespace Flurl.Http.Testing
 		/// If no names are provided, asserts that calls were made containing at least one query parameter with any name.
 		/// </summary>
 		public HttpCallAssertion WithAnyQueryParam(params string[] names) {
-			var descrip = names.Any() ? $"any of query parameters {string.Join(", ", names)}" : "any query parameters";
+			var descrip = $"any query param {string.Join(", ", names)}".Trim();
 			return With(c => c.HasAnyQueryParam(names), descrip);
 		}
 
@@ -149,7 +147,7 @@ namespace Flurl.Http.Testing
 		/// Asserts whether calls were made containing given request body. body may contain * wildcard.
 		/// </summary>
 		public HttpCallAssertion WithRequestBody(string bodyPattern) {
-			return With(c => Util.MatchesPattern(c.RequestBody, bodyPattern), $"body matching pattern {bodyPattern}");
+			return With(c => Util.MatchesPattern(c.RequestBody, bodyPattern), $"body {bodyPattern}");
 		}
 
 		/// <summary>
@@ -173,7 +171,7 @@ namespace Flurl.Http.Testing
 		/// value may contain * wildcard.
 		/// </summary>
 		public HttpCallAssertion WithHeader(string name, string valuePattern = "*", string descrip = null) {
-			descrip = descrip ?? $"header {name}: {valuePattern}";
+			descrip = descrip ?? BuildDescrip("header", name, valuePattern);
 			return With(c => c.HasHeader(name, valuePattern), descrip);
 		}
 
@@ -182,7 +180,7 @@ namespace Flurl.Http.Testing
 		/// value may contain * wildcard.
 		/// </summary>
 		public HttpCallAssertion WithoutHeader(string name, string valuePattern = "*") {
-			return Without(c => c.HasHeader(name, valuePattern), $"no header {name}: {valuePattern}");
+			return Without(c => c.HasHeader(name, valuePattern), BuildDescrip("no header", name, valuePattern));
 		}
 
 		/// <summary>
@@ -214,7 +212,10 @@ namespace Flurl.Http.Testing
 				try {
 					var bytes = Convert.FromBase64String(encodedCreds);
 					var creds = Encoding.UTF8.GetString(bytes, 0, bytes.Length).SplitOnFirstOccurence(":");
-					return creds.Length == 2 && Util.MatchesPattern(creds[0], username) && Util.MatchesPattern(creds[1], password);
+					return
+						creds.Length == 2 &&
+						Util.MatchesPattern(creds[0], username) &&
+						Util.MatchesPattern(creds[1], password);
 				}
 				catch (FormatException) {
 					return false;
@@ -228,6 +229,12 @@ namespace Flurl.Http.Testing
 
 			if (!pass)
 				throw new HttpTestException(_expectedConditions, count, _calls.Count);
+		}
+
+		private string BuildDescrip(string label, string name, object value) {
+			var result = $"{label} {name}";
+			if (value != null) result += $" = {value}";
+			return result;
 		}
 	}
 }
