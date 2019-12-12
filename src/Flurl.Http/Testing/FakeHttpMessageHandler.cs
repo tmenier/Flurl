@@ -7,37 +7,45 @@ using System.Threading.Tasks;
 namespace Flurl.Http.Testing
 {
 	/// <summary>
-	/// An HTTP message handler that prevents actual HTTP calls from being made and instead returns
-	/// responses from a provided response factory.
+	/// An HTTP message handler that logs calls so they can be asserted in tests. If the corresponding test setup is
+	/// configured to fake HTTP calls (the default behavior), blocks the call from being made and provides a fake
+	/// response as configured in the test.
 	/// </summary>
-	public class FakeHttpMessageHandler : HttpMessageHandler
+	public class FakeHttpMessageHandler : DelegatingHandler
 	{
 		/// <summary>
-		/// Sends the request asynchronous.
+		/// Creates a new instance of FakeHttpMessageHandler with the given inner handler.
 		/// </summary>
-		/// <param name="request">The request.</param>
-		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
-			HttpResponseMessage resp = null;
+		public FakeHttpMessageHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
 
+		/// <summary>
+		/// If there is an HttpTest context, logs the call so it can be asserted. If the corresponding test setup is
+		/// configured to fake HTTP calls (the default behavior), blocks the call from being made and provides a fake
+		/// response as configured in the test.
+		/// </summary>
+		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
 			if (HttpTest.Current != null) {
 				var call = request.GetHttpCall();
 				if (call != null) {
 					HttpTest.Current.LogCall(call);
-					resp = HttpTest.Current.GetNextResponse(call);
+					var setup = HttpTest.Current.FindSetup(call);
+					if (setup?.FakeRequest == true) {
+						var resp = setup.GetNextResponse() ?? new HttpResponseMessage {
+							StatusCode = HttpStatusCode.OK,
+							Content = new StringContent("")
+						};
+
+						var tcs = new TaskCompletionSource<HttpResponseMessage>();
+						if (resp is TimeoutResponseMessage)
+							tcs.SetCanceled();
+						else
+							tcs.SetResult(resp);
+						return tcs.Task;
+					}
 				}
 			}
 
-			var tcs = new TaskCompletionSource<HttpResponseMessage>();
-			resp = resp ?? new HttpResponseMessage {
-				StatusCode = HttpStatusCode.OK,
-				Content = new StringContent("")
-			};
-			if (resp is TimeoutResponseMessage)
-				tcs.SetCanceled();
-			else
-				tcs.SetResult(resp);
-			return tcs.Task;
+			return base.SendAsync(request, cancellationToken);
 		}
 	}
 }

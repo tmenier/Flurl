@@ -333,6 +333,23 @@ namespace Flurl.Test.Http
 			}
 		}
 
+		[Test]
+		public async Task can_allow_real_http_in_test() {
+			using (var test = new HttpTest()) {
+				test.RespondWith("foo");
+				test.ForCallsTo("*httpbin*").AllowRealHttp();
+
+				Assert.AreEqual("foo", await "https://www.google.com".GetStringAsync());
+				Assert.AreNotEqual("foo", await "https://httpbin.org/get".GetStringAsync());
+				Assert.AreEqual("bar", (await "https://httpbin.org/get?x=bar".GetJsonAsync()).args.x);
+				Assert.AreEqual("foo", await "https://www.microsoft.com".GetStringAsync());
+
+				// real calls still get logged
+				Assert.AreEqual(4, test.CallLog.Count);
+				test.ShouldHaveCalled("https://httpbin*").Times(2);
+			}
+		}
+
 		public class DelegatingHandlerHttpClientFactory : DefaultHttpClientFactory
 		{
 			public override HttpMessageHandler CreateMessageHandler() {

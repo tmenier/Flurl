@@ -16,9 +16,11 @@ namespace Flurl.Http.Testing
 	/// </summary>
 	public class HttpTestSetup
 	{
-		private List<Func<HttpCall, bool>> _filters = new List<Func<HttpCall, bool>>();
-		private List<Func<HttpResponseMessage>> _responses = new List<Func<HttpResponseMessage>>();
+		private readonly List<Func<HttpCall, bool>> _filters = new List<Func<HttpCall, bool>>();
+		private readonly List<Func<HttpResponseMessage>> _responses = new List<Func<HttpResponseMessage>>();
+
 		private int _respIndex = 0;
+		private bool _allowRealHttp = false;
 
 		/// <summary>
 		/// Constructs a new instance of HttpTestSetup.
@@ -36,10 +38,12 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		public TestFlurlHttpSettings Settings { get; }
 
+		internal bool FakeRequest => !_allowRealHttp;
+
 		/// <summary>
 		/// Returns true if the given HttpCall matches one of the URL patterns and all other criteria defined for this HttpTestSetup.
 		/// </summary>
-		public bool IsMatch(HttpCall call) => _filters.All(f => f(call));
+		internal bool IsMatch(HttpCall call) => _filters.All(f => f(call));
 
 		internal HttpResponseMessage GetNextResponse() {
 			if (!_responses.Any())
@@ -229,6 +233,14 @@ namespace Flurl.Http.Testing
 		public HttpTestSetup SimulateTimeout() {
 			_responses.Add(() => new TimeoutResponseMessage());
 			return this;
+		}
+
+		/// <summary>
+		/// Do NOT fake requests for this setup. Typically called on a filtered setup, i.e. HttpTest.ForCallsTo(urlPattern).AllowRealHttp();
+		/// </summary>
+		public void AllowRealHttp() {
+			_responses.Clear();
+			_allowRealHttp = true;
 		}
 		#endregion
 	}

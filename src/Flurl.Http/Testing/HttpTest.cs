@@ -66,12 +66,8 @@ namespace Flurl.Http.Testing
 			return setup;
 		}
 
-		internal HttpResponseMessage GetNextResponse(HttpCall call) {
-			var setup = _filteredSetups
-				.Concat(new[] { this })
-				.FirstOrDefault(ts => ts.IsMatch(call));
-
-			return setup?.GetNextResponse();
+		internal HttpTestSetup FindSetup(HttpCall call) {
+			return _filteredSetups.FirstOrDefault(ts => ts.IsMatch(call)) ?? this;
 		}
 
 		/// <summary>

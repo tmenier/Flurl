@@ -162,18 +162,15 @@ namespace Flurl.Http
 		private void WriteRequestCookies(HttpRequestMessage request) {
 			if (!Cookies.Any()) return;
 			var uri = request.RequestUri;
-			var cookieHandler = FindHttpClientHandler(Client.HttpMessageHandler);
+			var jar = GetCookieJar(Client.HttpMessageHandler);
 
-			// if the handler is an HttpClientHandler (which it usually is), put the cookies in the CookieContainer.
-			if (cookieHandler != null && cookieHandler.UseCookies) {
-				if (cookieHandler.CookieContainer == null)
-					cookieHandler.CookieContainer = new CookieContainer();
-
+			if (jar != null) {
 				Cookies.Merge(Client.Cookies);
 				foreach (var cookie in Cookies.Values)
-					cookieHandler.CookieContainer.Add(uri, cookie);
+					jar.Add(uri, cookie);
 			}
 			else {
+				// no CookieContainer in play, add cookie headers manually
 				// http://stackoverflow.com/a/15588878/62600
 				request.Headers.TryAddWithoutValidation("Cookie", string.Join("; ", Cookies.Values));
 			}
@@ -184,35 +181,31 @@ namespace Flurl.Http
 			if (uri == null)
 				return;
 
-			// if the handler is an HttpClientHandler (which it usually is), it's already plucked the
-			// cookies out of the headers and put them in the CookieContainer.
-			var jar = FindHttpClientHandler(Client.HttpMessageHandler)?.CookieContainer;
-			if (jar == null) {
-				// http://stackoverflow.com/a/15588878/62600
-				IEnumerable<string> cookieHeaders;
-				if (!response.Headers.TryGetValues("Set-Cookie", out cookieHeaders))
-					return;
+			// if there's a CookieContainer in play, cookies have probably been removed from the headers and put there.
+			var jar = GetCookieJar(Client.HttpMessageHandler) ?? new CookieContainer();
 
-				jar = new CookieContainer();
-				foreach (string header in cookieHeaders) {
+			// but check the headers either way. they won't be in both places, so this should be safe.
+			// http://stackoverflow.com/a/15588878/62600
+			if (response.Headers.TryGetValues("Set-Cookie", out var cookieHeaders)) {
+				foreach (string header in cookieHeaders)
 					jar.SetCookies(uri, header);
-				}
 			}
 
 			foreach (var cookie in jar.GetCookies(uri).Cast<Cookie>())
 				Cookies[cookie.Name] = cookie;
 		}
 
-		private HttpClientHandler FindHttpClientHandler(HttpMessageHandler handler) {
-			// if it's an HttpClientHandler, return it
-			var httpClientHandler = handler as HttpClientHandler;
-			if (httpClientHandler != null)
-				return httpClientHandler;
+		private CookieContainer GetCookieJar(HttpMessageHandler handler) {
+			// if it's an HttpClientHandler, return its CookieContainer
+			if (handler is HttpClientHandler hch) {
+				if (hch.UseCookies && hch.CookieContainer == null)
+					hch.CookieContainer = new CookieContainer();
+				return hch.CookieContainer;
+			}
 
 			// if it's a DelegatingHandler, check the InnerHandler recursively
-			var delegatingHandler = handler as DelegatingHandler;
-			if (delegatingHandler != null)
-				return FindHttpClientHandler(delegatingHandler.InnerHandler);
+			if (handler is DelegatingHandler dh)
+				return GetCookieJar(dh.InnerHandler);
 
 			// it's neither
 			return null;
