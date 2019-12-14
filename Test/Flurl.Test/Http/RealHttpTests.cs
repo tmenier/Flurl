@@ -202,7 +202,7 @@ namespace Flurl.Test.Http
 				Assert.IsInstanceOf<FlurlParsingException>(ex);
 			}
 			catch (FlurlHttpException) {
-				Assert.Fail("exception should have been supressed.");
+				Assert.Fail("exception should have been suppressed.");
 			}
 		}
 

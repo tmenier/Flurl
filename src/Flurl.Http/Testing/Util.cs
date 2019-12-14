@@ -15,8 +15,12 @@ namespace Flurl.Http.Testing
 	internal static class Util
 	{
 		internal static bool MatchesPattern(string textToCheck, string pattern) {
-			if ((pattern ?? "*") == "*") return true;
-			var regex = Regex.Escape(pattern).Replace("\\*", "(.*)");
+			// avoid regex'ing in simple cases
+			if (string.IsNullOrEmpty(pattern) || pattern == "*") return true;
+			if (string.IsNullOrEmpty(textToCheck)) return false;
+			if (!pattern.Contains("*")) return textToCheck == pattern;
+
+			var regex =  "^" + Regex.Escape(pattern).Replace("\\*", "(.*)") + "$";
 			return Regex.IsMatch(textToCheck ?? "", regex);
 		}
 

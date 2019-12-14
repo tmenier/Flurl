@@ -66,6 +66,10 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveMadeACall();
 			HttpTest.ShouldHaveCalled("http://www.api.com/*").WithVerb(HttpMethod.Get).Times(3);
 			HttpTest.ShouldNotHaveCalled("http://www.otherapi.com/*");
+
+			// #323 make sure it's a full string match and not a "contains"
+			Assert.Throws<HttpTestException>(() => HttpTest.ShouldHaveCalled("http://www.api.com/"));
+			HttpTest.ShouldNotHaveCalled("http://www.api.com/");
 		}
 
 		[Test] // #482
