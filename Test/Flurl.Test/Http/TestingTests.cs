@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -66,6 +66,135 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveMadeACall();
 			HttpTest.ShouldHaveCalled("http://www.api.com/*").WithVerb(HttpMethod.Get).Times(3);
 			HttpTest.ShouldNotHaveCalled("http://www.otherapi.com/*");
+
+			// #323 make sure it's a full string match and not a "contains"
+			Assert.Throws<HttpTestException>(() => HttpTest.ShouldHaveCalled("http://www.api.com/"));
+			HttpTest.ShouldNotHaveCalled("http://www.api.com/");
+		}
+
+		[Test] // #482
+		public async Task last_response_is_sticky() {
+			HttpTest.RespondWith("1").RespondWith("2").RespondWith("3");
+
+			Assert.AreEqual("1", await "http://api.com".GetStringAsync());
+			Assert.AreEqual("2", await "http://api.com".GetStringAsync());
+			Assert.AreEqual("3", await "http://api.com".GetStringAsync());
+			Assert.AreEqual("3", await "http://api.com".GetStringAsync());
+			Assert.AreEqual("3", await "http://api.com".GetStringAsync());
+		}
+
+		[Test]
+		public async Task can_respond_based_on_url() {
+			HttpTest.RespondWith("never");
+			HttpTest.ForCallsTo("*/1").RespondWith("one");
+			HttpTest.ForCallsTo("*/2").RespondWith("two");
+			HttpTest.ForCallsTo("*/3").RespondWith("three");
+			HttpTest.ForCallsTo("http://www.api.com/*").RespondWith("foo!");
+
+			Assert.AreEqual("foo!", await "http://www.api.com/4".GetStringAsync());
+			Assert.AreEqual("three", await "http://www.api.com/3".GetStringAsync());
+			Assert.AreEqual("two", await "http://www.api.com/2".GetStringAsync());
+			Assert.AreEqual("one", await "http://www.api.com/1".GetStringAsync());
+
+			Assert.AreEqual(4, HttpTest.CallLog.Count);
+		}
+
+		[Test]
+		public async Task can_respond_based_on_verb() {
+			HttpTest.RespondWith("catch-all");
+
+			HttpTest
+				.ForCallsTo("http://www.api.com*")
+				.WithVerb(HttpMethod.Post)
+				.RespondWith("I posted.");
+
+			HttpTest
+				.ForCallsTo("http://www.api.com*")
+				.WithVerb("put", "PATCH")
+				.RespondWith("I put or patched.");
+
+			Assert.AreEqual("I put or patched.", await "http://www.api.com/1".PatchAsync(null).ReceiveString());
+			Assert.AreEqual("I posted.", await "http://www.api.com/2".PostAsync(null).ReceiveString());
+			Assert.AreEqual("I put or patched.", await "http://www.api.com/3".SendAsync(HttpMethod.Put, null).ReceiveString());
+			Assert.AreEqual("catch-all", await "http://www.api.com/4".DeleteAsync().ReceiveString());
+
+			Assert.AreEqual(4, HttpTest.CallLog.Count);
+		}
+
+		[Test]
+		public async Task can_respond_based_on_query_params() {
+			HttpTest
+				.ForCallsTo("*")
+				.WithQueryParam("x", 1)
+				.WithQueryParams(new { y = 2, z = 3 })
+				.WithAnyQueryParam("a", "b", "c")
+				.WithoutQueryParam("d")
+				.WithoutQueryParams(new { c = "n*" })
+				.RespondWith("query param conditions met!");
+
+			Assert.AreEqual("", await "http://api.com?x=1&y=2&a=yes".GetStringAsync());
+			Assert.AreEqual("", await "http://api.com?y=2&z=3&b=yes".GetStringAsync());
+			Assert.AreEqual("", await "http://api.com?x=1&y=2&z=3&c=yes&d=yes".GetStringAsync());
+			Assert.AreEqual("", await "http://api.com?x=1&y=2&z=3&c=no".GetStringAsync());
+			Assert.AreEqual("query param conditions met!", await "http://api.com?x=1&y=2&z=3&c=yes".GetStringAsync());
+		}
+
+		[Test]
+		public async Task can_respond_based_on_headers() {
+			HttpTest
+				.ForCallsTo("*")
+				.WithHeader("x")
+				.WithHeader("y", "f*o")
+				.WithoutHeader("y", "flo")
+				.WithoutHeader("z")
+				.RespondWith("header conditions met!");
+
+			Assert.AreEqual("", await "http://api.com".WithHeaders(new { y = "foo" }).GetStringAsync());
+			Assert.AreEqual("", await "http://api.com".WithHeaders(new { x = 1, y = "flo" }).GetStringAsync());
+			Assert.AreEqual("", await "http://api.com".WithHeaders(new { x = 1, y = "foo", z = 2 }).GetStringAsync());
+			Assert.AreEqual("header conditions met!", await "http://api.com".WithHeaders(new { x = 1, y = "foo" }).GetStringAsync());
+		}
+
+		[Test]
+		public async Task can_respond_based_on_body() {
+			HttpTest
+				.ForCallsTo("*")
+				.WithRequestBody("*something*")
+				.WithRequestJson(new { a = "*", b = new { c = "*", d = "yes" } })
+				.RespondWith("body conditions met!");
+
+			Assert.AreEqual("", await "http://api.com".PostStringAsync("something").ReceiveString());
+			Assert.AreEqual("", await "http://api.com".PostJsonAsync(
+				new { a = "hi", b = new { c = "bye", d = "yes" } }).ReceiveString());
+
+			Assert.AreEqual("body conditions met!", await "http://api.com".PostJsonAsync(
+				new { a = "hi", b = new { c = "this is something!", d = "yes" } }).ReceiveString());
+		}
+
+		[Test]
+		public async Task can_respond_based_on_any_call_condition() {
+			HttpTest
+				.ForCallsTo("*")
+				.With(call => call.FlurlRequest.Url.Fragment.StartsWith("abc"))
+				.Without(call => call.FlurlRequest.Url.Fragment.EndsWith("xyz"))
+				.RespondWith("arbitrary conditions met!");
+
+			Assert.AreEqual("", await "http://api.com#abcxyz".GetStringAsync());
+			Assert.AreEqual("", await "http://api.com#xyz".GetStringAsync());
+			Assert.AreEqual("arbitrary conditions met!", await "http://api.com#abcxy".GetStringAsync());
+		}
+
+		[Test]
+		public async Task can_assert_verb() {
+			await "http://www.api.com/1".PostStringAsync("");
+			await "http://www.api.com/2".PutStringAsync("");
+			await "http://www.api.com/3".PatchStringAsync("");
+			await "http://www.api.com/4".DeleteAsync();
+
+			HttpTest.ShouldHaveMadeACall().WithVerb(HttpMethod.Post).Times(1);
+			HttpTest.ShouldHaveMadeACall().WithVerb("put", "PATCH").Times(2);
+			HttpTest.ShouldHaveMadeACall().WithVerb("get", "delete").Times(1);
+			Assert.Throws<HttpTestException>(() => HttpTest.ShouldHaveMadeACall().WithVerb(HttpMethod.Get));
 		}
 
 		[Test]
@@ -91,38 +220,41 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParams();
 			HttpTest.ShouldHaveMadeACall().WithQueryParam("x");
 			HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParams("z", "y");
-			HttpTest.ShouldHaveMadeACall().WithQueryParamValue("y", 222);
-			HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParamValue("z", "*3");
-			HttpTest.ShouldHaveMadeACall().WithQueryParamValues(new { z = 333, y = 222 });
+			HttpTest.ShouldHaveMadeACall().WithQueryParam("y", 222);
+			HttpTest.ShouldHaveCalled("http://www.api.com*").WithQueryParam("z", "*3");
+			HttpTest.ShouldHaveMadeACall().WithQueryParams(new { z = 333, y = 222 });
+			HttpTest.ShouldHaveMadeACall().WithQueryParams(new { z = "*", y = 222, x = "*" });
+			HttpTest.ShouldHaveMadeACall().WithAnyQueryParam("a", "z", "b");
 
 			// without
 			HttpTest.ShouldHaveCalled("http://www.api.com*").WithoutQueryParam("w");
 			HttpTest.ShouldHaveMadeACall().WithoutQueryParams("t", "u", "v");
-			HttpTest.ShouldHaveCalled("http://www.api.com*").WithoutQueryParamValue("x", 112);
-			HttpTest.ShouldHaveMadeACall().WithoutQueryParamValues(new { x = 112, y = 223, z = 666 });
+			HttpTest.ShouldHaveCalled("http://www.api.com*").WithoutQueryParam("x", 112);
+			HttpTest.ShouldHaveMadeACall().WithoutQueryParams(new { x = 112, y = 223, z = 666 });
+			HttpTest.ShouldHaveMadeACall().WithoutQueryParams(new { a = "*", b = "*" });
 
 			// failures
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithQueryParam("w"));
-			Assert.Throws<HttpCallAssertException>(() =>
-				HttpTest.ShouldHaveMadeACall().WithQueryParamValue("y", 223));
-			Assert.Throws<HttpCallAssertException>(() =>
-				HttpTest.ShouldHaveMadeACall().WithQueryParamValue("z", "*4"));
-			Assert.Throws<HttpCallAssertException>(() =>
-				HttpTest.ShouldHaveMadeACall().WithQueryParamValues(new { x = 111, y = 666 }));
+			Assert.Throws<HttpTestException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithQueryParam("y", 223));
+			Assert.Throws<HttpTestException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithQueryParam("z", "*4"));
+			Assert.Throws<HttpTestException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithQueryParams(new { x = 111, y = 666 }));
 
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithoutQueryParams());
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithoutQueryParam("x"));
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithoutQueryParams("z", "y"));
-			Assert.Throws<HttpCallAssertException>(() =>
-				HttpTest.ShouldHaveMadeACall().WithoutQueryParamValue("y", 222));
-			Assert.Throws<HttpCallAssertException>(() =>
-				HttpTest.ShouldHaveMadeACall().WithoutQueryParamValue("z", "*3"));
-			Assert.Throws<HttpCallAssertException>(() =>
-				HttpTest.ShouldHaveMadeACall().WithoutQueryParamValues(new { z = 333, y = 222 }));
+			Assert.Throws<HttpTestException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithoutQueryParam("y", 222));
+			Assert.Throws<HttpTestException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithoutQueryParam("z", "*3"));
+			Assert.Throws<HttpTestException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithoutQueryParams(new { z = 333, y = 222 }));
 		}
 
 		[TestCase(false)]
@@ -136,13 +268,13 @@ namespace Flurl.Test.Http
 			await url.GetAsync();
 
 			HttpTest.ShouldHaveMadeACall().WithQueryParam("x");
-			HttpTest.ShouldHaveMadeACall().WithQueryParamValue("x", new[] { 2, 1 }); // order shouldn't matter
-			HttpTest.ShouldHaveMadeACall().WithQueryParamValues(new { x = new[] { 3, 2, 1 } }); // order shouldn't matter
+			HttpTest.ShouldHaveMadeACall().WithQueryParam("x", new[] { 2, 1 }); // order shouldn't matter
+			HttpTest.ShouldHaveMadeACall().WithQueryParams(new { x = new[] { 3, 2, 1 } }); // order shouldn't matter
 
-			Assert.Throws<HttpCallAssertException>(() =>
-				HttpTest.ShouldHaveMadeACall().WithQueryParamValue("x", new[] { 1, 2, 4 }));
-			Assert.Throws<HttpCallAssertException>(() =>
-				HttpTest.ShouldHaveMadeACall().WithQueryParamValues(new { x = new[] { 1, 2, 4 } }));
+			Assert.Throws<HttpTestException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithQueryParam("x", new[] { 1, 2, 4 }));
+			Assert.Throws<HttpTestException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithQueryParams(new { x = new[] { 1, 2, 4 } }));
 		}
 
 		[Test]
@@ -165,10 +297,33 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveMadeACall().WithoutHeader("h2", "val1");
 			HttpTest.ShouldHaveMadeACall().WithoutHeader("h1", "foo*");
 
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithHeader("h3"));
-			Assert.Throws<HttpCallAssertException>(() =>
+			Assert.Throws<HttpTestException>(() =>
 				HttpTest.ShouldHaveMadeACall().WithoutHeader("h1"));
+		}
+
+		[Test]
+		public async Task can_assert_oauth_token() {
+			await "https://auth.com".WithOAuthBearerToken("foo").GetAsync();
+			HttpTest.ShouldHaveMadeACall().WithOAuthBearerToken();
+			HttpTest.ShouldHaveMadeACall().WithOAuthBearerToken("foo");
+			HttpTest.ShouldHaveMadeACall().WithOAuthBearerToken("*oo");
+			Assert.Throws<HttpTestException>(() => HttpTest.ShouldHaveMadeACall().WithOAuthBearerToken("bar"));
+			Assert.Throws<HttpTestException>(() => HttpTest.ShouldHaveMadeACall().WithBasicAuth());
+		}
+
+		[Test]
+		public async Task can_assert_basic_auth() {
+			await "https://auth.com".WithBasicAuth("me", "letmein").GetAsync();
+			HttpTest.ShouldHaveMadeACall().WithBasicAuth();
+			HttpTest.ShouldHaveMadeACall().WithBasicAuth("me", "letmein");
+			HttpTest.ShouldHaveMadeACall().WithBasicAuth("me");
+			HttpTest.ShouldHaveMadeACall().WithBasicAuth("m*", "*in");
+			Assert.Throws<HttpTestException>(() => HttpTest.ShouldHaveMadeACall().WithBasicAuth("me", "wrong"));
+			Assert.Throws<HttpTestException>(() => HttpTest.ShouldHaveMadeACall().WithBasicAuth("you"));
+			Assert.Throws<HttpTestException>(() => HttpTest.ShouldHaveMadeACall().WithBasicAuth("m*", "*out"));
+			Assert.Throws<HttpTestException>(() => HttpTest.ShouldHaveMadeACall().WithOAuthBearerToken());
 		}
 
 		[Test]
@@ -200,17 +355,17 @@ namespace Flurl.Test.Http
 			var resp = await "http://www.api.com".GetAsync();
 			Assert.AreEqual(1, resp.Headers.Count());
 			Assert.AreEqual("h1", resp.Headers.First().Key);
-			Assert.AreEqual("foo", resp.Headers.First().Value.First());
+			Assert.AreEqual("foo", resp.Headers.First().Value);
 		}
 
 		[Test]
 		public async Task can_fake_cookies() {
 			HttpTest.RespondWith(cookies: new { c1 = "foo" });
 
-			var rec = "http://www.api.com".EnableCookies();
-			await rec.GetAsync();
-			Assert.AreEqual(1, rec.Cookies.Count);
-			Assert.AreEqual("foo", rec.Cookies["c1"].Value);
+			var req = "http://www.api.com".EnableCookies();
+			await req.GetAsync();
+			Assert.AreEqual(1, req.Cookies.Count);
+			Assert.AreEqual("foo", req.Cookies["c1"].Value);
 		}
 
 		// https://github.com/tmenier/Flurl/issues/175
@@ -284,12 +439,16 @@ namespace Flurl.Test.Http
 			}
 		}
 
-		[Test, Ignore("bug repro, not yet fixed")] // #366 & #398
+		[Test] // #366 & #398
 		public async Task can_use_response_queue_in_parallel() {
+			// this was hard to test. numbers used (200 ms delay, 10 calls, repeat 5 times) were not
+			// arrived at by any exact science. they just seemed to be the point where failure is
+			// virtually guaranteed without thread-safe collections backing ResponseQueue and CallLog,
+			// but without making the test unbearably slow.
 			var cli = new FlurlClient("http://api.com");
-			cli.Settings.BeforeCallAsync = call => Task.Delay(500);
+			cli.Settings.BeforeCallAsync = call => Task.Delay(200);
 
-			for (var i = 0; i < 100; i++) {
+			for (var i = 0; i < 5; i++) {
 				using (var test = new HttpTest()) {
 					test
 						.RespondWith("0")
@@ -316,7 +475,7 @@ namespace Flurl.Test.Http
 						cli.Request().GetStringAsync());
 
 					CollectionAssert.AllItemsAreUnique(results);
-					CollectionAssert.IsEmpty(test.ResponseQueue);
+					test.ShouldHaveMadeACall().Times(10);
 				}
 			}
 		}

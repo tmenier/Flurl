@@ -11,7 +11,8 @@ using Flurl.Util;
 namespace Flurl.Http
 {
 	/// <summary>
-	/// Interface defining FlurlRequest's contract (useful for mocking and DI)
+	/// Represents an HTTP request. Can be created explicitly via new FlurlRequest(), fluently via Url.Request(),
+	/// or implicitly when a call is made via methods like Url.GetAsync().
 	/// </summary>
 	public interface IFlurlRequest : IHttpSettingsContainer
 	{
@@ -26,20 +27,18 @@ namespace Flurl.Http
 		Url Url { get; set; }
 
 		/// <summary>
-		/// Creates and asynchronously sends an HttpRequestMethod.
+		/// Asynchronously sends the HTTP request.
 		/// Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
 		/// </summary>
 		/// <param name="verb">The HTTP method used to make the request.</param>
 		/// <param name="content">Contents of the request body.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
-		/// <returns>A Task whose result is the received HttpResponseMessage.</returns>
-		Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead);
+		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
+		Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead);
 	}
 
-	/// <summary>
-	/// A chainable wrapper around HttpClient and Flurl.Url.
-	/// </summary>
+	/// <inheritdoc />
 	public class FlurlRequest : IFlurlRequest
 	{
 		private FlurlHttpSettings _settings;
@@ -108,7 +107,7 @@ namespace Flurl.Http
 		public IDictionary<string, Cookie> Cookies => Client.Cookies;
 
 		/// <inheritdoc />
-		public async Task<HttpResponseMessage> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
+		public async Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			_client = Client; // "freeze" the client at this point to avoid excessive calls to FlurlClientFactory.Get (#374)
 
 			var request = new HttpRequestMessage(verb, Url) { Content = content };
@@ -138,9 +137,10 @@ namespace Flurl.Http
 
 				call.Response = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
 				call.Response.RequestMessage = request;
+				call.FlurlResponse = new FlurlResponse(call.Response);
 
 				if (call.Succeeded)
-					return call.Response;
+					return call.FlurlResponse;
 
 				throw new FlurlHttpException(call, null);
 			}
@@ -162,18 +162,15 @@ namespace Flurl.Http
 		private void WriteRequestCookies(HttpRequestMessage request) {
 			if (!Cookies.Any()) return;
 			var uri = request.RequestUri;
-			var cookieHandler = FindHttpClientHandler(Client.HttpMessageHandler);
+			var jar = GetCookieJar(Client.HttpMessageHandler);
 
-			// if the handler is an HttpClientHandler (which it usually is), put the cookies in the CookieContainer.
-			if (cookieHandler != null && cookieHandler.UseCookies) {
-				if (cookieHandler.CookieContainer == null)
-					cookieHandler.CookieContainer = new CookieContainer();
-
+			if (jar != null) {
 				Cookies.Merge(Client.Cookies);
 				foreach (var cookie in Cookies.Values)
-					cookieHandler.CookieContainer.Add(uri, cookie);
+					jar.Add(uri, cookie);
 			}
 			else {
+				// no CookieContainer in play, add cookie headers manually
 				// http://stackoverflow.com/a/15588878/62600
 				request.Headers.TryAddWithoutValidation("Cookie", string.Join("; ", Cookies.Values));
 			}
@@ -184,46 +181,42 @@ namespace Flurl.Http
 			if (uri == null)
 				return;
 
-			// if the handler is an HttpClientHandler (which it usually is), it's already plucked the
-			// cookies out of the headers and put them in the CookieContainer.
-			var jar = FindHttpClientHandler(Client.HttpMessageHandler)?.CookieContainer;
-			if (jar == null) {
-				// http://stackoverflow.com/a/15588878/62600
-				IEnumerable<string> cookieHeaders;
-				if (!response.Headers.TryGetValues("Set-Cookie", out cookieHeaders))
-					return;
+			// if there's a CookieContainer in play, cookies have probably been removed from the headers and put there.
+			var jar = GetCookieJar(Client.HttpMessageHandler) ?? new CookieContainer();
 
-				jar = new CookieContainer();
-				foreach (string header in cookieHeaders) {
+			// but check the headers either way. they won't be in both places, so this should be safe.
+			// http://stackoverflow.com/a/15588878/62600
+			if (response.Headers.TryGetValues("Set-Cookie", out var cookieHeaders)) {
+				foreach (string header in cookieHeaders)
 					jar.SetCookies(uri, header);
-				}
 			}
 
 			foreach (var cookie in jar.GetCookies(uri).Cast<Cookie>())
 				Cookies[cookie.Name] = cookie;
 		}
 
-		private HttpClientHandler FindHttpClientHandler(HttpMessageHandler handler) {
-			// if it's an HttpClientHandler, return it
-			var httpClientHandler = handler as HttpClientHandler;
-			if (httpClientHandler != null)
-				return httpClientHandler;
+		private CookieContainer GetCookieJar(HttpMessageHandler handler) {
+			// if it's an HttpClientHandler, return its CookieContainer
+			if (handler is HttpClientHandler hch) {
+				if (hch.UseCookies && hch.CookieContainer == null)
+					hch.CookieContainer = new CookieContainer();
+				return hch.CookieContainer;
+			}
 
 			// if it's a DelegatingHandler, check the InnerHandler recursively
-			var delegatingHandler = handler as DelegatingHandler;
-			if (delegatingHandler != null)
-				return FindHttpClientHandler(delegatingHandler.InnerHandler);
+			if (handler is DelegatingHandler dh)
+				return GetCookieJar(dh.InnerHandler);
 
 			// it's neither
 			return null;
 		}
 
-		internal static async Task<HttpResponseMessage> HandleExceptionAsync(HttpCall call, Exception ex, CancellationToken token) {
+		internal static async Task<IFlurlResponse> HandleExceptionAsync(HttpCall call, Exception ex, CancellationToken token) {
 			call.Exception = ex;
 			await HandleEventAsync(call.FlurlRequest.Settings.OnError, call.FlurlRequest.Settings.OnErrorAsync, call).ConfigureAwait(false);
 
 			if (call.ExceptionHandled)
-				return call.Response;
+				return call.FlurlResponse;
 
 			if (ex is OperationCanceledException && !token.IsCancellationRequested)
 				throw new FlurlHttpTimeoutException(call, ex);

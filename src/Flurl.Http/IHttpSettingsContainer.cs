@@ -14,12 +14,12 @@ namespace Flurl.Http
 	public interface IHttpSettingsContainer
 	{
 	    /// <summary>
-	    /// Gets or sets the FlurlHttpSettings object used by this client.
+	    /// Gets or sets the FlurlHttpSettings object used by this client or request.
 	    /// </summary>
 	    FlurlHttpSettings Settings { get; set; }
 
 	    /// <summary>
-	    /// Collection of headers sent on all requests using this client.
+	    /// Collection of headers sent on this request or all requests using this client.
 	    /// </summary>
 	    IDictionary<string, object> Headers { get; }
 

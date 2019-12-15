@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -17,35 +17,15 @@ namespace Flurl.Test.Http
 	[TestFixture, Parallelizable]
 	public class RealHttpTests
 	{
-		class StackExResponse
-		{
-			public object[] items { get; set; }
-			public bool has_more { get; set; }
-			public int backoff { get; set; }
+		[TestCase("gzip", "gzipped")]
+		[TestCase("deflate", "deflated"), Ignore("#474")]
+		public async Task decompresses_automatically(string encoding, string jsonKey) {
+			var result = await "https://httpbin.org"
+				.AppendPathSegment(encoding)
+				.WithHeader("Accept-encoding", encoding)
+				.GetJsonAsync<Dictionary<string, object>>();
 
-			internal static int last_page = 0;
-			internal static int last_backoff = 0;
-		}
-
-		[TestCase("gzip")]
-		[TestCase("deflate")]
-		[NonParallelizable]
-		public async Task decompresses_automatically(string encoding) {
-			if (StackExResponse.last_backoff > 0) {
-				Console.WriteLine($"Backing off StackExchange for {StackExResponse.last_backoff} seconds...");
-				await Task.Delay(TimeSpan.FromSeconds(StackExResponse.last_backoff));
-			}
-
-			StackExResponse.last_page++;
-			var result = await $"https://api.stackexchange.com/2.2/answers?site=stackoverflow&pagesize=10"
-				.SetQueryParam("page", ++StackExResponse.last_page)
-				.WithHeader("Accept-Encoding", encoding)
-				.GetJsonAsync<StackExResponse>();
-
-			StackExResponse.last_backoff = result.backoff;
-
-			Assert.AreEqual(10, result.items.Length);
-			Assert.IsTrue(result.has_more);
+			Assert.AreEqual(true, result[jsonKey]);
 		}
 
 		[TestCase("https://httpbin.org/image/jpeg", null, "my-image.jpg", "my-image.jpg")]
@@ -148,21 +128,21 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_allow_non_success_status() {
-			await "https://httpbin.org/status/418".AllowHttpStatus("4xx").GetAsync();
+			var resp = await "https://httpbin.org/status/418".AllowHttpStatus("4xx").GetAsync();
+			Assert.AreEqual(418, resp.StatusCode);
 		}
 
 		[Test]
 		public async Task can_post_multipart() {
 			var folder = "c:\\flurl-test-" + Guid.NewGuid(); // random so parallel tests don't trip over each other
-			Directory.CreateDirectory(folder);
-
 			var path1 = Path.Combine(folder, "upload1.txt");
 			var path2 = Path.Combine(folder, "upload2.txt");
 
-			File.WriteAllText(path1, "file contents 1");
-			File.WriteAllText(path2, "file contents 2");
-
+			Directory.CreateDirectory(folder);
 			try {
+				File.WriteAllText(path1, "file contents 1");
+				File.WriteAllText(path2, "file contents 2");
+
 				using (var stream = File.OpenRead(path2)) {
 					var resp = await "https://httpbin.org/post"
 						.PostMultipartAsync(content => {
@@ -203,7 +183,7 @@ namespace Flurl.Test.Http
 				Assert.IsTrue(handlerCalled, "error handler should have been called.");
 			}
 			catch (FlurlHttpException) {
-				Assert.Fail("exception should have been supressed.");
+				Assert.Fail("exception should have been suppressed.");
 			}
 		}
 
@@ -222,7 +202,7 @@ namespace Flurl.Test.Http
 				Assert.IsInstanceOf<FlurlParsingException>(ex);
 			}
 			catch (FlurlHttpException) {
-				Assert.Fail("exception should have been supressed.");
+				Assert.Fail("exception should have been suppressed.");
 			}
 		}
 
@@ -350,6 +330,23 @@ namespace Flurl.Test.Http
 					.GetStringAsync();
 				Assert.AreEqual("foo 2!", s);
 				Assert.IsFalse(cli2.Settings.CookiesEnabled);
+			}
+		}
+
+		[Test]
+		public async Task can_allow_real_http_in_test() {
+			using (var test = new HttpTest()) {
+				test.RespondWith("foo");
+				test.ForCallsTo("*httpbin*").AllowRealHttp();
+
+				Assert.AreEqual("foo", await "https://www.google.com".GetStringAsync());
+				Assert.AreNotEqual("foo", await "https://httpbin.org/get".GetStringAsync());
+				Assert.AreEqual("bar", (await "https://httpbin.org/get?x=bar".GetJsonAsync()).args.x);
+				Assert.AreEqual("foo", await "https://www.microsoft.com".GetStringAsync());
+
+				// real calls still get logged
+				Assert.AreEqual(4, test.CallLog.Count);
+				test.ShouldHaveCalled("https://httpbin*").Times(2);
 			}
 		}
 

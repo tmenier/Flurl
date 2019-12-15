@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -27,7 +28,7 @@ namespace Flurl.Test.Http
 				test.RespondWith("I'm a teapot", 418);
 				try {
 					var result = await GetRequest().GetAsync();
-					Assert.IsFalse(result.IsSuccessStatusCode);
+					Assert.AreEqual(418, result.StatusCode);
 				}
 				catch (Exception) {
 					Assert.Fail("Exception should not have been thrown.");
@@ -41,7 +42,7 @@ namespace Flurl.Test.Http
 			using (var test = new HttpTest()) {
 				test.RespondWith("ok");
 				GetSettings().BeforeCall = call => {
-					CollectionAssert.IsNotEmpty(test.ResponseQueue); // verifies that callback is running before HTTP call is made
+					Assert.Null(call.Response); // verifies that callback is running before HTTP call is made
 					callbackCalled = true;
 				};
 				Assert.IsFalse(callbackCalled);
@@ -56,7 +57,7 @@ namespace Flurl.Test.Http
 			using (var test = new HttpTest()) {
 				test.RespondWith("ok");
 				GetSettings().AfterCall = call => {
-					CollectionAssert.IsEmpty(test.ResponseQueue); // verifies that callback is running after HTTP call is made
+					Assert.NotNull(call.Response); // verifies that callback is running after HTTP call is made
 					callbackCalled = true;
 				};
 				Assert.IsFalse(callbackCalled);
@@ -72,7 +73,7 @@ namespace Flurl.Test.Http
 			using (var test = new HttpTest()) {
 				test.RespondWith("server error", 500);
 				GetSettings().OnError = call => {
-					CollectionAssert.IsEmpty(test.ResponseQueue); // verifies that callback is running after HTTP call is made
+					Assert.NotNull(call.Response); // verifies that callback is running after HTTP call is made
 					callbackCalled = true;
 					call.ExceptionHandled = markExceptionHandled;
 				};
@@ -98,7 +99,7 @@ namespace Flurl.Test.Http
 				test.RespondWith("server error", 500);
 				try {
 					var result = await GetRequest().GetAsync();
-					Assert.IsFalse(result.IsSuccessStatusCode);
+					Assert.AreEqual(500, result.StatusCode);
 				}
 				catch (FlurlHttpException) {
 					Assert.Fail("Flurl should not have thrown exception.");

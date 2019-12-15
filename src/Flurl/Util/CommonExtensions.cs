@@ -57,16 +57,15 @@ namespace Flurl.Util
 		/// <param name="s">The string to split.</param>
 		/// <param name="separator">The separator to split on.</param>
 		/// <returns>Array of at most 2 strings. (1 if separator is not found.)</returns>
-		public static string[] SplitOnFirstOccurence(this string s, char separator) {
+		public static string[] SplitOnFirstOccurence(this string s, string separator) {
 			// Needed because full PCL profile doesn't support Split(char[], int) (#119)
 			if (string.IsNullOrEmpty(s))
 				return new[] { s };
 
 			var i = s.IndexOf(separator);
-			if (i == -1)
-				return new[] { s };
-
-			return new[] { s.Substring(0, i), s.Substring(i + 1) };
+			return (i == -1) ?
+				new[] { s } :
+				new[] { s.Substring(0, i), s.Substring(i + separator.Length) };
 		}
 
 		private static IEnumerable<KeyValuePair<string, object>> StringToKV(string s) {

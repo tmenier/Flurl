@@ -159,7 +159,7 @@ namespace Flurl.Http.Configuration
 	public class ClientFlurlHttpSettings : FlurlHttpSettings
 	{
 		/// <summary>
-		/// Specifies the time to keep the underlying HTTP/TCP conneciton open. When expired, a Connection: close header
+		/// Specifies the time to keep the underlying HTTP/TCP connection open. When expired, a Connection: close header
 		/// is sent with the next request, which should force a new connection and DSN lookup to occur on the next call.
 		/// Default is null, effectively disabling the behavior.
 		/// </summary>

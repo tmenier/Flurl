@@ -4,8 +4,8 @@
     <TargetFrameworks>net45;net46;netstandard1.1;netstandard1.3;netstandard2.0;</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard1.1;netstandard1.3;netstandard2.0;</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	  <PackageId>Flurl.Http</PackageId>
-    <Version>2.4.2</Version>
+    <PackageId>Flurl.Http</PackageId>
+    <Version>3.0.0-pre2</Version>
     <Authors>Todd Menier</Authors>
     <Description>A fluent, portable, testable HTTP client library.</Description>
     <PackageProjectUrl>https://flurl.dev</PackageProjectUrl>
@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -28,7 +28,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="Flurl" Version="2.8.2" />
+    <PackageReference Include="Flurl" Version="3.0.0-pre1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
@@ -49,7 +49,14 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
-    <DocumentationFile>bin\Debug\net45\Flurl.Http.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\Flurl.Http.xml</DocumentationFile>
+    <WarningsAsErrors />
+    <NoWarn />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net45|AnyCPU'">
+    <WarningsAsErrors />
+    <NoWarn />
   </PropertyGroup>
   
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">

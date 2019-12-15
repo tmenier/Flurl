@@ -10,9 +10,9 @@ namespace Flurl.Test.Http
 	{
 		public PostTests() : base(HttpMethod.Post) { }
 
-		protected override Task<HttpResponseMessage> CallOnString(string url) => url.PostAsync(null);
-		protected override Task<HttpResponseMessage> CallOnUrl(Url url) => url.PostAsync(null);
-		protected override Task<HttpResponseMessage> CallOnFlurlRequest(IFlurlRequest req) => req.PostAsync(null);
+		protected override Task<IFlurlResponse> CallOnString(string url) => url.PostAsync(null);
+		protected override Task<IFlurlResponse> CallOnUrl(Url url) => url.PostAsync(null);
+		protected override Task<IFlurlResponse> CallOnFlurlRequest(IFlurlRequest req) => req.PostAsync(null);
 
 		[Test]
 		public async Task can_post_string() {

@@ -5,7 +5,7 @@
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard1.0;netstandard1.3;netstandard2.0;</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageId>Flurl</PackageId>
-    <Version>2.8.2</Version>
+    <Version>3.0.0-pre1</Version>
     <Authors>Todd Menier</Authors>
     <Description>A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.</Description>
     <PackageProjectUrl>https://flurl.dev</PackageProjectUrl>
@@ -19,11 +19,22 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\Flurl.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net40|AnyCPU'">
+    <WarningsAsErrors />
+    <NoWarn />
+    <DocumentationFile>bin\Debug\Flurl.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net40|AnyCPU'">
+    <WarningsAsErrors />
+    <NoWarn />
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">

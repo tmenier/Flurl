@@ -7,15 +7,15 @@ namespace Flurl.Http.Testing
 	/// <summary>
 	/// An exception thrown by HttpTest's assertion methods to indicate that the assertion failed.
 	/// </summary>
-	public class HttpCallAssertException : Exception
+	public class HttpTestException : Exception
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="HttpCallAssertException"/> class.
+		/// Initializes a new instance of the <see cref="HttpTestException"/> class.
 		/// </summary>
 		/// <param name="conditions">The expected call conditions.</param>
 		/// <param name="expectedCalls">The expected number of calls.</param>
 		/// <param name="actualCalls">The actual number calls.</param>
-		public HttpCallAssertException(IList<string> conditions, int? expectedCalls, int actualCalls) : base(BuildMessage(conditions, expectedCalls, actualCalls)) { }
+		public HttpTestException(IList<string> conditions, int? expectedCalls, int actualCalls) : base(BuildMessage(conditions, expectedCalls, actualCalls)) { }
 
 		private static string BuildMessage(IList<string> conditions, int? expectedCalls, int actualCalls) {
 			var expected =

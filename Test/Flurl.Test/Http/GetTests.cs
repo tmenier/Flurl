@@ -14,9 +14,9 @@ namespace Flurl.Test.Http
 	{
 		public GetTests() : base(HttpMethod.Get) { }
 
-		protected override Task<HttpResponseMessage> CallOnString(string url) => url.GetAsync();
-		protected override Task<HttpResponseMessage> CallOnUrl(Url url) => url.GetAsync();
-		protected override Task<HttpResponseMessage> CallOnFlurlRequest(IFlurlRequest req) => req.GetAsync();
+		protected override Task<IFlurlResponse> CallOnString(string url) => url.GetAsync();
+		protected override Task<IFlurlResponse> CallOnUrl(Url url) => url.GetAsync();
+		protected override Task<IFlurlResponse> CallOnFlurlRequest(IFlurlRequest req) => req.GetAsync();
 
 		[Test]
 		public async Task can_get_json() {
@@ -24,6 +24,22 @@ namespace Flurl.Test.Http
 
 			var data = await "http://some-api.com".GetJsonAsync<TestData>();
 
+			Assert.AreEqual(1, data.id);
+			Assert.AreEqual("Frank", data.name);
+		}
+
+		[Test]
+		public async Task can_get_response_then_deserialize() {
+			// FlurlResponse was introduced in 3.0. I don't think we need to go crazy with new tests, because existing
+			// methods like FlurlRequest.GetJson, ReceiveJson, etc all go through FlurlResponse now.
+			HttpTest.RespondWithJson(new TestData { id = 1, name = "Frank" }, 234, new { my_header = "hi" }, null, true);
+
+			var resp = await "http://some-api.com".GetAsync();
+			Assert.AreEqual(234, resp.StatusCode);
+			Assert.IsTrue(resp.Headers.TryGetValue("my-header", out var headerVal));
+			Assert.AreEqual("hi", headerVal);
+
+			var data = await resp.GetJsonAsync<TestData>();
 			Assert.AreEqual(1, data.id);
 			Assert.AreEqual("Frank", data.name);
 		}
@@ -139,10 +155,12 @@ namespace Flurl.Test.Http
 		// quotes around charset value is technically legal but there's a bug in .NET we want to avoid: https://github.com/dotnet/corefx/issues/5014
 		[Test]
 		public async Task can_get_string_with_quoted_charset_header() {
-			var content = new StringContent("foo");
-			content.Headers.Clear();
-			content.Headers.Add("Content-Type", "text/javascript; charset=\"UTF-8\"");
-			HttpTest.RespondWith(content);
+			HttpTest.RespondWith(() => {
+				var content = new StringContent("foo");
+				content.Headers.Clear();
+				content.Headers.Add("Content-Type", "text/javascript; charset=\"UTF-8\"");
+				return content;
+			});
 
 			var resp = await "http://api.com".GetStringAsync(); // without StripCharsetQuotes, this fails
 			Assert.AreEqual("foo", resp);

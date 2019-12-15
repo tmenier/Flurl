@@ -24,11 +24,11 @@ namespace Flurl.Http
 			using (var resp = await request.SendAsync(HttpMethod.Get, cancellationToken: cancellationToken, completionOption: HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false)) {
 				localFileName =
 					localFileName ??
-					GetFileNameFromHeaders(resp) ??
+					GetFileNameFromHeaders(resp.ResponseMessage) ??
 					GetFileNameFromPath(request);
 
 				// http://codereview.stackexchange.com/a/18679
-				using (var httpStream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false))
+				using (var httpStream = await resp.GetStreamAsync().ConfigureAwait(false))
 				using (var fileStream = await FileUtil.OpenWriteAsync(localFolderPath, localFileName, bufferSize).ConfigureAwait(false)) {
 					await httpStream.CopyToAsync(fileStream, bufferSize, cancellationToken).ConfigureAwait(false);
 				}

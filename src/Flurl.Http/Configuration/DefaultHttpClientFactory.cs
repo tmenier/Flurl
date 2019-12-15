@@ -29,10 +29,13 @@ namespace Flurl.Http.Configuration
 		/// customize the result.
 		/// </summary>
 		public virtual HttpMessageHandler CreateMessageHandler() {
-			return new HttpClientHandler {
+			var httpClientHandler = new HttpClientHandler();
+			if (httpClientHandler.SupportsAutomaticDecompression) {
 				// #266
-				AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-			};
+				// deflate not working? see #474
+				httpClientHandler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+			}
+			return httpClientHandler;
 		}
 	}
 }

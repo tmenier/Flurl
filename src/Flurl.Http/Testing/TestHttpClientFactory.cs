@@ -14,7 +14,7 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		/// <returns></returns>
 		public override HttpMessageHandler CreateMessageHandler() {
-			return new FakeHttpMessageHandler();
+			return new FakeHttpMessageHandler(base.CreateMessageHandler());
 		}
 	}
 }

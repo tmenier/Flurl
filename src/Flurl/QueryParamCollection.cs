@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Flurl.Util;
 
 namespace Flurl
 {
@@ -10,6 +11,15 @@ namespace Flurl
 	/// </summary>
 	public class QueryParamCollection : List<QueryParameter>
 	{
+		/// <summary>
+		/// Returns a new instance of QueryParamCollection
+		/// </summary>
+		/// <param name="query">Optional query string to parse.</param>
+		public QueryParamCollection(string query = null) {
+			if (query != null)
+				AddRange(Url.ParseQueryParams(query));
+		}
+
 		/// <summary>
 		/// Returns serialized, encoded query string. Insertion order is preserved.
 		/// </summary>
@@ -23,7 +33,7 @@ namespace Flurl
 		/// </summary>
 		/// <returns></returns>
 		public string ToString(bool encodeSpaceAsPlus) {
-			return string.Join("&", this.Select(p => p.ToString(encodeSpaceAsPlus)));
+			return string.Join("&", this.Where(p => p != null).Select(p => p.ToString(encodeSpaceAsPlus)));
 		}
 
 		/// <summary>
@@ -92,6 +102,18 @@ namespace Flurl
 				else
 					break;
 			}
+		}
+
+		/// <summary>
+		/// Parses properties of values into key-value pairs and replaces existing QueryParameters or appends them to the end.
+		/// If a property value is a collection type (array, IEnumerable, etc.), multiple parameters are added, i.e. x=1&amp;x=2.
+		/// If any of the same name already exist, they are overwritten one by one (preserving order) and any remaining are
+		/// appended to the end. If fewer values are specified than already exist, remaining existing values are removed.
+		/// </summary>
+		public void Merge(object values, NullValueHandling nullValueHandling) {
+			if (values == null) return;
+			foreach (var kv in values.ToKeyValuePairs())
+				Merge(kv.Key, kv.Value, false, nullValueHandling);
 		}
 
 		/// <summary>
