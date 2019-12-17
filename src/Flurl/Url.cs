@@ -571,9 +571,9 @@ namespace Flurl
 				if (string.IsNullOrEmpty(part))
 					continue;
 
-				if (result.EndsWith("?") || part.StartsWith("?"))
+				if (result.EndsWith("?", StringComparison.InvariantCulture) || part.StartsWith("?", StringComparison.InvariantCulture))
 					result = CombineEnsureSingleSeparator(result, part, '?');
-				else if (result.EndsWith("#") || part.StartsWith("#"))
+				else if (result.EndsWith("#", StringComparison.InvariantCulture) || part.StartsWith("#", StringComparison.InvariantCulture))
 					result = CombineEnsureSingleSeparator(result, part, '#');
 				else if (inFragment)
 					result += part;
@@ -582,11 +582,11 @@ namespace Flurl
 				else
 					result = CombineEnsureSingleSeparator(result, part, '/');
 
-				if (part.Contains("#")) {
+				if (part.Contains("#", StringComparison.InvariantCulture)) {
 					inQuery = false;
 					inFragment = true;
 				}
-				else if (!inFragment && part.Contains("?")) {
+				else if (!inFragment && part.Contains("?", StringComparison.InvariantCulture)) {
 					inQuery = true;
 				}
 			}
