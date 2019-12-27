@@ -16,15 +16,19 @@ namespace Flurl.Test.UrlBuilder
 		public void extension_methods_consistently_supported() {
 			var urlMethods = typeof(Url).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Where(m => !m.IsSpecialName);
 			var stringExts = ReflectionHelper.GetAllExtensionMethods<string>(typeof(Url).GetTypeInfo().Assembly);
+			var uriExts = ReflectionHelper.GetAllExtensionMethods<Uri>(typeof(Url).GetTypeInfo().Assembly);
 			var whitelist = new[] { "ToString", "IsValid", "ToUri", "Equals", "GetHashCode", "Clone", "Reset" }; // cases where string extension of the same name was excluded intentionally
 
 			foreach (var method in urlMethods) {
-				if (whitelist.Contains(method.Name))
-					continue;
+				if (whitelist.Contains(method.Name)) continue;
 
 				if (!stringExts.Any(m => ReflectionHelper.AreSameMethodSignatures(method, m))) {
 					var args = string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name));
 					Assert.Fail($"No equivalent string extension method found for Url.{method.Name}({args})");
+				}
+				if (!uriExts.Any(m => ReflectionHelper.AreSameMethodSignatures(method, m))) {
+					var args = string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name));
+					Assert.Fail($"No equivalent System.Uri extension method found for Url.{method.Name}({args})");
 				}
 			}
 		}
@@ -540,5 +544,20 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual("https://api.com/", url.ToString());
 		}
 		#endregion
+
+		[Test]
+		public void can_build_url_from_uri() {
+			// shouldn't need to test System.Uri extensions exhaustively. they're auto-generated, and we already
+			// verified the set of them is uniform and complete as compared to the string extensions
+			// (see extension_methods_consistently_supported). just check a couple.
+
+			var url = new Uri("http://mysite.com").AppendPathSegment("hello");
+			Assert.IsInstanceOf<Url>(url);
+			Assert.AreEqual("http://mysite.com/hello", url.ToString());
+
+			url = new Uri("http://mysite.com/hello").ResetToRoot();
+			Assert.IsInstanceOf<Url>(url);
+			Assert.AreEqual("http://mysite.com", url.ToString());
+		}
 	}
 }

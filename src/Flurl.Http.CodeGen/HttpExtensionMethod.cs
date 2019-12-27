@@ -9,8 +9,6 @@ namespace Flurl.Http.CodeGen
 			return
 				from httpVerb in new[] { null, "Get", "Post", "Head", "Put", "Delete", "Patch", "Options" }
 				from reqType in new[] { null, "Json", /*"Xml",*/ "String", "UrlEncoded" }
-				from extensionType in new[] { "IFlurlRequest", "Url", "string" }
-				where SupportedCombo(httpVerb, reqType, extensionType)
 				from respType in new[] { null, "Json", "JsonList", /*"Xml",*/ "String", "Stream", "Bytes" }
 				where httpVerb == "Get" || respType == null
 				from isGeneric in new[] { true, false }
@@ -18,24 +16,9 @@ namespace Flurl.Http.CodeGen
 				select new HttpExtensionMethod {
 					HttpVerb = httpVerb,
 					RequestBodyType = reqType,
-					ExtentionOfType = extensionType,
 					ResponseBodyType = respType,
 					IsGeneric = isGeneric
 				};
-		}
-
-		private static bool SupportedCombo(string verb, string bodyType, string extensionType) {
-			switch (verb) {
-				case null: // Send
-					return bodyType != null || extensionType != "IFlurlRequest";
-				case "Post":
-					return true;
-				case "Put":
-				case "Patch":
-					return bodyType != "UrlEncoded";
-				default: // Get, Head, Delete, Options
-					return bodyType == null;
-			}
 		}
 
 		private static bool AllowDeserializeToGeneric(string deserializeType) {
@@ -49,7 +32,6 @@ namespace Flurl.Http.CodeGen
 
 		public string HttpVerb { get; set; }
 		public string RequestBodyType { get; set; }
-		public string ExtentionOfType { get; set; }
 		public string ResponseBodyType { get; set; }
 		public bool IsGeneric { get; set; }
 

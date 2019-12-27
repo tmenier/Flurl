@@ -19,6 +19,7 @@ namespace Flurl.Test.Http
 				.ToList();
 			var urlExts = ReflectionHelper.GetAllExtensionMethods<Url>(typeof(FlurlClient).GetTypeInfo().Assembly).ToList();
 			var stringExts = ReflectionHelper.GetAllExtensionMethods<string>(typeof(FlurlClient).GetTypeInfo().Assembly).ToList();
+			var uriExts = ReflectionHelper.GetAllExtensionMethods<Uri>(typeof(FlurlClient).GetTypeInfo().Assembly).ToList();
 
 			Assert.That(frExts.Count > 20, $"IFlurlRequest only has {frExts.Count} extension methods? Something's wrong here.");
 
@@ -31,6 +32,10 @@ namespace Flurl.Test.Http
 				if (!stringExts.Any(m => ReflectionHelper.AreSameMethodSignatures(method, m))) {
 					var args = string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name));
 					Assert.Fail($"No equivalent string extension method found for IFlurlRequest.{method.Name}({args})");
+				}
+				if (!uriExts.Any(m => ReflectionHelper.AreSameMethodSignatures(method, m))) {
+					var args = string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name));
+					Assert.Fail($"No equivalent System.Uri extension method found for IFlurlRequest.{method.Name}({args})");
 				}
 			}
 		}
