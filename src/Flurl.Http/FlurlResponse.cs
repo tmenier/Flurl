@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Flurl.Http.Configuration;
 
 namespace Flurl.Http
 {
@@ -87,6 +88,9 @@ namespace Flurl.Http
 	public class FlurlResponse : IFlurlResponse
 	{
 		private readonly Lazy<IDictionary<string, string>> _headers;
+		private object _capturedBody = null;
+		private bool _streamRead = false;
+		private ISerializer _serializer = null;
 
 		/// <inheritdoc />
 		public IDictionary<string, string> Headers => _headers.Value;
@@ -116,14 +120,22 @@ namespace Flurl.Http
 
 		/// <inheritdoc />
 		public async Task<T> GetJsonAsync<T>() {
+			if (_streamRead)
+				return _capturedBody is T body ? body : default(T);
+
 			var call = ResponseMessage.RequestMessage.GetHttpCall();
+			_serializer = call.Request.Settings.JsonSerializer;
 			using (var stream = await ResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false)) {
 				try {
-					return call.FlurlRequest.Settings.JsonSerializer.Deserialize<T>(stream);
+					_capturedBody = _serializer.Deserialize<T>(stream);
+					_streamRead = true;
+					return (T)_capturedBody;
 				}
 				catch (Exception ex) {
-					var body = await ResponseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-					call.Exception = new FlurlParsingException(call, "JSON", body, ex);
+					_serializer = null;
+					_capturedBody = await ResponseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+					_streamRead = true;
+					call.Exception = new FlurlParsingException(call, "JSON", ex);
 					await FlurlRequest.HandleExceptionAsync(call, call.Exception, CancellationToken.None).ConfigureAwait(false);
 					return default(T);
 				}
@@ -143,22 +155,39 @@ namespace Flurl.Http
 		}
 
 		/// <inheritdoc />
-		public Task<string> GetStringAsync() {
+		public async Task<string> GetStringAsync() {
+			if (_streamRead) {
+				return
+					(_capturedBody == null) ? null :
+					// if GetJsonAsync<T> was called, we streamed the response directly to a T (for memory efficiency)
+					// without first capturing a string. it's too late to get it, so the best we can do is serialize the T
+					(_serializer != null) ? _serializer.Serialize(_capturedBody) :
+					_capturedBody?.ToString();
+			}
+
 #if NETSTANDARD1_3 || NETSTANDARD2_0
 			// https://stackoverflow.com/questions/46119872/encoding-issues-with-net-core-2 (#86)
 			System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 #endif
-			return ResponseMessage.Content.StripCharsetQuotes().ReadAsStringAsync();
+			_capturedBody = await ResponseMessage.Content.StripCharsetQuotes().ReadAsStringAsync();
+			_streamRead = true;
+			return (string)_capturedBody;
 		}
 
 		/// <inheritdoc />
 		public Task<Stream> GetStreamAsync() {
+			_streamRead = true;
 			return ResponseMessage.Content.ReadAsStreamAsync();
 		}
 
 		/// <inheritdoc />
-		public Task<byte[]> GetBytesAsync() {
-			return ResponseMessage.Content.ReadAsByteArrayAsync();
+		public async Task<byte[]> GetBytesAsync() {
+			if (_streamRead)
+				return _capturedBody as byte[];
+
+			_capturedBody = await ResponseMessage.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+			_streamRead = true;
+			return (byte[])_capturedBody;
 		}
 
 		/// <summary>

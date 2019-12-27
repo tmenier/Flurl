@@ -19,8 +19,8 @@ namespace Flurl.Test.Http
 			await "http://www.api.com".GetAsync();
 
 			var lastCall = HttpTest.CallLog.Last();
-			Assert.AreEqual(HttpStatusCode.OK, lastCall.Response.StatusCode);
-			Assert.AreEqual("great job", await lastCall.Response.Content.ReadAsStringAsync());
+			Assert.AreEqual(200, lastCall.Response.StatusCode);
+			Assert.AreEqual("great job", await lastCall.Response.GetStringAsync());
 		}
 
 		[Test]
@@ -31,8 +31,8 @@ namespace Flurl.Test.Http
 
 			var lastCall = HttpTest.CallLog.Last();
 			Assert.AreEqual("{\"x\":5}", lastCall.RequestBody);
-			Assert.AreEqual(HttpStatusCode.OK, lastCall.Response.StatusCode);
-			Assert.AreEqual("great job", await lastCall.Response.Content.ReadAsStringAsync());
+			Assert.AreEqual(200, lastCall.Response.StatusCode);
+			Assert.AreEqual("great job", await lastCall.Response.GetStringAsync());
 		}
 
 		[Test]
@@ -40,8 +40,8 @@ namespace Flurl.Test.Http
 			await "http://www.api.com".GetAsync();
 
 			var lastCall = HttpTest.CallLog.Last();
-			Assert.AreEqual(HttpStatusCode.OK, lastCall.Response.StatusCode);
-			Assert.AreEqual("", await lastCall.Response.Content.ReadAsStringAsync());
+			Assert.AreEqual(200, lastCall.Response.StatusCode);
+			Assert.AreEqual("", await lastCall.Response.GetStringAsync());
 		}
 
 		[Test]
@@ -59,9 +59,9 @@ namespace Flurl.Test.Http
 
 			var calls = HttpTest.CallLog;
 			Assert.AreEqual(3, calls.Count);
-			Assert.AreEqual("one", await calls[0].Response.Content.ReadAsStringAsync());
-			Assert.AreEqual("two", await calls[1].Response.Content.ReadAsStringAsync());
-			Assert.AreEqual("three", await calls[2].Response.Content.ReadAsStringAsync());
+			Assert.AreEqual("one", await calls[0].Response.GetStringAsync());
+			Assert.AreEqual("two", await calls[1].Response.GetStringAsync());
+			Assert.AreEqual("three", await calls[2].Response.GetStringAsync());
 
 			HttpTest.ShouldHaveMadeACall();
 			HttpTest.ShouldHaveCalled("http://www.api.com/*").WithVerb(HttpMethod.Get).Times(3);
@@ -175,8 +175,8 @@ namespace Flurl.Test.Http
 		public async Task can_respond_based_on_any_call_condition() {
 			HttpTest
 				.ForCallsTo("*")
-				.With(call => call.FlurlRequest.Url.Fragment.StartsWith("abc"))
-				.Without(call => call.FlurlRequest.Url.Fragment.EndsWith("xyz"))
+				.With(call => call.Request.Url.Fragment.StartsWith("abc"))
+				.Without(call => call.Request.Url.Fragment.EndsWith("xyz"))
 				.RespondWith("arbitrary conditions met!");
 
 			Assert.AreEqual("", await "http://api.com#abcxyz".GetStringAsync());
@@ -425,7 +425,8 @@ namespace Flurl.Test.Http
 		public async Task can_fake_content_headers() {
 			HttpTest.RespondWith("<xml></xml>", 200, new { Content_Type = "text/xml" });
 			await "http://api.com".GetAsync();
-			HttpTest.ShouldHaveMadeACall().With(call => call.Response.Content.Headers.ContentType.MediaType == "text/xml");
+			HttpTest.ShouldHaveMadeACall().With(call => call.Response.Headers.Any(kv => kv.Key == "Content-Type" && kv.Value == "text/xml"));
+			HttpTest.ShouldHaveMadeACall().With(call => call.HttpResponseMessage.Content.Headers.ContentType.MediaType == "text/xml");
 		}
 
 		[Test] // #335

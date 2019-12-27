@@ -45,7 +45,7 @@ namespace Flurl.Http.Configuration
 		/// <param name="stream">The stream.</param>
 		/// <returns></returns>
 		public T Deserialize<T>(Stream stream) {
-			// http://james.newtonking.com/json/help/index.html?topic=html/Performance.htm
+			// https://www.newtonsoft.com/json/help/html/Performance.htm#MemoryUsage
 			using (var sr = new StreamReader(stream))
 			using (var jr = new JsonTextReader(sr)) {
 				return JsonSerializer.CreateDefault(_settings).Deserialize<T>(jr);

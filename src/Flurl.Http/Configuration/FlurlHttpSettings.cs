@@ -78,32 +78,32 @@ namespace Flurl.Http.Configuration
 		/// <summary>
 		/// Gets or sets a callback that is called immediately before every HTTP request is sent.
 		/// </summary>
-		public Action<HttpCall> BeforeCall {
-			get => Get<Action<HttpCall>>();
+		public Action<FlurlCall> BeforeCall {
+			get => Get<Action<FlurlCall>>();
 			set => Set(value);
 		}
 
 		/// <summary>
 		/// Gets or sets a callback that is asynchronously called immediately before every HTTP request is sent.
 		/// </summary>
-		public Func<HttpCall, Task> BeforeCallAsync {
-			get => Get<Func<HttpCall, Task>>();
+		public Func<FlurlCall, Task> BeforeCallAsync {
+			get => Get<Func<FlurlCall, Task>>();
 			set => Set(value);
 		}
 
 		/// <summary>
 		/// Gets or sets a callback that is called immediately after every HTTP response is received.
 		/// </summary>
-		public Action<HttpCall> AfterCall {
-			get => Get<Action<HttpCall>>();
+		public Action<FlurlCall> AfterCall {
+			get => Get<Action<FlurlCall>>();
 			set => Set(value);
 		}
 
 		/// <summary>
 		/// Gets or sets a callback that is asynchronously called immediately after every HTTP response is received.
 		/// </summary>
-		public Func<HttpCall, Task> AfterCallAsync {
-			get => Get<Func<HttpCall, Task>>();
+		public Func<FlurlCall, Task> AfterCallAsync {
+			get => Get<Func<FlurlCall, Task>>();
 			set => Set(value);
 		}
 
@@ -111,8 +111,8 @@ namespace Flurl.Http.Configuration
 		/// Gets or sets a callback that is called when an error occurs during any HTTP call, including when any non-success
 		/// HTTP status code is returned in the response. Response should be null-checked if used in the event handler.
 		/// </summary>
-		public Action<HttpCall> OnError {
-			get => Get<Action<HttpCall>>();
+		public Action<FlurlCall> OnError {
+			get => Get<Action<FlurlCall>>();
 			set => Set(value);
 		}
 
@@ -120,8 +120,8 @@ namespace Flurl.Http.Configuration
 		/// Gets or sets a callback that is asynchronously called when an error occurs during any HTTP call, including when any non-success
 		/// HTTP status code is returned in the response. Response should be null-checked if used in the event handler.
 		/// </summary>
-		public Func<HttpCall, Task> OnErrorAsync {
-			get => Get<Func<HttpCall, Task>>();
+		public Func<FlurlCall, Task> OnErrorAsync {
+			get => Get<Func<FlurlCall, Task>>();
 			set => Set(value);
 		}
 
