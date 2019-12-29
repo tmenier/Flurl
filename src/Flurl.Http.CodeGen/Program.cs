@@ -13,9 +13,7 @@ namespace Flurl.Http.CodeGen
 			try {
 				var path = codeRoot + @"\src\Flurl\GeneratedExtensions.cs";
 				if (!File.Exists(path)) {
-					Console.ForegroundColor = ConsoleColor.Red;
-					Console.WriteLine("Code file not found: " + Path.GetFullPath(path));
-					Console.ReadLine();
+					ShowError("Code file not found: " + Path.GetFullPath(path));
 					return 2;
 				}
 
@@ -43,9 +41,7 @@ namespace Flurl.Http.CodeGen
 
 				path = codeRoot + @"\src\Flurl.Http\GeneratedExtensions.cs";
 				if (!File.Exists(path)) {
-					Console.ForegroundColor = ConsoleColor.Red;
-					Console.WriteLine("Code file not found: " + Path.GetFullPath(path));
-					Console.ReadLine();
+					ShowError("Code file not found: " + Path.GetFullPath(path));
 					return 2;
 				}
 
@@ -82,161 +78,69 @@ namespace Flurl.Http.CodeGen
 				return 0;
 			}
 			catch (Exception ex) {
-				Console.ForegroundColor = ConsoleColor.Red;
-				Console.WriteLine(ex);
-				Console.ReadLine();
+				ShowError(ex.ToString());
 				return 2;
 			}
 		}
 
+		private static void ShowError(string error) {
+			Console.ForegroundColor = ConsoleColor.Red;
+			Console.WriteLine(error);
+			Console.ReadLine();
+		}
+
+		private static MethodArg[] _extendedArgs = new[] {
+			new MethodArg { Name = "request", Type = "IFlurlRequest", Description = "This IFlurlRequest" },
+			new MethodArg { Name = "url", Type = "Url", Description = "This Flurl.Url." },
+			new MethodArg { Name = "url", Type = "string", Description = "This URL." },
+			new MethodArg { Name = "uri", Type = "Uri", Description = "This System.Uri." }
+		};
+
 		private static void WriteUrlBuilderExtensionMethods(CodeWriter writer) {
-			var extendedArgs = new[] {
-				new { Name = "url", Type = "string", Descrip = "This URL." },
-				new { Name = "uri", Type = "Uri", Descrip = "This System.Uri." }
-			};
-
-			foreach (var firstArg in extendedArgs) {
-				foreach (var xm in ExtensionMethod.GetAllForUrlBuilder()) {
-					Console.WriteLine($"writing {xm.Name} for {firstArg.Type}...");
-
-					writer.WriteLine("/// <summary>");
-					writer.WriteLine($"/// {xm.Description}");
-					writer.WriteLine("/// </summary>");
-					writer.WriteLine($"/// <param name=\"{firstArg.Name}\">{firstArg.Descrip}</param>");
-					foreach (var p in xm.Params)
-						writer.WriteLine($"/// <param name=\"{p.Name}\">{p.Description}</param>");
-					writer.WriteLine($"/// <returns>A new Flurl.Url object.</returns>");
-
-					var argList = new List<string> { $"this {firstArg.Type} {firstArg.Name}" };
-					argList.AddRange(xm.Params.Select(p => $"{p.Type} {p.Name}" + (p.Default == null ? "" : $" = {p.Default}")));
-					writer.WriteLine($"public static Url {xm.Name}({string.Join(", ", argList)}) {{");
-					writer.WriteLine($"return new Url({firstArg.Name}).{xm.Name}({string.Join(", ", xm.Params.Select(p => p.Name))});");
-					writer.WriteLine("}");
+			foreach (var xarg in _extendedArgs.Skip(2)) { // skip 2 because we only auto-gen for string and Uri
+				foreach (var xm in Metadata.GetUrlReturningExtensions(xarg)) {
+					Console.WriteLine($"writing {xm.Name} for {xarg.Type}...");
+					xm.Write(writer, $"new Url({xarg.Name})");
 				}
 			}
 		}
 
 		private static void WriteHttpExtensionMethods(CodeWriter writer) {
-			var extendedArgs = new[] {
-				new { Name = "request", Type = "IFlurlRequest", Descrip = "This IFlurlRequest" },
-				new { Name = "url", Type = "Url", Descrip = "This Flurl.Url." },
-				new { Name = "url", Type = "string", Descrip = "This URL." },
-				new { Name = "uri", Type = "Uri", Descrip = "This System.Uri." }
-			};
+			var reqArg = _extendedArgs[0];
 
-			foreach (var firstArg in extendedArgs) {
-				foreach (var xm in HttpExtensionMethod.GetAll().Where(x => IsSupportedCombo(x.HttpVerb, x.RequestBodyType, firstArg.Type))) {
-					Console.WriteLine($"writing {xm.Name} for {firstArg.Type}...");
-
-					var hasRequestBody = (xm.HttpVerb == "Post" || xm.HttpVerb == "Put" || xm.HttpVerb == "Patch" || xm.HttpVerb == null);
-
-					writer.WriteLine("/// <summary>");
-					var summaryStart = (firstArg.Type == "IFlurlRequest") ? "Sends" : "Creates a FlurlRequest and sends";
-					if (xm.HttpVerb == null)
-						writer.WriteLine("/// @0 an asynchronous request.", summaryStart);
-					else
-						writer.WriteLine("/// @0 an asynchronous @1 request.", summaryStart, xm.HttpVerb.ToUpperInvariant());
-
-					writer.WriteLine("/// </summary>");
-					writer.WriteLine($"/// <param name=\"{firstArg.Name}\">{firstArg.Descrip}</param>");
-
-					if (xm.HttpVerb == null)
-						writer.WriteLine("/// <param name=\"verb\">The HTTP verb used to make the request.</param>");
-
-					if (hasRequestBody) {
-						if (xm.RequestBodyType == "Json")
-							writer.WriteLine("/// <param name=\"data\">An object representing the request body, which will be serialized to JSON.</param>");
-						else if (xm.RequestBodyType != null)
-							writer.WriteLine("/// <param name=\"data\">Contents of the request body.</param>");
-						else
-							writer.WriteLine("/// <param name=\"content\">Contents of the request body.</param>");
-					}
-
-					writer.WriteLine("/// <param name=\"cancellationToken\">The token to monitor for cancellation requests.</param>");
-					writer.WriteLine("/// <param name=\"completionOption\">The HttpCompletionOption used in the request. Optional.</param>");
-					writer.WriteLine("/// <returns>A Task whose result is @0.</returns>", xm.ReturnTypeDescription);
-
+			foreach (var xm in Metadata.GetHttpCallingExtensions(reqArg)) {
+				Console.WriteLine($"writing {xm.Name} for IFlurlRequest...");
+				xm.Write(writer, () => {
 					var args = new List<string>();
-					args.Add($"this {firstArg.Type} {firstArg.Name}");
-					if (xm.HttpVerb == null)
-						args.Add("HttpMethod verb");
-					if (xm.RequestBodyType != null)
-						args.Add((xm.RequestBodyType == "String" ? "string" : "object") + " data");
-					else if (hasRequestBody)
-						args.Add("HttpContent content");
+					var genericArg = xm.IsGeneric ? "<T>" : "";
 
-					// http://stackoverflow.com/questions/22359706/default-parameter-for-cancellationtoken
-					args.Add("CancellationToken cancellationToken = default(CancellationToken)");
-					args.Add("HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead");
+					args.Add(
+						xm.HttpVerb == null ? "verb" :
+						xm.HttpVerb == "Patch" ? "new HttpMethod(\"PATCH\")" : // there's no HttpMethod.Patch
+						"HttpMethod." + xm.HttpVerb);
 
-					writer.WriteLine("public static Task<@0> @1@2(@3) {", xm.TaskArg, xm.Name, xm.IsGeneric ? "<T>" : "", string.Join(", ", args));
+					if (xm.HasRequestBody)
+						args.Add("content: content");
 
-					if (firstArg.Type == "IFlurlRequest") {
-						args.Clear();
-						args.Add(
-							xm.HttpVerb == null ? "verb" :
-							xm.HttpVerb == "Patch" ? "new HttpMethod(\"PATCH\")" : // there's no HttpMethod.Patch
-							"HttpMethod." + xm.HttpVerb);
+					args.Add("cancellationToken: cancellationToken");
+					args.Add("completionOption: completionOption");
 
-						if (xm.RequestBodyType != null || hasRequestBody)
-							args.Add("content: content");
-
-						args.Add("cancellationToken: cancellationToken");
-						args.Add("completionOption: completionOption");
-
-						if (xm.RequestBodyType != null) {
-							writer.WriteLine("var content = new Captured@0Content(@1);",
-								xm.RequestBodyType,
-								xm.RequestBodyType == "String" ? "data" : $"request.Settings.{xm.RequestBodyType}Serializer.Serialize(data)");
-						}
-
-						var request = (firstArg.Type == "IFlurlRequest") ? firstArg.Name : $"new FlurlRequest({firstArg.Name})";
-						var receive = (xm.ResponseBodyType == null) ? "" : $".Receive{xm.ResponseBodyType}{(xm.IsGeneric ? "<T>" : "")}()";
-						writer.WriteLine("return @0.SendAsync(@1)@2;", request, string.Join(", ", args), receive);
-					}
-					else {
-						var typeArg = xm.IsGeneric ? "<T>" : "";
-						var argList = string.Join(", ", args.Skip(1).Select(a => a.Split(' ')[1]));
-						writer.WriteLine($"return new FlurlRequest({firstArg.Name}).{xm.Name}{typeArg}({argList});");
+					if (xm.RequestBodyType != null) {
+						writer.WriteLine("var content = new Captured@0Content(@1);",
+							xm.RequestBodyType,
+							xm.RequestBodyType == "String" ? "data" : $"request.Settings.{xm.RequestBodyType}Serializer.Serialize(data)");
 					}
 
-					writer.WriteLine("}").WriteLine();
-				}
+					var receive = (xm.ResponseBodyType != null) ? $".Receive{xm.ResponseBodyType}{genericArg}()" : "";
+					writer.WriteLine($"return {reqArg.Name}.SendAsync({string.Join(", ", args)}){receive};");
+				});
 			}
 
-			foreach (var firstArg in extendedArgs.Skip(1)) {
-				// Skip(1) because these don't apply to IFlurlRequest
-				foreach (var xm in ExtensionMethod.GetAllForHttp()) {
-					Console.WriteLine($"writing {xm.Name} for {firstArg.Type}...");
-
-					writer.WriteLine("/// <summary>");
-					writer.WriteLine($"/// {xm.Description}");
-					writer.WriteLine("/// </summary>");
-					writer.WriteLine($"/// <param name=\"{firstArg.Name}\">{firstArg.Descrip}</param>");
-					foreach (var p in xm.Params)
-						writer.WriteLine($"/// <param name=\"{p.Name}\">{p.Description}</param>");
-					writer.WriteLine($"/// <returns>{xm.ReturnDescrip}</returns>");
-
-					var argList = new List<string> { $"this {firstArg.Type} {firstArg.Name}" };
-					argList.AddRange(xm.Params.Select(p => $"{p.Type} {p.Name}" + (p.Default == null ? "" : $" = {p.Default}")));
-					writer.WriteLine($"public static {xm.ReturnType} {xm.Name}({string.Join(", ", argList)}) {{");
-					writer.WriteLine($"return new FlurlRequest({firstArg.Name}).{xm.Name}({string.Join(", ", xm.Params.Select(p => p.Name))});");
-					writer.WriteLine("}");
+			foreach (var xarg in _extendedArgs.Skip(1)) { // skip 1 because these don't apply to IFlurlRequest
+				foreach (var xm in Metadata.GetHttpCallingExtensions(xarg).Concat(Metadata.GetRequestReturningExtensions(xarg))) {
+					Console.WriteLine($"writing {xm.Name} for {xarg.Type}...");
+					xm.Write(writer, $"new FlurlRequest({xarg.Name})");
 				}
-			}
-		}
-
-		private static bool IsSupportedCombo(string verb, string bodyType, string extensionType) {
-			switch (verb) {
-				case null: // Send
-					return bodyType != null || extensionType != "IFlurlRequest";
-				case "Post":
-					return true;
-				case "Put":
-				case "Patch":
-					return bodyType != "UrlEncoded";
-				default: // Get, Head, Delete, Options
-					return bodyType == null;
 			}
 		}
 	}
