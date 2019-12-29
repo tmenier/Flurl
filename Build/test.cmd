@@ -1,3 +1,4 @@
+REM https://github.com/tonerdo/coverlet/blob/master/Documentation/MSBuildIntegration.md
 @call dotnet test -c Release /p:CollectCoverage=true /p:Threshold=80 /p:Include=\"[Flurl]*,[Flurl.Http]*\" /p:Exclude="[*]*.GeneratedExtensions" ..\test\Flurl.Test\
 @if ERRORLEVEL 1 (
 echo Error! Tests for Flurl failed.
