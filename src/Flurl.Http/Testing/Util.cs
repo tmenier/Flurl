@@ -24,16 +24,16 @@ namespace Flurl.Http.Testing
 			return Regex.IsMatch(textToCheck ?? "", regex);
 		}
 
-		internal static bool HasAnyVerb(this HttpCall call, HttpMethod[] verbs) {
-			return verbs.Any(verb => call.Request.Method == verb);
+		internal static bool HasAnyVerb(this FlurlCall call, HttpMethod[] verbs) {
+			return verbs.Any(verb => call.HttpRequestMessage.Method == verb);
 		}
 
-		internal static bool HasAnyVerb(this HttpCall call, string[] verbs) {
-			return verbs.Any(verb => call.Request.Method.Method.Equals(verb, StringComparison.OrdinalIgnoreCase));
+		internal static bool HasAnyVerb(this FlurlCall call, string[] verbs) {
+			return verbs.Any(verb => call.HttpRequestMessage.Method.Method.Equals(verb, StringComparison.OrdinalIgnoreCase));
 		}
 
-		internal static bool HasQueryParam(this HttpCall call, string name, object value) {
-			var paramVals = call.FlurlRequest.Url.QueryParams
+		internal static bool HasQueryParam(this FlurlCall call, string name, object value) {
+			var paramVals = call.Request.Url.QueryParams
 				.Where(p => p.Name == name)
 				.Select(p => p.Value.ToInvariantString())
 				.ToList();
@@ -51,27 +51,27 @@ namespace Flurl.Http.Testing
 			return paramVals.Any(v => v == value.ToInvariantString());
 		}
 
-		internal static bool HasAllQueryParams(this HttpCall call, string[] names) {
-			return call.FlurlRequest.Url.QueryParams
+		internal static bool HasAllQueryParams(this FlurlCall call, string[] names) {
+			return call.Request.Url.QueryParams
 			   .Select(p => p.Name)
 			   .Intersect(names)
 			   .Count() == names.Length;
 		}
 
-		internal static bool HasAnyQueryParam(this HttpCall call, string[] names) {
-			var qp = call.FlurlRequest.Url.QueryParams;
+		internal static bool HasAnyQueryParam(this FlurlCall call, string[] names) {
+			var qp = call.Request.Url.QueryParams;
 			return names.Any() ? qp
 			   .Select(p => p.Name)
 			   .Intersect(names)
 			   .Any() : qp.Any();
 		}
 
-		internal static bool HasQueryParams(this HttpCall call, object values) {
+		internal static bool HasQueryParams(this FlurlCall call, object values) {
 			return values.ToKeyValuePairs().All(kv => call.HasQueryParam(kv.Key, kv.Value));
 		}
 
-		internal static bool HasHeader(this HttpCall call, string name, string valuePattern) {
-			var val = call.Request.GetHeaderValue(name);
+		internal static bool HasHeader(this FlurlCall call, string name, string valuePattern) {
+			var val = call.HttpRequestMessage.GetHeaderValue(name);
 			return val != null && MatchesPattern(val, valuePattern);
 		}
 	}

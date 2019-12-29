@@ -133,7 +133,7 @@ namespace Flurl.Test.Http
 					.WithHeader("CONTENT-LENGTH", 10) // header names are case-insensitive
 					.PostJsonAsync(new { foo = "bar" });
 
-				var h = test.CallLog[0].Request.Content.Headers;
+				var h = test.CallLog[0].HttpRequestMessage.Content.Headers;
 				Assert.AreEqual(new[] { "application/json-patch+json; utf-8" }, h.GetValues("Content-Type"));
 				Assert.AreEqual(new[] { "10" }, h.GetValues("Content-Length"));
 			}

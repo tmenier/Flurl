@@ -40,7 +40,7 @@ namespace Flurl.Test.Http
 
 	    [Test]
 	    public async Task can_catch_parsing_error() {
-		    HttpTest.RespondWith("I'm not JSON!");
+		    HttpTest.RespondWith("{ \"invalid JSON!");
 
 		    try {
 			    await "http://myapi.com".GetJsonAsync();
@@ -48,7 +48,7 @@ namespace Flurl.Test.Http
 		    }
 		    catch (FlurlParsingException ex) {
 			    Assert.AreEqual("Response could not be deserialized to JSON: GET http://myapi.com", ex.Message);
-			    Assert.AreEqual("I'm not JSON!", await ex.GetResponseStringAsync());
+			    Assert.AreEqual("{ \"invalid JSON!", await ex.Call.Response.GetStringAsync());
 				// will differ if you're using a different serializer (which you probably aren't):
 			    Assert.IsInstanceOf<Newtonsoft.Json.JsonReaderException>(ex.InnerException);
 		    }

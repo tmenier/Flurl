@@ -4,11 +4,12 @@
     <TargetFrameworks>net40;netstandard1.0;netstandard1.3;netstandard2.0;</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard1.0;netstandard1.3;netstandard2.0;</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<PackageId>Flurl</PackageId>
-    <Version>3.0.0-pre1</Version>
+    <PackageId>Flurl</PackageId>
+    <Version>3.0.0-pre3</Version>
     <Authors>Todd Menier</Authors>
     <Description>A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.</Description>
     <PackageProjectUrl>https://flurl.dev</PackageProjectUrl>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageIconUrl>https://pbs.twimg.com/profile_images/534024476296376320/IuPGZ_bX_400x400.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/tmenier/Flurl.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -36,6 +37,10 @@
     <WarningsAsErrors />
     <NoWarn />
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\icon.png" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.4.0" />

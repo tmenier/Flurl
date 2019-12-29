@@ -12,7 +12,7 @@ namespace Flurl.Http.Testing
 	/// </summary>
 	public class FilteredHttpTestSetup : HttpTestSetup
 	{
-		private readonly List<Func<HttpCall, bool>> _filters = new List<Func<HttpCall, bool>>();
+		private readonly List<Func<FlurlCall, bool>> _filters = new List<Func<FlurlCall, bool>>();
 
 		/// <summary>
 		/// Constructs a new instance of FilteredHttpTestSetup.
@@ -21,18 +21,18 @@ namespace Flurl.Http.Testing
 		/// <param name="urlPatterns">URL(s) or URL pattern(s) that this HttpTestSetup applies to. Can contain * wildcard.</param>
 		public FilteredHttpTestSetup(TestFlurlHttpSettings settings, params string[] urlPatterns) : base(settings) {
 			if (urlPatterns.Any())
-				With(call => urlPatterns.Any(p => Util.MatchesPattern(call.FlurlRequest.Url, p)));
+				With(call => urlPatterns.Any(p => Util.MatchesPattern(call.Request.Url, p)));
 		}
 
 		/// <summary>
-		/// Returns true if the given HttpCall matches one of the URL patterns and all other criteria defined for this HttpTestSetup.
+		/// Returns true if the given FlurlCall matches one of the URL patterns and all other criteria defined for this HttpTestSetup.
 		/// </summary>
-		internal bool IsMatch(HttpCall call) => _filters.All(f => f(call));
+		internal bool IsMatch(FlurlCall call) => _filters.All(f => f(call));
 
 		/// <summary>
 		/// Defines a condition for which this HttpTestSetup applies.
 		/// </summary>
-		public FilteredHttpTestSetup With(Func<HttpCall, bool> condition) {
+		public FilteredHttpTestSetup With(Func<FlurlCall, bool> condition) {
 			_filters.Add(condition);
 			return this;
 		}
@@ -40,7 +40,7 @@ namespace Flurl.Http.Testing
 		/// <summary>
 		/// Defines a condition for which this HttpTestSetup does NOT apply.
 		/// </summary>
-		public FilteredHttpTestSetup Without(Func<HttpCall, bool> condition) {
+		public FilteredHttpTestSetup Without(Func<FlurlCall, bool> condition) {
 			return With(c => !condition(c));
 		}
 

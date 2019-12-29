@@ -16,14 +16,14 @@ namespace Flurl.Http.Testing
 		private readonly bool _negate;
 		private readonly IList<string> _expectedConditions = new List<string>();
 
-		private IList<HttpCall> _calls;
+		private IList<FlurlCall> _calls;
 
 		/// <summary>
 		/// Constructs a new instance of HttpCallAssertion.
 		/// </summary>
 		/// <param name="loggedCalls">Set of calls (usually from HttpTest.CallLog) to assert against.</param>
 		/// <param name="negate">If true, assertions pass when calls matching criteria were NOT made.</param>
-		public HttpCallAssertion(IEnumerable<HttpCall> loggedCalls, bool negate = false) {
+		public HttpCallAssertion(IEnumerable<FlurlCall> loggedCalls, bool negate = false) {
 			_calls = loggedCalls.ToList();
 			_negate = negate;
 		}
@@ -41,12 +41,12 @@ namespace Flurl.Http.Testing
 			Assert(expectedCount);
 		}
 
-	    /// <summary>
-	    /// Asserts whether calls were made matching the given predicate function.
-	    /// </summary>
-	    /// <param name="match">Predicate (usually a lambda expression) that tests an HttpCall and returns a bool.</param>
-	    /// <param name="descrip">A description of what is being asserted.</param>
-	    public HttpCallAssertion With(Func<HttpCall, bool> match, string descrip = null) {
+		/// <summary>
+		/// Asserts whether calls were made matching the given predicate function.
+		/// </summary>
+		/// <param name="match">Predicate (usually a lambda expression) that tests a FlurlCall and returns a bool.</param>
+		/// <param name="descrip">A description of what is being asserted.</param>
+		public HttpCallAssertion With(Func<FlurlCall, bool> match, string descrip = null) {
 		    if (!string.IsNullOrEmpty(descrip))
 			    _expectedConditions.Add(descrip);
 		    _calls = _calls.Where(match).ToList();
@@ -54,12 +54,12 @@ namespace Flurl.Http.Testing
 		    return this;
 	    }
 
-	    /// <summary>
-	    /// Asserts whether calls were made that do NOT match the given predicate function.
-	    /// </summary>
-	    /// <param name="match">Predicate (usually a lambda expression) that tests an HttpCall and returns a bool.</param>
-	    /// <param name="descrip">A description of what is being asserted.</param>
-	    public HttpCallAssertion Without(Func<HttpCall, bool> match, string descrip = null) {
+		/// <summary>
+		/// Asserts whether calls were made that do NOT match the given predicate function.
+		/// </summary>
+		/// <param name="match">Predicate (usually a lambda expression) that tests a FlurlCall and returns a bool.</param>
+		/// <param name="descrip">A description of what is being asserted.</param>
+		public HttpCallAssertion Without(Func<FlurlCall, bool> match, string descrip = null) {
 		    return With(c => !match(c), descrip);
 	    }
 
@@ -68,7 +68,7 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		/// <param name="urlPattern">Can contain * wildcard.</param>
 		public HttpCallAssertion WithUrlPattern(string urlPattern) {
-			return With(c => Util.MatchesPattern(c.FlurlRequest.Url, urlPattern), $"URL pattern {urlPattern}");
+			return With(c => Util.MatchesPattern(c.Request.Url, urlPattern), $"URL pattern {urlPattern}");
 		}
 
 		/// <summary>
@@ -114,7 +114,7 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		public HttpCallAssertion WithoutQueryParams(params string[] names) {
 			if (!names.Any())
-				return With(c => !c.FlurlRequest.Url.QueryParams.Any(), "no query parameters");
+				return With(c => !c.Request.Url.QueryParams.Any(), "no query parameters");
 			return names.Select(n => WithoutQueryParam(n)).LastOrDefault() ?? this;
 		}
 
@@ -208,7 +208,7 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		public HttpCallAssertion WithBasicAuth(string username = "*", string password = "*") {
 			return With(call => {
-				var val = call.Request.GetHeaderValue("Authorization");
+				var val = call.HttpRequestMessage.GetHeaderValue("Authorization");
 				if (val == null) return false;
 				if (!val.StartsWith("Basic ")) return false;
 				if ((username ?? "*") == "*" && (password ?? "*") == "*") return true;

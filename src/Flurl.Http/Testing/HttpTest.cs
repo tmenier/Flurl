@@ -17,7 +17,7 @@ namespace Flurl.Http.Testing
 #endif
 	public class HttpTest : HttpTestSetup, IDisposable
 	{
-		private readonly ConcurrentQueue<HttpCall> _calls = new ConcurrentQueue<HttpCall>();
+		private readonly ConcurrentQueue<FlurlCall> _calls = new ConcurrentQueue<FlurlCall>();
 		private readonly List<FilteredHttpTestSetup> _filteredSetups = new List<FilteredHttpTestSetup>();
 		private readonly Lazy<HttpClient> _httpClient;
 		private readonly Lazy<HttpMessageHandler> _httpMessageHandler;
@@ -34,7 +34,7 @@ namespace Flurl.Http.Testing
 
 		internal HttpClient HttpClient => _httpClient.Value;
 		internal HttpMessageHandler HttpMessageHandler => _httpMessageHandler.Value;
-		internal void LogCall(HttpCall call) => _calls.Enqueue(call);
+		internal void LogCall(FlurlCall call) => _calls.Enqueue(call);
 
 		/// <summary>
 		/// Gets the current HttpTest from the logical (async) call context
@@ -44,7 +44,7 @@ namespace Flurl.Http.Testing
 		/// <summary>
 		/// List of all (fake) HTTP calls made since this HttpTest was created.
 		/// </summary>
-		public IReadOnlyList<HttpCall> CallLog => new ReadOnlyCollection<HttpCall>(_calls.ToList());
+		public IReadOnlyList<FlurlCall> CallLog => new ReadOnlyCollection<FlurlCall>(_calls.ToList());
 
 		/// <summary>
 		/// Change FlurlHttpSettings for the scope of this HttpTest.
@@ -65,7 +65,7 @@ namespace Flurl.Http.Testing
 			return setup;
 		}
 
-		internal HttpTestSetup FindSetup(HttpCall call) {
+		internal HttpTestSetup FindSetup(FlurlCall call) {
 			return _filteredSetups.FirstOrDefault(ts => ts.IsMatch(call)) ?? (HttpTestSetup)this;
 		}
 

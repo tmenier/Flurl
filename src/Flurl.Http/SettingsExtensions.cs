@@ -44,26 +44,6 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// Fluently returns a new IFlurlRequest that can be used to call this Url with the given client.
-		/// </summary>
-		/// <param name="url"></param>
-		/// <param name="client">The IFlurlClient to use to call the Url.</param>
-		/// <returns>A new IFlurlRequest to use in calling the Url</returns>
-		public static IFlurlRequest WithClient(this Url url, IFlurlClient client) {
-			return client.Request(url);
-		}
-
-		/// <summary>
-		/// Fluently returns a new IFlurlRequest that can be used to call this Url with the given client.
-		/// </summary>
-		/// <param name="url"></param>
-		/// <param name="client">The IFlurlClient to use to call the Url.</param>
-		/// <returns>A new IFlurlRequest to use in calling the Url</returns>
-		public static IFlurlRequest WithClient(this string url, IFlurlClient client) {
-			return client.Request(url);
-		}
-
-		/// <summary>
 		/// Sets the timeout for this IFlurlRequest or all requests made with this IFlurlClient.
 		/// </summary>
 		/// <param name="obj">The IFlurlClient or IFlurlRequest.</param>

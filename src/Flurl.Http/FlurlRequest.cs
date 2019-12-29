@@ -111,7 +111,7 @@ namespace Flurl.Http
 			_client = Client; // "freeze" the client at this point to avoid excessive calls to FlurlClientFactory.Get (#374)
 
 			var request = new HttpRequestMessage(verb, Url) { Content = content };
-			var call = new HttpCall { FlurlRequest = this, Request = request };
+			var call = new FlurlCall { Request = this, HttpRequestMessage = request };
 			request.SetHttpCall(call);
 
 			await HandleEventAsync(Settings.BeforeCall, Settings.BeforeCallAsync, call).ConfigureAwait(false);
@@ -135,12 +135,12 @@ namespace Flurl.Http
 				if (Settings.CookiesEnabled)
 					WriteRequestCookies(request);
 
-				call.Response = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
-				call.Response.RequestMessage = request;
-				call.FlurlResponse = new FlurlResponse(call.Response);
+				call.HttpResponseMessage = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
+				call.HttpResponseMessage.RequestMessage = request;
+				call.Response = new FlurlResponse(call.HttpResponseMessage);
 
 				if (call.Succeeded)
-					return call.FlurlResponse;
+					return call.Response;
 
 				throw new FlurlHttpException(call, null);
 			}
@@ -152,7 +152,7 @@ namespace Flurl.Http
 				timeoutTokenSource?.Dispose();
 
 				if (Settings.CookiesEnabled)
-					ReadResponseCookies(call.Response);
+					ReadResponseCookies(call.HttpResponseMessage);
 
 				call.EndedUtc = DateTime.UtcNow;
 				await HandleEventAsync(Settings.AfterCall, Settings.AfterCallAsync, call).ConfigureAwait(false);
@@ -211,12 +211,12 @@ namespace Flurl.Http
 			return null;
 		}
 
-		internal static async Task<IFlurlResponse> HandleExceptionAsync(HttpCall call, Exception ex, CancellationToken token) {
+		internal static async Task<IFlurlResponse> HandleExceptionAsync(FlurlCall call, Exception ex, CancellationToken token) {
 			call.Exception = ex;
-			await HandleEventAsync(call.FlurlRequest.Settings.OnError, call.FlurlRequest.Settings.OnErrorAsync, call).ConfigureAwait(false);
+			await HandleEventAsync(call.Request.Settings.OnError, call.Request.Settings.OnErrorAsync, call).ConfigureAwait(false);
 
 			if (call.ExceptionHandled)
-				return call.FlurlResponse;
+				return call.Response;
 
 			if (ex is OperationCanceledException && !token.IsCancellationRequested)
 				throw new FlurlHttpTimeoutException(call, ex);
@@ -227,7 +227,7 @@ namespace Flurl.Http
 			throw new FlurlHttpException(call, ex);
 		}
 
-		private static Task HandleEventAsync(Action<HttpCall> syncHandler, Func<HttpCall, Task> asyncHandler, HttpCall call) {
+		private static Task HandleEventAsync(Action<FlurlCall> syncHandler, Func<FlurlCall, Task> asyncHandler, FlurlCall call) {
 			syncHandler?.Invoke(call);
 			if (asyncHandler != null)
 				return asyncHandler(call);

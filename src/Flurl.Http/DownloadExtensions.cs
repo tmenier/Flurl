@@ -49,31 +49,5 @@ namespace Flurl.Http
 		private static string GetFileNameFromPath(IFlurlRequest req) {
 			return FileUtil.MakeValidName(Url.Decode(req.Url.Path.Split('/').Last(), false));
 		}
-
-		/// <summary>
-		/// Asynchronously downloads a file at the specified URL.
-		/// </summary>
-		/// <param name="url">The Url.</param>
-		/// <param name="localFolderPath">Path of local folder where file is to be downloaded.</param>
-		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
-		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
-		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-		/// <returns>A Task whose result is the local path of the downloaded file.</returns>
-		public static Task<string> DownloadFileAsync(this string url, string localFolderPath, string localFileName = null, int bufferSize = 4096, CancellationToken cancellationToken = default(CancellationToken)) {
-			return new FlurlRequest(url).DownloadFileAsync(localFolderPath, localFileName, bufferSize, cancellationToken);
-		}
-
-		/// <summary>
-		/// Asynchronously downloads a file at the specified URL.
-		/// </summary>
-		/// <param name="url">The Url.</param>
-		/// <param name="localFolderPath">Path of local folder where file is to be downloaded.</param>
-		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
-		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
-		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-		/// <returns>A Task whose result is the local path of the downloaded file.</returns>
-		public static Task<string> DownloadFileAsync(this Url url, string localFolderPath, string localFileName = null, int bufferSize = 4096, CancellationToken cancellationToken = default(CancellationToken)) {
-			return new FlurlRequest(url).DownloadFileAsync(localFolderPath, localFileName, bufferSize, cancellationToken);
-		}
 	}
 }
