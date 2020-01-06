@@ -194,6 +194,36 @@ namespace Flurl.Http.Testing
 				"content type " + contentType);
 		}
 
+    /// <summary>
+    /// Asserts whether calls were made with a timeout greater than the given value.
+    /// </summary>
+    public HttpCallAssertion WithTimeoutGreaterThan(TimeSpan timeout)
+    {
+      return With(c =>
+        c.Request.Settings.Timeout > timeout,
+        "timeout greater than " + timeout);
+    }
+
+    /// <summary>
+    /// Asserts whether calls were made with a timeout equals to the given value.
+    /// </summary>
+    public HttpCallAssertion WithTimeout(TimeSpan timeout)
+    {
+      return With(c =>
+        c.Request.Settings.Timeout == timeout,
+        "timeout equals to " + timeout);
+    }
+
+    /// <summary>
+    /// Asserts whether calls were made with a timeout less than the given value.
+    /// </summary>
+    public HttpCallAssertion WithTimeoutLessThan(TimeSpan timeout)
+    {
+      return With(c =>
+         c.Request.Settings.Timeout < timeout,
+        "timeout less than " + timeout);
+    }
+
 		/// <summary>
 		/// Asserts whether an Authorization header was set with the given Bearer token, or any Bearer token if excluded.
 		/// Token can contain * wildcard.

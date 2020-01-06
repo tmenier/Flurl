@@ -327,6 +327,29 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public async Task can_assert_timeout() {
+			await "http://www.api.com/1".WithTimeout(TimeSpan.FromSeconds(2)).GetStringAsync();
+			await "http://www.api.com/2".WithTimeout(TimeSpan.FromSeconds(4)).GetStringAsync();
+			await "http://www.api.com/3".WithTimeout(TimeSpan.FromSeconds(8)).GetStringAsync();
+
+			HttpTest.ShouldHaveMadeACall().WithTimeoutGreaterThan(TimeSpan.FromSeconds(2)).Times(2);
+			HttpTest.ShouldHaveMadeACall().WithTimeoutGreaterThan(TimeSpan.FromSeconds(4)).Times(1);
+      
+			HttpTest.ShouldHaveMadeACall().WithTimeoutLessThan(TimeSpan.FromSeconds(8)).Times(2);
+			HttpTest.ShouldHaveMadeACall().WithTimeoutLessThan(TimeSpan.FromSeconds(4)).Times(1);
+      
+			HttpTest.ShouldHaveMadeACall().WithTimeout(TimeSpan.FromSeconds(2)).Times(1);
+			HttpTest.ShouldHaveMadeACall().WithTimeout(TimeSpan.FromSeconds(4)).Times(1);
+
+			Assert.Throws<HttpTestException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithTimeoutGreaterThan(TimeSpan.FromSeconds(8)));
+			Assert.Throws<HttpTestException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithTimeoutLessThan(TimeSpan.FromSeconds(2)));
+			Assert.Throws<HttpTestException>(() =>
+				HttpTest.ShouldHaveMadeACall().WithTimeout(TimeSpan.FromSeconds(3)));
+		}
+
+		[Test]
 		public async Task can_simulate_timeout() {
 			HttpTest.SimulateTimeout();
 			try {
