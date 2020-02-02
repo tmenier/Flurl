@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -73,6 +74,30 @@ namespace Flurl.Test.Http
 			var cli = new FlurlClient().EnableCookies();
 			await cli.Request("https://httpbin.org/cookies/set?z=999").HeadAsync();
 			Assert.AreEqual("999", cli.Cookies["z"].Value);
+		}
+
+		[Test]
+		public async Task can_have_cookie_with_path_that_is_not_sent() {
+			var cli = new FlurlClient().EnableCookies();
+			var response = await cli.Request("https://httpbin.org")
+				.WithCookie(new Cookie("z", "999", "/cookies", "httpbin.org"))
+				.HeadAsync();
+			Assert.False(response.Cookies.ContainsKey("z"));
+		}
+
+		[Test]
+		public async Task sends_correct_cookie_depending_on_path() {
+			var cli = new FlurlClient().EnableCookies();
+			var response = await cli.Request("https://httpbin.org/cookies/set?z=999").HeadAsync();
+			Assert.AreEqual("999", response.Cookies["z"].Value);
+
+			response = await cli.Request("https://httpbin.org/cookies")
+				.WithCookie(new Cookie("z", "1000", "/cookies", "httpbin.org"))
+				.HeadAsync();
+			Assert.AreEqual("1000", response.Cookies["z"].Value);
+
+			response = await cli.Request("https://httpbin.org/").HeadAsync();
+			Assert.AreEqual("999", response.Cookies["z"].Value);
 		}
 
 		[Test]

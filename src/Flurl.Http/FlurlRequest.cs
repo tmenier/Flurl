@@ -152,7 +152,7 @@ namespace Flurl.Http
 				timeoutTokenSource?.Dispose();
 
 				if (Settings.CookiesEnabled)
-					ReadResponseCookies(call.HttpResponseMessage);
+					ReadResponseCookies(call);
 
 				call.EndedUtc = DateTime.UtcNow;
 				await HandleEventAsync(Settings.AfterCall, Settings.AfterCallAsync, call).ConfigureAwait(false);
@@ -167,7 +167,12 @@ namespace Flurl.Http
 			if (jar != null) {
 				Cookies.Merge(Client.Cookies);
 				foreach (var cookie in Cookies.Values)
-					jar.Add(uri, cookie);
+					try {
+						jar.Add(uri, cookie);
+					}
+					catch (CookieException) {
+						// Ignore invalid cookie and continue processing as per corefx https://github.com/dotnet/corefx/blob/v3.1.1/src/System.Net.Http/src/System/Net/Http/SocketsHttpHandler/CookieHelper.cs
+					}
 			}
 			else {
 				// no CookieContainer in play, add cookie headers manually
@@ -176,7 +181,8 @@ namespace Flurl.Http
 			}
 		}
 
-		private void ReadResponseCookies(HttpResponseMessage response) {
+		private void ReadResponseCookies(FlurlCall call) {
+			var response = call.HttpResponseMessage;
 			var uri = response?.RequestMessage?.RequestUri;
 			if (uri == null)
 				return;
@@ -188,11 +194,20 @@ namespace Flurl.Http
 			// http://stackoverflow.com/a/15588878/62600
 			if (response.Headers.TryGetValues("Set-Cookie", out var cookieHeaders)) {
 				foreach (string header in cookieHeaders)
-					jar.SetCookies(uri, header);
+					try {
+						jar.SetCookies(uri, header);
+					}
+					catch (CookieException) {
+						// Ignore invalid cookie and continue processing as per corefx https://github.com/dotnet/corefx/blob/v3.1.1/src/System.Net.Http/src/System/Net/Http/SocketsHttpHandler/CookieHelper.cs
+					}
 			}
 
-			foreach (var cookie in jar.GetCookies(uri).Cast<Cookie>())
+			foreach (var cookie in jar.GetCookies(uri).Cast<Cookie>()) {
 				Cookies[cookie.Name] = cookie;
+
+				if (call.Response?.Cookies != null)
+					call.Response.Cookies[cookie.Name] = cookie;
+			}
 		}
 
 		private CookieContainer GetCookieJar(HttpMessageHandler handler) {
