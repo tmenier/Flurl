@@ -70,8 +70,14 @@ namespace Flurl.Http
 		/// <summary>
 		/// True if a response with a successful HTTP status was received.
 		/// </summary>
-		public bool Succeeded => Completed && 
-			(HttpResponseMessage.IsSuccessStatusCode || HttpStatusRangeParser.IsMatch(Request.Settings.AllowedHttpStatusRange, HttpResponseMessage.StatusCode));
+		public bool Succeeded => Completed && Request.Settings.AllowedHttpStatusRange == null ?
+			(int)HttpResponseMessage.StatusCode < 400 :
+			HttpStatusRangeParser.IsMatch(Request.Settings.AllowedHttpStatusRange, HttpResponseMessage.StatusCode);
+
+		/// <summary>
+		/// True if HTTP response status code is in 3xx range.
+		/// </summary>
+		public bool IsRedirect => Completed && (int)HttpResponseMessage.StatusCode / 100 == 3;
 
 		/// <summary>
 		/// Returns the verb and absolute URI associated with this call.

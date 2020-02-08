@@ -59,8 +59,12 @@ namespace Flurl.Http
 			if (cookies == null)
 				return clientOrRequest;
 
-			foreach (var kv in cookies.ToKeyValuePairs())
-				clientOrRequest.WithCookie(kv.Key, kv.Value, expires);
+			foreach (var kv in cookies.ToKeyValuePairs()) {
+				if (kv.Value is Cookie cookie)
+					clientOrRequest.WithCookie(cookie);
+				else
+					clientOrRequest.WithCookie(kv.Key, kv.Value, expires);
+			}
 
 			return clientOrRequest;
 		}

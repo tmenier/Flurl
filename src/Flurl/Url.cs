@@ -132,6 +132,11 @@ namespace Flurl
 		/// True if URL does not start with a non-empty scheme. i.e. true for "https://www.site.com", false for "//www.site.com".
 		/// </summary>
 		public bool IsRelative => string.IsNullOrEmpty(Scheme);
+
+		/// <summary>
+		/// True if Url is absolute and scheme is https or wss.
+		/// </summary>
+		public bool IsSecureScheme => !IsRelative && (Scheme.ToLowerInvariant() == "https" || Scheme.ToLowerInvariant() == "wss");
 		#endregion
 
 		#region ctors and parsing methods
@@ -416,7 +421,6 @@ namespace Flurl
 		public Url RemoveQueryParams(IEnumerable<string> names) {
 			foreach(var name in names)
 				QueryParams.Remove(name);
-
 			return this;
 		}
 

@@ -362,10 +362,9 @@ namespace Flurl.Test.Http
 		public async Task can_fake_cookies() {
 			HttpTest.RespondWith(cookies: new { c1 = "foo" });
 
-			var req = "http://www.api.com".EnableCookies();
-			await req.GetAsync();
-			Assert.AreEqual(1, req.Cookies.Count);
-			Assert.AreEqual("foo", req.Cookies["c1"].Value);
+			var resp = await "http://www.api.com".EnableCookies().GetAsync();
+			Assert.AreEqual(1, resp.Cookies.Count);
+			Assert.AreEqual("foo", resp.Cookies["c1"].Value);
 		}
 
 		// https://github.com/tmenier/Flurl/issues/175
@@ -435,7 +434,7 @@ namespace Flurl.Test.Http
 				httpTest.RespondWith("Hello");
 				var flurClient = new FlurlClient();
 				// use the underlying HttpClient directly
-				await flurClient.HttpClient.GetStringAsync("http://google.com/");
+				await flurClient.HttpClient.GetStringAsync("https://www.google.com/");
 				CollectionAssert.IsEmpty(httpTest.CallLog);
 			}
 		}

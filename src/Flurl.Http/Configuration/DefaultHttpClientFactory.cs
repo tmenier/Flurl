@@ -29,7 +29,11 @@ namespace Flurl.Http.Configuration
 		/// customize the result.
 		/// </summary>
 		public virtual HttpMessageHandler CreateMessageHandler() {
-			var httpClientHandler = new HttpClientHandler();
+			var httpClientHandler = new HttpClientHandler {
+				// flurl has its own mechanisms for managing cookies and redirects
+				UseCookies = false,
+				AllowAutoRedirect = false
+			};
 			if (httpClientHandler.SupportsAutomaticDecompression) {
 				// #266
 				// deflate not working? see #474

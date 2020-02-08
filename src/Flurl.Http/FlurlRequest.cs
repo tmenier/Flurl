@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -104,95 +104,135 @@ namespace Flurl.Http
 		/// <summary>
 		/// Collection of HttpCookies sent and received by the IFlurlClient associated with this request.
 		/// </summary>
-		public IDictionary<string, Cookie> Cookies => Client.Cookies;
+		public IDictionary<string, Cookie> Cookies { get; } = new Dictionary<string, Cookie>();
 
 		/// <inheritdoc />
 		public async Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			_client = Client; // "freeze" the client at this point to avoid excessive calls to FlurlClientFactory.Get (#374)
 
-			var request = new HttpRequestMessage(verb, Url) { Content = content };
-			var call = new FlurlCall { Request = this, HttpRequestMessage = request };
-			request.SetHttpCall(call);
+			while (true) { // loop for redirects
+				var request = new HttpRequestMessage(verb, Url) { Content = content };
+				var call = new FlurlCall { Request = this, HttpRequestMessage = request };
+				request.SetHttpCall(call);
 
-			await HandleEventAsync(Settings.BeforeCall, Settings.BeforeCallAsync, call).ConfigureAwait(false);
-			request.RequestUri = Url.ToUri(); // in case it was modified in the handler above
+				await HandleEventAsync(Settings.BeforeCall, Settings.BeforeCallAsync, call).ConfigureAwait(false);
+				request.RequestUri = Url.ToUri(); // in case it was modified in the handler above
 
-			var cancellationTokenWithTimeout = cancellationToken;
-			CancellationTokenSource timeoutTokenSource = null;
+				var cancellationTokenWithTimeout = cancellationToken;
+				CancellationTokenSource timeoutTokenSource = null;
 
-			if (Settings.Timeout.HasValue) {
-				timeoutTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-				timeoutTokenSource.CancelAfter(Settings.Timeout.Value);
-				cancellationTokenWithTimeout = timeoutTokenSource.Token;
-			}
+				if (Settings.Timeout.HasValue) {
+					timeoutTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+					timeoutTokenSource.CancelAfter(Settings.Timeout.Value);
+					cancellationTokenWithTimeout = timeoutTokenSource.Token;
+				}
 
-			call.StartedUtc = DateTime.UtcNow;
-			try {
-				Headers.Merge(Client.Headers);
-				foreach (var header in Headers)
-					request.SetHeader(header.Key, header.Value);
+				call.StartedUtc = DateTime.UtcNow;
+				try {
+					Headers.Merge(Client.Headers);
+					foreach (var header in Headers)
+						request.SetHeader(header.Key, header.Value);
 
-				if (Settings.CookiesEnabled)
-					WriteRequestCookies(request);
+					if (Settings.CookiesEnabled)
+						WriteRequestCookies(call);
 
-				call.HttpResponseMessage = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
-				call.HttpResponseMessage.RequestMessage = request;
-				call.Response = new FlurlResponse(call.HttpResponseMessage);
+					call.HttpResponseMessage = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
+					call.HttpResponseMessage.RequestMessage = request;
+					call.Response = new FlurlResponse(call.HttpResponseMessage);
 
-				if (call.Succeeded)
-					return call.Response;
+					if (Settings.CookiesEnabled)
+						ReadResponseCookies(call);
 
-				throw new FlurlHttpException(call, null);
-			}
-			catch (Exception ex) {
-				return await HandleExceptionAsync(call, ex, cancellationToken);
-			}
-			finally {
-				request.Dispose();
-				timeoutTokenSource?.Dispose();
+					// TODO: need a flurl-level auto-redirect setting (default true)
+					if (IsRedirecting(call, out var redirectUrl)) {
+						this.Url = redirectUrl;
+						this.WithCookies(call.Response.Cookies);
+					}
+					else if (call.Succeeded)
+						return call.Response;
+					else
+						throw new FlurlHttpException(call, null);
+				}
+				catch (Exception ex) {
+					return await HandleExceptionAsync(call, ex, cancellationToken);
+				}
+				finally {
+					request.Dispose();
+					timeoutTokenSource?.Dispose();
 
-				if (Settings.CookiesEnabled)
-					ReadResponseCookies(call.HttpResponseMessage);
-
-				call.EndedUtc = DateTime.UtcNow;
-				await HandleEventAsync(Settings.AfterCall, Settings.AfterCallAsync, call).ConfigureAwait(false);
+					call.EndedUtc = DateTime.UtcNow;
+					await HandleEventAsync(Settings.AfterCall, Settings.AfterCallAsync, call).ConfigureAwait(false);
+				}
 			}
 		}
 
-		private void WriteRequestCookies(HttpRequestMessage request) {
-			if (!Cookies.Any()) return;
-			var uri = request.RequestUri;
-			var jar = GetCookieJar(Client.HttpMessageHandler);
+		// largely lifted from https://github.com/dotnet/runtime/blob/master/src/libraries/System.Net.Http/src/System/Net/Http/SocketsHttpHandler/RedirectHandler.cs
+		private bool IsRedirecting(FlurlCall call, out Url redirectUrl) {
+			redirectUrl = null;
 
-			if (jar != null) {
-				Cookies.Merge(Client.Cookies);
-				foreach (var cookie in Cookies.Values)
-					jar.Add(uri, cookie);
-			}
-			else {
+			if (!call.IsRedirect)
+				return false;
+
+			if (!call.Response.Headers.TryGetValue("Location", out var location))
+				return false;
+
+			if (Url.IsValid(location))
+				redirectUrl = new Url(location);
+			else if (location.StartsWith("/"))
+				redirectUrl = new Url(this.Url.Root).AppendPathSegment(location);
+			else
+				redirectUrl = new Url(this.Url.Root).AppendPathSegments(this.Url.Path, location);
+
+			// Per https://tools.ietf.org/html/rfc7231#section-7.1.2, a redirect location without a
+			// fragment should inherit the fragment from the original URI.
+			redirectUrl.Fragment = this.Url.Fragment;
+
+			// Disallow automatic redirection from secure to non-secure schemes
+			if (this.Url.IsSecureScheme && !redirectUrl.IsSecureScheme)
+				return false;
+
+			return true;
+		}
+
+		private void WriteRequestCookies(FlurlCall call) {
+			Cookies.Merge(Client.Cookies);
+
+			if (!Cookies.Any()) return;
+			var uri = call.HttpRequestMessage.RequestUri;
+
+			//var jar = GetCookieJar(Client.HttpMessageHandler);
+
+			//if (jar != null) {
+			//	Cookies.Merge(Client.Cookies);
+			//	foreach (var cookie in Cookies.Values)
+			//		jar.Add(uri, cookie);
+			//}
+			//else {
 				// no CookieContainer in play, add cookie headers manually
 				// http://stackoverflow.com/a/15588878/62600
-				request.Headers.TryAddWithoutValidation("Cookie", string.Join("; ", Cookies.Values));
-			}
+				call.HttpRequestMessage.Headers.TryAddWithoutValidation("Cookie", string.Join("; ", Cookies.Values));
+			//}
 		}
 
-		private void ReadResponseCookies(HttpResponseMessage response) {
-			var uri = response?.RequestMessage?.RequestUri;
+		private void ReadResponseCookies(FlurlCall call) {
+			var uri = call.HttpRequestMessage.RequestUri;
 			if (uri == null)
 				return;
 
 			// if there's a CookieContainer in play, cookies have probably been removed from the headers and put there.
-			var jar = GetCookieJar(Client.HttpMessageHandler) ?? new CookieContainer();
+			//var jar = GetCookieJar(Client.HttpMessageHandler) ?? new CookieContainer();
 
-			// but check the headers either way. they won't be in both places, so this should be safe.
+			// enlist CookieContainer to help with parsing
+			var jar = new CookieContainer();
+
 			// http://stackoverflow.com/a/15588878/62600
-			if (response.Headers.TryGetValues("Set-Cookie", out var cookieHeaders)) {
+			if (call.HttpResponseMessage.Headers.TryGetValues("Set-Cookie", out var cookieHeaders)) {
 				foreach (string header in cookieHeaders)
 					jar.SetCookies(uri, header);
 			}
 
 			foreach (var cookie in jar.GetCookies(uri).Cast<Cookie>())
-				Cookies[cookie.Name] = cookie;
+				call.Response.Cookies[cookie.Name] = cookie;
 		}
 
 		private CookieContainer GetCookieJar(HttpMessageHandler handler) {
