@@ -112,16 +112,19 @@ namespace Flurl.Test.Http
 			GetSettings().JsonSerializer = null;
 			GetSettings().CookiesEnabled = true;
 			GetSettings().BeforeCall = (call) => Console.WriteLine("Before!");
+			GetSettings().Redirects.MaxAutoRedirects = 5;
 
 			Assert.IsNull(GetSettings().JsonSerializer);
 			Assert.IsTrue(GetSettings().CookiesEnabled);
 			Assert.IsNotNull(GetSettings().BeforeCall);
+			Assert.AreEqual(5, GetSettings().Redirects.MaxAutoRedirects);
 
 			GetSettings().ResetDefaults();
 
 			Assert.That(GetSettings().JsonSerializer is NewtonsoftJsonSerializer);
 			Assert.IsFalse(GetSettings().CookiesEnabled);
 			Assert.IsNull(GetSettings().BeforeCall);
+			Assert.AreEqual(10, GetSettings().Redirects.MaxAutoRedirects);
 		}
 
 		[Test] // #256
@@ -153,15 +156,19 @@ namespace Flurl.Test.Http
 		public void settings_propagate_correctly() {
 			FlurlHttp.GlobalSettings.CookiesEnabled = false;
 			FlurlHttp.GlobalSettings.AllowedHttpStatusRange = "4xx";
+			FlurlHttp.GlobalSettings.Redirects.MaxAutoRedirects = 123;
 
 			var client1 = new FlurlClient();
 			client1.Settings.CookiesEnabled = true;
 			Assert.AreEqual("4xx", client1.Settings.AllowedHttpStatusRange);
+			Assert.AreEqual(123, client1.Settings.Redirects.MaxAutoRedirects);
 			client1.Settings.AllowedHttpStatusRange = "5xx";
+			client1.Settings.Redirects.MaxAutoRedirects = 456;
 
 			var req = client1.Request("http://myapi.com");
 			Assert.IsTrue(req.Settings.CookiesEnabled, "request should inherit client settings when not set at request level");
 			Assert.AreEqual("5xx", req.Settings.AllowedHttpStatusRange, "request should inherit client settings when not set at request level");
+			Assert.AreEqual(456, req.Settings.Redirects.MaxAutoRedirects, "request should inherit client settings when not set at request level");
 
 			var client2 = new FlurlClient();
 			client2.Settings.CookiesEnabled = false;
@@ -169,24 +176,31 @@ namespace Flurl.Test.Http
 			req.WithClient(client2);
 			Assert.IsFalse(req.Settings.CookiesEnabled, "request should inherit client settings when not set at request level");
 			Assert.AreEqual("4xx", req.Settings.AllowedHttpStatusRange, "request should inherit global settings when not set at request or client level");
+			Assert.AreEqual(123, req.Settings.Redirects.MaxAutoRedirects, "request should inherit global settings when not set at request or client level");
 
 			client2.Settings.CookiesEnabled = true;
 			client2.Settings.AllowedHttpStatusRange = "3xx";
-			Assert.IsTrue(req.Settings.CookiesEnabled, "request should inherit client sttings when not set at request level");
-			Assert.AreEqual("3xx", req.Settings.AllowedHttpStatusRange, "request should inherit client sttings when not set at request level");
+			client2.Settings.Redirects.MaxAutoRedirects = 789;
+			Assert.IsTrue(req.Settings.CookiesEnabled, "request should inherit client settings when not set at request level");
+			Assert.AreEqual("3xx", req.Settings.AllowedHttpStatusRange, "request should inherit client settings when not set at request level");
+			Assert.AreEqual(789, req.Settings.Redirects.MaxAutoRedirects, "request should inherit client settings when not set at request level");
 
 			req.Settings.CookiesEnabled = false;
 			req.Settings.AllowedHttpStatusRange = "6xx";
+			req.Settings.Redirects.MaxAutoRedirects = 2;
 			Assert.IsFalse(req.Settings.CookiesEnabled, "request-level settings should override any defaults");
 			Assert.AreEqual("6xx", req.Settings.AllowedHttpStatusRange, "request-level settings should override any defaults");
+			Assert.AreEqual(2, req.Settings.Redirects.MaxAutoRedirects, "request-level settings should override any defaults");
 
 			req.Settings.ResetDefaults();
-			Assert.IsTrue(req.Settings.CookiesEnabled, "request should inherit client sttings when cleared at request level");
-			Assert.AreEqual("3xx", req.Settings.AllowedHttpStatusRange, "request should inherit client sttings when cleared request level");
+			Assert.IsTrue(req.Settings.CookiesEnabled, "request should inherit client settings when cleared at request level");
+			Assert.AreEqual("3xx", req.Settings.AllowedHttpStatusRange, "request should inherit client settings when cleared request level");
+			Assert.AreEqual(789, req.Settings.Redirects.MaxAutoRedirects, "request should inherit client settings when cleared request level");
 
 			client2.Settings.ResetDefaults();
 			Assert.IsFalse(req.Settings.CookiesEnabled, "request should inherit global settings when cleared at request and client level");
 			Assert.AreEqual("4xx", req.Settings.AllowedHttpStatusRange, "request should inherit global settings when cleared at request and client level");
+			Assert.AreEqual(123, req.Settings.Redirects.MaxAutoRedirects, "request should inherit global settings when cleared at request and client level");
 		}
 
 		[Test]

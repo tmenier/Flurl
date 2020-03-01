@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Flurl.Http.Configuration;
 
 namespace Flurl.Http
@@ -99,6 +100,76 @@ namespace Flurl.Http
 		/// <returns>This IFlurlClient or IFlurlRequest.</returns>
 		public static T AllowAnyHttpStatus<T>(this T obj) where T : IHttpSettingsContainer {
 			obj.Settings.AllowedHttpStatusRange = "*";
+			return obj;
+		}
+
+		/// <summary>
+		/// Sets a callback that is invoked immediately before every HTTP request is sent.
+		/// </summary>
+		public static T BeforeCall<T>(this T obj, Action<FlurlCall> act) where T : IHttpSettingsContainer {
+			obj.Settings.BeforeCall = act;
+			return obj;
+		}
+
+		/// <summary>
+		/// Sets a callback that is invoked asynchronously immediately before every HTTP request is sent.
+		/// </summary>
+		public static T BeforeCall<T>(this T obj, Func<FlurlCall, Task> act) where T : IHttpSettingsContainer {
+			obj.Settings.BeforeCallAsync = act;
+			return obj;
+		}
+
+		/// <summary>
+		/// Sets a callback that is invoked immediately after every HTTP response is received.
+		/// </summary>
+		public static T AfterCall<T>(this T obj, Action<FlurlCall> act) where T : IHttpSettingsContainer {
+			obj.Settings.AfterCall = act;
+			return obj;
+		}
+
+		/// <summary>
+		/// Sets a callback that is invoked asynchronously immediately after every HTTP response is received.
+		/// </summary>
+		public static T AfterCall<T>(this T obj, Func<FlurlCall, Task> act) where T : IHttpSettingsContainer {
+			obj.Settings.AfterCallAsync = act;
+			return obj;
+		}
+
+		/// <summary>
+		/// Sets a callback that is invoked when an error occurs during any HTTP call, including when any non-success
+		/// HTTP status code is returned in the response. Response should be null-checked if used in the event handler.
+		/// </summary>
+		public static T OnError<T>(this T obj, Action<FlurlCall> act) where T : IHttpSettingsContainer {
+			obj.Settings.OnError = act;
+			return obj;
+		}
+
+		/// <summary>
+		/// Sets a callback that is invoked asynchronously when an error occurs during any HTTP call, including when any non-success
+		/// HTTP status code is returned in the response. Response should be null-checked if used in the event handler.
+		/// </summary>
+		public static T OnError<T>(this T obj, Func<FlurlCall, Task> act) where T : IHttpSettingsContainer {
+			obj.Settings.OnErrorAsync = act;
+			return obj;
+		}
+
+		/// <summary>
+		/// Sets a callback that is invoked when any 3xx response with a Location header is received.
+		/// You can inspect/manipulate the call.Redirect object to determine what will happen next.
+		/// An auto-redirect will only happen if call.Redirect.Follow is true upon exiting the callback.
+		/// </summary>
+		public static T OnRedirect<T>(this T obj, Action<FlurlCall> act) where T : IHttpSettingsContainer {
+			obj.Settings.OnRedirect = act;
+			return obj;
+		}
+
+		/// <summary>
+		/// Sets a callback that is invoked asynchronously when any 3xx response with a Location header is received.
+		/// You can inspect/manipulate the call.Redirect object to determine what will happen next.
+		/// An auto-redirect will only happen if call.Redirect.Follow is true upon exiting the callback.
+		/// </summary>
+		public static T OnRedirect<T>(this T obj, Func<FlurlCall, Task> act) where T : IHttpSettingsContainer {
+			obj.Settings.OnRedirectAsync = act;
 			return obj;
 		}
 	}

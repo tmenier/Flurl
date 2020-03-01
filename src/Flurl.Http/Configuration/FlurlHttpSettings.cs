@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using Flurl.Http.Testing;
@@ -23,6 +21,7 @@ namespace Flurl.Http.Configuration
 		/// Creates a new FlurlHttpSettings object.
 		/// </summary>
 		public FlurlHttpSettings() {
+			Redirects = new RedirectSettings(this);
 			ResetDefaults();
 		}
 		/// <summary>
@@ -76,7 +75,12 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a callback that is called immediately before every HTTP request is sent.
+		/// Gets object whose properties describe how Flurl.Http should handle redirect (3xx) responses.
+		/// </summary>
+		public RedirectSettings Redirects { get; }
+
+		/// <summary>
+		/// Gets or sets a callback that is invoked immediately before every HTTP request is sent.
 		/// </summary>
 		public Action<FlurlCall> BeforeCall {
 			get => Get<Action<FlurlCall>>();
@@ -84,7 +88,7 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a callback that is asynchronously called immediately before every HTTP request is sent.
+		/// Gets or sets a callback that is invoked asynchronously immediately before every HTTP request is sent.
 		/// </summary>
 		public Func<FlurlCall, Task> BeforeCallAsync {
 			get => Get<Func<FlurlCall, Task>>();
@@ -92,7 +96,7 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a callback that is called immediately after every HTTP response is received.
+		/// Gets or sets a callback that is invoked immediately after every HTTP response is received.
 		/// </summary>
 		public Action<FlurlCall> AfterCall {
 			get => Get<Action<FlurlCall>>();
@@ -100,7 +104,7 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a callback that is asynchronously called immediately after every HTTP response is received.
+		/// Gets or sets a callback that is invoked asynchronously immediately after every HTTP response is received.
 		/// </summary>
 		public Func<FlurlCall, Task> AfterCallAsync {
 			get => Get<Func<FlurlCall, Task>>();
@@ -108,7 +112,7 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a callback that is called when an error occurs during any HTTP call, including when any non-success
+		/// Gets or sets a callback that is invoked when an error occurs during any HTTP call, including when any non-success
 		/// HTTP status code is returned in the response. Response should be null-checked if used in the event handler.
 		/// </summary>
 		public Action<FlurlCall> OnError {
@@ -117,10 +121,30 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a callback that is asynchronously called when an error occurs during any HTTP call, including when any non-success
+		/// Gets or sets a callback that is invoked asynchronously when an error occurs during any HTTP call, including when any non-success
 		/// HTTP status code is returned in the response. Response should be null-checked if used in the event handler.
 		/// </summary>
 		public Func<FlurlCall, Task> OnErrorAsync {
+			get => Get<Func<FlurlCall, Task>>();
+			set => Set(value);
+		}
+
+		/// <summary>
+		/// Gets or sets a callback that is invoked when any 3xx response with a Location header is received.
+		/// You can inspect/manipulate the call.Redirect object to determine what will happen next.
+		/// An auto-redirect will only happen if call.Redirect.Follow is true upon exiting the callback.
+		/// </summary>
+		public Action<FlurlCall> OnRedirect {
+			get => Get<Action<FlurlCall>>();
+			set => Set(value);
+		}
+
+		/// <summary>
+		/// Gets or sets a callback that is invoked asynchronously when any 3xx response with a Location header is received.
+		/// You can inspect/manipulate the call.Redirect object to determine what will happen next.
+		/// An auto-redirect will only happen if call.Redirect.Follow is true upon exiting the callback.
+		/// </summary>
+		public Func<FlurlCall, Task> OnRedirectAsync {
 			get => Get<Func<FlurlCall, Task>>();
 			set => Set(value);
 		}
@@ -136,7 +160,7 @@ namespace Flurl.Http.Configuration
 		/// <summary>
 		/// Gets a settings value from this instance if explicitly set, otherwise from the default settings that back this instance.
 		/// </summary>
-		protected T Get<T>([CallerMemberName]string propName = null) {
+		internal T Get<T>([CallerMemberName]string propName = null) {
 			var testVals = HttpTest.Current?.Settings._vals;
 			return
 				testVals?.ContainsKey(propName) == true ? (T)testVals[propName] :
@@ -148,7 +172,7 @@ namespace Flurl.Http.Configuration
 		/// <summary>
 		/// Sets a settings value for this instance.
 		/// </summary>
-		protected void Set<T>(T value, [CallerMemberName]string propName = null) {
+		internal void Set<T>(T value, [CallerMemberName]string propName = null) {
 			_vals[propName] = value;
 		}
 	}
@@ -206,7 +230,7 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <summary>
-		/// Resets all global settings to their Flurl.Http-defined default values.
+		/// Resets all global settings to their default values.
 		/// </summary>
 		public override void ResetDefaults() {
 			base.ResetDefaults();
@@ -215,6 +239,10 @@ namespace Flurl.Http.Configuration
 			UrlEncodedSerializer = new DefaultUrlEncodedSerializer();
 			FlurlClientFactory = new PerHostFlurlClientFactory();
 			HttpClientFactory = new DefaultHttpClientFactory();
+			Redirects.Enabled = true;
+			Redirects.AllowSecureToInsecure = false;
+			Redirects.ForwardAuthorizationHeader = false;
+			Redirects.MaxAutoRedirects = 10;
 		}
 	}
 

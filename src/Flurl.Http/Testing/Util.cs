@@ -25,11 +25,15 @@ namespace Flurl.Http.Testing
 		}
 
 		internal static bool HasAnyVerb(this FlurlCall call, HttpMethod[] verbs) {
-			return verbs.Any(verb => call.HttpRequestMessage.Method == verb);
+			// for good measure, check both FlurlRequest.Verb and HttpRequestMessage.Method
+			return verbs.Any(verb => call.Request.Verb == verb && call.HttpRequestMessage.Method == verb);
 		}
 
 		internal static bool HasAnyVerb(this FlurlCall call, string[] verbs) {
-			return verbs.Any(verb => call.HttpRequestMessage.Method.Method.Equals(verb, StringComparison.OrdinalIgnoreCase));
+			// for good measure, check both FlurlRequest.Verb and HttpRequestMessage.Method
+			return verbs.Any(verb =>
+				call.Request.Verb.Method.Equals(verb, StringComparison.OrdinalIgnoreCase) &&
+				call.HttpRequestMessage.Method.Method.Equals(verb, StringComparison.OrdinalIgnoreCase));
 		}
 
 		internal static bool HasQueryParam(this FlurlCall call, string name, object value) {
