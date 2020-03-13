@@ -34,6 +34,22 @@ namespace Flurl.Test.Http
 				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://redir.com/redir2");
 		}
 
+		[TestCase(false)]
+		[TestCase(true)]
+		public async Task can_enable_auto_redirect_per_request(bool enabled) {
+			HttpTest
+				.RespondWith("original", 302, new { Location = "http://redir.com/foo" })
+				.RespondWith("redirected");
+
+			// whatever we want at the request level, set it the opposite at the client level
+			var fc = new FlurlClient().WithAutoRedirect(!enabled);
+
+			var result = await fc.Request("http://start.com").WithAutoRedirect(enabled).GetStringAsync();
+
+			Assert.AreEqual(enabled ? "redirected" : "original", result);
+			HttpTest.ShouldHaveMadeACall().Times(enabled ? 2 : 1);
+		}
+
 		[Test]
 		public async Task redirect_preserves_most_headers() {
 			HttpTest

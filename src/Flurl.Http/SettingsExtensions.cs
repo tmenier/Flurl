@@ -97,9 +97,21 @@ namespace Flurl.Http
 		/// <summary>
 		/// Prevents a FlurlHttpException from being thrown on any completed response, regardless of the HTTP status code.
 		/// </summary>
+		/// <param name="obj">The IFlurlClient or IFlurlRequest.</param>
 		/// <returns>This IFlurlClient or IFlurlRequest.</returns>
 		public static T AllowAnyHttpStatus<T>(this T obj) where T : IHttpSettingsContainer {
 			obj.Settings.AllowedHttpStatusRange = "*";
+			return obj;
+		}
+
+		/// <summary>
+		/// Configures whether redirects are automatically followed.
+		/// </summary>
+		/// <param name="obj">The IFlurlClient or IFlurlRequest.</param>
+		/// <param name="enabled">true if Flurl should automatically send a new request to the redirect URL, false if it should not.</param>
+		/// <returns>This IFlurlClient or IFlurlRequest.</returns>
+		public static T WithAutoRedirect<T>(this T obj, bool enabled) where T : IHttpSettingsContainer {
+			obj.Settings.Redirects.Enabled = enabled;
 			return obj;
 		}
 

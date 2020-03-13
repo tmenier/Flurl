@@ -722,6 +722,16 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
+		/// Creates a new FlurlRequest and configures whether redirects are automatically followed.
+		/// </summary>
+		/// <param name="url">This Flurl.Url.</param>
+		/// <param name="enabled">true if Flurl should automatically send a new request to the redirect URL, false if it should not.</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithAutoRedirect(this Url url, bool enabled) {
+			return new FlurlRequest(url).WithAutoRedirect(enabled);
+		}
+		
+		/// <summary>
 		/// Creates a new FlurlRequest and configures it to use the given IFlurlClient.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
@@ -1182,6 +1192,16 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
+		/// Creates a new FlurlRequest and configures whether redirects are automatically followed.
+		/// </summary>
+		/// <param name="url">This URL.</param>
+		/// <param name="enabled">true if Flurl should automatically send a new request to the redirect URL, false if it should not.</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithAutoRedirect(this string url, bool enabled) {
+			return new FlurlRequest(url).WithAutoRedirect(enabled);
+		}
+		
+		/// <summary>
 		/// Creates a new FlurlRequest and configures it to use the given IFlurlClient.
 		/// </summary>
 		/// <param name="url">This URL.</param>
@@ -1639,6 +1659,16 @@ namespace Flurl.Http
 		/// <returns>A new IFlurlRequest.</returns>
 		public static IFlurlRequest AllowAnyHttpStatus(this Uri uri) {
 			return new FlurlRequest(uri).AllowAnyHttpStatus();
+		}
+		
+		/// <summary>
+		/// Creates a new FlurlRequest and configures whether redirects are automatically followed.
+		/// </summary>
+		/// <param name="uri">This System.Uri.</param>
+		/// <param name="enabled">true if Flurl should automatically send a new request to the redirect URL, false if it should not.</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithAutoRedirect(this Uri uri, bool enabled) {
+			return new FlurlRequest(uri).WithAutoRedirect(enabled);
 		}
 		
 		/// <summary>
