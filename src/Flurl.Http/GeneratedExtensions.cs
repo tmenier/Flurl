@@ -663,6 +663,26 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
+		/// Creates a new FlurlRequest and sets a collection of HTTP cookies that will be sent with it. May be modified when the response is received, if the server returns any cookies.
+		/// </summary>
+		/// <param name="url">This Flurl.Url.</param>
+		/// <param name="cookies">The cookies to send.</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithCookies(this Url url, IDictionary<string, Cookie> cookies) {
+			return new FlurlRequest(url).WithCookies(cookies);
+		}
+		
+		/// <summary>
+		/// Creates a new FlurlRequest and provides access to the collection that will receive HTTP cookies from the server, which can then be sent in subsequent requests.
+		/// </summary>
+		/// <param name="url">This Flurl.Url.</param>
+		/// <param name="cookies">The cookie collection.</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithCookies(this Url url, out IDictionary<string, Cookie> cookies) {
+			return new FlurlRequest(url).WithCookies(out cookies);
+		}
+		
+		/// <summary>
 		/// Creates a new FlurlRequest and allows changing its Settings inline.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
@@ -1133,6 +1153,26 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
+		/// Creates a new FlurlRequest and sets a collection of HTTP cookies that will be sent with it. May be modified when the response is received, if the server returns any cookies.
+		/// </summary>
+		/// <param name="url">This URL.</param>
+		/// <param name="cookies">The cookies to send.</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithCookies(this string url, IDictionary<string, Cookie> cookies) {
+			return new FlurlRequest(url).WithCookies(cookies);
+		}
+		
+		/// <summary>
+		/// Creates a new FlurlRequest and provides access to the collection that will receive HTTP cookies from the server, which can then be sent in subsequent requests.
+		/// </summary>
+		/// <param name="url">This URL.</param>
+		/// <param name="cookies">The cookie collection.</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithCookies(this string url, out IDictionary<string, Cookie> cookies) {
+			return new FlurlRequest(url).WithCookies(out cookies);
+		}
+		
+		/// <summary>
 		/// Creates a new FlurlRequest and allows changing its Settings inline.
 		/// </summary>
 		/// <param name="url">This URL.</param>
@@ -1600,6 +1640,26 @@ namespace Flurl.Http
 		/// <returns>A new IFlurlRequest.</returns>
 		public static IFlurlRequest WithCookies(this Uri uri, object cookies, DateTime? expires = null) {
 			return new FlurlRequest(uri).WithCookies(cookies, expires);
+		}
+		
+		/// <summary>
+		/// Creates a new FlurlRequest and sets a collection of HTTP cookies that will be sent with it. May be modified when the response is received, if the server returns any cookies.
+		/// </summary>
+		/// <param name="uri">This System.Uri.</param>
+		/// <param name="cookies">The cookies to send.</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithCookies(this Uri uri, IDictionary<string, Cookie> cookies) {
+			return new FlurlRequest(uri).WithCookies(cookies);
+		}
+		
+		/// <summary>
+		/// Creates a new FlurlRequest and provides access to the collection that will receive HTTP cookies from the server, which can then be sent in subsequent requests.
+		/// </summary>
+		/// <param name="uri">This System.Uri.</param>
+		/// <param name="cookies">The cookie collection.</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithCookies(this Uri uri, out IDictionary<string, Cookie> cookies) {
+			return new FlurlRequest(uri).WithCookies(out cookies);
 		}
 		
 		/// <summary>

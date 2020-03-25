@@ -96,7 +96,7 @@ namespace Flurl.Http
 		public IDictionary<string, string> Headers => _headers.Value;
 
 		/// <inheritdoc />
-		public IDictionary<string, Cookie> Cookies { get; } = new Dictionary<string, Cookie>();
+		public IDictionary<string, Cookie> Cookies { get; }
 
 		/// <inheritdoc />
 		public HttpResponseMessage ResponseMessage { get; }
@@ -108,9 +108,11 @@ namespace Flurl.Http
 		/// Creates a new FlurlResponse that wraps the give HttpResponseMessage.
 		/// </summary>
 		/// <param name="resp"></param>
-		public FlurlResponse(HttpResponseMessage resp) {
+		/// <param name="cookies"></param>
+		public FlurlResponse(HttpResponseMessage resp, IDictionary<string, Cookie> cookies) {
 			ResponseMessage = resp;
 			_headers = new Lazy<IDictionary<string, string>>(BuildHeaders);
+			Cookies = cookies;
 		}
 
 		private IDictionary<string, string> BuildHeaders() => ResponseMessage.Headers

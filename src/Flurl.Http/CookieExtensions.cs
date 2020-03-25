@@ -68,5 +68,27 @@ namespace Flurl.Http
 
 			return clientOrRequest;
 		}
+
+		/// <summary>
+		/// Sets a collection of HTTP cookies that will be sent with the request. May be modified when the response is received, if the server returns any cookies.
+		/// </summary>
+		/// <param name="request"></param>
+		/// <param name="cookies">The cookies to send.</param>
+		/// <returns></returns>
+		public static IFlurlRequest WithCookies(this IFlurlRequest request, IDictionary<string, Cookie> cookies) {
+			request.Cookies = cookies;
+			return request;
+		}
+
+		/// <summary>
+		/// Provides access to the collection that will receive HTTP cookies from the server, which can then be sent in subsequent requests.
+		/// </summary>
+		/// <param name="request"></param>
+		/// <param name="cookies">The cookie collection.</param>
+		/// <returns></returns>
+		public static IFlurlRequest WithCookies(this IFlurlRequest request, out IDictionary<string, Cookie> cookies) {
+			cookies = request.Cookies;
+			return request;
+		}
 	}
 }

@@ -114,7 +114,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Collection of HttpCookies sent and received by the IFlurlClient associated with this request.
 		/// </summary>
-		public IDictionary<string, Cookie> Cookies { get; } = new Dictionary<string, Cookie>();
+		public IDictionary<string, Cookie> Cookies { get; set; } = new Dictionary<string, Cookie>();
 
 		/// <inheritdoc />
 		public async Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
@@ -147,15 +147,14 @@ namespace Flurl.Http
 				foreach (var header in Headers)
 					request.SetHeader(header.Key, header.Value);
 
-				if (Settings.CookiesEnabled)
-					WriteRequestCookies(call);
+				WriteRequestCookies(request);
 
-				call.HttpResponseMessage = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
+				var response = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
+				call.HttpResponseMessage = response;
 				call.HttpResponseMessage.RequestMessage = request;
-				call.Response = new FlurlResponse(call.HttpResponseMessage);
+				call.Response = new FlurlResponse(call.HttpResponseMessage, Cookies);
 
-				if (Settings.CookiesEnabled)
-					ReadResponseCookies(call);
+				ReadResponseCookies(response);
 
 				if (Settings.Redirects.Enabled)
 					call.Redirect = GetRedirect(call);
@@ -168,7 +167,7 @@ namespace Flurl.Http
 
 					var redir = new FlurlRequest(call.Redirect.Url)
 						.WithHeaders(this.Headers)
-						.WithCookies(call.Response.Cookies);
+						.WithCookies(call.Response.Cookies) as FlurlRequest;
 
 					redir.Client = Client;
 					redir._redirectedFrom = call;
@@ -267,61 +266,28 @@ namespace Flurl.Http
 			CheckForCircularRedirects(call.RedirectedFrom, visited);
 		}
 
-		private void WriteRequestCookies(FlurlCall call) {
+		private void WriteRequestCookies(HttpRequestMessage request) {
 			Cookies.Merge(Client.Cookies);
 
 			if (!Cookies.Any()) return;
-			var uri = call.HttpRequestMessage.RequestUri;
-
-			//var jar = GetCookieJar(Client.HttpMessageHandler);
-
-			//if (jar != null) {
-			//	Cookies.Merge(Client.Cookies);
-			//	foreach (var cookie in Cookies.Values)
-			//		jar.Add(uri, cookie);
-			//}
-			//else {
-				// no CookieContainer in play, add cookie headers manually
-				// http://stackoverflow.com/a/15588878/62600
-				call.HttpRequestMessage.Headers.TryAddWithoutValidation("Cookie", string.Join("; ", Cookies.Values));
-			//}
-		}
-
-		private void ReadResponseCookies(FlurlCall call) {
-			var uri = call.HttpRequestMessage.RequestUri;
-			if (uri == null)
-				return;
-
-			// if there's a CookieContainer in play, cookies have probably been removed from the headers and put there.
-			//var jar = GetCookieJar(Client.HttpMessageHandler) ?? new CookieContainer();
-
-			// enlist CookieContainer to help with parsing
-			var jar = new CookieContainer();
 
 			// http://stackoverflow.com/a/15588878/62600
-			if (call.HttpResponseMessage.Headers.TryGetValues("Set-Cookie", out var cookieHeaders)) {
+			request.Headers.TryAddWithoutValidation("Cookie", string.Join("; ", Cookies.Values));
+		}
+
+		private void ReadResponseCookies(HttpResponseMessage response) {
+			// enlist CookieContainer to help with parsing
+			var jar = new CookieContainer();
+			var uri = Url.ToUri();
+
+			// http://stackoverflow.com/a/15588878/62600
+			if (response.Headers.TryGetValues("Set-Cookie", out var cookieHeaders)) {
 				foreach (string header in cookieHeaders)
 					jar.SetCookies(uri, header);
 			}
 
 			foreach (var cookie in jar.GetCookies(uri).Cast<Cookie>())
-				call.Response.Cookies[cookie.Name] = cookie;
-		}
-
-		private CookieContainer GetCookieJar(HttpMessageHandler handler) {
-			// if it's an HttpClientHandler, return its CookieContainer
-			if (handler is HttpClientHandler hch) {
-				if (hch.UseCookies && hch.CookieContainer == null)
-					hch.CookieContainer = new CookieContainer();
-				return hch.CookieContainer;
-			}
-
-			// if it's a DelegatingHandler, check the InnerHandler recursively
-			if (handler is DelegatingHandler dh)
-				return GetCookieJar(dh.InnerHandler);
-
-			// it's neither
-			return null;
+				Cookies[cookie.Name] = cookie;
 		}
 
 		internal static async Task<IFlurlResponse> HandleExceptionAsync(FlurlCall call, Exception ex, CancellationToken token) {

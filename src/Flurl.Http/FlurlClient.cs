@@ -95,7 +95,7 @@ namespace Flurl.Http
 		public IDictionary<string, object> Headers { get; } = new Dictionary<string, object>();
 
 		/// <inheritdoc />
-		public IDictionary<string, Cookie> Cookies { get; } = new Dictionary<string, Cookie>();
+		public IDictionary<string, Cookie> Cookies { get; set; } = new Dictionary<string, Cookie>();
 
 		/// <inheritdoc />
 		public HttpClient HttpClient => HttpTest.Current?.HttpClient ?? _injectedClient ?? GetHttpClient();

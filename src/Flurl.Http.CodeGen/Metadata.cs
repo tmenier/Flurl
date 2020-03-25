@@ -104,6 +104,11 @@ namespace Flurl.Http.CodeGen
 				.AddArg("cookies", "object", "Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.")
 				.AddArg("expires", "DateTime?", "Expiration for all cookies (optional). If excluded, cookies only live for duration of session.", "null");
 
+			yield return Create("WithCookies", "Creates a new FlurlRequest and sets a collection of HTTP cookies that will be sent with it. May be modified when the response is received, if the server returns any cookies.")
+				.AddArg("cookies", "IDictionary<string, Cookie>", "The cookies to send.");
+			yield return Create("WithCookies", "Creates a new FlurlRequest and provides access to the collection that will receive HTTP cookies from the server, which can then be sent in subsequent requests.")
+				.AddArg("cookies", "IDictionary<string, Cookie>", "The cookie collection.", isOut: true);
+
 			// settings extensions
 			yield return Create("ConfigureRequest", "Creates a new FlurlRequest and allows changing its Settings inline.")
 				.AddArg("action", "Action<FlurlHttpSettings>", "A delegate defining the Settings changes.");
