@@ -90,5 +90,10 @@ namespace Flurl.Http
 			cookies = request.Cookies;
 			return request;
 		}
+
+		/// <summary>
+		/// Creates a new CookieSession, under which all requests and responses share a cookie collection.
+		/// </summary>
+		public static CookieSession StartCookieSession(this IFlurlClient client) => new CookieSession(client);
 	}
 }

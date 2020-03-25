@@ -51,5 +51,28 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("foo", cookies["x"].Value);
 			Assert.AreEqual("bazz", cookies["y"].Value);
 		}
+
+		[Test]
+		public async Task can_do_cookie_session() {
+			HttpTest
+				.RespondWith("hi", cookies: new { x = "foo", y = "bar" })
+				.RespondWith("hi")
+				.RespondWith("hi", cookies: new { y = "bazz" })
+				.RespondWith("hi");
+
+			var client = new FlurlClient("https://cookies.com");
+			using (var cs = client.StartCookieSession()) {
+				await cs.Request().GetAsync();
+				await cs.Request("1").GetAsync();
+				await cs.Request("2").GetAsync();
+				await cs.Request("3").GetAsync();
+
+				HttpTest.ShouldHaveMadeACall().WithHeader("Cookie", "x=foo; y=bar").Times(2);
+				HttpTest.ShouldHaveMadeACall().WithHeader("Cookie", "x=foo; y=bazz").Times(1);
+				Assert.AreEqual(2, cs.Cookies.Count);
+				Assert.AreEqual("foo", cs.Cookies["x"].Value);
+				Assert.AreEqual("bazz", cs.Cookies["y"].Value);
+			}
+		}
 	}
 }
