@@ -87,6 +87,32 @@ namespace Flurl.Http.Testing
 			return With(call => call.HasAnyVerb(verbs), $"verb {list}");
 		}
 
+		#region request body
+		/// <summary>
+		/// Asserts whether calls were made containing given request body. body may contain * wildcard.
+		/// </summary>
+		public HttpCallAssertion WithRequestBody(string bodyPattern) {
+			return With(c => Util.MatchesPattern(c.RequestBody, bodyPattern), $"body {bodyPattern}");
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made containing given JSON-encoded request body. body may contain * wildcard.
+		/// </summary>
+		public HttpCallAssertion WithRequestJson(object body) {
+			var serializedBody = FlurlHttp.GlobalSettings.JsonSerializer.Serialize(body);
+			return WithRequestBody(serializedBody);
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made containing given URL-encoded request body. body may contain * wildcard.
+		/// </summary>
+		public HttpCallAssertion WithRequestUrlEncoded(object body) {
+			var serializedBody = FlurlHttp.GlobalSettings.UrlEncodedSerializer.Serialize(body);
+			return WithRequestBody(serializedBody);
+		}
+		#endregion
+
+		#region query params
 		/// <summary>
 		/// Asserts whether calls were made containing the given query parameter name and (optionally) value.
 		/// </summary>
@@ -142,30 +168,9 @@ namespace Flurl.Http.Testing
 		public HttpCallAssertion WithoutQueryParams(object values) {
 			return values.ToKeyValuePairs().Select(kv => WithoutQueryParam(kv.Key, kv.Value)).LastOrDefault() ?? this;
 		}
+		#endregion
 
-		/// <summary>
-		/// Asserts whether calls were made containing given request body. body may contain * wildcard.
-		/// </summary>
-		public HttpCallAssertion WithRequestBody(string bodyPattern) {
-			return With(c => Util.MatchesPattern(c.RequestBody, bodyPattern), $"body {bodyPattern}");
-		}
-
-		/// <summary>
-		/// Asserts whether calls were made containing given JSON-encoded request body. body may contain * wildcard.
-		/// </summary>
-		public HttpCallAssertion WithRequestJson(object body) {
-			var serializedBody = FlurlHttp.GlobalSettings.JsonSerializer.Serialize(body);
-			return WithRequestBody(serializedBody);
-		}
-
-		/// <summary>
-		/// Asserts whether calls were made containing given URL-encoded request body. body may contain * wildcard.
-		/// </summary>
-		public HttpCallAssertion WithRequestUrlEncoded(object body) {
-			var serializedBody = FlurlHttp.GlobalSettings.UrlEncodedSerializer.Serialize(body);
-			return WithRequestBody(serializedBody);
-		}
-
+		#region headers
 		/// <summary>
 		/// Asserts whether calls were made containing the given request header and (optionally) value.
 		/// value may contain * wildcard.
@@ -182,6 +187,26 @@ namespace Flurl.Http.Testing
 		public HttpCallAssertion WithoutHeader(string name, string valuePattern = "*") {
 			return Without(c => c.HasHeader(name, valuePattern), BuildDescrip("no header", name, valuePattern));
 		}
+		#endregion
+
+		#region cookies
+		/// <summary>
+		/// Asserts whether calls were made containing the given cookie and (optionally) value.
+		/// value may contain * wildcard.
+		/// </summary>
+		public HttpCallAssertion WithCookie(string name, string valuePattern = "*", string descrip = null) {
+			descrip = descrip ?? BuildDescrip("cookie", name, valuePattern);
+			return With(c => c.HasCookie(name, valuePattern), descrip);
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made that do NOT contain the given cookie and (optionally) value.
+		/// value may contain * wildcard.
+		/// </summary>
+		public HttpCallAssertion WithoutCookie(string name, string valuePattern = "*") {
+			return Without(c => c.HasCookie(name, valuePattern), BuildDescrip("no cookie", name, valuePattern));
+		}
+		#endregion
 
 		/// <summary>
 		/// Asserts whether calls were made with a request body of the given content (MIME) type.

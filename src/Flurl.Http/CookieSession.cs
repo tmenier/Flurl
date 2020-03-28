@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -21,7 +22,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// A collection of cookies sent by all requests and received by all responses within this session.
 		/// </summary>
-		public IDictionary<string, Cookie> Cookies { get; } = new Dictionary<string, Cookie>();
+		public IDictionary<string, Cookie> Cookies { get; } = new ConcurrentDictionary<string, Cookie>();
 
 		/// <summary>
 		/// Creates a new IFlurlRequest with this session's cookies that can be further built and sent fluently.

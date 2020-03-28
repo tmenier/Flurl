@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -109,12 +110,12 @@ namespace Flurl.Http
 		/// <summary>
 		/// Collection of headers sent on this request.
 		/// </summary>
-		public IDictionary<string, object> Headers { get; } = new Dictionary<string, object>();
+		public IDictionary<string, object> Headers { get; } = new ConcurrentDictionary<string, object>();
 
 		/// <summary>
 		/// Collection of HttpCookies sent and received by the IFlurlClient associated with this request.
 		/// </summary>
-		public IDictionary<string, Cookie> Cookies { get; set; } = new Dictionary<string, Cookie>();
+		public IDictionary<string, Cookie> Cookies { get; set; } = new ConcurrentDictionary<string, Cookie>();
 
 		/// <inheritdoc />
 		public async Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -92,10 +93,10 @@ namespace Flurl.Http
 		}
 
 		/// <inheritdoc />
-		public IDictionary<string, object> Headers { get; } = new Dictionary<string, object>();
+		public IDictionary<string, object> Headers { get; } = new ConcurrentDictionary<string, object>();
 
 		/// <inheritdoc />
-		public IDictionary<string, Cookie> Cookies { get; set; } = new Dictionary<string, Cookie>();
+		public IDictionary<string, Cookie> Cookies { get; set; } = new ConcurrentDictionary<string, Cookie>();
 
 		/// <inheritdoc />
 		public HttpClient HttpClient => HttpTest.Current?.HttpClient ?? _injectedClient ?? GetHttpClient();

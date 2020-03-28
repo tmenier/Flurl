@@ -78,5 +78,19 @@ namespace Flurl.Http.Testing
 			var val = call.HttpRequestMessage.GetHeaderValue(name);
 			return val != null && MatchesPattern(val, valuePattern);
 		}
+
+		internal static bool HasCookie(this FlurlCall call, string name, string valuePattern) {
+			var headerVal = call.HttpRequestMessage.GetHeaderValue("Cookie");
+			if (headerVal == null) return false;
+			return (
+				from kv in headerVal.Split(';')
+				let parts = kv.SplitOnFirstOccurence("=")
+				where parts.Length == 2
+				let key = parts[0].Trim()
+				where key == name
+				let val = parts[1].Trim()
+				where MatchesPattern(val, valuePattern)
+				select 1).Any();
+		}
 	}
 }
