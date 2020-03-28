@@ -98,14 +98,15 @@ namespace Flurl.Http.CodeGen
 				.AddArg("cookie", "Cookie", "");
 			yield return Create("WithCookie", "Creates a new FlurlRequest and sets an HTTP cookie to be sent.")
 				.AddArg("name", "string", "The cookie name.")
-				.AddArg("value", "object", "The cookie value.")
-				.AddArg("expires", "DateTime?", "The cookie expiration (optional). If excluded, cookie only lives for duration of session.", "null");
+				.AddArg("value", "object", "The cookie value.");
 			yield return Create("WithCookies", "Creates a new FlurlRequest and sets HTTP cookies to be sent, based on property names / values of the provided object, or keys / values if object is a dictionary.")
-				.AddArg("cookies", "object", "Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.")
-				.AddArg("expires", "DateTime?", "Expiration for all cookies (optional). If excluded, cookies only live for duration of session.", "null");
+				.AddArg("values", "object", "Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.");
+			yield return Create("WithCookies", "Creates a new FlurlRequest and sets HTTP cookies to be sent, based on property names / values of the provided object, or keys / values if object is a dictionary.")
+				.AddArg("values", "object", "Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.")
+				.AddArg("cookies", "IDictionary<string, Cookie>", "The collection of cookies that will be initialized with the given values, possibly modified by the response, and pass-able to subsequent requests.", isOut: true);
 
-			yield return Create("WithCookies", "Creates a new FlurlRequest and sets a collection of HTTP cookies that will be sent with it. May be modified when the response is received, if the server returns any cookies.")
-				.AddArg("cookies", "IDictionary<string, Cookie>", "The cookies to send.");
+			yield return Create("WithCookies", "Creates a new FlurlRequest and sets a collection of HTTP cookies that will be sent with it.")
+				.AddArg("cookies", "IDictionary<string, Cookie>", "The cookies to send. May be modified when the response is received, if the server returns any cookies.");
 			yield return Create("WithCookies", "Creates a new FlurlRequest and provides access to the collection that will receive HTTP cookies from the server, which can then be sent in subsequent requests.")
 				.AddArg("cookies", "IDictionary<string, Cookie>", "The cookie collection.", isOut: true);
 

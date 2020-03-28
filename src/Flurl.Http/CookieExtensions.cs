@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -31,7 +32,7 @@ namespace Flurl.Http
 		/// <returns>This IFlurlClient.</returns>
 		public static T WithCookie<T>(this T clientOrRequest, Cookie cookie) where T : IHttpSettingsContainer {
 			clientOrRequest.Settings.CookiesEnabled = true;
-			clientOrRequest.Cookies[cookie.Name] = cookie;
+			clientOrRequest.Cookies[cookie.Name] = cookie.Value;
 			return clientOrRequest;
 		}
 
@@ -41,53 +42,39 @@ namespace Flurl.Http
 		/// <param name="clientOrRequest">The IFlurlClient or IFlurlRequest.</param>
 		/// <param name="name">The cookie name.</param>
 		/// <param name="value">The cookie value.</param>
-		/// <param name="expires">The cookie expiration (optional). If excluded, cookie only lives for duration of session.</param>
 		/// <returns>This IFlurlClient.</returns>
-		public static T WithCookie<T>(this T clientOrRequest, string name, object value, DateTime? expires = null) where T : IHttpSettingsContainer {
-			var cookie = new Cookie(name, value?.ToInvariantString()) { Expires = expires ?? DateTime.MinValue };
-			return clientOrRequest.WithCookie(cookie);
-		}
-
-		/// <summary>
-		/// Sets HTTP cookies to be sent with this IFlurlRequest or all requests made with this IFlurlClient, based on property names/values of the provided object, or keys/values if object is a dictionary.
-		/// </summary>
-		/// <param name="clientOrRequest">The IFlurlClient or IFlurlRequest.</param>
-		/// <param name="cookies">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
-		/// <param name="expires">Expiration for all cookies (optional). If excluded, cookies only live for duration of session.</param>
-		/// <returns>This IFlurlClient.</returns>
-		public static T WithCookies<T>(this T clientOrRequest, object cookies, DateTime? expires = null) where T : IHttpSettingsContainer {
-			if (cookies == null)
-				return clientOrRequest;
-
-			foreach (var kv in cookies.ToKeyValuePairs()) {
-				if (kv.Value is Cookie cookie)
-					clientOrRequest.WithCookie(cookie);
-				else
-					clientOrRequest.WithCookie(kv.Key, kv.Value, expires);
-			}
-
+		public static T WithCookie<T>(this T clientOrRequest, string name, object value) where T : IHttpSettingsContainer {
+			clientOrRequest.Cookies[name] = value?.ToInvariantString();
 			return clientOrRequest;
 		}
 
 		/// <summary>
-		/// Sets a collection of HTTP cookies that will be sent with the request. May be modified when the response is received, if the server returns any cookies.
+		/// Sets HTTP cookies to be sent with this IFlurlRequest, based on property names/values of the provided object, or keys/values if object is a dictionary.
 		/// </summary>
-		/// <param name="request"></param>
-		/// <param name="cookies">The cookies to send.</param>
-		/// <returns></returns>
-		public static IFlurlRequest WithCookies(this IFlurlRequest request, IDictionary<string, Cookie> cookies) {
-			request.Cookies = cookies;
-			return request;
+		/// <param name="request">The IFlurlRequest.</param>
+		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
+		/// <param name="cookies">The collection of cookies that will be initialized with the given values, possibly modified by the response, and pass-able to subsequent requests.</param>
+		/// <returns>This IFlurlClient.</returns>
+		public static IFlurlRequest WithCookies(this IFlurlRequest request, object values, out IDictionary<string, Cookie> cookies) {
+			cookies = new ConcurrentDictionary<string, Cookie>(values == null ?
+				Enumerable.Empty<KeyValuePair<string, Cookie>>() :
+				values
+					.ToKeyValuePairs()
+					.Select(kv => new KeyValuePair<string, Cookie>(kv.Key, new Cookie(kv.Key, kv.Value?.ToInvariantString()))));
+
+			return request.WithCookies(cookies);
 		}
 
 		/// <summary>
-		/// Provides access to the collection that will receive HTTP cookies from the server, which can then be sent in subsequent requests.
+		/// Sets HTTP cookies to be sent with this IFlurlRequest, based on property names/values of the provided object, or keys/values if object is a dictionary.
 		/// </summary>
-		/// <param name="request"></param>
-		/// <param name="cookies">The cookie collection.</param>
-		/// <returns></returns>
-		public static IFlurlRequest WithCookies(this IFlurlRequest request, out IDictionary<string, Cookie> cookies) {
-			cookies = request.Cookies;
+		/// <param name="request">The IFlurlRequest.</param>
+		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
+		/// <returns>This IFlurlClient.</returns>
+		public static IFlurlRequest WithCookies(this IFlurlRequest request, object values) {
+			foreach (var kv in values.ToKeyValuePairs())
+				request.Cookies[kv.Key] = kv.Value?.ToInvariantString();
+
 			return request;
 		}
 

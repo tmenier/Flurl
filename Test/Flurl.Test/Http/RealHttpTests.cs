@@ -289,10 +289,12 @@ namespace Flurl.Test.Http
 		[Test]
 		public async Task can_send_cookies() {
 			var req = "https://httpbin.org/cookies".WithCookies(new { x = 1, y = 2 });
-			Assert.AreEqual("1", req.Cookies["x"].Value);
-			Assert.AreEqual("2", req.Cookies["y"].Value);
+			Assert.AreEqual("1", req.Cookies["x"]);
+			Assert.AreEqual("2", req.Cookies["y"]);
 
-			var resp = await req.GetJsonAsync();
+			var s = await req.GetStringAsync();
+
+			var resp = await req.WithAutoRedirect(false).GetJsonAsync();
 			// httpbin returns json representation of cookies that were sent
 			Assert.AreEqual("1", resp.cookies.x);
 			Assert.AreEqual("2", resp.cookies.y);
@@ -300,9 +302,19 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_receive_cookies() {
-			var cli = new FlurlClient().EnableCookies();
-			var resp = await cli.Request("https://httpbin.org/cookies/set?z=999").GetJsonAsync();
-			Assert.AreEqual("999", resp.cookies.z);
+			// endpoint does a redirect, so we need to disable auto-redirect in order to see the cookie in the response
+			var resp = await "https://httpbin.org/cookies/set?z=999".WithAutoRedirect(false).GetAsync();
+			Assert.AreEqual("999", resp.Cookies["z"].Value);
+
+			// but using WithCookies we can capture it even with redirects enabled
+			await "https://httpbin.org/cookies/set?z=999".WithCookies(out var cookies).GetAsync();
+			Assert.AreEqual("999", cookies["z"].Value);
+
+			// this works with redirects too
+			using (var session = new FlurlClient().StartCookieSession()) {
+				await session.Request("https://httpbin.org/cookies/set?z=999").GetAsync();
+				Assert.AreEqual("999", session.Cookies["z"].Value);
+			}
 		}
 
 		[Test]

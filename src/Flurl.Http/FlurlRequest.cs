@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http.Configuration;
@@ -34,6 +35,20 @@ namespace Flurl.Http
 		Url Url { get; set; }
 
 		/// <summary>
+		/// Provides access to the collection that will receive HTTP cookies from the server, which can then be sent in subsequent requests.
+		/// </summary>
+		/// <param name="cookies">The cookie collection.</param>
+		/// <returns>This IFlurlClient instance.</returns>
+		IFlurlRequest WithCookies(out IDictionary<string, Cookie> cookies);
+
+		/// <summary>
+		/// Sets a collection of HTTP cookies that will be sent with the request. May be modified when the response is received, if the server returns any cookies.
+		/// </summary>
+		/// <param name="cookies">The cookies to send.</param>
+		/// <returns>This IFlurlClient instance.</returns>
+		IFlurlRequest WithCookies(IDictionary<string, Cookie> cookies);
+
+		/// <summary>
 		/// Asynchronously sends the HTTP request.
 		/// Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
 		/// </summary>
@@ -52,6 +67,7 @@ namespace Flurl.Http
 		private IFlurlClient _client;
 		private Url _url;
 		private FlurlCall _redirectedFrom;
+		private IDictionary<string, Cookie> _cookieJar;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlRequest"/> class.
@@ -113,12 +129,26 @@ namespace Flurl.Http
 		public IDictionary<string, object> Headers { get; } = new ConcurrentDictionary<string, object>();
 
 		/// <summary>
-		/// Collection of HttpCookies sent and received by the IFlurlClient associated with this request.
+		/// Collection of HTTP cookies sent by the IFlurlClient associated with this request.
 		/// </summary>
-		public IDictionary<string, Cookie> Cookies { get; set; } = new ConcurrentDictionary<string, Cookie>();
+		public IDictionary<string, string> Cookies { get; set; } = new ConcurrentDictionary<string, string>();
 
 		/// <inheritdoc />
-		public async Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
+		public IFlurlRequest WithCookies(IDictionary<string, Cookie> cookies) {
+			_cookieJar = cookies;
+			foreach (var cookie in cookies)
+				Cookies[cookie.Key] = cookie.Value.Value;
+			return this;
+		}
+
+		/// <inheritdoc />
+		public IFlurlRequest WithCookies(out IDictionary<string, Cookie> cookies) {
+			cookies = _cookieJar = new ConcurrentDictionary<string, Cookie>();
+			return this;
+		}
+
+		/// <inheritdoc />
+		public async Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			_client = Client; // "freeze" the client at this point to avoid excessive calls to FlurlClientFactory.Get (#374)
 			Verb = verb;
 
@@ -144,18 +174,12 @@ namespace Flurl.Http
 
 			call.StartedUtc = DateTime.UtcNow;
 			try {
-				Headers.Merge(Client.Headers);
-				foreach (var header in Headers)
-					request.SetHeader(header.Key, header.Value);
-
-				WriteRequestCookies(request);
+				SyncHeadersAndCookies(request);
 
 				var response = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
 				call.HttpResponseMessage = response;
 				call.HttpResponseMessage.RequestMessage = request;
-				call.Response = new FlurlResponse(call.HttpResponseMessage, Cookies);
-
-				ReadResponseCookies(response);
+				call.Response = new FlurlResponse(call.HttpResponseMessage, _cookieJar);
 
 				if (Settings.Redirects.Enabled)
 					call.Redirect = GetRedirect(call);
@@ -201,6 +225,29 @@ namespace Flurl.Http
 
 				call.EndedUtc = DateTime.UtcNow;
 				await RaiseEventAsync(Settings.AfterCall, Settings.AfterCallAsync, call).ConfigureAwait(false);
+			}
+		}
+
+		private void SyncHeadersAndCookies(HttpRequestMessage request) {
+			// copy any client-level (default) to FlurlRequest
+			Headers.Merge(Client.Headers);
+			Cookies.Merge(Client.Cookies);
+
+			if (Cookies.Any()) {
+				// http://stackoverflow.com/a/15588878/62600
+				var cookieHeader = string.Join("; ", Cookies.Select(c => $"{c.Key}={c.Value}"));
+				Headers["Cookie"] = cookieHeader;
+				//request.Headers.TryAddWithoutValidation("Cookie", cookieHeader);
+			}
+
+			// copy headers from FlurlRequest to HttpRequestMessage
+			foreach (var header in Headers)
+				request.SetHeader(header.Key, header.Value);
+
+			// copy headers from HttpContent to FlurlRequest
+			if (request.Content != null) {
+				foreach (var header in request.Content.Headers)
+					Headers[header.Key] = string.Join(",", header.Value);
 			}
 		}
 
@@ -265,30 +312,6 @@ namespace Flurl.Http
 				throw new FlurlHttpException(call, "Circular redirects detected.", null);
 			visited.Add(call.Request.Url);
 			CheckForCircularRedirects(call.RedirectedFrom, visited);
-		}
-
-		private void WriteRequestCookies(HttpRequestMessage request) {
-			Cookies.Merge(Client.Cookies);
-
-			if (!Cookies.Any()) return;
-
-			// http://stackoverflow.com/a/15588878/62600
-			request.Headers.TryAddWithoutValidation("Cookie", string.Join("; ", Cookies.Values));
-		}
-
-		private void ReadResponseCookies(HttpResponseMessage response) {
-			// enlist CookieContainer to help with parsing
-			var jar = new CookieContainer();
-			var uri = Url.ToUri();
-
-			// http://stackoverflow.com/a/15588878/62600
-			if (response.Headers.TryGetValues("Set-Cookie", out var cookieHeaders)) {
-				foreach (string header in cookieHeaders)
-					jar.SetCookies(uri, header);
-			}
-
-			foreach (var cookie in jar.GetCookies(uri).Cast<Cookie>())
-				Cookies[cookie.Name] = cookie;
 		}
 
 		internal static async Task<IFlurlResponse> HandleExceptionAsync(FlurlCall call, Exception ex, CancellationToken token) {

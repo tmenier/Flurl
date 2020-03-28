@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
@@ -88,6 +89,7 @@ namespace Flurl.Http
 	public class FlurlResponse : IFlurlResponse
 	{
 		private readonly Lazy<IDictionary<string, string>> _headers;
+		private readonly IDictionary<string, Cookie> _cookieJar;
 		private object _capturedBody = null;
 		private bool _streamRead = false;
 		private ISerializer _serializer = null;
@@ -96,7 +98,7 @@ namespace Flurl.Http
 		public IDictionary<string, string> Headers => _headers.Value;
 
 		/// <inheritdoc />
-		public IDictionary<string, Cookie> Cookies { get; }
+		public IDictionary<string, Cookie> Cookies { get; } = new ConcurrentDictionary<string, Cookie>();
 
 		/// <inheritdoc />
 		public HttpResponseMessage ResponseMessage { get; }
@@ -108,11 +110,30 @@ namespace Flurl.Http
 		/// Creates a new FlurlResponse that wraps the give HttpResponseMessage.
 		/// </summary>
 		/// <param name="resp"></param>
-		/// <param name="cookies"></param>
-		public FlurlResponse(HttpResponseMessage resp, IDictionary<string, Cookie> cookies) {
+		/// <param name="cookieJar"></param>
+		public FlurlResponse(HttpResponseMessage resp, IDictionary<string, Cookie> cookieJar = null) {
 			ResponseMessage = resp;
 			_headers = new Lazy<IDictionary<string, string>>(BuildHeaders);
-			Cookies = cookies;
+			_cookieJar = cookieJar;
+			InitializeCookies();
+		}
+
+		private void InitializeCookies() {
+			// enlist CookieContainer to help with parsing
+			var cc = new CookieContainer();
+			var uri = ResponseMessage.RequestMessage.RequestUri;
+
+			// http://stackoverflow.com/a/15588878/62600
+			if (ResponseMessage.Headers.TryGetValues("Set-Cookie", out var cookieHeaders)) {
+				foreach (string header in cookieHeaders)
+					cc.SetCookies(uri, header);
+			}
+
+			foreach (var cookie in cc.GetCookies(uri).Cast<Cookie>()) {
+				Cookies[cookie.Name] = cookie;
+				if (_cookieJar != null)
+					_cookieJar[cookie.Name] = cookie;
+			}
 		}
 
 		private IDictionary<string, string> BuildHeaders() => ResponseMessage.Headers

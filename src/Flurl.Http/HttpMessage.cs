@@ -78,7 +78,7 @@ namespace Flurl.Http
 
 		public string GetHeaderValue(string name) {
 			return (Headers.TryGetValues(name, out var vals) || Content?.Headers.TryGetValues(name, out vals) == true) ?
-				string.Join(" ", vals) : null;
+				string.Join(",", vals) : null; // multiple values should be comma delimited https://stackoverflow.com/a/3097052/62600
 		}
 	}
 }

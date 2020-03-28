@@ -24,8 +24,8 @@ namespace Flurl.Http
 	    IDictionary<string, object> Headers { get; }
 
 	    /// <summary>
-	    /// Collection of HttpCookies sent and received with all requests using this client.
+	    /// Collection of HTTP cookies sent on this request or all requests using this client.
 	    /// </summary>
-	    IDictionary<string, Cookie> Cookies { get; set; }
+	    IDictionary<string, string> Cookies { get; set; }
     }
 }

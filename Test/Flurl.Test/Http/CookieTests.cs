@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,8 +40,7 @@ namespace Flurl.Test.Http
 				.RespondWith("hi", cookies: new { y = "bazz" })
 				.RespondWith("hi");
 
-			var resp = await "https://cookies.com".WithCookies(new { x = "foo", y = "bar" }).GetAsync();
-			var cookies = resp.Cookies;
+			await "https://cookies.com".WithCookies(new { x = "foo", y = "bar" }, out var cookies).GetAsync();
 			await "https://cookies.com/1".WithCookies(cookies).GetAsync();
 			await "https://cookies.com/2".WithCookies(cookies).GetAsync();
 			await "https://cookies.com/3".WithCookies(cookies).GetAsync();

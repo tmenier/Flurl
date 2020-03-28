@@ -645,28 +645,37 @@ namespace Flurl.Http
 		/// <param name="url">This Flurl.Url.</param>
 		/// <param name="name">The cookie name.</param>
 		/// <param name="value">The cookie value.</param>
-		/// <param name="expires">The cookie expiration (optional). If excluded, cookie only lives for duration of session.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookie(this Url url, string name, object value, DateTime? expires = null) {
-			return new FlurlRequest(url).WithCookie(name, value, expires);
+		public static IFlurlRequest WithCookie(this Url url, string name, object value) {
+			return new FlurlRequest(url).WithCookie(name, value);
 		}
 		
 		/// <summary>
 		/// Creates a new FlurlRequest and sets HTTP cookies to be sent, based on property names / values of the provided object, or keys / values if object is a dictionary.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
-		/// <param name="cookies">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
-		/// <param name="expires">Expiration for all cookies (optional). If excluded, cookies only live for duration of session.</param>
+		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookies(this Url url, object cookies, DateTime? expires = null) {
-			return new FlurlRequest(url).WithCookies(cookies, expires);
+		public static IFlurlRequest WithCookies(this Url url, object values) {
+			return new FlurlRequest(url).WithCookies(values);
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets a collection of HTTP cookies that will be sent with it. May be modified when the response is received, if the server returns any cookies.
+		/// Creates a new FlurlRequest and sets HTTP cookies to be sent, based on property names / values of the provided object, or keys / values if object is a dictionary.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
-		/// <param name="cookies">The cookies to send.</param>
+		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
+		/// <param name="cookies">The collection of cookies that will be initialized with the given values, possibly modified by the response, and pass-able to subsequent requests.</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithCookies(this Url url, object values, out IDictionary<string, Cookie> cookies) {
+			return new FlurlRequest(url).WithCookies(values, out cookies);
+		}
+		
+		/// <summary>
+		/// Creates a new FlurlRequest and sets a collection of HTTP cookies that will be sent with it.
+		/// </summary>
+		/// <param name="url">This Flurl.Url.</param>
+		/// <param name="cookies">The cookies to send. May be modified when the response is received, if the server returns any cookies.</param>
 		/// <returns>A new IFlurlRequest.</returns>
 		public static IFlurlRequest WithCookies(this Url url, IDictionary<string, Cookie> cookies) {
 			return new FlurlRequest(url).WithCookies(cookies);
@@ -1135,28 +1144,37 @@ namespace Flurl.Http
 		/// <param name="url">This URL.</param>
 		/// <param name="name">The cookie name.</param>
 		/// <param name="value">The cookie value.</param>
-		/// <param name="expires">The cookie expiration (optional). If excluded, cookie only lives for duration of session.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookie(this string url, string name, object value, DateTime? expires = null) {
-			return new FlurlRequest(url).WithCookie(name, value, expires);
+		public static IFlurlRequest WithCookie(this string url, string name, object value) {
+			return new FlurlRequest(url).WithCookie(name, value);
 		}
 		
 		/// <summary>
 		/// Creates a new FlurlRequest and sets HTTP cookies to be sent, based on property names / values of the provided object, or keys / values if object is a dictionary.
 		/// </summary>
 		/// <param name="url">This URL.</param>
-		/// <param name="cookies">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
-		/// <param name="expires">Expiration for all cookies (optional). If excluded, cookies only live for duration of session.</param>
+		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookies(this string url, object cookies, DateTime? expires = null) {
-			return new FlurlRequest(url).WithCookies(cookies, expires);
+		public static IFlurlRequest WithCookies(this string url, object values) {
+			return new FlurlRequest(url).WithCookies(values);
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets a collection of HTTP cookies that will be sent with it. May be modified when the response is received, if the server returns any cookies.
+		/// Creates a new FlurlRequest and sets HTTP cookies to be sent, based on property names / values of the provided object, or keys / values if object is a dictionary.
 		/// </summary>
 		/// <param name="url">This URL.</param>
-		/// <param name="cookies">The cookies to send.</param>
+		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
+		/// <param name="cookies">The collection of cookies that will be initialized with the given values, possibly modified by the response, and pass-able to subsequent requests.</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithCookies(this string url, object values, out IDictionary<string, Cookie> cookies) {
+			return new FlurlRequest(url).WithCookies(values, out cookies);
+		}
+		
+		/// <summary>
+		/// Creates a new FlurlRequest and sets a collection of HTTP cookies that will be sent with it.
+		/// </summary>
+		/// <param name="url">This URL.</param>
+		/// <param name="cookies">The cookies to send. May be modified when the response is received, if the server returns any cookies.</param>
 		/// <returns>A new IFlurlRequest.</returns>
 		public static IFlurlRequest WithCookies(this string url, IDictionary<string, Cookie> cookies) {
 			return new FlurlRequest(url).WithCookies(cookies);
@@ -1625,28 +1643,37 @@ namespace Flurl.Http
 		/// <param name="uri">This System.Uri.</param>
 		/// <param name="name">The cookie name.</param>
 		/// <param name="value">The cookie value.</param>
-		/// <param name="expires">The cookie expiration (optional). If excluded, cookie only lives for duration of session.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookie(this Uri uri, string name, object value, DateTime? expires = null) {
-			return new FlurlRequest(uri).WithCookie(name, value, expires);
+		public static IFlurlRequest WithCookie(this Uri uri, string name, object value) {
+			return new FlurlRequest(uri).WithCookie(name, value);
 		}
 		
 		/// <summary>
 		/// Creates a new FlurlRequest and sets HTTP cookies to be sent, based on property names / values of the provided object, or keys / values if object is a dictionary.
 		/// </summary>
 		/// <param name="uri">This System.Uri.</param>
-		/// <param name="cookies">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
-		/// <param name="expires">Expiration for all cookies (optional). If excluded, cookies only live for duration of session.</param>
+		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookies(this Uri uri, object cookies, DateTime? expires = null) {
-			return new FlurlRequest(uri).WithCookies(cookies, expires);
+		public static IFlurlRequest WithCookies(this Uri uri, object values) {
+			return new FlurlRequest(uri).WithCookies(values);
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets a collection of HTTP cookies that will be sent with it. May be modified when the response is received, if the server returns any cookies.
+		/// Creates a new FlurlRequest and sets HTTP cookies to be sent, based on property names / values of the provided object, or keys / values if object is a dictionary.
 		/// </summary>
 		/// <param name="uri">This System.Uri.</param>
-		/// <param name="cookies">The cookies to send.</param>
+		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
+		/// <param name="cookies">The collection of cookies that will be initialized with the given values, possibly modified by the response, and pass-able to subsequent requests.</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithCookies(this Uri uri, object values, out IDictionary<string, Cookie> cookies) {
+			return new FlurlRequest(uri).WithCookies(values, out cookies);
+		}
+		
+		/// <summary>
+		/// Creates a new FlurlRequest and sets a collection of HTTP cookies that will be sent with it.
+		/// </summary>
+		/// <param name="uri">This System.Uri.</param>
+		/// <param name="cookies">The cookies to send. May be modified when the response is received, if the server returns any cookies.</param>
 		/// <returns>A new IFlurlRequest.</returns>
 		public static IFlurlRequest WithCookies(this Uri uri, IDictionary<string, Cookie> cookies) {
 			return new FlurlRequest(uri).WithCookies(cookies);
