@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,9 +24,8 @@ namespace Flurl.Test.Http
 			await "https://cookies.com/2".WithCookies(cookies).GetAsync();
 			await "https://cookies.com/3".WithCookies(cookies).GetAsync();
 
-			HttpTest.ShouldHaveMadeACall().WithCookie("x", "foo").Times(3);
-			HttpTest.ShouldHaveMadeACall().WithCookie("y", "bar").Times(2);
-			HttpTest.ShouldHaveMadeACall().WithCookie("y", "bazz").Times(1);
+			HttpTest.ShouldHaveMadeACall().WithCookies(new { x = "foo", y = "bar" }).Times(2);
+			HttpTest.ShouldHaveMadeACall().WithCookies(new { x = "foo", y = "bazz" }).Times(1);
 
 			Assert.AreEqual(2, cookies.Count);
 			Assert.AreEqual("foo", cookies["x"].Value);
@@ -47,9 +46,8 @@ namespace Flurl.Test.Http
 			await "https://cookies.com/2".WithCookies(cookies).GetAsync();
 			await "https://cookies.com/3".WithCookies(cookies).GetAsync();
 
-			HttpTest.ShouldHaveMadeACall().WithCookie("x", "foo").Times(4);
-			HttpTest.ShouldHaveMadeACall().WithCookie("y", "bar").Times(3);
-			HttpTest.ShouldHaveMadeACall().WithCookie("y", "bazz").Times(1);
+			HttpTest.ShouldHaveMadeACall().WithCookies(new { x = "foo", y = "bar" }).Times(3);
+			HttpTest.ShouldHaveMadeACall().WithCookies(new { x = "foo", y = "bazz" }).Times(1);
 
 			Assert.AreEqual(2, cookies.Count);
 			Assert.AreEqual("foo", cookies["x"].Value);
@@ -71,9 +69,8 @@ namespace Flurl.Test.Http
 				await cs.Request("2").GetAsync();
 				await cs.Request("3").GetAsync();
 
-				HttpTest.ShouldHaveMadeACall().WithCookie("x", "foo").Times(3);
-				HttpTest.ShouldHaveMadeACall().WithCookie("y", "bar").Times(2);
-				HttpTest.ShouldHaveMadeACall().WithCookie("y", "bazz").Times(1);
+				HttpTest.ShouldHaveMadeACall().WithCookies(new { x = "foo", y = "bar" }).Times(2);
+				HttpTest.ShouldHaveMadeACall().WithCookies(new { x = "foo", y = "bazz" }).Times(1);
 
 				Assert.AreEqual(2, cs.Cookies.Count);
 				Assert.AreEqual("foo", cs.Cookies["x"].Value);

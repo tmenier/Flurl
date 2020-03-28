@@ -114,14 +114,14 @@ namespace Flurl.Http.Testing
 
 		#region query params
 		/// <summary>
-		/// Asserts whether calls were made containing the given query parameter name and (optionally) value.
+		/// Asserts whether calls were made containing the given query parameter name and (optionally) value. value may contain * wildcard.
 		/// </summary>
 		public HttpCallAssertion WithQueryParam(string name, object value = null) {
 			return With(c => c.HasQueryParam(name, value), BuildDescrip("query param", name, value));
 		}
 
 		/// <summary>
-		/// Asserts whether calls were made NOT containing the given query parameter and (optionally) value.
+		/// Asserts whether calls were made NOT containing the given query parameter and (optionally) value. value may contain * wildcard.
 		/// </summary>
 		public HttpCallAssertion WithoutQueryParam(string name, object value = null) {
 			return Without(c => c.HasQueryParam(name, value), BuildDescrip("no query param", name, value));
@@ -172,39 +172,123 @@ namespace Flurl.Http.Testing
 
 		#region headers
 		/// <summary>
-		/// Asserts whether calls were made containing the given request header and (optionally) value.
-		/// value may contain * wildcard.
+		/// Asserts whether calls were made containing the given header name and (optionally) value. value may contain * wildcard.
 		/// </summary>
-		public HttpCallAssertion WithHeader(string name, string valuePattern = "*", string descrip = null) {
-			descrip = descrip ?? BuildDescrip("header", name, valuePattern);
-			return With(c => c.HasHeader(name, valuePattern), descrip);
+		public HttpCallAssertion WithHeader(string name, object value = null) {
+			return With(c => c.HasHeader(name, value), BuildDescrip("header", name, value));
 		}
 
 		/// <summary>
-		/// Asserts whether calls were made that do NOT contain the given request header and (optionally) value.
-		/// value may contain * wildcard.
+		/// Asserts whether calls were made NOT containing the given header and (optionally) value. value may contain * wildcard.
 		/// </summary>
-		public HttpCallAssertion WithoutHeader(string name, string valuePattern = "*") {
-			return Without(c => c.HasHeader(name, valuePattern), BuildDescrip("no header", name, valuePattern));
+		public HttpCallAssertion WithoutHeader(string name, object value = null) {
+			return Without(c => c.HasHeader(name, value), BuildDescrip("no header", name, value));
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made containing ALL the given headers (regardless of their values).
+		/// </summary>
+		public HttpCallAssertion WithHeaders(params string[] names) {
+			return names.Select(n => WithHeader(n)).LastOrDefault() ?? this;
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made NOT containing any of the given headers.
+		/// If no names are provided, asserts no calls were made with any headers.
+		/// </summary>
+		public HttpCallAssertion WithoutHeaders(params string[] names) {
+			if (!names.Any())
+				return With(c => !c.Request.Headers.Any(), "no headers");
+			return names.Select(n => WithoutHeader(n)).LastOrDefault() ?? this;
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made containing ANY the given headers (regardless of their values).
+		/// If no names are provided, asserts that calls were made containing at least one header with any name.
+		/// </summary>
+		public HttpCallAssertion WithAnyHeader(params string[] names) {
+			var descrip = $"any header {string.Join(", ", names)}".Trim();
+			return With(call => {
+				if (!names.Any()) return call.Request.Headers.Any();
+				return call.Request.Headers.Select(h => h.Key).Intersect(names).Any();
+			}, descrip);
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made containing all of the given header values.
+		/// </summary>
+		/// <param name="values">Object (usually anonymous) or dictionary that is parsed to name/value headers to check for. Values may contain * wildcard.</param>
+		public HttpCallAssertion WithHeaders(object values) {
+			return values.ToKeyValuePairs().Select(kv => WithHeader(kv.Key, kv.Value)).LastOrDefault() ?? this;
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made NOT containing any of the given header values.
+		/// </summary>
+		/// <param name="values">Object (usually anonymous) or dictionary that is parsed to name/value headers to check for. Values may contain * wildcard.</param>
+		public HttpCallAssertion WithoutHeaders(object values) {
+			return values.ToKeyValuePairs().Select(kv => WithoutHeader(kv.Key, kv.Value)).LastOrDefault() ?? this;
 		}
 		#endregion
 
 		#region cookies
 		/// <summary>
-		/// Asserts whether calls were made containing the given cookie and (optionally) value.
-		/// value may contain * wildcard.
+		/// Asserts whether calls were made containing the given cookie name and (optionally) value. value may contain * wildcard.
 		/// </summary>
-		public HttpCallAssertion WithCookie(string name, string valuePattern = "*", string descrip = null) {
-			descrip = descrip ?? BuildDescrip("cookie", name, valuePattern);
-			return With(c => c.HasCookie(name, valuePattern), descrip);
+		public HttpCallAssertion WithCookie(string name, object value = null) {
+			return With(c => c.HasCookie(name, value), BuildDescrip("cookie", name, value));
 		}
 
 		/// <summary>
-		/// Asserts whether calls were made that do NOT contain the given cookie and (optionally) value.
-		/// value may contain * wildcard.
+		/// Asserts whether calls were made NOT containing the given cookie and (optionally) value. value may contain * wildcard.
 		/// </summary>
-		public HttpCallAssertion WithoutCookie(string name, string valuePattern = "*") {
-			return Without(c => c.HasCookie(name, valuePattern), BuildDescrip("no cookie", name, valuePattern));
+		public HttpCallAssertion WithoutCookie(string name, object value = null) {
+			return Without(c => c.HasCookie(name, value), BuildDescrip("no cookie", name, value));
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made containing ALL the given cookies (regardless of their values).
+		/// </summary>
+		public HttpCallAssertion WithCookies(params string[] names) {
+			return names.Select(n => WithCookie(n)).LastOrDefault() ?? this;
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made NOT containing any of the given cookies.
+		/// If no names are provided, asserts no calls were made with any cookies.
+		/// </summary>
+		public HttpCallAssertion WithoutCookies(params string[] names) {
+			if (!names.Any())
+				return With(c => !c.Request.Cookies.Any(), "no cookies");
+			return names.Select(n => WithoutCookie(n)).LastOrDefault() ?? this;
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made containing ANY the given cookies (regardless of their values).
+		/// If no names are provided, asserts that calls were made containing at least one cookie with any name.
+		/// </summary>
+		public HttpCallAssertion WithAnyCookie(params string[] names) {
+			var descrip = $"any cookie {string.Join(", ", names)}".Trim();
+			return With(call => {
+				if (!names.Any()) return call.Request.Cookies.Any();
+				return call.Request.Cookies.Select(c => c.Key).Intersect(names).Any();
+			}, descrip);
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made containing all of the given cookie values.
+		/// </summary>
+		/// <param name="values">Object (usually anonymous) or dictionary that is parsed to name/value cookies to check for. Values may contain * wildcard.</param>
+		public HttpCallAssertion WithCookies(object values) {
+			return values.ToKeyValuePairs().Select(kv => WithCookie(kv.Key, kv.Value)).LastOrDefault() ?? this;
+		}
+
+		/// <summary>
+		/// Asserts whether calls were made NOT containing any of the given cookie values.
+		/// </summary>
+		/// <param name="values">Object (usually anonymous) or dictionary that is parsed to name/value cookies to check for. Values may contain * wildcard.</param>
+		public HttpCallAssertion WithoutCookies(object values) {
+			return values.ToKeyValuePairs().Select(kv => WithoutCookie(kv.Key, kv.Value)).LastOrDefault() ?? this;
 		}
 		#endregion
 
@@ -224,7 +308,7 @@ namespace Flurl.Http.Testing
 		/// Token can contain * wildcard.
 		/// </summary>
 		public HttpCallAssertion WithOAuthBearerToken(string token = "*") {
-			return WithHeader("Authorization", $"Bearer {token}", "bearer token " + token);
+			return WithHeader("Authorization", $"Bearer {token}");
 		}
 
 		/// <summary>
