@@ -99,7 +99,7 @@ You can make further assertions against the call log with a fluent API:
 
 ````c#
 httpTest.ShouldHaveCalled("http://some-api.com/*")
-    .WithVerb(HttpMethd.Post)
+    .WithVerb(HttpMethod.Post)
     .WithContentType("application/json")
     .WithRequestBody("{\"a\":*,\"b\":*}") // supports wildcards
     .Times(1);
