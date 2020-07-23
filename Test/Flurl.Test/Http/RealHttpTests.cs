@@ -319,8 +319,9 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_set_cookies_before_setting_url() {
-			var cli = new FlurlClient().WithCookie("z", "999");
-			var resp = await cli.Request("https://httpbin.org/cookies").GetJsonAsync();
+			var req = new FlurlRequest().WithCookie("z", "999");
+			req.Url = "https://httpbin.org/cookies";
+			var resp = await req.GetJsonAsync();
 			Assert.AreEqual("999", resp.cookies.z);
 		}
 
@@ -336,46 +337,6 @@ namespace Flurl.Test.Http
 
 			Assert.AreEqual("123", resp1.cookies.x);
 			Assert.AreEqual("abc", resp2.cookies.x);
-		}
-
-		[Test]
-		public async Task can_set_request_cookies_with_a_delegating_handler() {
-			var resp = await new FlurlClient("http://httpbin.org")
-				.Configure(settings => settings.HttpClientFactory = new DelegatingHandlerHttpClientFactory())
-				.Request("cookies")
-				.WithCookies(new { x = 1, y = 2 })
-				.GetJsonAsync();
-
-			// httpbin returns json representation of cookies that were set on the server.
-			Assert.AreEqual("1", resp.cookies.x);
-			Assert.AreEqual("2", resp.cookies.y);
-		}
-
-		[Test]
-		public async Task can_get_response_cookies_with_a_delegating_handler() {
-			var cli = new FlurlClient("https://httpbin.org")
-				.Configure(settings => settings.HttpClientFactory = new DelegatingHandlerHttpClientFactory())
-				.EnableCookies();
-
-			var resp = await cli.Request("cookies/set?z=999").GetAsync();
-			Assert.AreEqual(200, resp.StatusCode);
-
-			var json = await resp.GetJsonAsync();
-			Assert.AreEqual("999", json.cookies.z);
-		}
-
-		public class DelegatingHandlerHttpClientFactory : DefaultHttpClientFactory
-		{
-			public override HttpMessageHandler CreateMessageHandler() {
-				var handler = base.CreateMessageHandler();
-
-				return new PassThroughDelegatingHandler(new PassThroughDelegatingHandler(handler));
-			}
-
-			public class PassThroughDelegatingHandler : DelegatingHandler
-			{
-				public PassThroughDelegatingHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
-			}
 		}
 		#endregion
 	}

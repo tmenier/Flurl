@@ -25,7 +25,13 @@ namespace Flurl.Http.Testing
 				call.HttpRequestMessage.Method.Method.Equals(verb, StringComparison.OrdinalIgnoreCase));
 		}
 
-		internal static bool HasQueryParam(this FlurlCall call, string name, object value) {
+		/// <summary>
+		/// null value means just check for existence by name
+		/// </summary>
+		internal static bool HasQueryParam(this FlurlCall call, string name, object value = null) {
+			if (value == null)
+				return call.Request.Url.QueryParams.ContainsKey(name);
+
 			var paramVals = call.Request.Url.QueryParams
 				.Where(p => p.Name == name)
 				.Select(p => p.Value.ToInvariantString())
@@ -37,7 +43,7 @@ namespace Flurl.Http.Testing
 				var values = en.Cast<object>().Select(o => o.ToInvariantString()).ToList();
 				return values.Intersect(paramVals).Count() == values.Count;
 			}
-			return paramVals.Any(v => MatchesValue(v, value));
+			return paramVals.Any(v => MatchesValueOrPattern(v, value));
 		}
 
 		internal static bool HasAllQueryParams(this FlurlCall call, string[] names) {
@@ -59,22 +65,29 @@ namespace Flurl.Http.Testing
 			return values.ToKeyValuePairs().All(kv => call.HasQueryParam(kv.Key, kv.Value));
 		}
 
-		internal static bool HasHeader(this FlurlCall call, string name, object value) {
-			return call.Request.Headers.TryGetValue(name, out var val) && MatchesValue(val?.ToInvariantString(), value);
+		/// <summary>
+		/// null value means just check for existence by name
+		/// </summary>
+		internal static bool HasHeader(this FlurlCall call, string name, object value = null) {
+			return (value == null) ?
+				call.Request.Headers.ContainsKey(name) :
+				call.Request.Headers.TryGetValue(name, out var val) && MatchesValueOrPattern(val, value);
 		}
 
-		internal static bool HasCookie(this FlurlCall call, string name, object value) {
-			return call.Request.Cookies.TryGetValue(name, out var val) && MatchesValue(val, value);
+		/// <summary>
+		/// null value means just check for existence by name
+		/// </summary>
+		internal static bool HasCookie(this FlurlCall call, string name, object value = null) {
+			return (value == null) ?
+				call.Request.Cookies.ContainsKey(name) :
+				call.Request.Cookies.TryGetValue(name, out var val) && MatchesValueOrPattern(val, value);
 		}
 
-		private static bool MatchesValue(string valueToMatch, object value) {
-			if (value == null)
-				return true;
-			if (valueToMatch == null)
-				return false;
-			if (value is string s)
-				return MatchesPattern(valueToMatch, s);
-			return valueToMatch == value.ToInvariantString();
+		private static bool MatchesValueOrPattern(object valueToMatch, object value) {
+			if (valueToMatch is string pattern && value is string s)
+				return MatchesPattern(pattern, s);
+			// string match is good enough
+			return valueToMatch?.ToInvariantString() == value?.ToInvariantString();
 		}
 
 		internal static bool MatchesPattern(string textToCheck, string pattern) {

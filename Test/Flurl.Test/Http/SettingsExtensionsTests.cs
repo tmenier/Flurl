@@ -140,26 +140,26 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void WithUrl_shares_client_but_not_Url() {
-			var cli = new FlurlClient().WithCookie("mycookie", "123");
+			var cli = new FlurlClient().WithHeader("myheader", "123");
 			var req1 = cli.Request("http://www.api.com/for-req1");
 			var req2 = cli.Request("http://www.api.com/for-req2");
 			var req3 = cli.Request("http://www.api.com/for-req3");
 
-			CollectionAssert.AreEquivalent(req1.Cookies, req2.Cookies);
-			CollectionAssert.AreEquivalent(req1.Cookies, req3.Cookies);
+			CollectionAssert.AreEquivalent(req1.Headers, req2.Headers);
+			CollectionAssert.AreEquivalent(req1.Headers, req3.Headers);
 			var urls = new[] { req1, req2, req3 }.Select(c => c.Url.ToString());
 			CollectionAssert.AllItemsAreUnique(urls);
 		}
 
 		[Test]
 		public void WithClient_shares_client_but_not_Url() {
-			var cli = new FlurlClient().WithCookie("mycookie", "123");
+			var cli = new FlurlClient().WithHeader("myheader", "123");
 			var req1 = "http://www.api.com/for-req1".WithClient(cli);
 			var req2 = "http://www.api.com/for-req2".WithClient(cli);
 			var req3 = "http://www.api.com/for-req3".WithClient(cli);
 
-			CollectionAssert.AreEquivalent(req1.Cookies, req2.Cookies);
-			CollectionAssert.AreEquivalent(req1.Cookies, req3.Cookies);
+			CollectionAssert.AreEquivalent(req1.Headers, req2.Headers);
+			CollectionAssert.AreEquivalent(req1.Headers, req3.Headers);
 			var urls = new[] { req1, req2, req3 }.Select(c => c.Url.ToString());
 			CollectionAssert.AllItemsAreUnique(urls);
 		}

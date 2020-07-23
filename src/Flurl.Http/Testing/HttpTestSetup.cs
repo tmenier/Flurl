@@ -85,6 +85,7 @@ namespace Flurl.Http.Testing
 					StatusCode = (HttpStatusCode)status,
 					Content = buildContent?.Invoke()
 				};
+
 				if (headers != null) {
 					foreach (var kv in headers.ToKeyValuePairs()) {
 						var key = replaceUnderscoreWithHyphen ? kv.Key.Replace("_", "-") : kv.Key;
@@ -93,10 +94,8 @@ namespace Flurl.Http.Testing
 				}
 
 				if (cookies != null) {
-					foreach (var kv in cookies.ToKeyValuePairs()) {
-						var value = new Cookie(kv.Key, kv.Value.ToInvariantString()).ToString();
-						response.Headers.Add("Set-Cookie", value);
-					}
+					foreach (var kv in cookies.ToKeyValuePairs())
+						response.Headers.Add("Set-Cookie", $"{kv.Key}={kv.Value}");
 				}
 				return response;
 			});

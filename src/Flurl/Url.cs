@@ -136,7 +136,7 @@ namespace Flurl
 		/// <summary>
 		/// True if Url is absolute and scheme is https or wss.
 		/// </summary>
-		public bool IsSecureScheme => !IsRelative && (Scheme.ToLowerInvariant() == "https" || Scheme.ToLowerInvariant() == "wss");
+		public bool IsSecureScheme => !IsRelative && (Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) || Scheme.Equals("wss", StringComparison.OrdinalIgnoreCase));
 		#endregion
 
 		#region ctors and parsing methods

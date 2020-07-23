@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http.Configuration;
@@ -21,12 +18,12 @@ namespace Flurl.Http
 		/// <summary>
 		/// Gets the collection of response headers received.
 		/// </summary>
-		IDictionary<string, string> Headers { get; }
+		IReadOnlyDictionary<string, string> Headers { get; }
 
 		/// <summary>
-		/// Gets the collection of HttpCookies received from the server.
+		/// Gets the collection of HTTP cookies received in this response via Set-Cookie headers.
 		/// </summary>
-		IDictionary<string, Cookie> Cookies { get; }
+		IReadOnlyDictionary<string, FlurlCookie> Cookies { get; }
 
 		/// <summary>
 		/// Gets the raw HttpResponseMessage that this IFlurlResponse wraps.
@@ -88,17 +85,17 @@ namespace Flurl.Http
 	/// <inheritdoc />
 	public class FlurlResponse : IFlurlResponse
 	{
-		private readonly Lazy<IDictionary<string, string>> _headers;
-		private readonly IDictionary<string, Cookie> _cookieJar;
+		private readonly Lazy<IReadOnlyDictionary<string, string>> _headers;
+		private readonly Lazy<IReadOnlyDictionary<string, FlurlCookie>> _cookies;
 		private object _capturedBody = null;
 		private bool _streamRead = false;
 		private ISerializer _serializer = null;
 
 		/// <inheritdoc />
-		public IDictionary<string, string> Headers => _headers.Value;
+		public IReadOnlyDictionary<string, string> Headers => _headers.Value;
 
 		/// <inheritdoc />
-		public IDictionary<string, Cookie> Cookies { get; } = new ConcurrentDictionary<string, Cookie>();
+		public IReadOnlyDictionary<string, FlurlCookie> Cookies => _cookies.Value;
 
 		/// <inheritdoc />
 		public HttpResponseMessage ResponseMessage { get; }
@@ -109,37 +106,32 @@ namespace Flurl.Http
 		/// <summary>
 		/// Creates a new FlurlResponse that wraps the give HttpResponseMessage.
 		/// </summary>
-		/// <param name="resp"></param>
-		/// <param name="cookieJar"></param>
-		public FlurlResponse(HttpResponseMessage resp, IDictionary<string, Cookie> cookieJar = null) {
+		public FlurlResponse(HttpResponseMessage resp, CookieJar cookieJar = null) {
 			ResponseMessage = resp;
-			_headers = new Lazy<IDictionary<string, string>>(BuildHeaders);
-			_cookieJar = cookieJar;
-			InitializeCookies();
+			_headers = new Lazy<IReadOnlyDictionary<string, string>>(LoadHeaders);
+			_cookies = new Lazy<IReadOnlyDictionary<string, FlurlCookie>>(LoadCookies);
+			LoadCookieJar(cookieJar);
 		}
 
-		private void InitializeCookies() {
-			// enlist CookieContainer to help with parsing
-			var cc = new CookieContainer();
-			var uri = ResponseMessage.RequestMessage.RequestUri;
-
-			// http://stackoverflow.com/a/15588878/62600
-			if (ResponseMessage.Headers.TryGetValues("Set-Cookie", out var cookieHeaders)) {
-				foreach (string header in cookieHeaders)
-					cc.SetCookies(uri, header);
-			}
-
-			foreach (var cookie in cc.GetCookies(uri).Cast<Cookie>()) {
-				Cookies[cookie.Name] = cookie;
-				if (_cookieJar != null)
-					_cookieJar[cookie.Name] = cookie;
-			}
-		}
-
-		private IDictionary<string, string> BuildHeaders() => ResponseMessage.Headers
+		private IReadOnlyDictionary<string, string> LoadHeaders() => ResponseMessage.Headers
 			.Concat(ResponseMessage.Content?.Headers ?? Enumerable.Empty<KeyValuePair<string, IEnumerable<string>>>())
 			.GroupBy(h => h.Key)
 			.ToDictionary(g => g.Key, g => string.Join(", ", g.SelectMany(h => h.Value)));
+
+		private IReadOnlyDictionary<string, FlurlCookie> LoadCookies() {
+			var url = ResponseMessage.RequestMessage.RequestUri.ToString();
+			return ResponseMessage.Headers.TryGetValues("Set-Cookie", out var headerValues) ?
+				headerValues
+					.Select(hv => CookieCutter.FromResponseHeader(url, hv))
+					.ToDictionary(c => c.Name) :
+				new Dictionary<string, FlurlCookie>();
+		}
+
+		private void LoadCookieJar(CookieJar jar) {
+			if (jar == null) return;
+			foreach (var cookie in Cookies.Values)
+				jar.AddOrUpdate(cookie);
+		}
 
 		/// <inheritdoc />
 		public async Task<T> GetJsonAsync<T>() {

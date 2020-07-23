@@ -2,9 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http.Configuration;
@@ -35,22 +33,22 @@ namespace Flurl.Http
 		Url Url { get; set; }
 
 		/// <summary>
-		/// Provides access to the collection that will receive HTTP cookies from the server, which can then be sent in subsequent requests.
+		/// Collection of HTTP cookie values to be sent in this request's Cookie header. If a CookieJar is used, values
+		/// from the jar that will be sent in this request will be sync'd to this collection automatically, but NOT
+		/// vice-versa. Therefore, you can use this collection to override values set by the jar for this request only,
+		/// but for a multi-request cookie "session" it is better to set values in the CookieJar and reuse it.
 		/// </summary>
-		/// <param name="cookies">The cookie collection.</param>
-		/// <returns>This IFlurlClient instance.</returns>
-		IFlurlRequest WithCookies(out IDictionary<string, Cookie> cookies);
+		IDictionary<string, object> Cookies { get; }
 
 		/// <summary>
-		/// Sets a collection of HTTP cookies that will be sent with the request. May be modified when the response is received, if the server returns any cookies.
+		/// Collection of HTTP cookies that can be shared between multiple requests. Automatically adds/updates cookies
+		/// received via Set-Cookie headers in this response. Processes rules based on attributes (Domain, Path, Expires, etc.)
+		/// to determine which cookies to send with this specific request, and synchronizes those with the Cookies collection.
 		/// </summary>
-		/// <param name="cookies">The cookies to send.</param>
-		/// <returns>This IFlurlClient instance.</returns>
-		IFlurlRequest WithCookies(IDictionary<string, Cookie> cookies);
+		CookieJar CookieJar { get; set; }
 
 		/// <summary>
-		/// Asynchronously sends the HTTP request.
-		/// Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
+		/// Asynchronously sends the HTTP request. Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
 		/// </summary>
 		/// <param name="verb">The HTTP method used to make the request.</param>
 		/// <param name="content">Contents of the request body.</param>
@@ -66,8 +64,8 @@ namespace Flurl.Http
 		private FlurlHttpSettings _settings;
 		private IFlurlClient _client;
 		private Url _url;
+		private CookieJar _cookieJar;
 		private FlurlCall _redirectedFrom;
-		private IDictionary<string, Cookie> _cookieJar;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FlurlRequest"/> class.
@@ -123,30 +121,22 @@ namespace Flurl.Http
 				_settings.Defaults = Client?.Settings;
 		}
 
-		/// <summary>
-		/// Collection of headers sent on this request.
-		/// </summary>
+		/// <inheritdoc />
 		public IDictionary<string, object> Headers { get; } = new ConcurrentDictionary<string, object>();
 
-		/// <summary>
-		/// Collection of HTTP cookies sent by the IFlurlClient associated with this request.
-		/// </summary>
-		public IDictionary<string, string> Cookies { get; set; } = new ConcurrentDictionary<string, string>();
+		/// <inheritdoc />
+		public IDictionary<string, object> Cookies { get; } = new ConcurrentDictionary<string, object>();
 
 		/// <inheritdoc />
-		public IFlurlRequest WithCookies(IDictionary<string, Cookie> cookies) {
-			_cookieJar = cookies;
-			foreach (var cookie in cookies)
-				Cookies[cookie.Key] = cookie.Value.Value;
-			return this;
+		public CookieJar CookieJar {
+			get => _cookieJar;
+			set {
+				_cookieJar?.UnsyncWith(this);
+				_cookieJar = value;
+				_cookieJar?.SyncWith(this);
+			}
 		}
-
-		/// <inheritdoc />
-		public IFlurlRequest WithCookies(out IDictionary<string, Cookie> cookies) {
-			cookies = _cookieJar = new ConcurrentDictionary<string, Cookie>();
-			return this;
-		}
-
+		
 		/// <inheritdoc />
 		public async Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
 			_client = Client; // "freeze" the client at this point to avoid excessive calls to FlurlClientFactory.Get (#374)
@@ -175,6 +165,7 @@ namespace Flurl.Http
 			call.StartedUtc = DateTime.UtcNow;
 			try {
 				SyncHeadersAndCookies(request);
+				_cookieJar?.UnsyncWith(this);
 
 				var response = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
 				call.HttpResponseMessage = response;
@@ -231,14 +222,10 @@ namespace Flurl.Http
 		private void SyncHeadersAndCookies(HttpRequestMessage request) {
 			// copy any client-level (default) to FlurlRequest
 			Headers.Merge(Client.Headers);
-			Cookies.Merge(Client.Cookies);
+			//Cookies.Merge(Client.Cookies);
 
-			if (Cookies.Any()) {
-				// http://stackoverflow.com/a/15588878/62600
-				var cookieHeader = string.Join("; ", Cookies.Select(c => $"{c.Key}={c.Value}"));
-				Headers["Cookie"] = cookieHeader;
-				//request.Headers.TryAddWithoutValidation("Cookie", cookieHeader);
-			}
+			if (Cookies.Any())
+				Headers["Cookie"] = CookieCutter.ToRequestHeader(Cookies);
 
 			// copy headers from FlurlRequest to HttpRequestMessage
 			foreach (var header in Headers)

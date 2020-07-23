@@ -630,17 +630,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets an HTTP cookie to be sent
-		/// </summary>
-		/// <param name="url">This Flurl.Url.</param>
-		/// <param name="cookie"></param>
-		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookie(this Url url, Cookie cookie) {
-			return new FlurlRequest(url).WithCookie(cookie);
-		}
-		
-		/// <summary>
-		/// Creates a new FlurlRequest and sets an HTTP cookie to be sent.
+		/// Creates a new FlurlRequest and sets an HTTP cookie to be sent with this request only. To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
 		/// <param name="name">The cookie name.</param>
@@ -651,7 +641,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets HTTP cookies to be sent, based on property names / values of the provided object, or keys / values if object is a dictionary.
+		/// Creates a new FlurlRequest and sets HTTP cookies to be sent with this request only, based on property names/values of the provided object, or keys/values if object is a dictionary. To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
 		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
@@ -661,34 +651,23 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets HTTP cookies to be sent, based on property names / values of the provided object, or keys / values if object is a dictionary.
+		/// Creates a new FlurlRequest and sets the CookieJar associated with this request, which will be updated with any Set-Cookie headers present in the response and is suitable for reuse in subsequent requests.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
-		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
-		/// <param name="cookies">The collection of cookies that will be initialized with the given values, possibly modified by the response, and pass-able to subsequent requests.</param>
+		/// <param name="cookieJar">The CookieJar.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookies(this Url url, object values, out IDictionary<string, Cookie> cookies) {
-			return new FlurlRequest(url).WithCookies(values, out cookies);
+		public static IFlurlRequest WithCookies(this Url url, CookieJar cookieJar) {
+			return new FlurlRequest(url).WithCookies(cookieJar);
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets a collection of HTTP cookies that will be sent with it.
+		/// Creates a new FlurlRequest and associates it with a new CookieJar, which will be updated with any Set-Cookie headers present in the response and is suitable for reuse in subsequent requests.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
-		/// <param name="cookies">The cookies to send. May be modified when the response is received, if the server returns any cookies.</param>
+		/// <param name="cookieJar">The created CookieJar, which can be reused in subsequent requests.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookies(this Url url, IDictionary<string, Cookie> cookies) {
-			return new FlurlRequest(url).WithCookies(cookies);
-		}
-		
-		/// <summary>
-		/// Creates a new FlurlRequest and provides access to the collection that will receive HTTP cookies from the server, which can then be sent in subsequent requests.
-		/// </summary>
-		/// <param name="url">This Flurl.Url.</param>
-		/// <param name="cookies">The cookie collection.</param>
-		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookies(this Url url, out IDictionary<string, Cookie> cookies) {
-			return new FlurlRequest(url).WithCookies(out cookies);
+		public static IFlurlRequest WithCookies(this Url url, out CookieJar cookieJar) {
+			return new FlurlRequest(url).WithCookies(out cookieJar);
 		}
 		
 		/// <summary>
@@ -732,7 +711,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and adds an HttpStatusCode which (in addtion to 2xx) will NOT result in a FlurlHttpException being thrown.
+		/// Creates a new FlurlRequest and adds an HttpStatusCode which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
 		/// <param name="statusCodes">The HttpStatusCode(s) to allow.</param>
@@ -1129,17 +1108,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets an HTTP cookie to be sent
-		/// </summary>
-		/// <param name="url">This URL.</param>
-		/// <param name="cookie"></param>
-		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookie(this string url, Cookie cookie) {
-			return new FlurlRequest(url).WithCookie(cookie);
-		}
-		
-		/// <summary>
-		/// Creates a new FlurlRequest and sets an HTTP cookie to be sent.
+		/// Creates a new FlurlRequest and sets an HTTP cookie to be sent with this request only. To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead.
 		/// </summary>
 		/// <param name="url">This URL.</param>
 		/// <param name="name">The cookie name.</param>
@@ -1150,7 +1119,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets HTTP cookies to be sent, based on property names / values of the provided object, or keys / values if object is a dictionary.
+		/// Creates a new FlurlRequest and sets HTTP cookies to be sent with this request only, based on property names/values of the provided object, or keys/values if object is a dictionary. To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead
 		/// </summary>
 		/// <param name="url">This URL.</param>
 		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
@@ -1160,34 +1129,23 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets HTTP cookies to be sent, based on property names / values of the provided object, or keys / values if object is a dictionary.
+		/// Creates a new FlurlRequest and sets the CookieJar associated with this request, which will be updated with any Set-Cookie headers present in the response and is suitable for reuse in subsequent requests.
 		/// </summary>
 		/// <param name="url">This URL.</param>
-		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
-		/// <param name="cookies">The collection of cookies that will be initialized with the given values, possibly modified by the response, and pass-able to subsequent requests.</param>
+		/// <param name="cookieJar">The CookieJar.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookies(this string url, object values, out IDictionary<string, Cookie> cookies) {
-			return new FlurlRequest(url).WithCookies(values, out cookies);
+		public static IFlurlRequest WithCookies(this string url, CookieJar cookieJar) {
+			return new FlurlRequest(url).WithCookies(cookieJar);
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets a collection of HTTP cookies that will be sent with it.
+		/// Creates a new FlurlRequest and associates it with a new CookieJar, which will be updated with any Set-Cookie headers present in the response and is suitable for reuse in subsequent requests.
 		/// </summary>
 		/// <param name="url">This URL.</param>
-		/// <param name="cookies">The cookies to send. May be modified when the response is received, if the server returns any cookies.</param>
+		/// <param name="cookieJar">The created CookieJar, which can be reused in subsequent requests.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookies(this string url, IDictionary<string, Cookie> cookies) {
-			return new FlurlRequest(url).WithCookies(cookies);
-		}
-		
-		/// <summary>
-		/// Creates a new FlurlRequest and provides access to the collection that will receive HTTP cookies from the server, which can then be sent in subsequent requests.
-		/// </summary>
-		/// <param name="url">This URL.</param>
-		/// <param name="cookies">The cookie collection.</param>
-		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookies(this string url, out IDictionary<string, Cookie> cookies) {
-			return new FlurlRequest(url).WithCookies(out cookies);
+		public static IFlurlRequest WithCookies(this string url, out CookieJar cookieJar) {
+			return new FlurlRequest(url).WithCookies(out cookieJar);
 		}
 		
 		/// <summary>
@@ -1231,7 +1189,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and adds an HttpStatusCode which (in addtion to 2xx) will NOT result in a FlurlHttpException being thrown.
+		/// Creates a new FlurlRequest and adds an HttpStatusCode which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.
 		/// </summary>
 		/// <param name="url">This URL.</param>
 		/// <param name="statusCodes">The HttpStatusCode(s) to allow.</param>
@@ -1628,17 +1586,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets an HTTP cookie to be sent
-		/// </summary>
-		/// <param name="uri">This System.Uri.</param>
-		/// <param name="cookie"></param>
-		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookie(this Uri uri, Cookie cookie) {
-			return new FlurlRequest(uri).WithCookie(cookie);
-		}
-		
-		/// <summary>
-		/// Creates a new FlurlRequest and sets an HTTP cookie to be sent.
+		/// Creates a new FlurlRequest and sets an HTTP cookie to be sent with this request only. To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead.
 		/// </summary>
 		/// <param name="uri">This System.Uri.</param>
 		/// <param name="name">The cookie name.</param>
@@ -1649,7 +1597,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets HTTP cookies to be sent, based on property names / values of the provided object, or keys / values if object is a dictionary.
+		/// Creates a new FlurlRequest and sets HTTP cookies to be sent with this request only, based on property names/values of the provided object, or keys/values if object is a dictionary. To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead
 		/// </summary>
 		/// <param name="uri">This System.Uri.</param>
 		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
@@ -1659,34 +1607,23 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets HTTP cookies to be sent, based on property names / values of the provided object, or keys / values if object is a dictionary.
+		/// Creates a new FlurlRequest and sets the CookieJar associated with this request, which will be updated with any Set-Cookie headers present in the response and is suitable for reuse in subsequent requests.
 		/// </summary>
 		/// <param name="uri">This System.Uri.</param>
-		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
-		/// <param name="cookies">The collection of cookies that will be initialized with the given values, possibly modified by the response, and pass-able to subsequent requests.</param>
+		/// <param name="cookieJar">The CookieJar.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookies(this Uri uri, object values, out IDictionary<string, Cookie> cookies) {
-			return new FlurlRequest(uri).WithCookies(values, out cookies);
+		public static IFlurlRequest WithCookies(this Uri uri, CookieJar cookieJar) {
+			return new FlurlRequest(uri).WithCookies(cookieJar);
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets a collection of HTTP cookies that will be sent with it.
+		/// Creates a new FlurlRequest and associates it with a new CookieJar, which will be updated with any Set-Cookie headers present in the response and is suitable for reuse in subsequent requests.
 		/// </summary>
 		/// <param name="uri">This System.Uri.</param>
-		/// <param name="cookies">The cookies to send. May be modified when the response is received, if the server returns any cookies.</param>
+		/// <param name="cookieJar">The created CookieJar, which can be reused in subsequent requests.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookies(this Uri uri, IDictionary<string, Cookie> cookies) {
-			return new FlurlRequest(uri).WithCookies(cookies);
-		}
-		
-		/// <summary>
-		/// Creates a new FlurlRequest and provides access to the collection that will receive HTTP cookies from the server, which can then be sent in subsequent requests.
-		/// </summary>
-		/// <param name="uri">This System.Uri.</param>
-		/// <param name="cookies">The cookie collection.</param>
-		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithCookies(this Uri uri, out IDictionary<string, Cookie> cookies) {
-			return new FlurlRequest(uri).WithCookies(out cookies);
+		public static IFlurlRequest WithCookies(this Uri uri, out CookieJar cookieJar) {
+			return new FlurlRequest(uri).WithCookies(out cookieJar);
 		}
 		
 		/// <summary>
@@ -1730,7 +1667,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and adds an HttpStatusCode which (in addtion to 2xx) will NOT result in a FlurlHttpException being thrown.
+		/// Creates a new FlurlRequest and adds an HttpStatusCode which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.
 		/// </summary>
 		/// <param name="uri">This System.Uri.</param>
 		/// <param name="statusCodes">The HttpStatusCode(s) to allow.</param>

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Flurl.Http
 {
 	/// <summary>
-	/// A context where multiple requests and responses share the same cookie collection. Created using FlurlClient.StartCookieSession.
+	/// A context where multiple requests use a common CookieJar. Created using FlurlClient.StartCookieSession.
 	/// </summary>
 	public class CookieSession : IDisposable
 	{
@@ -20,12 +20,12 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// A collection of cookies sent by all requests and received by all responses within this session.
+		/// The CookieJar used by all requests sent with this CookieSession.
 		/// </summary>
-		public IDictionary<string, Cookie> Cookies { get; } = new ConcurrentDictionary<string, Cookie>();
+		public CookieJar Cookies { get; } = new CookieJar();
 
 		/// <summary>
-		/// Creates a new IFlurlRequest with this session's cookies that can be further built and sent fluently.
+		/// Creates a new IFlurlRequest with this session's CookieJar that can be further built and sent fluently.
 		/// </summary>
 		/// <param name="urlSegments">The URL or URL segments for the request.</param>
 		public IFlurlRequest Request(params object[] urlSegments) => _client.Request(urlSegments).WithCookies(Cookies);
@@ -33,6 +33,6 @@ namespace Flurl.Http
 		/// <summary>
 		/// Not necessary to call. IDisposable is implemented mainly for the syntactic sugar of using statements.
 		/// </summary>
-		public void Dispose() => Cookies.Clear();
+		public void Dispose() { }
 	}
 }

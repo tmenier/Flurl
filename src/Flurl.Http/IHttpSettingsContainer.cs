@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
 using Flurl.Http.Configuration;
-using Flurl.Util;
 
 namespace Flurl.Http
 {
@@ -22,10 +18,5 @@ namespace Flurl.Http
 	    /// Collection of headers sent on this request or all requests using this client.
 	    /// </summary>
 	    IDictionary<string, object> Headers { get; }
-
-	    /// <summary>
-	    /// Collection of HTTP cookies sent on this request or all requests using this client.
-	    /// </summary>
-	    IDictionary<string, string> Cookies { get; set; }
     }
 }
