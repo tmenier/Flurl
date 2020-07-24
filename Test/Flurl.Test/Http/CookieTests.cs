@@ -92,8 +92,7 @@ namespace Flurl.Test.Http
 				.RespondWith("hi", cookies: new { y = "bazz" })
 				.RespondWith("hi");
 
-			var client = new FlurlClient("https://cookies.com");
-			using (var cs = client.StartCookieSession()) {
+			using (var cs = new CookieSession("https://cookies.com")) {
 				await cs.Request().GetAsync();
 				await cs.Request("1").GetAsync();
 				await cs.Request().GetAsync();

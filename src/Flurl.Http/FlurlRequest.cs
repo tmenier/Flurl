@@ -76,6 +76,22 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
+		/// Used internally by FlurlClient.Request and CookieSession.Request
+		/// </summary>
+		internal FlurlRequest(string baseUrl, object[] urlSegments) {
+			var parts = new List<string>(urlSegments.Select(s => s.ToInvariantString()));
+			if (!Url.IsValid(parts.FirstOrDefault()) && !string.IsNullOrEmpty(baseUrl))
+				parts.Insert(0, baseUrl);
+
+			if (!parts.Any())
+				throw new ArgumentException("Cannot create a Request. BaseUrl is not defined and no segments were passed.");
+			if (!Url.IsValid(parts[0]))
+				throw new ArgumentException("Cannot create a Request. Neither BaseUrl nor the first segment passed is a valid URL.");
+
+			_url = Url.Combine(parts.ToArray());
+		}
+
+		/// <summary>
 		/// Gets or sets the FlurlHttpSettings used by this request.
 		/// </summary>
 		public FlurlHttpSettings Settings {

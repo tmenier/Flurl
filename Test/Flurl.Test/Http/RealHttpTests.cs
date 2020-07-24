@@ -246,14 +246,14 @@ namespace Flurl.Test.Http
 			var h = cli1.HttpClient; // force (lazy) instantiation
 
 			using (var test = new HttpTest()) {
-				test.Settings.CookiesEnabled = false;
+				test.Settings.Redirects.Enabled = false;
 
 				test.RespondWith("foo!");
 				var s = await cli1.Request("http://www.google.com")
-					.EnableCookies() // test says cookies are off, and test should always win
+					.WithAutoRedirect(true) // test says redirects are off, and test should always win
 					.GetStringAsync();
 				Assert.AreEqual("foo!", s);
-				Assert.IsFalse(cli1.Settings.CookiesEnabled);
+				Assert.IsFalse(cli1.Settings.Redirects.Enabled);
 
 				var cli2 = new FlurlClient();
 				cli2.Settings.HttpClientFactory = new DefaultHttpClientFactory();
@@ -261,10 +261,10 @@ namespace Flurl.Test.Http
 
 				test.RespondWith("foo 2!");
 				s = await cli2.Request("http://www.google.com")
-					.EnableCookies() // test says cookies are off, and test should always win
+					.WithAutoRedirect(true) // test says redirects are off, and test should always win
 					.GetStringAsync();
 				Assert.AreEqual("foo 2!", s);
-				Assert.IsFalse(cli2.Settings.CookiesEnabled);
+				Assert.IsFalse(cli2.Settings.Redirects.Enabled);
 			}
 		}
 
@@ -311,8 +311,8 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("999", cookies["z"].Value);
 
 			// this works with redirects too
-			using (var session = new FlurlClient().StartCookieSession()) {
-				await session.Request("https://httpbin.org/cookies/set?z=999").GetAsync();
+			using (var session = new CookieSession("https://httpbin.org/cookies")) {
+				await session.Request("set?z=999").GetAsync();
 				Assert.AreEqual("999", session.Cookies["z"].Value);
 			}
 		}

@@ -93,7 +93,6 @@ namespace Flurl.Http.CodeGen
 				.AddArg("token", "string", "The acquired oAuth bearer token.");
 
 			// cookie extensions
-			yield return Create("EnableCookies", "Creates a new FlurlRequest and allows cookies to be sent and received. Not necessary to call when setting cookies via WithCookie/WithCookies.");
 			yield return Create("WithCookie", "Creates a new FlurlRequest and sets an HTTP cookie to be sent with this request only. To maintain a cookie \"session\", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead.")
 				.AddArg("name", "string", "The cookie name.")
 				.AddArg("value", "object", "The cookie value.");

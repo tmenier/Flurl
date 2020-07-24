@@ -621,15 +621,6 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and allows cookies to be sent and received. Not necessary to call when setting cookies via WithCookie/WithCookies.
-		/// </summary>
-		/// <param name="url">This Flurl.Url.</param>
-		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest EnableCookies(this Url url) {
-			return new FlurlRequest(url).EnableCookies();
-		}
-		
-		/// <summary>
 		/// Creates a new FlurlRequest and sets an HTTP cookie to be sent with this request only. To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
@@ -1099,15 +1090,6 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and allows cookies to be sent and received. Not necessary to call when setting cookies via WithCookie/WithCookies.
-		/// </summary>
-		/// <param name="url">This URL.</param>
-		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest EnableCookies(this string url) {
-			return new FlurlRequest(url).EnableCookies();
-		}
-		
-		/// <summary>
 		/// Creates a new FlurlRequest and sets an HTTP cookie to be sent with this request only. To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead.
 		/// </summary>
 		/// <param name="url">This URL.</param>
@@ -1574,15 +1556,6 @@ namespace Flurl.Http
 		/// <returns>A new IFlurlRequest.</returns>
 		public static IFlurlRequest WithOAuthBearerToken(this Uri uri, string token) {
 			return new FlurlRequest(uri).WithOAuthBearerToken(token);
-		}
-		
-		/// <summary>
-		/// Creates a new FlurlRequest and allows cookies to be sent and received. Not necessary to call when setting cookies via WithCookie/WithCookies.
-		/// </summary>
-		/// <param name="uri">This System.Uri.</param>
-		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest EnableCookies(this Uri uri) {
-			return new FlurlRequest(uri).EnableCookies();
 		}
 		
 		/// <summary>

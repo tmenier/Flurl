@@ -33,9 +33,9 @@ namespace Flurl.Test.Http
 	    [Test]
 	    public void can_configure_client_from_factory() {
 		    var fac = new PerHostFlurlClientFactory()
-			    .ConfigureClient("http://api.com/foo", c => c.Settings.CookiesEnabled = true);
-		    Assert.IsTrue(fac.Get("https://api.com/bar").Settings.CookiesEnabled);
-		    Assert.IsFalse(fac.Get("http://api2.com/foo").Settings.CookiesEnabled);
+			    .ConfigureClient("http://api.com/foo", c => c.Settings.Timeout = TimeSpan.FromSeconds(123));
+		    Assert.AreEqual(TimeSpan.FromSeconds(123), fac.Get("https://api.com/bar").Settings.Timeout);
+		    Assert.AreNotEqual(TimeSpan.FromSeconds(123), fac.Get("http://api2.com/foo").Settings.Timeout);
 	    }
 
 		[Test]

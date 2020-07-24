@@ -51,14 +51,6 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a value indicating whether cookies should be sent/received with each HTTP request.
-		/// </summary>
-		public bool CookiesEnabled {
-			get => Get<bool>();
-			set => Set(value);
-		}
-
-		/// <summary>
 		/// Gets or sets object used to serialize and deserialize JSON. Default implementation uses Newtonsoft Json.NET.
 		/// </summary>
 		public ISerializer JsonSerializer {

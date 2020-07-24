@@ -362,7 +362,7 @@ namespace Flurl.Test.Http
 		public async Task can_fake_cookies() {
 			HttpTest.RespondWith(cookies: new { c1 = "foo" });
 
-			var resp = await "http://www.api.com".EnableCookies().GetAsync();
+			var resp = await "http://www.api.com".GetAsync();
 			Assert.AreEqual(1, resp.Cookies.Count);
 			Assert.AreEqual("foo", resp.Cookies["c1"].Value);
 		}
@@ -381,12 +381,12 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void can_configure_settings_for_test() {
-			Assert.IsFalse(new FlurlRequest().Settings.CookiesEnabled);
-			using (new HttpTest().Configure(settings => settings.CookiesEnabled = true)) {
-				Assert.IsTrue(new FlurlRequest().Settings.CookiesEnabled);
+			Assert.IsTrue(new FlurlRequest().Settings.Redirects.Enabled);
+			using (new HttpTest().Configure(settings => settings.Redirects.Enabled = false)) {
+				Assert.IsFalse(new FlurlRequest().Settings.Redirects.Enabled);
 			}
 			// test disposed, should revert back to global settings
-			Assert.IsFalse(new FlurlRequest().Settings.CookiesEnabled);
+			Assert.IsTrue(new FlurlRequest().Settings.Redirects.Enabled);
 		}
 
 		[Test]

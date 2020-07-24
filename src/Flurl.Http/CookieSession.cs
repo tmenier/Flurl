@@ -1,21 +1,26 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Flurl.Http
 {
 	/// <summary>
-	/// A context where multiple requests use a common CookieJar. Created using FlurlClient.StartCookieSession.
+	/// A context where multiple requests use a common CookieJar.
 	/// </summary>
 	public class CookieSession : IDisposable
 	{
+		private readonly string _baseUrl;
 		private readonly IFlurlClient _client;
 
-		internal CookieSession(IFlurlClient client) {
+		/// <summary>
+		/// Creates a new CookieSession where all requests are made off the same base URL.
+		/// </summary>
+		public CookieSession(string baseUrl = null) {
+			_baseUrl = baseUrl;
+		}
+
+		/// <summary>
+		/// Creates a new CookieSession where all requests are made using the provided IFlurlClient
+		/// </summary>
+		public CookieSession(IFlurlClient client) {
 			_client = client;
 		}
 
@@ -28,7 +33,9 @@ namespace Flurl.Http
 		/// Creates a new IFlurlRequest with this session's CookieJar that can be further built and sent fluently.
 		/// </summary>
 		/// <param name="urlSegments">The URL or URL segments for the request.</param>
-		public IFlurlRequest Request(params object[] urlSegments) => _client.Request(urlSegments).WithCookies(Cookies);
+		public IFlurlRequest Request(params object[] urlSegments) =>
+			_client?.Request(urlSegments).WithCookies(Cookies) ??
+			new FlurlRequest(_baseUrl, urlSegments).WithCookies(Cookies);
 
 		/// <summary>
 		/// Not necessary to call. IDisposable is implemented mainly for the syntactic sugar of using statements.

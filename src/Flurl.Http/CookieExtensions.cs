@@ -8,16 +8,6 @@ namespace Flurl.Http
 	public static class CookieExtensions
 	{
 		/// <summary>
-		/// Allows cookies to be sent and received. Not necessary to call when setting cookies via WithCookie/WithCookies.
-		/// </summary>
-		/// <param name="clientOrRequest">The IFlurlClient or IFlurlRequest.</param>
-		/// <returns>This IFlurlClient.</returns>
-		public static T EnableCookies<T>(this T clientOrRequest) where T : IHttpSettingsContainer {
-			clientOrRequest.Settings.CookiesEnabled = true;
-			return clientOrRequest;
-		}
-
-		/// <summary>
 		/// Sets an HTTP cookie to be sent with this request only.
 		/// To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead.
 		/// </summary>
@@ -68,10 +58,5 @@ namespace Flurl.Http
 			cookieJar = new CookieJar();
 			return request.WithCookies(cookieJar);
 		}
-
-		/// <summary>
-		/// Creates a new CookieSession, under which all requests automatically share a common CookieJar.
-		/// </summary>
-		public static CookieSession StartCookieSession(this IFlurlClient client) => new CookieSession(client);
 	}
 }

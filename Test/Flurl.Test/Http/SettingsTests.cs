@@ -110,19 +110,19 @@ namespace Flurl.Test.Http
 		[Test]
 		public void can_reset_defaults() {
 			GetSettings().JsonSerializer = null;
-			GetSettings().CookiesEnabled = true;
+			GetSettings().Redirects.Enabled = false;
 			GetSettings().BeforeCall = (call) => Console.WriteLine("Before!");
 			GetSettings().Redirects.MaxAutoRedirects = 5;
 
 			Assert.IsNull(GetSettings().JsonSerializer);
-			Assert.IsTrue(GetSettings().CookiesEnabled);
+			Assert.IsFalse(GetSettings().Redirects.Enabled);
 			Assert.IsNotNull(GetSettings().BeforeCall);
 			Assert.AreEqual(5, GetSettings().Redirects.MaxAutoRedirects);
 
 			GetSettings().ResetDefaults();
 
 			Assert.That(GetSettings().JsonSerializer is NewtonsoftJsonSerializer);
-			Assert.IsFalse(GetSettings().CookiesEnabled);
+			Assert.IsTrue(GetSettings().Redirects.Enabled);
 			Assert.IsNull(GetSettings().BeforeCall);
 			Assert.AreEqual(10, GetSettings().Redirects.MaxAutoRedirects);
 		}
@@ -154,51 +154,51 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void settings_propagate_correctly() {
-			FlurlHttp.GlobalSettings.CookiesEnabled = false;
+			FlurlHttp.GlobalSettings.Redirects.Enabled = false;
 			FlurlHttp.GlobalSettings.AllowedHttpStatusRange = "4xx";
 			FlurlHttp.GlobalSettings.Redirects.MaxAutoRedirects = 123;
 
 			var client1 = new FlurlClient();
-			client1.Settings.CookiesEnabled = true;
+			client1.Settings.Redirects.Enabled = true;
 			Assert.AreEqual("4xx", client1.Settings.AllowedHttpStatusRange);
 			Assert.AreEqual(123, client1.Settings.Redirects.MaxAutoRedirects);
 			client1.Settings.AllowedHttpStatusRange = "5xx";
 			client1.Settings.Redirects.MaxAutoRedirects = 456;
 
 			var req = client1.Request("http://myapi.com");
-			Assert.IsTrue(req.Settings.CookiesEnabled, "request should inherit client settings when not set at request level");
+			Assert.IsTrue(req.Settings.Redirects.Enabled, "request should inherit client settings when not set at request level");
 			Assert.AreEqual("5xx", req.Settings.AllowedHttpStatusRange, "request should inherit client settings when not set at request level");
 			Assert.AreEqual(456, req.Settings.Redirects.MaxAutoRedirects, "request should inherit client settings when not set at request level");
 
 			var client2 = new FlurlClient();
-			client2.Settings.CookiesEnabled = false;
+			client2.Settings.Redirects.Enabled = false;
 
 			req.WithClient(client2);
-			Assert.IsFalse(req.Settings.CookiesEnabled, "request should inherit client settings when not set at request level");
+			Assert.IsFalse(req.Settings.Redirects.Enabled, "request should inherit client settings when not set at request level");
 			Assert.AreEqual("4xx", req.Settings.AllowedHttpStatusRange, "request should inherit global settings when not set at request or client level");
 			Assert.AreEqual(123, req.Settings.Redirects.MaxAutoRedirects, "request should inherit global settings when not set at request or client level");
 
-			client2.Settings.CookiesEnabled = true;
+			client2.Settings.Redirects.Enabled = true;
 			client2.Settings.AllowedHttpStatusRange = "3xx";
 			client2.Settings.Redirects.MaxAutoRedirects = 789;
-			Assert.IsTrue(req.Settings.CookiesEnabled, "request should inherit client settings when not set at request level");
+			Assert.IsTrue(req.Settings.Redirects.Enabled, "request should inherit client settings when not set at request level");
 			Assert.AreEqual("3xx", req.Settings.AllowedHttpStatusRange, "request should inherit client settings when not set at request level");
 			Assert.AreEqual(789, req.Settings.Redirects.MaxAutoRedirects, "request should inherit client settings when not set at request level");
 
-			req.Settings.CookiesEnabled = false;
+			req.Settings.Redirects.Enabled = false;
 			req.Settings.AllowedHttpStatusRange = "6xx";
 			req.Settings.Redirects.MaxAutoRedirects = 2;
-			Assert.IsFalse(req.Settings.CookiesEnabled, "request-level settings should override any defaults");
+			Assert.IsFalse(req.Settings.Redirects.Enabled, "request-level settings should override any defaults");
 			Assert.AreEqual("6xx", req.Settings.AllowedHttpStatusRange, "request-level settings should override any defaults");
 			Assert.AreEqual(2, req.Settings.Redirects.MaxAutoRedirects, "request-level settings should override any defaults");
 
 			req.Settings.ResetDefaults();
-			Assert.IsTrue(req.Settings.CookiesEnabled, "request should inherit client settings when cleared at request level");
+			Assert.IsTrue(req.Settings.Redirects.Enabled, "request should inherit client settings when cleared at request level");
 			Assert.AreEqual("3xx", req.Settings.AllowedHttpStatusRange, "request should inherit client settings when cleared request level");
 			Assert.AreEqual(789, req.Settings.Redirects.MaxAutoRedirects, "request should inherit client settings when cleared request level");
 
 			client2.Settings.ResetDefaults();
-			Assert.IsFalse(req.Settings.CookiesEnabled, "request should inherit global settings when cleared at request and client level");
+			Assert.IsFalse(req.Settings.Redirects.Enabled, "request should inherit global settings when cleared at request and client level");
 			Assert.AreEqual("4xx", req.Settings.AllowedHttpStatusRange, "request should inherit global settings when cleared at request and client level");
 			Assert.AreEqual(123, req.Settings.Redirects.MaxAutoRedirects, "request should inherit global settings when cleared at request and client level");
 		}
@@ -212,15 +212,15 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void can_configure_global_from_FlurlHttp_object() {
-			FlurlHttp.Configure(settings => settings.CookiesEnabled = true);
-			Assert.IsTrue(FlurlHttp.GlobalSettings.CookiesEnabled);
+			FlurlHttp.Configure(settings => settings.Redirects.Enabled = false);
+			Assert.IsFalse(FlurlHttp.GlobalSettings.Redirects.Enabled);
 		}
 
 		[Test]
 		public void can_configure_client_from_FlurlHttp_object() {
-			FlurlHttp.ConfigureClient("http://host1.com/foo", cli => cli.Settings.CookiesEnabled = true);
-			Assert.IsTrue(new FlurlRequest("https://host1.com/bar").Client.Settings.CookiesEnabled); // different URL but same host, so should use same client
-			Assert.IsFalse(new FlurlRequest("http://host2.com").Client.Settings.CookiesEnabled);
+			FlurlHttp.ConfigureClient("http://host1.com/foo", cli => cli.Settings.Redirects.Enabled = false);
+			Assert.IsFalse(new FlurlRequest("https://host1.com/bar").Client.Settings.Redirects.Enabled); // different URL but same host, so should use same client
+			Assert.IsTrue(new FlurlRequest("http://host2.com").Client.Settings.Redirects.Enabled);
 		}
 	}
 
@@ -305,31 +305,31 @@ namespace Flurl.Test.Http
 
 		[Test, NonParallelizable] // #239
 		public void request_default_settings_change_when_client_changes() {
-			FlurlHttp.ConfigureClient("http://test.com", cli => cli.Settings.CookiesEnabled = true);
+			FlurlHttp.ConfigureClient("http://test.com", cli => cli.Settings.Redirects.Enabled = false);
 			var req = new FlurlRequest("http://test.com");
 			var cli1 = req.Client;
-			Assert.IsTrue(req.Settings.CookiesEnabled, "pre-configured client should provide defaults to new request");
+			Assert.IsFalse(req.Settings.Redirects.Enabled, "pre-configured client should provide defaults to new request");
 
 			req.Url = "http://test.com/foo";
 			Assert.AreSame(cli1, req.Client, "new URL with same host should hold onto same client");
-			Assert.IsTrue(req.Settings.CookiesEnabled);
+			Assert.IsFalse(req.Settings.Redirects.Enabled);
 
 			req.Url = "http://test2.com";
 			Assert.AreNotSame(cli1, req.Client, "new host should trigger new client");
-			Assert.IsFalse(req.Settings.CookiesEnabled);
+			Assert.IsTrue(req.Settings.Redirects.Enabled);
 
-			FlurlHttp.ConfigureClient("http://test2.com", cli => cli.Settings.CookiesEnabled = true);
-			Assert.IsTrue(req.Settings.CookiesEnabled, "changing client settings should be reflected in request");
+			FlurlHttp.ConfigureClient("http://test2.com", cli => cli.Settings.Redirects.Enabled = false);
+			Assert.IsFalse(req.Settings.Redirects.Enabled, "changing client settings should be reflected in request");
 
 			req.Settings = new FlurlHttpSettings();
-			Assert.IsTrue(req.Settings.CookiesEnabled, "entirely new settings object should still inherit current client settings");
+			Assert.IsFalse(req.Settings.Redirects.Enabled, "entirely new settings object should still inherit current client settings");
 
 			req.Client = new FlurlClient();
-			Assert.IsFalse(req.Settings.CookiesEnabled, "entirely new client should provide new defaults");
+			Assert.IsTrue(req.Settings.Redirects.Enabled, "entirely new client should provide new defaults");
 
 			req.Url = "http://test.com";
 			Assert.AreNotSame(cli1, req.Client, "client was explicitly set on request, so it shouldn't change even if the URL changes");
-			Assert.IsFalse(req.Settings.CookiesEnabled);
+			Assert.IsTrue(req.Settings.Redirects.Enabled);
 		}
 
 		[Test]
