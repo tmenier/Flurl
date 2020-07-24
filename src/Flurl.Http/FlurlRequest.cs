@@ -64,6 +64,7 @@ namespace Flurl.Http
 		private FlurlHttpSettings _settings;
 		private IFlurlClient _client;
 		private Url _url;
+		private IDictionary<string, object> _headers = new ConcurrentDictionary<string, object>();
 		private CookieJar _cookieJar;
 		private FlurlCall _redirectedFrom;
 
@@ -138,7 +139,13 @@ namespace Flurl.Http
 		}
 
 		/// <inheritdoc />
-		public IDictionary<string, object> Headers { get; } = new ConcurrentDictionary<string, object>();
+		public IDictionary<string, object> Headers {
+			get {
+				if (Cookies.Any())
+					_headers["Cookie"] = CookieCutter.ToRequestHeader(Cookies);
+				return _headers;
+			}
+		}
 
 		/// <inheritdoc />
 		public IDictionary<string, object> Cookies { get; } = new ConcurrentDictionary<string, object>();
@@ -238,10 +245,6 @@ namespace Flurl.Http
 		private void SyncHeadersAndCookies(HttpRequestMessage request) {
 			// copy any client-level (default) to FlurlRequest
 			Headers.Merge(Client.Headers);
-			//Cookies.Merge(Client.Cookies);
-
-			if (Cookies.Any())
-				Headers["Cookie"] = CookieCutter.ToRequestHeader(Cookies);
 
 			// copy headers from FlurlRequest to HttpRequestMessage
 			foreach (var header in Headers)

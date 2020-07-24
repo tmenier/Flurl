@@ -60,6 +60,17 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public void request_cookies_sync_with_cookie_header() {
+			var req = new FlurlRequest("http://cookies.com").WithCookie("x", "foo");
+			Assert.AreEqual("x=foo", req.Headers.TryGetValue("Cookie", out var val) ? val : null);
+
+			// should flow from CookieJar too
+			var jar = new CookieJar().AddOrUpdate("y", "bar", "http://cookies.com");
+			req = new FlurlRequest("http://cookies.com").WithCookies(jar);
+			Assert.AreEqual("y=bar", req.Headers.TryGetValue("Cookie", out val) ? val : null);
+		}
+
+		[Test]
 		public async Task can_send_cookies_per_request_initialized() {
 			HttpTest
 				.RespondWith("hi")
