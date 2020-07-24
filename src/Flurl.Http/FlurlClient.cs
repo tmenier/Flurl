@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
-using System.Linq;
 using Flurl.Http.Configuration;
 using Flurl.Http.Testing;
-using Flurl.Util;
 
 namespace Flurl.Http
 {
