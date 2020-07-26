@@ -133,6 +133,9 @@ namespace Flurl.Test.Http
 
 			jar["x"].Secure = true;
 			Assert.IsFalse(req.Cookies.ContainsKey("x"));
+
+			jar.Clear();
+			Assert.IsFalse(req.Cookies.Any());
 		}
 
 		[Test]

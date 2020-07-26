@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -50,11 +50,21 @@ namespace Flurl.Http
 		/// Removes a cookie from the CookieJar.
 		/// </summary>
 		/// <param name="name">The cookie name.</param>
-		/// <returns>true if cookie was removed.</returns>
 		public CookieJar Remove(string name) {
 			if (_dict.TryRemove(name, out var cookie))
 				SyncToRequests(cookie, true);
 
+			return this;
+		}
+
+		/// <summary>
+		/// Removes all cookies from this CookieJar
+		/// </summary>
+		public CookieJar Clear() {
+			var all = _dict.Values;
+			_dict.Clear();
+			foreach (var cookie in all)
+				SyncToRequests(cookie, true);
 			return this;
 		}
 
@@ -95,8 +105,8 @@ namespace Flurl.Http
 			// enlist the help of CookieContainer here, which feels really awful, but so does re-inventing the wheel.
 			var cc = new System.Net.CookieContainer();
 			var ccCookie = new System.Net.Cookie(cookie.Name, cookie.Value);
-			if (cookie.MaxAge.HasValue) ccCookie.Expires = cookie.DateReceived.AddSeconds(cookie.MaxAge.Value).DateTime;
-			else if (cookie.Expires.HasValue) ccCookie.Expires = cookie.Expires.Value.DateTime;
+			if (cookie.MaxAge.HasValue) ccCookie.Expires = cookie.DateReceived.UtcDateTime.AddSeconds(cookie.MaxAge.Value);
+			else if (cookie.Expires.HasValue) ccCookie.Expires = cookie.Expires.Value.UtcDateTime;
 			if (!string.IsNullOrEmpty(cookie.Domain)) ccCookie.Domain = cookie.Domain;
 			if (!string.IsNullOrEmpty(cookie.Path)) ccCookie.Path = cookie.Path;
 			ccCookie.Secure = cookie.Secure;
