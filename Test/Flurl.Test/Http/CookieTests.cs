@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -168,38 +170,76 @@ namespace Flurl.Test.Http
 		[TestCase("https://domain1.com", "https://www.domain1.com", false)]
 		[TestCase("https://www.domain1.com", "https://domain1.com", false)]
 		[TestCase("https://domain1.com", "https://domain2.com", false)]
-		public async Task cookies_without_domain_restricted_to_origin_domain(string fromUrl, string toUrl, bool shouldSend) {
-			var headers = new Dictionary<string, string> { ["Set-Cookie"] = "x=foo" };
-			HttpTest
-				.RespondWith("hi", headers: headers)
-				.RespondWith("hi");
-
-			await fromUrl.WithCookies(out var cookies).GetAsync();
-			Assert.AreEqual(1, cookies.Count);
-
-			await toUrl.WithCookies(cookies).GetAsync();
+		public async Task cookies_without_domain_restricted_to_origin_domain(string originUrl, string requestUrl, bool shouldSend) {
+			var jar = new CookieJar().AddOrUpdate("x", "foo", originUrl);
+			await requestUrl.WithCookies(jar).GetAsync();
 			if (shouldSend)
-				HttpTest.ShouldHaveCalled(toUrl).WithCookie("x");
+				HttpTest.ShouldHaveCalled(requestUrl).WithCookie("x");
 			else
-				HttpTest.ShouldHaveCalled(toUrl).WithoutCookie("x");
+				HttpTest.ShouldHaveCalled(requestUrl).WithoutCookie("x");
 		}
 
-		[TestCase("domain.com", "www.domain.com", true)]
-		[TestCase("www.domain.com", "domain.com", false)] // not vice-versa
-		public async Task cookies_with_domain_sent_to_subdomain(string cookieDomain, string otherDomain, bool shouldSend) {
-			var headers = new Dictionary<string, string> { ["Set-Cookie"] = $"x=foo; Domain={cookieDomain}" };
-			HttpTest
-				.RespondWith("hi", headers: headers)
-				.RespondWith("hi");
-
-			await $"https://{cookieDomain}".WithCookies(out var cookies).GetAsync();
-			Assert.AreEqual(1, cookies.Count);
-
-			await $"https://{otherDomain}".WithCookies(cookies).GetAsync();
+		[TestCase("domain.com", "https://www.domain.com", true)]
+		[TestCase("www.domain.com", "https://domain.com", false)] // not vice-versa
+		public async Task cookies_with_domain_sent_to_subdomain(string cookieDomain, string requestUrl, bool shouldSend) {
+			var jar = new CookieJar().AddOrUpdate(new FlurlCookie("x", "foo", $"https://{cookieDomain}") { Domain = cookieDomain });
+			await requestUrl.WithCookies(jar).GetAsync();
 			if (shouldSend)
-				HttpTest.ShouldHaveCalled($"https://{otherDomain}").WithCookie("x");
+				HttpTest.ShouldHaveMadeACall().WithCookie("x");
 			else
-				HttpTest.ShouldHaveCalled($"https://{otherDomain}").WithoutCookie("x");
+				HttpTest.ShouldHaveMadeACall().WithoutCookie("x");
+		}
+
+		[TestCase("/a", "/a", true)]
+		[TestCase("/a", "/a/", true)]
+		[TestCase("/a", "/a/hello", true)]
+		[TestCase("/a", "/", false)]
+		[TestCase("/a", "/b", false)]
+		public async Task cookies_with_path_sent_to_subpath(string cookiePath, string requestPath, bool shouldSend) {
+			var origin = "https://cookies.com".AppendPathSegment(cookiePath);
+			var jar = new CookieJar().AddOrUpdate(new FlurlCookie("x", "foo", origin) { Path = cookiePath });
+			await "https://cookies.com".AppendPathSegment(requestPath).WithCookies(jar).GetAsync();
+			if (shouldSend)
+				HttpTest.ShouldHaveMadeACall().WithCookie("x");
+			else
+				HttpTest.ShouldHaveMadeACall().WithoutCookie("x");
+		}
+
+		[Test]
+		public async Task doesnt_send_secure_to_non_https() {
+			var jar = new CookieJar()
+				.AddOrUpdate(new FlurlCookie("x", "secure", "https://cookies.com") { Secure = true })
+				.AddOrUpdate(new FlurlCookie("y", "insecure", "https://cookies.com")); // default is false
+
+			await "http://cookies.com".WithCookies(jar).GetAsync();
+			await "https://cookies.com".WithCookies(jar).GetAsync();
+
+			HttpTest.ShouldHaveCalled("http://cookies.com").WithoutCookie("x").WithCookie("y");
+			HttpTest.ShouldHaveCalled("https://cookies.com").WithCookie("x").WithCookie("y");
+		}
+
+		[TestCase(false)]
+		[TestCase(true)]
+		public async Task doesnt_send_expired_cookies_absolute(bool localTime) {
+			var now = localTime ? DateTimeOffset.Now : DateTimeOffset.UtcNow;
+			var jar = new CookieJar()
+				.AddOrUpdate(new FlurlCookie("x", "expired", "https://cookies.com") { Expires = now.AddSeconds(-2) })
+				.AddOrUpdate(new FlurlCookie("y", "not expired", "https://cookies.com") { Expires = now.AddSeconds(2) });
+
+			await "https://cookies.com".WithCookies(jar).GetAsync();
+			HttpTest.ShouldHaveMadeACall().WithoutCookie("x").WithCookie("y");
+		}
+
+		[TestCase(false)]
+		[TestCase(true)]
+		public async Task doesnt_send_expired_cookies_by_max_age(bool localTime) {
+			var now = localTime ? DateTimeOffset.Now : DateTimeOffset.UtcNow;
+			var jar = new CookieJar()
+				.AddOrUpdate(new FlurlCookie("x", "expired", "https://cookies.com", now.AddSeconds(-3602)) { MaxAge = 3600 })
+				.AddOrUpdate(new FlurlCookie("y", "not expired", "https://cookies.com", now.AddSeconds(-3598)) { MaxAge = 3600 });
+
+			await "https://cookies.com".WithCookies(jar).GetAsync();
+			HttpTest.ShouldHaveMadeACall().WithoutCookie("x").WithCookie("y");
 		}
 	}
 }
