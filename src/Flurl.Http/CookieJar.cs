@@ -1,8 +1,10 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Flurl.Util;
 
 namespace Flurl.Http
@@ -118,19 +120,42 @@ namespace Flurl.Http
 
 		/// <inheritdoc/>
 		public IEnumerator<KeyValuePair<string, FlurlCookie>> GetEnumerator() => _dict.GetEnumerator();
+
 		/// <inheritdoc/>
 		IEnumerator IEnumerable.GetEnumerator() => _dict.GetEnumerator();
+
 		/// <inheritdoc/>
 		public int Count => _dict.Count;
+
 		/// <inheritdoc/>
 		public bool ContainsKey(string key) => _dict.ContainsKey(key);
+
 		/// <inheritdoc/>
 		public bool TryGetValue(string key, out FlurlCookie value) => _dict.TryGetValue(key, out value);
+
 		/// <inheritdoc/>
 		public FlurlCookie this[string key] => _dict[key];
+
 		/// <inheritdoc/>
 		public IEnumerable<string> Keys => _dict.Keys;
+
 		/// <inheritdoc/>
 		public IEnumerable<FlurlCookie> Values => _dict.Values;
+
+		// Possible future enhancement: https://github.com/tmenier/Flurl/issues/538
+		// This method works, but the feature still needs caching of some kind and an opt-in config setting.
+		private async Task<bool> IsPublicSuffixesAsync(string domain) {
+			using (var stream = await "https://publicsuffix.org/list/public_suffix_list.dat".GetStreamAsync())
+			using (var reader = new StreamReader(stream)) {
+				while (true) {
+					var line = await reader.ReadLineAsync();
+					if (line == null) break;
+					if (line.Trim() == "") continue;
+					if (line.StartsWith("//")) continue;
+					if (line == domain) return true;
+				}
+			}
+			return false;
+		}
 	}
 }
