@@ -30,7 +30,8 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="Flurl" Version="3.0.0-pre3" />
-    <None Include="..\..\icon.png" Pack="true" PackagePath="\"/>
+    <PackageReference Include="System.ValueTuple" Version="4.3.0" />
+    <None Include="..\..\icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">

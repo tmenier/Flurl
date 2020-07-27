@@ -46,6 +46,14 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public void can_set_headers_from_tuple() {
+			var sc = GetSettingsContainer().WithHeaders(("a", 1), ("b", "c"));
+			Assert.AreEqual(2, sc.Headers.Count);
+			Assert.AreEqual(1, sc.Headers["a"]);
+			Assert.AreEqual("c", sc.Headers["b"]);
+		}
+
+		[Test]
 		public void can_remove_header_by_setting_null() {
 			var sc = GetSettingsContainer().WithHeaders(new { a = 1, b = 2 });
 			Assert.AreEqual(2, sc.Headers.Count);
