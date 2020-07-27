@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
 using NUnit.Framework;
@@ -196,11 +191,26 @@ namespace Flurl.Test.Http
 		[TestCase("/a", "/a", true)]
 		[TestCase("/a", "/a/", true)]
 		[TestCase("/a", "/a/hello", true)]
+		[TestCase("/a", "/ab", false)]
 		[TestCase("/a", "/", false)]
-		[TestCase("/a", "/b", false)]
 		public async Task cookies_with_path_sent_to_subpath(string cookiePath, string requestPath, bool shouldSend) {
 			var origin = "https://cookies.com".AppendPathSegment(cookiePath);
 			var jar = new CookieJar().AddOrUpdate(new FlurlCookie("x", "foo", origin) { Path = cookiePath });
+			await "https://cookies.com".AppendPathSegment(requestPath).WithCookies(jar).GetAsync();
+			if (shouldSend)
+				HttpTest.ShouldHaveMadeACall().WithCookie("x");
+			else
+				HttpTest.ShouldHaveMadeACall().WithoutCookie("x");
+		}
+
+		[TestCase("/a", "/a", true)]
+		[TestCase("/a", "/a/", true)]
+		[TestCase("/a", "/a/hello", true)]
+		[TestCase("/a", "/ab", false)]
+		[TestCase("/a", "/", false)]
+		public async Task cookies_without_path_sent_to_origin_subpath(string originPath, string requestPath, bool shouldSend) {
+			var origin = "https://cookies.com".AppendPathSegment(originPath);
+			var jar = new CookieJar().AddOrUpdate(new FlurlCookie("x", "foo", origin));
 			await "https://cookies.com".AppendPathSegment(requestPath).WithCookies(jar).GetAsync();
 			if (shouldSend)
 				HttpTest.ShouldHaveMadeACall().WithCookie("x");

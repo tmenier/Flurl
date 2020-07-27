@@ -74,7 +74,7 @@ namespace Flurl.Http
 		/// Ensures changes to the CookieJar are kept in sync with the Cookies collection of the FlurlRequest
 		/// </summary>
 		internal void SyncWith(IFlurlRequest req) {
-			foreach (var cookie in this.Values.Where(c => ShouldSend(c, req.Url)))
+			foreach (var cookie in this.Values.Where(c => ShouldSend(c, req.Url, out _)))
 				req.Cookies[cookie.Name] = cookie.Value;
 			_syncdRequests.Add(req);
 		}
@@ -86,7 +86,7 @@ namespace Flurl.Http
 
 		private void SyncToRequests(FlurlCookie cookie, bool removed) {
 			foreach (var req in _syncdRequests) {
-				if (removed || !ShouldSend(cookie, req.Url))
+				if (removed || !ShouldSend(cookie, req.Url, out _))
 					req.Cookies.Remove(cookie.Name);
 				else
 					req.Cookies[cookie.Name] = cookie.Value;
@@ -94,28 +94,66 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// True the given cookie should be sent in requests to the given URL.
+		/// True if the given cookie should be sent in a request to the given URL. If false, a descriptive reason is provided.
 		/// </summary>
-		private static bool ShouldSend(FlurlCookie cookie, string url) {
-			var origin = cookie.OriginUrl;
-			if (string.IsNullOrEmpty(origin)) {
-				if (string.IsNullOrEmpty(cookie.Domain) || string.IsNullOrEmpty(cookie.Path))
-					return false; // CookieJar.AddOrUpdate will catch this in validation
-				origin = $"{(cookie.Secure ? "https" : "http")}://{cookie.Domain.Trim().TrimStart('.')}".AppendPathSegment(cookie.Path);
+		public static bool ShouldSend(FlurlCookie cookie, string requestUrl, out string reason) {
+			Url originUrl;
+			if (string.IsNullOrEmpty(cookie.OriginUrl)) {
+				if (string.IsNullOrEmpty(cookie.Domain) || string.IsNullOrEmpty(cookie.Path)) {
+					// CookieJar.AddOrUpdate will catch this in validation. Should this throw instead?
+					reason = "Either OriginUrl, or both Domain and Path, must be specified to determine whether to send this cooke.";
+					return false;
+				}
+
+				originUrl = $"{(cookie.Secure ? "https" : "http")}://{cookie.Domain.Trim().TrimStart('.')}"
+					.AppendPathSegment(cookie.Path);
+			}
+			else {
+				originUrl = new Url(cookie.OriginUrl);
 			}
 
-			// enlist the help of CookieContainer here, which feels really awful, but so does re-inventing the wheel.
-			var cc = new System.Net.CookieContainer();
-			var ccCookie = new System.Net.Cookie(cookie.Name, cookie.Value);
-			if (cookie.MaxAge.HasValue) ccCookie.Expires = cookie.DateReceived.UtcDateTime.AddSeconds(cookie.MaxAge.Value);
-			else if (cookie.Expires.HasValue) ccCookie.Expires = cookie.Expires.Value.UtcDateTime;
-			if (!string.IsNullOrEmpty(cookie.Domain)) ccCookie.Domain = cookie.Domain;
-			if (!string.IsNullOrEmpty(cookie.Path)) ccCookie.Path = cookie.Path;
-			ccCookie.Secure = cookie.Secure;
-			ccCookie.HttpOnly = cookie.HttpOnly;
-			cc.Add(new Uri(origin), ccCookie);
+			var url = new Url(requestUrl);
+			if (cookie.Secure && !url.IsSecureScheme) {
+				reason = $"Cookie is marked Secure and request URL is insecure ({url.Scheme}).";
+				return false;
+			}
 
-			return cc.GetCookies(new Uri(url)).Count > 0;
+			// if host of request matches origin host exactly (subdomain and all) we can skip the fancier checks
+			if (!url.Host.Equals(originUrl.Host, StringComparison.OrdinalIgnoreCase)) {
+				if (string.IsNullOrEmpty(cookie.Domain)) {
+					reason = $"Cookie set from {originUrl.Host} without Domain specified should only be sent to that specific host, not {url.Host}.";
+					return false;
+				}
+				else {
+					var domain = cookie.Domain.TrimStart('.');
+					if (!url.Host.Equals(domain, StringComparison.OrdinalIgnoreCase) && !url.Host.EndsWith("." + domain, StringComparison.OrdinalIgnoreCase)) {
+						reason = $"Cookie with Domain={cookie.Domain} should not be sent to {url.Host}.";
+						return false;
+					}
+				}
+			}
+
+			// https://tools.ietf.org/html/rfc6265#section-5.2.4
+			var path = (cookie.Path?.StartsWith("/") == true) ? cookie.Path : originUrl.Path;
+			if (!url.Path.Equals(path) && !url.Path.StartsWith(path + "/")) { // Path is case-sensitive, unlike Domain
+				reason = $"Cookie with Path={cookie.Path} should not be sent to {url.Path}.";
+				return false;
+			}
+
+			// Max-Age takes precedence over Expires
+			if (cookie.MaxAge.HasValue) {
+				if (cookie.DateReceived.AddSeconds(cookie.MaxAge.Value) < DateTimeOffset.UtcNow) {
+					reason = $"Cookie's Max-Age={cookie.MaxAge} (seconds) has expired.";
+					return false;
+				}
+			}
+			else if (cookie.Expires.HasValue && cookie.Expires < DateTimeOffset.UtcNow) {
+				reason = $"Cookie with Expires={cookie.Expires} has expired.";
+				return false;
+			}
+
+			reason = "ok";
+			return true;
 		}
 
 		/// <inheritdoc/>
