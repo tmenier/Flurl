@@ -96,64 +96,106 @@ namespace Flurl.Http
 		/// <summary>
 		/// True if the given cookie should be sent in a request to the given URL. If false, a descriptive reason is provided.
 		/// </summary>
-		public static bool ShouldSend(FlurlCookie cookie, string requestUrl, out string reason) {
-			Url originUrl;
-			if (string.IsNullOrEmpty(cookie.OriginUrl)) {
-				if (string.IsNullOrEmpty(cookie.Domain) || string.IsNullOrEmpty(cookie.Path)) {
-					// CookieJar.AddOrUpdate will catch this in validation. Should this throw instead?
-					reason = "Either OriginUrl, or both Domain and Path, must be specified to determine whether to send this cooke.";
-					return false;
-				}
+		public static bool ShouldSend(FlurlCookie cookie, Url requestUrl, out string reason) {
+			if (cookie.Secure && !requestUrl.IsSecureScheme) {
+				reason = $"Cookie is marked Secure and request URL is insecure ({requestUrl.Scheme}).";
+				return false;
+			}
 
+			return
+				ValidateOrigin(cookie, out var originUrl, out reason) &&
+				IsDomainMatch(cookie, originUrl, requestUrl, out reason) &&
+				IsPathMatch(cookie, originUrl, requestUrl, out reason) &&
+				!IsExpired(cookie, out reason);
+		}
+
+		private static bool ValidateOrigin(FlurlCookie cookie, out Url originUrl, out string reason) {
+			if (!string.IsNullOrEmpty(cookie.OriginUrl)) {
+				originUrl = new Url(cookie.OriginUrl);
+				reason = "ok";
+				return true;
+			}
+
+			if (!string.IsNullOrEmpty(cookie.Domain) && !string.IsNullOrEmpty(cookie.Path)) {
 				originUrl = $"{(cookie.Secure ? "https" : "http")}://{cookie.Domain.Trim().TrimStart('.')}"
 					.AppendPathSegment(cookie.Path);
-			}
-			else {
-				originUrl = new Url(cookie.OriginUrl);
+				reason = "ok";
+				return true;
 			}
 
-			var url = new Url(requestUrl);
-			if (cookie.Secure && !url.IsSecureScheme) {
-				reason = $"Cookie is marked Secure and request URL is insecure ({url.Scheme}).";
+			// CookieJar.AddOrUpdate will catch this in validation. Should this throw instead?
+			originUrl = null;
+			reason = "Either OriginUrl, or both Domain and Path, must be specified to determine whether to send this cooke.";
+			return false;
+		}
+
+		private static bool IsDomainMatch(FlurlCookie cookie, Url originUrl, Url requestUrl, out string reason) {
+			reason = "ok";
+
+			if (requestUrl.Host.Equals(originUrl.Host, StringComparison.OrdinalIgnoreCase))
+				return true;
+
+			if (string.IsNullOrEmpty(cookie.Domain)) {
+				reason = $"Cookie set from {originUrl.Host} without Domain specified should only be sent to that specific host, not {requestUrl.Host}.";
 				return false;
 			}
 
-			// if host of request matches origin host exactly (subdomain and all) we can skip the fancier checks
-			if (!url.Host.Equals(originUrl.Host, StringComparison.OrdinalIgnoreCase)) {
-				if (string.IsNullOrEmpty(cookie.Domain)) {
-					reason = $"Cookie set from {originUrl.Host} without Domain specified should only be sent to that specific host, not {url.Host}.";
-					return false;
-				}
-				else {
-					var domain = cookie.Domain.TrimStart('.');
-					if (!url.Host.Equals(domain, StringComparison.OrdinalIgnoreCase) && !url.Host.EndsWith("." + domain, StringComparison.OrdinalIgnoreCase)) {
-						reason = $"Cookie with Domain={cookie.Domain} should not be sent to {url.Host}.";
-						return false;
-					}
-				}
-			}
+			var domain = cookie.Domain.TrimStart('.');
+			if (requestUrl.Host.Equals(domain, StringComparison.OrdinalIgnoreCase))
+				return true;
 
-			// https://tools.ietf.org/html/rfc6265#section-5.2.4
-			var path = (cookie.Path?.StartsWith("/") == true) ? cookie.Path : originUrl.Path;
-			if (!url.Path.Equals(path) && !url.Path.StartsWith(path + "/")) { // Path is case-sensitive, unlike Domain
-				reason = $"Cookie with Path={cookie.Path} should not be sent to {url.Path}.";
-				return false;
-			}
+			if (requestUrl.Host.EndsWith("." + domain, StringComparison.OrdinalIgnoreCase))
+				return true;
 
+			reason = $"Cookie with Domain={cookie.Domain} should not be sent to {requestUrl.Host}.";
+			return false;
+		}
+
+		// https://tools.ietf.org/html/rfc6265#section-5.1.4
+		private static bool IsPathMatch(FlurlCookie cookie, Url originUrl, Url requestUrl, out string reason) {
+			reason = "ok";
+
+			if (cookie.Path == "/")
+				return true;
+			
+			var cookiePath = (cookie.Path?.StartsWith("/") == true) ? cookie.Path : originUrl.Path;
+			if (cookiePath == "")
+				cookiePath = "/";
+			else if (cookiePath.Length > 1 && cookiePath.EndsWith("/"))
+				cookiePath = cookiePath.TrimEnd('/');
+
+			if (cookiePath == "/")
+				return true;
+
+			var requestPath = (requestUrl.Path.Length > 0) ? requestUrl.Path : "/";
+
+			if (requestPath.Equals(cookiePath, StringComparison.Ordinal)) // Path is case-sensitive, unlike Domain
+				return true;
+
+			if (requestPath.StartsWith(cookiePath, StringComparison.Ordinal) && requestPath[cookiePath.Length] == '/')
+				return true;
+
+			reason = string.IsNullOrEmpty(cookie.Path) ?
+				$"Cookie from path {cookiePath} should not be sent to path {requestUrl.Path}." :
+				$"Cookie with Path={cookie.Path} should not be sent to path {requestUrl.Path}.";
+
+			return false;
+		}
+
+		private static bool IsExpired(FlurlCookie cookie, out string reason) {
 			// Max-Age takes precedence over Expires
 			if (cookie.MaxAge.HasValue) {
 				if (cookie.DateReceived.AddSeconds(cookie.MaxAge.Value) < DateTimeOffset.UtcNow) {
 					reason = $"Cookie's Max-Age={cookie.MaxAge} (seconds) has expired.";
-					return false;
+					return true;
 				}
 			}
 			else if (cookie.Expires.HasValue && cookie.Expires < DateTimeOffset.UtcNow) {
 				reason = $"Cookie with Expires={cookie.Expires} has expired.";
-				return false;
+				return true;
 			}
-
 			reason = "ok";
-			return true;
+			return false;
 		}
 
 		/// <inheritdoc/>
