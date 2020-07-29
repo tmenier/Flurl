@@ -5,6 +5,25 @@ using System.Runtime.CompilerServices;
 namespace Flurl.Http
 {
 	/// <summary>
+	/// Corresponds to the possible values of the SameSite attribute of the Set-Cookie header.
+	/// </summary>
+	public enum SameSite
+	{
+		/// <summary>
+		/// Indicates a browser should only send cookie for same-site requests.
+		/// </summary>
+		Strict,
+		/// <summary>
+		/// Indicates a browser should send cookie for cross-site requests only with top-level navigation. 
+		/// </summary>
+		Lax,
+		/// <summary>
+		/// Indicates a browser should send cookie for same-site and cross-site requests.
+		/// </summary>
+		None
+	}
+
+	/// <summary>
 	/// Represents an HTTP cookie. Closely matches Set-Cookie response header.
 	/// </summary>
 	public class FlurlCookie
@@ -16,7 +35,7 @@ namespace Flurl.Http
 		private string _path;
 		private bool _secure;
 		private bool _httpOnly;
-		private string _sameSite;
+		private SameSite? _sameSite;
 
 		/// <summary>
 		/// Creates a new FlurlCookie.
@@ -41,7 +60,7 @@ namespace Flurl.Http
 		/// The URL that originally sent the Set-Cookie response header. If adding to a CookieJar, this is required unless
 		/// both Domain AND Path are specified.
 		/// </summary>
-		public string OriginUrl { get; }
+		public Url OriginUrl { get; }
 
 		/// <summary>
 		/// Date and time the cookie was received. Defaults to date/time this FlurlCookie was created.
@@ -113,7 +132,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Corresponds to the SameSite attribute of the Set-Cookie header.
 		/// </summary>
-		public string SameSite {
+		public SameSite? SameSite {
 			get => _sameSite;
 			set => UpdateAndNotify(ref _sameSite, value);
 		}

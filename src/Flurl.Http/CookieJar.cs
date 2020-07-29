@@ -2,9 +2,7 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Flurl.Util;
 
 namespace Flurl.Http
@@ -33,19 +31,29 @@ namespace Flurl.Http
 			AddOrUpdate(new FlurlCookie(name, value.ToInvariantString(), originUrl, dateReceived));
 
 		/// <summary>
-		/// Add a cookie to the jar or update if one with the same Name already exists.
+		/// Adds a cookie to the jar or updates if one with the same Name already exists.
+		/// Throws FlurlHttpException if cookie is invalid.
 		/// </summary>
 		public CookieJar AddOrUpdate(FlurlCookie cookie) {
-			if (string.IsNullOrEmpty(cookie.OriginUrl)) {
-				if (string.IsNullOrEmpty(cookie.Domain) || string.IsNullOrEmpty(cookie.Path))
-					throw new ArgumentException("OriginUrl must have a value unless both Domain and Path are specified. This is necessary to determine whether to send the cookie in subsequent requests.");
-			}
+			if (!TryAddOrUpdate(cookie, out var reason))
+				throw new InvalidCookieException(reason);
+
+			return this;
+		}
+
+		/// <summary>
+		/// Adds a cookie to the jar or updates if one with the same Name already exists, if it is valid.
+		/// Returns true if cookie is valid and was added. If false, provides descriptive reason.
+		/// </summary>
+		public bool TryAddOrUpdate(FlurlCookie cookie, out string reason) {
+			if (!cookie.IsValid(out reason) || cookie.IsExpired(out reason))
+				return false;
 
 			cookie.Changed += (_, name) => SyncToRequests(cookie, false);
 			_dict[cookie.Name] = cookie;
 			SyncToRequests(cookie, false);
 
-			return this;
+			return true;
 		}
 
 		/// <summary>
@@ -74,7 +82,7 @@ namespace Flurl.Http
 		/// Ensures changes to the CookieJar are kept in sync with the Cookies collection of the FlurlRequest
 		/// </summary>
 		internal void SyncWith(IFlurlRequest req) {
-			foreach (var cookie in this.Values.Where(c => ShouldSend(c, req.Url, out _)))
+			foreach (var cookie in this.Values.Where(c => c.ShouldSendTo(req.Url, out _)))
 				req.Cookies[cookie.Name] = cookie.Value;
 			_syncdRequests.Add(req);
 		}
@@ -86,116 +94,11 @@ namespace Flurl.Http
 
 		private void SyncToRequests(FlurlCookie cookie, bool removed) {
 			foreach (var req in _syncdRequests) {
-				if (removed || !ShouldSend(cookie, req.Url, out _))
+				if (removed || !cookie.ShouldSendTo(req.Url, out _))
 					req.Cookies.Remove(cookie.Name);
 				else
 					req.Cookies[cookie.Name] = cookie.Value;
 			}
-		}
-
-		/// <summary>
-		/// True if the given cookie should be sent in a request to the given URL. If false, a descriptive reason is provided.
-		/// </summary>
-		public static bool ShouldSend(FlurlCookie cookie, Url requestUrl, out string reason) {
-			if (cookie.Secure && !requestUrl.IsSecureScheme) {
-				reason = $"Cookie is marked Secure and request URL is insecure ({requestUrl.Scheme}).";
-				return false;
-			}
-
-			return
-				ValidateOrigin(cookie, out var originUrl, out reason) &&
-				IsDomainMatch(cookie, originUrl, requestUrl, out reason) &&
-				IsPathMatch(cookie, originUrl, requestUrl, out reason) &&
-				!IsExpired(cookie, out reason);
-		}
-
-		private static bool ValidateOrigin(FlurlCookie cookie, out Url originUrl, out string reason) {
-			if (!string.IsNullOrEmpty(cookie.OriginUrl)) {
-				originUrl = new Url(cookie.OriginUrl);
-				reason = "ok";
-				return true;
-			}
-
-			if (!string.IsNullOrEmpty(cookie.Domain) && !string.IsNullOrEmpty(cookie.Path)) {
-				originUrl = $"{(cookie.Secure ? "https" : "http")}://{cookie.Domain.Trim().TrimStart('.')}"
-					.AppendPathSegment(cookie.Path);
-				reason = "ok";
-				return true;
-			}
-
-			// CookieJar.AddOrUpdate will catch this in validation. Should this throw instead?
-			originUrl = null;
-			reason = "Either OriginUrl, or both Domain and Path, must be specified to determine whether to send this cooke.";
-			return false;
-		}
-
-		private static bool IsDomainMatch(FlurlCookie cookie, Url originUrl, Url requestUrl, out string reason) {
-			reason = "ok";
-
-			if (requestUrl.Host.Equals(originUrl.Host, StringComparison.OrdinalIgnoreCase))
-				return true;
-
-			if (string.IsNullOrEmpty(cookie.Domain)) {
-				reason = $"Cookie set from {originUrl.Host} without Domain specified should only be sent to that specific host, not {requestUrl.Host}.";
-				return false;
-			}
-
-			var domain = cookie.Domain.TrimStart('.');
-			if (requestUrl.Host.Equals(domain, StringComparison.OrdinalIgnoreCase))
-				return true;
-
-			if (requestUrl.Host.EndsWith("." + domain, StringComparison.OrdinalIgnoreCase))
-				return true;
-
-			reason = $"Cookie with Domain={cookie.Domain} should not be sent to {requestUrl.Host}.";
-			return false;
-		}
-
-		// https://tools.ietf.org/html/rfc6265#section-5.1.4
-		private static bool IsPathMatch(FlurlCookie cookie, Url originUrl, Url requestUrl, out string reason) {
-			reason = "ok";
-
-			if (cookie.Path == "/")
-				return true;
-			
-			var cookiePath = (cookie.Path?.StartsWith("/") == true) ? cookie.Path : originUrl.Path;
-			if (cookiePath == "")
-				cookiePath = "/";
-			else if (cookiePath.Length > 1 && cookiePath.EndsWith("/"))
-				cookiePath = cookiePath.TrimEnd('/');
-
-			if (cookiePath == "/")
-				return true;
-
-			var requestPath = (requestUrl.Path.Length > 0) ? requestUrl.Path : "/";
-
-			if (requestPath.Equals(cookiePath, StringComparison.Ordinal)) // Path is case-sensitive, unlike Domain
-				return true;
-
-			if (requestPath.StartsWith(cookiePath, StringComparison.Ordinal) && requestPath[cookiePath.Length] == '/')
-				return true;
-
-			reason = string.IsNullOrEmpty(cookie.Path) ?
-				$"Cookie from path {cookiePath} should not be sent to path {requestUrl.Path}." :
-				$"Cookie with Path={cookie.Path} should not be sent to path {requestUrl.Path}.";
-
-			return false;
-		}
-
-		private static bool IsExpired(FlurlCookie cookie, out string reason) {
-			// Max-Age takes precedence over Expires
-			if (cookie.MaxAge.HasValue) {
-				if (cookie.DateReceived.AddSeconds(cookie.MaxAge.Value) < DateTimeOffset.UtcNow) {
-					reason = $"Cookie's Max-Age={cookie.MaxAge} (seconds) has expired.";
-					return true;
-				}
-			}
-			else if (cookie.Expires.HasValue && cookie.Expires < DateTimeOffset.UtcNow) {
-				reason = $"Cookie with Expires={cookie.Expires} has expired.";
-				return true;
-			}
-			reason = "ok";
-			return false;
 		}
 
 		/// <inheritdoc/>
@@ -221,21 +124,16 @@ namespace Flurl.Http
 
 		/// <inheritdoc/>
 		public IEnumerable<FlurlCookie> Values => _dict.Values;
+	}
 
-		// Possible future enhancement: https://github.com/tmenier/Flurl/issues/538
-		// This method works, but the feature still needs caching of some kind and an opt-in config setting.
-		private async Task<bool> IsPublicSuffixesAsync(string domain) {
-			using (var stream = await "https://publicsuffix.org/list/public_suffix_list.dat".GetStreamAsync())
-			using (var reader = new StreamReader(stream)) {
-				while (true) {
-					var line = await reader.ReadLineAsync();
-					if (line == null) break;
-					if (line.Trim() == "") continue;
-					if (line.StartsWith("//")) continue;
-					if (line == domain) return true;
-				}
-			}
-			return false;
-		}
+	/// <summary>
+	/// Exception thrown when attempting to add or update an invalid FlurlCookie to a CookieJar.
+	/// </summary>
+	public class InvalidCookieException : Exception
+	{
+		/// <summary>
+		/// Creates a new InvalidCookieException.
+		/// </summary>
+		public InvalidCookieException(string reason) : base(reason) { }
 	}
 }

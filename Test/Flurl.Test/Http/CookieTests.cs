@@ -112,7 +112,53 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public void jar_syncs_with_request_cookies() {
+		public void can_parse_set_cookie_header() {
+			var start = DateTimeOffset.UtcNow;
+			var cookie = CookieCutter.FromResponseHeader("https://www.cookies.com/a/b", "x=foo  ; DoMaIn=cookies.com  ;     path=/  ; MAX-AGE=999 ; expires= ;  secure ;HTTPONLY ;samesite=none");
+			Assert.AreEqual("https://www.cookies.com/a/b", cookie.OriginUrl.ToString());
+			Assert.AreEqual("x", cookie.Name);
+			Assert.AreEqual("foo", cookie.Value);
+			Assert.AreEqual("cookies.com", cookie.Domain);
+			Assert.AreEqual("/", cookie.Path);
+			Assert.AreEqual(999, cookie.MaxAge);
+			Assert.IsNull(cookie.Expires);
+			Assert.IsTrue(cookie.Secure);
+			Assert.IsTrue(cookie.HttpOnly);
+			Assert.AreEqual(SameSite.None, cookie.SameSite);
+			Assert.GreaterOrEqual(cookie.DateReceived, start);
+			Assert.LessOrEqual(cookie.DateReceived, DateTimeOffset.UtcNow);
+
+			// simpler case
+			start = DateTimeOffset.UtcNow;
+			cookie = CookieCutter.FromResponseHeader("https://www.cookies.com/a/b", "y=bar");
+			Assert.AreEqual("https://www.cookies.com/a/b", cookie.OriginUrl.ToString());
+			Assert.AreEqual("y", cookie.Name);
+			Assert.AreEqual("bar", cookie.Value);
+			Assert.IsNull(cookie.Domain);
+			Assert.IsNull(cookie.Path);
+			Assert.IsNull(cookie.MaxAge);
+			Assert.IsNull(cookie.Expires);
+			Assert.IsFalse(cookie.Secure);
+			Assert.IsFalse(cookie.HttpOnly);
+			Assert.IsNull(cookie.SameSite);
+			Assert.GreaterOrEqual(cookie.DateReceived, start);
+			Assert.LessOrEqual(cookie.DateReceived, DateTimeOffset.UtcNow);
+		}
+
+		[Test]
+		public void url_decodes_cookie_value() {
+			var cookie = CookieCutter.FromResponseHeader("https://cookies.com", "x=one%3A%20for%20the%20money");
+			Assert.AreEqual("one: for the money", cookie.Value);
+		}
+
+		[Test]
+		public void unquotes_cookie_value() {
+			var cookie = CookieCutter.FromResponseHeader("https://cookies.com", "x=\"hello there\"" );
+			Assert.AreEqual("hello there", cookie.Value);
+		}
+
+		[Test]
+		public void jar_syncs_to_request_cookies() {
 			var jar = new CookieJar().AddOrUpdate("x", "foo", "https://cookies.com");
 
 			var req = new FlurlRequest("http://cookies.com").WithCookies(jar);
@@ -168,24 +214,16 @@ namespace Flurl.Test.Http
 		[TestCase("https://domain1.com", "https://www.domain1.com", false)]
 		[TestCase("https://www.domain1.com", "https://domain1.com", false)]
 		[TestCase("https://domain1.com", "https://domain2.com", false)]
-		public async Task cookies_without_domain_restricted_to_origin_domain(string originUrl, string requestUrl, bool shouldSend) {
-			var jar = new CookieJar().AddOrUpdate("x", "foo", originUrl);
-			await requestUrl.WithCookies(jar).GetAsync();
-			if (shouldSend)
-				HttpTest.ShouldHaveCalled(requestUrl).WithCookie("x");
-			else
-				HttpTest.ShouldHaveCalled(requestUrl).WithoutCookie("x");
+		public void cookies_without_domain_restricted_to_origin_domain(string originUrl, string requestUrl, bool shouldSend) {
+			var cookie = new FlurlCookie("x", "foo", originUrl);
+			AssertCookie(cookie, true, false, requestUrl, shouldSend);
 		}
 
 		[TestCase("domain.com", "https://www.domain.com", true)]
 		[TestCase("www.domain.com", "https://domain.com", false)] // not vice-versa
-		public async Task cookies_with_domain_sent_to_subdomain(string cookieDomain, string requestUrl, bool shouldSend) {
-			var jar = new CookieJar().AddOrUpdate(new FlurlCookie("x", "foo", $"https://{cookieDomain}") { Domain = cookieDomain });
-			await requestUrl.WithCookies(jar).GetAsync();
-			if (shouldSend)
-				HttpTest.ShouldHaveMadeACall().WithCookie("x");
-			else
-				HttpTest.ShouldHaveMadeACall().WithoutCookie("x");
+		public void cookies_with_domain_sent_to_subdomain(string cookieDomain, string requestUrl, bool shouldSend) {
+			var cookie = new FlurlCookie("x", "foo", $"https://{cookieDomain}") { Domain = cookieDomain };
+			AssertCookie(cookie, true, false, requestUrl, shouldSend);
 		}
 
 		[TestCase("/a", "/a", true)]
@@ -193,14 +231,11 @@ namespace Flurl.Test.Http
 		[TestCase("/a", "/a/hello", true)]
 		[TestCase("/a", "/ab", false)]
 		[TestCase("/a", "/", false)]
-		public async Task cookies_with_path_sent_to_subpath(string cookiePath, string requestPath, bool shouldSend) {
+		public void cookies_with_path_sent_to_subpath(string cookiePath, string requestPath, bool shouldSend) {
 			var origin = "https://cookies.com".AppendPathSegment(cookiePath);
-			var jar = new CookieJar().AddOrUpdate(new FlurlCookie("x", "foo", origin) { Path = cookiePath });
-			await "https://cookies.com".AppendPathSegment(requestPath).WithCookies(jar).GetAsync();
-			if (shouldSend)
-				HttpTest.ShouldHaveMadeACall().WithCookie("x");
-			else
-				HttpTest.ShouldHaveMadeACall().WithoutCookie("x");
+			var cookie = new FlurlCookie("x", "foo", origin) { Path = cookiePath };
+			var url = "https://cookies.com".AppendPathSegment(requestPath);
+			AssertCookie(cookie, true, false, url, shouldSend);
 		}
 
 		[TestCase("/a", "/a", true)]
@@ -208,51 +243,119 @@ namespace Flurl.Test.Http
 		[TestCase("/a", "/a/hello", true)]
 		[TestCase("/a", "/ab", false)]
 		[TestCase("/a", "/", false)]
-		public async Task cookies_without_path_sent_to_origin_subpath(string originPath, string requestPath, bool shouldSend) {
+		public void cookies_without_path_sent_to_origin_subpath(string originPath, string requestPath, bool shouldSend) {
 			var origin = "https://cookies.com".AppendPathSegment(originPath);
-			var jar = new CookieJar().AddOrUpdate(new FlurlCookie("x", "foo", origin));
-			await "https://cookies.com".AppendPathSegment(requestPath).WithCookies(jar).GetAsync();
-			if (shouldSend)
-				HttpTest.ShouldHaveMadeACall().WithCookie("x");
-			else
-				HttpTest.ShouldHaveMadeACall().WithoutCookie("x");
+			var cookie = new FlurlCookie("x", "foo", origin);
+			var url = "https://cookies.com".AppendPathSegment(requestPath);
+			AssertCookie(cookie, true, false, url, shouldSend);
 		}
 
 		[Test]
-		public async Task doesnt_send_secure_to_non_https() {
-			var jar = new CookieJar()
-				.AddOrUpdate(new FlurlCookie("x", "secure", "https://cookies.com") { Secure = true })
-				.AddOrUpdate(new FlurlCookie("y", "insecure", "https://cookies.com")); // default is false
-
-			await "http://cookies.com".WithCookies(jar).GetAsync();
-			await "https://cookies.com".WithCookies(jar).GetAsync();
-
-			HttpTest.ShouldHaveCalled("http://cookies.com").WithoutCookie("x").WithCookie("y");
-			HttpTest.ShouldHaveCalled("https://cookies.com").WithCookie("x").WithCookie("y");
+		public void secure_cookies_not_sent_to_insecure_url() {
+			var cookie = new FlurlCookie("x", "foo", "https://cookies.com") { Secure = true };
+			AssertCookie(cookie, true, false, "https://cookies.com", true);
+			AssertCookie(cookie, true, false, "http://cookies.com", false);
 		}
 
 		[TestCase(false)]
 		[TestCase(true)]
-		public async Task doesnt_send_expired_cookies_absolute(bool localTime) {
+		public void validates_expired_absolute(bool localTime) {
 			var now = localTime ? DateTimeOffset.Now : DateTimeOffset.UtcNow;
-			var jar = new CookieJar()
-				.AddOrUpdate(new FlurlCookie("x", "expired", "https://cookies.com") { Expires = now.AddSeconds(-2) })
-				.AddOrUpdate(new FlurlCookie("y", "not expired", "https://cookies.com") { Expires = now.AddSeconds(2) });
-
-			await "https://cookies.com".WithCookies(jar).GetAsync();
-			HttpTest.ShouldHaveMadeACall().WithoutCookie("x").WithCookie("y");
+			var c1 = new FlurlCookie("x", "foo", "https://cookies.com") { Expires = now.AddSeconds(-2) };
+			var c2 = new FlurlCookie("x", "foo", "https://cookies.com") { Expires = now.AddSeconds(2) };
+			AssertCookie(c1, true, true, "https://cookies.com", false);
+			AssertCookie(c2, true, false, "https://cookies.com", true);
 		}
 
 		[TestCase(false)]
 		[TestCase(true)]
-		public async Task doesnt_send_expired_cookies_by_max_age(bool localTime) {
+		public void validates_expired_by_max_age(bool localTime) {
 			var now = localTime ? DateTimeOffset.Now : DateTimeOffset.UtcNow;
-			var jar = new CookieJar()
-				.AddOrUpdate(new FlurlCookie("x", "expired", "https://cookies.com", now.AddSeconds(-3602)) { MaxAge = 3600 })
-				.AddOrUpdate(new FlurlCookie("y", "not expired", "https://cookies.com", now.AddSeconds(-3598)) { MaxAge = 3600 });
+			var c1 = new FlurlCookie("x", "foo", "https://cookies.com", now.AddSeconds(-3602)) { MaxAge = 3600 };
+			var c2 = new FlurlCookie("x", "foo", "https://cookies.com", now.AddSeconds(-3598)) { MaxAge = 3600 };
+			AssertCookie(c1, true, true, "https://cookies.com", false);
+			AssertCookie(c2, true, false, "https://cookies.com", true);
+		}
 
-			await "https://cookies.com".WithCookies(jar).GetAsync();
-			HttpTest.ShouldHaveMadeACall().WithoutCookie("x").WithCookie("y");
+		[TestCase(null, true)]
+		[TestCase("", true)] // spec says SHOULD ignore empty
+		[TestCase("cookies", false)]
+		[TestCase("cookies.com", true)]
+		[TestCase(".cookies.com", true)] // "Contrary to earlier specifications, leading dots in domain names are ignored" https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
+		[TestCase("ww.cookies.com", false)]
+		[TestCase("www.cookies.com", true)]
+		[TestCase(".www.cookies.com", true)]
+		[TestCase("wwww.cookies.com", false)]
+		[TestCase("cookies2.com", false)]
+		[TestCase("mycookies.com", false)]
+		[TestCase("https://www.cookies.com", false)]
+		[TestCase("https://www.cookies.com/a", false)]
+		[TestCase("www.cookies.com/a", false)]
+		public void validates_domain(string domain, bool valid) {
+			var cookie = new FlurlCookie("x", "foo", "https://www.cookies.com/a") { Domain = domain };
+			AssertCookie(cookie, valid, false);
+		}
+
+		[Test]
+		public void domain_cannot_be_ip_address() {
+			var cookie = new FlurlCookie("x", "foo", "https://1.2.3.4");
+			AssertCookie(cookie, true, false);
+
+			// domain can't be set at all if origin is an IP, but that's kind of impossible to
+			// test independently because it'll fail the domain match check first
+			cookie = new FlurlCookie("x", "foo", "https://1.2.3.4") { Domain = "1.2.3.4" };
+			AssertCookie(cookie, false, false);
+		}
+
+		[Test]
+		public void validates_secure() {
+			var cookie = new FlurlCookie("x", "foo", "http://insecure.com") { Secure = true };
+			AssertCookie(cookie, false, false);
+		}
+
+		[Test]
+		public async Task invalid_cookie_in_response_doesnt_throw() {
+			HttpTest.RespondWith("hi", headers: new { Set_Cookie = "x=foo; Secure" });
+			var resp = await "http://insecure.com".WithCookies(out var jar).GetAsync();
+
+			Assert.IsEmpty(jar);
+			// even though the CookieJar rejected the cookie, it doesn't change the fact
+			// that it exists in the response.
+			Assert.AreEqual("foo", resp.Cookies.TryGetValue("x", out var c) ? c.Value : null);
+		}
+
+		/// <summary>
+		/// Performs a series of behavioral checks against a cookie based on its state. Used by lots of tests to make them more robust.
+		/// </summary>
+		private void AssertCookie(FlurlCookie cookie, bool isValid, bool isExpired, string requestUrl = null, bool shouldSend = false) {
+			Assert.AreEqual(isValid, cookie.IsValid(out var reason), reason);
+			Assert.AreEqual(isExpired, cookie.IsExpired(out reason), reason);
+
+			var shouldAddToJar = isValid && !isExpired;
+			var jar = new CookieJar();
+			Assert.AreEqual(shouldAddToJar, jar.TryAddOrUpdate(cookie, out reason));
+
+			if (shouldAddToJar)
+				CollectionAssert.Contains(jar.Keys, cookie.Name);
+			else {
+				Assert.Throws<InvalidCookieException>(() => jar.AddOrUpdate(cookie));
+				CollectionAssert.DoesNotContain(jar.Keys, cookie.Name);
+			}
+
+			var req = cookie.OriginUrl.WithCookies(jar);
+			if (shouldAddToJar)
+				CollectionAssert.Contains(req.Cookies.Keys, cookie.Name);
+			else
+				CollectionAssert.DoesNotContain(req.Cookies.Keys, cookie.Name);
+
+			if (requestUrl != null) {
+				Assert.AreEqual(shouldSend, cookie.ShouldSendTo(requestUrl, out reason), reason);
+				req = requestUrl.WithCookies(jar);
+				if (shouldSend)
+					CollectionAssert.Contains(req.Cookies.Keys, cookie.Name);
+				else
+					CollectionAssert.DoesNotContain(req.Cookies.Keys, cookie.Name);
+			}
 		}
 	}
 }
