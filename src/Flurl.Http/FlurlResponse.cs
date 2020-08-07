@@ -140,7 +140,7 @@ namespace Flurl.Http
 		private void LoadCookieJar(CookieJar jar) {
 			if (jar == null) return;
 			foreach (var cookie in Cookies)
-				jar.TryAddOrUpdate(cookie, out _); // not added if cookie fails validation
+				jar.TryAddOrReplace(cookie, out _); // not added if cookie fails validation
 		}
 
 		/// <inheritdoc />

@@ -16,21 +16,22 @@ namespace Flurl.Http
 		private readonly ConcurrentDictionary<string, FlurlCookie> _dict = new ConcurrentDictionary<string, FlurlCookie>();
 
 		/// <summary>
-		/// Adds a cookie to the jar or updates if one with the same Name/Domain/Path already exists.
+		/// Adds a cookie to the jar or replaces one with the same Name/Domain/Path.
+		/// Throws InvalidCookieException if cookie is invalid.
 		/// </summary>
 		/// <param name="name">Name of the cookie.</param>
 		/// <param name="value">Value of the cookie.</param>
 		/// <param name="originUrl">URL of request that sent the original Set-Cookie header.</param>
 		/// <param name="dateReceived">Date/time that original Set-Cookie header was received. Defaults to current date/time. Important for Max-Age to be enforced correctly.</param>
-		public CookieJar AddOrUpdate(string name, object value, string originUrl, DateTimeOffset? dateReceived = null) =>
-			AddOrUpdate(new FlurlCookie(name, value.ToInvariantString(), originUrl, dateReceived));
+		public CookieJar AddOrReplace(string name, object value, string originUrl, DateTimeOffset? dateReceived = null) =>
+			AddOrReplace(new FlurlCookie(name, value.ToInvariantString(), originUrl, dateReceived));
 
 		/// <summary>
-		/// Adds a cookie to the jar or updates if one with the same Name/Domain/Path already exists.
-		/// Throws FlurlHttpException if cookie is invalid.
+		/// Adds a cookie to the jar or replaces one with the same Name/Domain/Path.
+		/// Throws InvalidCookieException if cookie is invalid.
 		/// </summary>
-		public CookieJar AddOrUpdate(FlurlCookie cookie) {
-			if (!TryAddOrUpdate(cookie, out var reason))
+		public CookieJar AddOrReplace(FlurlCookie cookie) {
+			if (!TryAddOrReplace(cookie, out var reason))
 				throw new InvalidCookieException(reason);
 
 			return this;
@@ -41,7 +42,7 @@ namespace Flurl.Http
 		/// but only if it is valid and not expired.
 		/// </summary>
 		/// <returns>true if cookie is valid and was added or updated. If false, provides descriptive reason.</returns>
-		public bool TryAddOrUpdate(FlurlCookie cookie, out string reason) {
+		public bool TryAddOrReplace(FlurlCookie cookie, out string reason) {
 			if (!cookie.IsValid(out reason) || cookie.IsExpired(out reason))
 				return false;
 

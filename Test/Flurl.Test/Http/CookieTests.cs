@@ -70,8 +70,8 @@ namespace Flurl.Test.Http
 				.RespondWith("hi");
 
 			var jar = new CookieJar()
-				.AddOrUpdate("x", "foo", "https://cookies.com")
-				.AddOrUpdate("y", "bar", "https://cookies.com");
+				.AddOrReplace("x", "foo", "https://cookies.com")
+				.AddOrReplace("y", "bar", "https://cookies.com");
 
 			await "https://cookies.com".WithCookies(jar).GetAsync();
 			await "https://cookies.com/1".WithCookies(jar).GetAsync();
@@ -154,7 +154,7 @@ namespace Flurl.Test.Http
 			cookie.Path = "/";
 			cookie.Secure = true;
 
-			var jar = new CookieJar().AddOrUpdate(cookie);
+			var jar = new CookieJar().AddOrReplace(cookie);
 
 			// bad
 			Assert.Throws<Exception>(() => cookie.Value = "value3");
@@ -177,8 +177,8 @@ namespace Flurl.Test.Http
 		[Test]
 		public void jar_overwrites_request_cookies() {
 			var jar = new CookieJar()
-				.AddOrUpdate("b", 10, "https://cookies.com")
-				.AddOrUpdate("c", 11, "https://cookies.com");
+				.AddOrReplace("b", 10, "https://cookies.com")
+				.AddOrReplace("c", 11, "https://cookies.com");
 
 			var req = new FlurlRequest("http://cookies.com")
 				.WithCookies(new { a = 1, b = 2 })
@@ -193,8 +193,8 @@ namespace Flurl.Test.Http
 		[Test]
 		public async Task request_cookies_do_not_overwrite_jar() {
 			var jar = new CookieJar()
-				.AddOrUpdate("b", 10, "https://cookies.com")
-				.AddOrUpdate("c", 11, "https://cookies.com");
+				.AddOrReplace("b", 10, "https://cookies.com")
+				.AddOrReplace("c", 11, "https://cookies.com");
 
 			var req = new FlurlRequest("http://cookies.com")
 				.WithCookies(jar)
@@ -215,7 +215,7 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("x=foo", req.Headers.FirstOrDefault("Cookie"));
 
 			// should flow from CookieJar too
-			var jar = new CookieJar().AddOrUpdate("y", "bar", "http://cookies.com");
+			var jar = new CookieJar().AddOrReplace("y", "bar", "http://cookies.com");
 			req = new FlurlRequest("http://cookies.com").WithCookies(jar);
 			Assert.AreEqual("y=bar", req.Headers.FirstOrDefault("Cookie"));
 		}
@@ -344,12 +344,12 @@ namespace Flurl.Test.Http
 
 			var shouldAddToJar = isValid && !isExpired;
 			var jar = new CookieJar();
-			Assert.AreEqual(shouldAddToJar, jar.TryAddOrUpdate(cookie, out reason));
+			Assert.AreEqual(shouldAddToJar, jar.TryAddOrReplace(cookie, out reason));
 
 			if (shouldAddToJar)
 				Assert.AreEqual(cookie.Name, jar.SingleOrDefault()?.Name);
 			else {
-				Assert.Throws<InvalidCookieException>(() => jar.AddOrUpdate(cookie));
+				Assert.Throws<InvalidCookieException>(() => jar.AddOrReplace(cookie));
 				CollectionAssert.IsEmpty(jar);
 			}
 
