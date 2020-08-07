@@ -335,6 +335,23 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("foo", resp.Cookies.FirstOrDefault(c => c.Name == "x")?.Value);
 		}
 
+		[Test]
+		public async Task multiple_cookies_same_name_picks_longest_path() {
+			HttpTest.RespondWith("hi", 200, new[] {
+				("Set-Cookie", "x=foo1; Path=/"),
+				("Set-Cookie", "x=foo2; Path=/"), // overwrites
+				("Set-Cookie", "x=foo3; Path=/a/b"), // doesn't overwrite, longer path should be listed first
+				("Set-Cookie", "y=bar")
+			});
+
+			var resp = await "https://cookies.com".WithCookies(out var jar).GetAsync();
+			Assert.AreEqual(4, resp.Headers.Count(h => h.Name == "Set-Cookie"));
+			Assert.AreEqual(4, resp.Cookies.Count);
+
+			var req = "https://cookies.com/a/b".WithCookies(jar);
+			Assert.AreEqual("x=foo3; x=foo2; y=bar", req.Headers.FirstOrDefault("Cookie"));
+		}
+
 		/// <summary>
 		/// Performs a series of behavioral checks against a cookie based on its state. Used by lots of tests to make them more robust.
 		/// </summary>
