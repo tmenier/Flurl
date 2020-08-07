@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -44,7 +44,7 @@ namespace Flurl.Http.Testing
 		}
 
 		/// <summary>
-		/// Adds an HttpResponseMessage to the response queue.
+		/// Adds a fake HTTP response to the response queue.
 		/// </summary>
 		/// <param name="body">The simulated response body string.</param>
 		/// <param name="status">The simulated HTTP status. Default is 200.</param>
@@ -57,7 +57,7 @@ namespace Flurl.Http.Testing
 		}
 
 		/// <summary>
-		/// Adds an HttpResponseMessage to the response queue with the given data serialized to JSON as the content body.
+		/// Adds a fake HTTP response to the response queue with the given data serialized to JSON as the content body.
 		/// </summary>
 		/// <param name="body">The object to be JSON-serialized and used as the simulated response body.</param>
 		/// <param name="status">The simulated HTTP status. Default is 200.</param>
@@ -71,7 +71,7 @@ namespace Flurl.Http.Testing
 		}
 
 		/// <summary>
-		/// Adds an HttpResponseMessage to the response queue.
+		/// Adds a fake HTTP response to the response queue.
 		/// </summary>
 		/// <param name="buildContent">A function that builds the simulated response body content. Optional.</param>
 		/// <param name="status">The simulated HTTP status. Optional. Default is 200.</param>

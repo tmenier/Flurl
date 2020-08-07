@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -289,8 +289,9 @@ namespace Flurl.Test.Http
 		[Test]
 		public async Task can_send_cookies() {
 			var req = "https://httpbin.org/cookies".WithCookies(new { x = 1, y = 2 });
-			Assert.AreEqual("1", req.Cookies["x"]);
-			Assert.AreEqual("2", req.Cookies["y"]);
+			Assert.AreEqual(2, req.Cookies.Count());
+			Assert.IsTrue(req.Cookies.Contains(("x", "1")));
+			Assert.IsTrue(req.Cookies.Contains(("y", "2")));
 
 			var s = await req.GetStringAsync();
 
@@ -304,16 +305,17 @@ namespace Flurl.Test.Http
 		public async Task can_receive_cookies() {
 			// endpoint does a redirect, so we need to disable auto-redirect in order to see the cookie in the response
 			var resp = await "https://httpbin.org/cookies/set?z=999".WithAutoRedirect(false).GetAsync();
-			Assert.AreEqual("999", resp.Cookies["z"].Value);
+			Assert.AreEqual("999", resp.Cookies.FirstOrDefault(c => c.Name == "z")?.Value);
+
 
 			// but using WithCookies we can capture it even with redirects enabled
 			await "https://httpbin.org/cookies/set?z=999".WithCookies(out var cookies).GetAsync();
-			Assert.AreEqual("999", cookies["z"].Value);
+			Assert.AreEqual("999", cookies.FirstOrDefault(c => c.Name == "z")?.Value);
 
 			// this works with redirects too
 			using (var session = new CookieSession("https://httpbin.org/cookies")) {
 				await session.Request("set?z=999").GetAsync();
-				Assert.AreEqual("999", session.Cookies["z"].Value);
+				Assert.AreEqual("999", session.Cookies.FirstOrDefault(c => c.Name == "z")?.Value);
 			}
 		}
 

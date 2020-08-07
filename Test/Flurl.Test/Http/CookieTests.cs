@@ -28,7 +28,7 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveMadeACall().WithCookies(new { y = "bar", z = "fizz" }).Times(1);
 			HttpTest.ShouldHaveMadeACall().WithoutCookies().Times(1);
 
-			Assert.AreEqual("bar", responses[0].Cookies.TryGetValue("x", out var c) ? c.Value : null);
+			Assert.AreEqual("bar", responses[0].Cookies.FirstOrDefault(c => c.Name == "x")?.Value);
 			Assert.IsEmpty(responses[1].Cookies);
 			Assert.IsEmpty(responses[2].Cookies);
 		}
@@ -57,8 +57,8 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveMadeACall().WithCookies(new { x = "foo", y = "bazz" }).Times(1);
 
 			Assert.AreEqual(2, jar.Count);
-			Assert.AreEqual("foo", jar["x"].Value);
-			Assert.AreEqual("bazz", jar["y"].Value);
+			Assert.AreEqual(1, jar.Count(c => c.Name == "x" && c.Value == "foo"));
+			Assert.AreEqual(1, jar.Count(c => c.Name == "y" && c.Value == "bazz"));
 		}
 
 		[Test]
@@ -82,8 +82,8 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveMadeACall().WithCookies(new { x = "foo", y = "bazz" }).Times(1);
 
 			Assert.AreEqual(2, jar.Count);
-			Assert.AreEqual("foo", jar["x"].Value);
-			Assert.AreEqual("bazz", jar["y"].Value);
+			Assert.AreEqual(1, jar.Count(c => c.Name == "x" && c.Value == "foo"));
+			Assert.AreEqual(1, jar.Count(c => c.Name == "y" && c.Value == "bazz"));
 		}
 
 		[Test]
@@ -106,15 +106,15 @@ namespace Flurl.Test.Http
 				HttpTest.ShouldHaveMadeACall().WithCookies(new { x = "foo", y = "bazz" }).Times(1);
 
 				Assert.AreEqual(2, cs.Cookies.Count);
-				Assert.AreEqual("foo", cs.Cookies["x"].Value);
-				Assert.AreEqual("bazz", cs.Cookies["y"].Value);
+				Assert.AreEqual(1, cs.Cookies.Count(c => c.Name == "x" && c.Value == "foo"));
+				Assert.AreEqual(1, cs.Cookies.Count(c => c.Name == "y" && c.Value == "bazz"));
 			}
 		}
 
 		[Test]
 		public void can_parse_set_cookie_header() {
 			var start = DateTimeOffset.UtcNow;
-			var cookie = CookieCutter.FromResponseHeader("https://www.cookies.com/a/b", "x=foo  ; DoMaIn=cookies.com  ;     path=/  ; MAX-AGE=999 ; expires= ;  secure ;HTTPONLY ;samesite=none");
+			var cookie = CookieCutter.ParseResponseHeader("https://www.cookies.com/a/b", "x=foo  ; DoMaIn=cookies.com  ;     path=/  ; MAX-AGE=999 ; expires= ;  secure ;HTTPONLY ;samesite=none");
 			Assert.AreEqual("https://www.cookies.com/a/b", cookie.OriginUrl.ToString());
 			Assert.AreEqual("x", cookie.Name);
 			Assert.AreEqual("foo", cookie.Value);
@@ -130,7 +130,7 @@ namespace Flurl.Test.Http
 
 			// simpler case
 			start = DateTimeOffset.UtcNow;
-			cookie = CookieCutter.FromResponseHeader("https://www.cookies.com/a/b", "y=bar");
+			cookie = CookieCutter.ParseResponseHeader("https://www.cookies.com/a/b", "y=bar");
 			Assert.AreEqual("https://www.cookies.com/a/b", cookie.OriginUrl.ToString());
 			Assert.AreEqual("y", cookie.Name);
 			Assert.AreEqual("bar", cookie.Value);
@@ -146,67 +146,78 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public void cannot_change_cookie_after_adding_to_jar() {
+			var cookie = new FlurlCookie("x", "foo", "https://cookies.com");
+
+			// good
+			cookie.Value = "value2";
+			cookie.Path = "/";
+			cookie.Secure = true;
+
+			var jar = new CookieJar().AddOrUpdate(cookie);
+
+			// bad
+			Assert.Throws<Exception>(() => cookie.Value = "value3");
+			Assert.Throws<Exception>(() => cookie.Path = "/a");
+			Assert.Throws<Exception>(() => cookie.Secure = false);
+		}
+
+		[Test]
 		public void url_decodes_cookie_value() {
-			var cookie = CookieCutter.FromResponseHeader("https://cookies.com", "x=one%3A%20for%20the%20money");
+			var cookie = CookieCutter.ParseResponseHeader("https://cookies.com", "x=one%3A%20for%20the%20money");
 			Assert.AreEqual("one: for the money", cookie.Value);
 		}
 
 		[Test]
 		public void unquotes_cookie_value() {
-			var cookie = CookieCutter.FromResponseHeader("https://cookies.com", "x=\"hello there\"" );
+			var cookie = CookieCutter.ParseResponseHeader("https://cookies.com", "x=\"hello there\"" );
 			Assert.AreEqual("hello there", cookie.Value);
 		}
 
 		[Test]
-		public void jar_syncs_to_request_cookies() {
-			var jar = new CookieJar().AddOrUpdate("x", "foo", "https://cookies.com");
+		public void jar_overwrites_request_cookies() {
+			var jar = new CookieJar()
+				.AddOrUpdate("b", 10, "https://cookies.com")
+				.AddOrUpdate("c", 11, "https://cookies.com");
 
-			var req = new FlurlRequest("http://cookies.com").WithCookies(jar);
-			Assert.IsTrue(req.Cookies.ContainsKey("x"));
-			Assert.AreEqual("foo", req.Cookies["x"]);
+			var req = new FlurlRequest("http://cookies.com")
+				.WithCookies(new { a = 1, b = 2 })
+				.WithCookies(jar);
 
-			jar["x"].Value = "new val!";
-			Assert.AreEqual("new val!", req.Cookies["x"]);
-
-			jar.AddOrUpdate("y", "bar", "https://cookies.com");
-			Assert.IsTrue(req.Cookies.ContainsKey("y"));
-			Assert.AreEqual("bar", req.Cookies["y"]);
-
-			jar["x"].Secure = true;
-			Assert.IsFalse(req.Cookies.ContainsKey("x"));
-
-			jar.Clear();
-			Assert.IsFalse(req.Cookies.Any());
+			Assert.AreEqual(3, req.Cookies.Count());
+			Assert.IsTrue(req.Cookies.Contains(("a", "1")));
+			Assert.IsTrue(req.Cookies.Contains(("b", "10"))); // the important one
+			Assert.IsTrue(req.Cookies.Contains(("c", "11")));
 		}
 
 		[Test]
-		public async Task request_cookies_do_not_sync_to_jar() {
-			var jar = new CookieJar().AddOrUpdate("x", "foo", "https://cookies.com");
+		public async Task request_cookies_do_not_overwrite_jar() {
+			var jar = new CookieJar()
+				.AddOrUpdate("b", 10, "https://cookies.com")
+				.AddOrUpdate("c", 11, "https://cookies.com");
 
-			var req = new FlurlRequest("http://cookies.com").WithCookies(jar);
-			Assert.IsTrue(req.Cookies.ContainsKey("x"));
-			Assert.AreEqual("foo", req.Cookies["x"]);
+			var req = new FlurlRequest("http://cookies.com")
+				.WithCookies(jar)
+				.WithCookies(new { a = 1, b = 2 });
 
-			// changing cookie at request level shouldn't touch jar
-			req.Cookies["x"] = "bar";
-			Assert.AreEqual("foo", jar["x"].Value);
-			
-			await req.GetAsync();
-			HttpTest.ShouldHaveMadeACall().WithCookies(new { x = "bar" });
+			Assert.AreEqual(3, req.Cookies.Count());
+			Assert.IsTrue(req.Cookies.Contains(("a", "1")));
+			Assert.IsTrue(req.Cookies.Contains(("b", "2"))); // value overwritten but just for this request
+			Assert.IsTrue(req.Cookies.Contains(("c", "11")));
 
-			// re-check after send
-			Assert.AreEqual("foo", jar["x"].Value);
+			// b in jar wasn't touched
+			Assert.AreEqual("10", jar.FirstOrDefault(c => c.Name == "b")?.Value);
 		}
 
 		[Test]
 		public void request_cookies_sync_with_cookie_header() {
 			var req = new FlurlRequest("http://cookies.com").WithCookie("x", "foo");
-			Assert.AreEqual("x=foo", req.Headers.TryGetValue("Cookie", out var val) ? val : null);
+			Assert.AreEqual("x=foo", req.Headers.FirstOrDefault("Cookie"));
 
 			// should flow from CookieJar too
 			var jar = new CookieJar().AddOrUpdate("y", "bar", "http://cookies.com");
 			req = new FlurlRequest("http://cookies.com").WithCookies(jar);
-			Assert.AreEqual("y=bar", req.Headers.TryGetValue("Cookie", out val) ? val : null);
+			Assert.AreEqual("y=bar", req.Headers.FirstOrDefault("Cookie"));
 		}
 
 		[TestCase("https://domain1.com", "https://domain1.com", true)]
@@ -321,7 +332,7 @@ namespace Flurl.Test.Http
 			Assert.IsEmpty(jar);
 			// even though the CookieJar rejected the cookie, it doesn't change the fact
 			// that it exists in the response.
-			Assert.AreEqual("foo", resp.Cookies.TryGetValue("x", out var c) ? c.Value : null);
+			Assert.AreEqual("foo", resp.Cookies.FirstOrDefault(c => c.Name == "x")?.Value);
 		}
 
 		/// <summary>
@@ -336,25 +347,19 @@ namespace Flurl.Test.Http
 			Assert.AreEqual(shouldAddToJar, jar.TryAddOrUpdate(cookie, out reason));
 
 			if (shouldAddToJar)
-				CollectionAssert.Contains(jar.Keys, cookie.Name);
+				Assert.AreEqual(cookie.Name, jar.SingleOrDefault()?.Name);
 			else {
 				Assert.Throws<InvalidCookieException>(() => jar.AddOrUpdate(cookie));
-				CollectionAssert.DoesNotContain(jar.Keys, cookie.Name);
+				CollectionAssert.IsEmpty(jar);
 			}
 
 			var req = cookie.OriginUrl.WithCookies(jar);
-			if (shouldAddToJar)
-				CollectionAssert.Contains(req.Cookies.Keys, cookie.Name);
-			else
-				CollectionAssert.DoesNotContain(req.Cookies.Keys, cookie.Name);
+			Assert.AreEqual(shouldAddToJar, req.Cookies.Contains((cookie.Name, cookie.Value)));
 
 			if (requestUrl != null) {
 				Assert.AreEqual(shouldSend, cookie.ShouldSendTo(requestUrl, out reason), reason);
 				req = requestUrl.WithCookies(jar);
-				if (shouldSend)
-					CollectionAssert.Contains(req.Cookies.Keys, cookie.Name);
-				else
-					CollectionAssert.DoesNotContain(req.Cookies.Keys, cookie.Name);
+				Assert.AreEqual(shouldSend, req.Cookies.Contains((cookie.Name, cookie.Value)));
 			}
 		}
 	}

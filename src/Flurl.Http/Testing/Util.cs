@@ -70,8 +70,8 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		internal static bool HasHeader(this FlurlCall call, string name, object value = null) {
 			return (value == null) ?
-				call.Request.Headers.ContainsKey(name) :
-				call.Request.Headers.TryGetValue(name, out var val) && MatchesValueOrPattern(val, value);
+				call.Request.Headers.Contains(name) :
+				call.Request.Headers.TryGetFirst(name, out var val) && MatchesValueOrPattern(val, value);
 		}
 
 		/// <summary>
@@ -79,8 +79,8 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		internal static bool HasCookie(this FlurlCall call, string name, object value = null) {
 			return (value == null) ?
-				call.Request.Cookies.ContainsKey(name) :
-				call.Request.Cookies.TryGetValue(name, out var val) && MatchesValueOrPattern(val, value);
+				call.Request.Cookies.Any(c => c.Name == name) :
+				MatchesValueOrPattern(call.Request.Cookies.FirstOrDefault(c => c.Name == name).Value, value);
 		}
 
 		private static bool MatchesValueOrPattern(object valueToMatch, object value) {

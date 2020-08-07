@@ -14,9 +14,9 @@ namespace Flurl.Http
 	    /// </summary>
 	    FlurlHttpSettings Settings { get; set; }
 
-	    /// <summary>
-	    /// Collection of headers sent on this request or all requests using this client.
-	    /// </summary>
-	    IDictionary<string, object> Headers { get; }
+		/// <summary>
+		/// Collection of headers sent on this request or all requests using this client.
+		/// </summary>
+		INameValueList<object> Headers { get; }
     }
 }

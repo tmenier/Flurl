@@ -352,9 +352,7 @@ namespace Flurl.Test.Http
 			HttpTest.RespondWith(headers: new { h1 = "foo" });
 
 			var resp = await "http://www.api.com".GetAsync();
-			Assert.AreEqual(1, resp.Headers.Count());
-			Assert.AreEqual("h1", resp.Headers.First().Key);
-			Assert.AreEqual("foo", resp.Headers.First().Value);
+			Assert.AreEqual(("h1", "foo"), resp.Headers.Single());
 		}
 
 		[Test]
@@ -363,7 +361,7 @@ namespace Flurl.Test.Http
 
 			var resp = await "http://www.api.com".GetAsync();
 			Assert.AreEqual(1, resp.Cookies.Count);
-			Assert.AreEqual("foo", resp.Cookies["c1"].Value);
+			Assert.AreEqual("foo", resp.Cookies.FirstOrDefault(c => c.Name == "c1")?.Value);
 		}
 
 		// https://github.com/tmenier/Flurl/issues/175
@@ -423,7 +421,7 @@ namespace Flurl.Test.Http
 		public async Task can_fake_content_headers() {
 			HttpTest.RespondWith("<xml></xml>", 200, new { Content_Type = "text/xml" });
 			await "http://api.com".GetAsync();
-			HttpTest.ShouldHaveMadeACall().With(call => call.Response.Headers.Any(kv => kv.Key == "Content-Type" && kv.Value == "text/xml"));
+			HttpTest.ShouldHaveMadeACall().With(call => call.Response.Headers.Contains(("Content-Type", "text/xml")));
 			HttpTest.ShouldHaveMadeACall().With(call => call.HttpResponseMessage.Content.Headers.ContentType.MediaType == "text/xml");
 		}
 

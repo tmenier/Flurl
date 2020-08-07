@@ -210,7 +210,7 @@ namespace Flurl.Http.Testing
 			var descrip = $"any header {string.Join(", ", names)}".Trim();
 			return With(call => {
 				if (!names.Any()) return call.Request.Headers.Any();
-				return call.Request.Headers.Select(h => h.Key).Intersect(names).Any();
+				return call.Request.Headers.Select(h => h.Name).Intersect(names).Any();
 			}, descrip);
 		}
 
@@ -271,7 +271,7 @@ namespace Flurl.Http.Testing
 			var descrip = $"any cookie {string.Join(", ", names)}".Trim();
 			return With(call => {
 				if (!names.Any()) return call.Request.Cookies.Any();
-				return call.Request.Cookies.Select(c => c.Key).Intersect(names).Any();
+				return call.Request.Cookies.Select(c => c.Name).Intersect(names).Any();
 			}, descrip);
 		}
 

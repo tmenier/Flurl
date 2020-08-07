@@ -11,20 +11,28 @@ namespace Flurl.Http
 	public static class CookieCutter
 	{
 		/// <summary>
+		/// Parses a Cookie request header to name-value pairs.
+		/// </summary>
+		/// <param name="headerValue">Value of the Cookie request header.</param>
+		/// <returns></returns>
+		public static IEnumerable<(string Name, string Value)> ParseRequestHeader(string headerValue) {
+			if (string.IsNullOrEmpty(headerValue)) yield break;
+
+			foreach (var pair in GetPairs(headerValue))
+				yield return (pair.Name, Url.Decode(pair.Value, false));
+		}
+
+		/// <summary>
 		/// Parses a Set-Cookie response header to a FlurlCookie.
 		/// </summary>
 		/// <param name="url">The URL that sent the response.</param>
 		/// <param name="headerValue">Value of the Set-Cookie header.</param>
 		/// <returns></returns>
-		public static FlurlCookie FromResponseHeader(string url, string headerValue) {
+		public static FlurlCookie ParseResponseHeader(string url, string headerValue) {
 			if (string.IsNullOrEmpty(headerValue)) return null;
-			var pairs = (
-				from part in headerValue.Split(';')
-				let pair = part.SplitOnFirstOccurence("=")
-				select new { Name = pair[0].Trim(), Value = pair.Last().Trim() });
 
 			FlurlCookie cookie = null;
-			foreach (var pair in pairs) {
+			foreach (var pair in GetPairs(headerValue)) {
 				if (cookie == null)
 					cookie = new FlurlCookie(pair.Name, Url.Decode(pair.Value.Trim('"'), false), url, DateTimeOffset.UtcNow);
 
@@ -49,15 +57,22 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// Creates a Cookie request header value from a key-value dictionary.
+		/// Parses list of semicolon-delimited "name=value" pairs.
 		/// </summary>
-		/// <param name="values">Cookie values.</param>
-		/// <returns>a header value if cookie values are present, otherwise null.</returns>
-		public static string ToRequestHeader(IDictionary<string, object> values) {
-			if (values?.Any() != true) return null;
+		private static IEnumerable<(string Name, string Value)> GetPairs(string list) =>
+			from part in list.Split(';')
+			let pair = part.SplitOnFirstOccurence("=")
+			select (pair[0].Trim(), pair.Last().Trim());
 
-			return string.Join("; ", values.Select(c =>
-				$"{Url.Encode(c.Key)}={Url.Encode(c.Value.ToInvariantString())}"));
+		/// <summary>
+		/// Creates a Cookie request header value from a list of cookie name-value pairs.
+		/// </summary>
+		/// <returns>A header value if cookie values are present, otherwise null.</returns>
+		public static string ToRequestHeader(IEnumerable<(string Name, string Value)> cookies) {
+			if (cookies?.Any() != true) return null;
+
+			return string.Join("; ", cookies.Select(c =>
+				$"{Url.Encode(c.Name)}={Url.Encode(c.Value)}"));
 		}
 
 		/// <summary>

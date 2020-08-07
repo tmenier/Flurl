@@ -3,10 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text.RegularExpressions;
-#if !NET40
 using System.Reflection;
-#endif
+using System.Text.RegularExpressions;
 
 namespace Flurl.Util
 {
@@ -89,34 +87,51 @@ namespace Flurl.Util
 		}
 
 		private static IEnumerable<KeyValuePair<string, object>> CollectionToKV(IEnumerable col) {
-			// Accepts KeyValuePairs or any arbitrary types that contain a property called "Key" or "Name" and a property called "Value".
+			bool TryGetProp(object obj, string name, out object value) {
+#if NETSTANDARD1_0
+				var prop = obj.GetType().GetRuntimeProperty(name);
+				var field = obj.GetType().GetRuntimeField(name);
+#else
+				var prop = obj.GetType().GetProperty(name);
+				var field = obj.GetType().GetField(name);
+#endif
+				if (prop != null) {
+					value = prop.GetValue(obj, null);
+					return true;
+				}
+				if (field != null) {
+					value = field.GetValue(obj);
+					return true;
+				}
+				value = null;
+				return false;
+			}
+
+			bool IsTuple2(object item, out object name, out object val) {
+				name = null;
+				val = null;
+				return
+					item.GetType().Name.Contains("Tuple") &&
+					TryGetProp(item, "Item1", out name) &&
+					TryGetProp(item, "Item2", out val) &&
+					!TryGetProp(item, "Item3", out _);
+			}
+
+			bool LooksLikeKV(object item, out object name, out object val) {
+				name = null;
+				val = null;
+				return
+					(TryGetProp(item, "Key", out name) || TryGetProp(item, "key", out name) || TryGetProp(item, "Name", out name) || TryGetProp(item, "name", out name)) &&
+					(TryGetProp(item, "Value", out val) || TryGetProp(item, "value", out val));
+			}
+
 			foreach (var item in col) {
 				if (item == null)
 					continue;
-
-				string key;
-				object val;
-
-				var type = item.GetType();
-#if NETSTANDARD1_0
-				var keyProp = type.GetRuntimeProperty("Key") ?? type.GetRuntimeProperty("key") ?? type.GetRuntimeProperty("Name") ?? type.GetRuntimeProperty("name");
-				var valProp = type.GetRuntimeProperty("Value") ?? type.GetRuntimeProperty("value");
-#else
-				var keyProp = type.GetProperty("Key") ?? type.GetProperty("key") ?? type.GetProperty("Name") ?? type.GetProperty("name");
-				var valProp = type.GetProperty("Value") ?? type.GetProperty("value");
-#endif
-
-				if (keyProp != null && valProp != null) {
-					key = keyProp.GetValue(item, null)?.ToInvariantString();
-					val = valProp.GetValue(item, null);
-				}
-				else {
-					key = item.ToInvariantString();
-					val = null;
-				}
-
-				if (key != null)
-					yield return new KeyValuePair<string, object>(key, val);
+				if (!IsTuple2(item, out var name, out var val) && !LooksLikeKV(item, out name, out val))
+					yield return new KeyValuePair<string, object>(item.ToInvariantString(), null);
+				else if (name != null)
+					yield return new KeyValuePair<string, object>(name.ToInvariantString(), val);
 			}
 		}
 

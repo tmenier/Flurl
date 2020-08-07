@@ -21,10 +21,10 @@ namespace Flurl.Http
 	    /// <param name="value">HTTP header value.</param>
 	    /// <returns>This IFlurlClient or IFlurlRequest.</returns>
 	    public static T WithHeader<T>(this T clientOrRequest, string name, object value) where T : IHttpSettingsContainer {
-		    if (value == null && clientOrRequest.Headers.ContainsKey(name))
+		    if (value == null)
 			    clientOrRequest.Headers.Remove(name);
-			else if (value != null)
-			    clientOrRequest.Headers[name] = value;
+			else
+			    clientOrRequest.Headers.AddOrReplace(name, value);
 		    return clientOrRequest;
 	    }
 

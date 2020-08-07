@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 using Flurl.Http.Content;
 using Flurl.Util;
 
@@ -68,8 +64,9 @@ namespace Flurl.Http
 						Content.Headers.TryAddWithoutValidation(name, new[] { value.ToInvariantString() });
 					break;
 				default:
-					// it's a request-level header
-					Headers.Remove(name);
+					// it's a request/response-level header
+					if (!name.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase)) // multiple set-cookie headers are allowed
+						Headers.Remove(name);
 					if (value != null)
 						Headers.TryAddWithoutValidation(name, new[] { value.ToInvariantString() });
 					break;

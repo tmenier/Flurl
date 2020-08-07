@@ -589,7 +589,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets request headers based on property names/values of the provided object, or keys/values if object is a dictionary, to be sent
+		/// Creates a new FlurlRequest and sets request headers based on property names/values of the provided object, or keys/values if object is a dictionary, to be sent.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
 		/// <param name="headers">Names/values of HTTP headers to set. Typically an anonymous object or IDictionary.</param>
@@ -621,7 +621,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets an HTTP cookie to be sent with this request only. To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead.
+		/// Creates a new FlurlRequest and adds a name-value pair to its Cookie header. To automatically maintain a cookie "session", consider using a CookieJar or CookieSession instead.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
 		/// <param name="name">The cookie name.</param>
@@ -632,7 +632,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets HTTP cookies to be sent with this request only, based on property names/values of the provided object, or keys/values if object is a dictionary. To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead
+		/// Creates a new FlurlRequest and adds name-value pairs to its Cookie header based on property names/values of the provided object, or keys/values if object is a dictionary. To automatically maintain a cookie "session", consider using a CookieJar or CookieSession instead.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
 		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
@@ -1058,7 +1058,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets request headers based on property names/values of the provided object, or keys/values if object is a dictionary, to be sent
+		/// Creates a new FlurlRequest and sets request headers based on property names/values of the provided object, or keys/values if object is a dictionary, to be sent.
 		/// </summary>
 		/// <param name="url">This URL.</param>
 		/// <param name="headers">Names/values of HTTP headers to set. Typically an anonymous object or IDictionary.</param>
@@ -1090,7 +1090,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets an HTTP cookie to be sent with this request only. To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead.
+		/// Creates a new FlurlRequest and adds a name-value pair to its Cookie header. To automatically maintain a cookie "session", consider using a CookieJar or CookieSession instead.
 		/// </summary>
 		/// <param name="url">This URL.</param>
 		/// <param name="name">The cookie name.</param>
@@ -1101,7 +1101,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets HTTP cookies to be sent with this request only, based on property names/values of the provided object, or keys/values if object is a dictionary. To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead
+		/// Creates a new FlurlRequest and adds name-value pairs to its Cookie header based on property names/values of the provided object, or keys/values if object is a dictionary. To automatically maintain a cookie "session", consider using a CookieJar or CookieSession instead.
 		/// </summary>
 		/// <param name="url">This URL.</param>
 		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
@@ -1527,7 +1527,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets request headers based on property names/values of the provided object, or keys/values if object is a dictionary, to be sent
+		/// Creates a new FlurlRequest and sets request headers based on property names/values of the provided object, or keys/values if object is a dictionary, to be sent.
 		/// </summary>
 		/// <param name="uri">This System.Uri.</param>
 		/// <param name="headers">Names/values of HTTP headers to set. Typically an anonymous object or IDictionary.</param>
@@ -1559,7 +1559,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets an HTTP cookie to be sent with this request only. To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead.
+		/// Creates a new FlurlRequest and adds a name-value pair to its Cookie header. To automatically maintain a cookie "session", consider using a CookieJar or CookieSession instead.
 		/// </summary>
 		/// <param name="uri">This System.Uri.</param>
 		/// <param name="name">The cookie name.</param>
@@ -1570,7 +1570,7 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and sets HTTP cookies to be sent with this request only, based on property names/values of the provided object, or keys/values if object is a dictionary. To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead
+		/// Creates a new FlurlRequest and adds name-value pairs to its Cookie header based on property names/values of the provided object, or keys/values if object is a dictionary. To automatically maintain a cookie "session", consider using a CookieJar or CookieSession instead.
 		/// </summary>
 		/// <param name="uri">This System.Uri.</param>
 		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>

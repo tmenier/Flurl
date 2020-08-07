@@ -8,20 +8,15 @@ using Flurl.Util;
 namespace Flurl.Http
 {
 	/// <summary>
-	/// A collection of FlurlCookies that can be passed to one or more FlurlRequests, either
-	/// explicitly via WithCookies or implicitly via FlurlClient.StartCookieSession. Automatically
-	/// populated/synchronized with cookies received via Set-Cookie response headers. Chooses
-	/// which cookies to send in Cookie request per RFC 6265.
+	/// A collection of FlurlCookies that can be attached to one or more FlurlRequests, either explicitly via WithCookies
+	/// or implicitly via a CookieSession. Stores cookies received via Set-Cookie response headers.
 	/// </summary>
-	public class CookieJar : IReadOnlyDictionary<string, FlurlCookie>
+	public class CookieJar : IReadOnlyCollection<FlurlCookie>
 	{
 		private readonly ConcurrentDictionary<string, FlurlCookie> _dict = new ConcurrentDictionary<string, FlurlCookie>();
 
-		// requests whose Cookies collection should be kept in sync with changes to this CookieJar
-		private readonly HashSet<IFlurlRequest> _syncdRequests = new HashSet<IFlurlRequest>();
-
 		/// <summary>
-		/// Add a cookie to the jar or update if one with the same Name already exists.
+		/// Adds a cookie to the jar or updates if one with the same Name/Domain/Path already exists.
 		/// </summary>
 		/// <param name="name">Name of the cookie.</param>
 		/// <param name="value">Value of the cookie.</param>
@@ -31,7 +26,7 @@ namespace Flurl.Http
 			AddOrUpdate(new FlurlCookie(name, value.ToInvariantString(), originUrl, dateReceived));
 
 		/// <summary>
-		/// Adds a cookie to the jar or updates if one with the same Name already exists.
+		/// Adds a cookie to the jar or updates if one with the same Name/Domain/Path already exists.
 		/// Throws FlurlHttpException if cookie is invalid.
 		/// </summary>
 		public CookieJar AddOrUpdate(FlurlCookie cookie) {
@@ -42,28 +37,27 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// Adds a cookie to the jar or updates if one with the same Name already exists, if it is valid.
-		/// Returns true if cookie is valid and was added. If false, provides descriptive reason.
+		/// Adds a cookie to the jar or updates if one with the same Name/Domain/Path already exists,
+		/// but only if it is valid and not expired.
 		/// </summary>
+		/// <returns>true if cookie is valid and was added or updated. If false, provides descriptive reason.</returns>
 		public bool TryAddOrUpdate(FlurlCookie cookie, out string reason) {
 			if (!cookie.IsValid(out reason) || cookie.IsExpired(out reason))
 				return false;
 
-			cookie.Changed += (_, name) => SyncToRequests(cookie, false);
-			_dict[cookie.Name] = cookie;
-			SyncToRequests(cookie, false);
+			cookie.Lock(); // makes immutable
+			_dict[cookie.GetKey()] = cookie;
 
 			return true;
 		}
 
 		/// <summary>
-		/// Removes a cookie from the CookieJar.
+		/// Removes all cookies matching the given predicate.
 		/// </summary>
-		/// <param name="name">The cookie name.</param>
-		public CookieJar Remove(string name) {
-			if (_dict.TryRemove(name, out var cookie))
-				SyncToRequests(cookie, true);
-
+		public CookieJar Remove(Func<FlurlCookie, bool> predicate) {
+			var keys = _dict.Where(kv => predicate(kv.Value)).Select(kv => kv.Key).ToList();
+			foreach (var key in keys)
+				_dict.TryRemove(key, out _);
 			return this;
 		}
 
@@ -71,59 +65,18 @@ namespace Flurl.Http
 		/// Removes all cookies from this CookieJar
 		/// </summary>
 		public CookieJar Clear() {
-			var all = _dict.Values;
 			_dict.Clear();
-			foreach (var cookie in all)
-				SyncToRequests(cookie, true);
 			return this;
 		}
 
-		/// <summary>
-		/// Ensures changes to the CookieJar are kept in sync with the Cookies collection of the FlurlRequest
-		/// </summary>
-		internal void SyncWith(IFlurlRequest req) {
-			foreach (var cookie in this.Values.Where(c => c.ShouldSendTo(req.Url, out _)))
-				req.Cookies[cookie.Name] = cookie.Value;
-			_syncdRequests.Add(req);
-		}
-
-		/// <summary>
-		/// Stops synchronization of changes to the CookieJar with the Cookies collection of the FlurlRequest
-		/// </summary>
-		internal void UnsyncWith(IFlurlRequest req) => _syncdRequests.Remove(req);
-
-		private void SyncToRequests(FlurlCookie cookie, bool removed) {
-			foreach (var req in _syncdRequests) {
-				if (removed || !cookie.ShouldSendTo(req.Url, out _))
-					req.Cookies.Remove(cookie.Name);
-				else
-					req.Cookies[cookie.Name] = cookie.Value;
-			}
-		}
-
 		/// <inheritdoc/>
-		public IEnumerator<KeyValuePair<string, FlurlCookie>> GetEnumerator() => _dict.GetEnumerator();
+		public IEnumerator<FlurlCookie> GetEnumerator() => _dict.Values.GetEnumerator();
 
 		/// <inheritdoc/>
 		IEnumerator IEnumerable.GetEnumerator() => _dict.GetEnumerator();
 
 		/// <inheritdoc/>
 		public int Count => _dict.Count;
-
-		/// <inheritdoc/>
-		public bool ContainsKey(string key) => _dict.ContainsKey(key);
-
-		/// <inheritdoc/>
-		public bool TryGetValue(string key, out FlurlCookie value) => _dict.TryGetValue(key, out value);
-
-		/// <inheritdoc/>
-		public FlurlCookie this[string key] => _dict[key];
-
-		/// <inheritdoc/>
-		public IEnumerable<string> Keys => _dict.Keys;
-
-		/// <inheritdoc/>
-		public IEnumerable<FlurlCookie> Values => _dict.Values;
 	}
 
 	/// <summary>

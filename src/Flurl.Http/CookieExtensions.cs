@@ -1,3 +1,4 @@
+using System.Linq;
 using Flurl.Util;
 
 namespace Flurl.Http
@@ -8,31 +9,38 @@ namespace Flurl.Http
 	public static class CookieExtensions
 	{
 		/// <summary>
-		/// Sets an HTTP cookie to be sent with this request only.
-		/// To maintain a cookie "session", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead.
+		/// Adds or updates a name-value pair in this request's Cookie header.
+		/// To automatically maintain a cookie "session", consider using a CookieJar or CookieSession instead.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest.</param>
 		/// <param name="name">The cookie name.</param>
 		/// <param name="value">The cookie value.</param>
 		/// <returns>This IFlurlClient instance.</returns>
 		public static IFlurlRequest WithCookie(this IFlurlRequest request, string name, object value) {
-			request.Cookies[name] = value;
-			return request;
+			var cookies = new NameValueList<string>(request.Cookies);
+			cookies.AddOrReplace(name, value.ToInvariantString());
+			return request.WithHeader("Cookie", CookieCutter.ToRequestHeader(cookies));
 		}
 
 		/// <summary>
-		/// Sets HTTP cookies to be sent with this request only, based on property names/values of the provided object, or
-		/// keys/values if object is a dictionary. To maintain a cookie "session", consider using WithCookies(CookieJar)
-		/// or FlurlClient.StartCookieSession instead.
+		/// Adds or updates name-value pairs in this request's Cookie header, based on property names/values
+		/// of the provided object, or keys/values if object is a dictionary.
+		/// To automatically maintain a cookie "session", consider using a CookieJar or CookieSession instead.
 		/// </summary>
 		/// <param name="request">The IFlurlRequest.</param>
 		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
 		/// <returns>This IFlurlClient.</returns>
 		public static IFlurlRequest WithCookies(this IFlurlRequest request, object values) {
-			foreach (var kv in values.ToKeyValuePairs())
-				request.Cookies[kv.Key] = kv.Value?.ToInvariantString();
-
-			return request;
+			var cookies = new NameValueList<string>(request.Cookies);
+			// although rare, we need to accommodate the possibility of multiple cookies with the same name
+			foreach (var group in values.ToKeyValuePairs().GroupBy(x => x.Key)) {
+				// add or replace the first one (by name)
+				cookies.AddOrReplace(group.Key, group.First().Value.ToInvariantString());
+				// append the rest
+				foreach (var kv in group.Skip(1))
+					cookies.Add(kv.Key, kv.Value.ToInvariantString());
+			}
+			return request.WithHeader("Cookie", CookieCutter.ToRequestHeader(cookies));
 		}
 
 		/// <summary>

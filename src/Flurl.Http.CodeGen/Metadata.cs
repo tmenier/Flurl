@@ -83,7 +83,7 @@ namespace Flurl.Http.CodeGen
 			yield return Create("WithHeader", "Creates a new FlurlRequest and sets a request header.")
 				.AddArg("name", "string", "The header name.")
 				.AddArg("value", "object", "The header value.");
-			yield return Create("WithHeaders", "Creates a new FlurlRequest and sets request headers based on property names/values of the provided object, or keys/values if object is a dictionary, to be sent")
+			yield return Create("WithHeaders", "Creates a new FlurlRequest and sets request headers based on property names/values of the provided object, or keys/values if object is a dictionary, to be sent.")
 				.AddArg("headers", "object", "Names/values of HTTP headers to set. Typically an anonymous object or IDictionary.")
 				.AddArg("replaceUnderscoreWithHyphen", "bool", "If true, underscores in property names will be replaced by hyphens. Default is true.", "true");
 			yield return Create("WithBasicAuth", "Creates a new FlurlRequest and sets the Authorization header according to Basic Authentication protocol.")
@@ -93,11 +93,12 @@ namespace Flurl.Http.CodeGen
 				.AddArg("token", "string", "The acquired oAuth bearer token.");
 
 			// cookie extensions
-			yield return Create("WithCookie", "Creates a new FlurlRequest and sets an HTTP cookie to be sent with this request only. To maintain a cookie \"session\", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead.")
+			yield return Create("WithCookie", "Creates a new FlurlRequest and adds a name-value pair to its Cookie header. " +
+											  "To automatically maintain a cookie \"session\", consider using a CookieJar or CookieSession instead.")
 				.AddArg("name", "string", "The cookie name.")
 				.AddArg("value", "object", "The cookie value.");
-			yield return Create("WithCookies", "Creates a new FlurlRequest and sets HTTP cookies to be sent with this request only, based on property names/values of the provided object, or keys/values " +
-			                                   "if object is a dictionary. To maintain a cookie \"session\", consider using WithCookies(CookieJar) or FlurlClient.StartCookieSession instead")
+			yield return Create("WithCookies", "Creates a new FlurlRequest and adds name-value pairs to its Cookie header based on property names/values of the provided object, or keys/values if object is a dictionary. " +
+			                                   "To automatically maintain a cookie \"session\", consider using a CookieJar or CookieSession instead.")
 				.AddArg("values", "object", "Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.");
 			yield return Create("WithCookies", "Creates a new FlurlRequest and sets the CookieJar associated with this request, which will be updated with any Set-Cookie headers present in the response and is suitable for reuse in subsequent requests.")
 				.AddArg("cookieJar", "CookieJar", "The CookieJar.");

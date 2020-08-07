@@ -34,7 +34,7 @@ namespace Flurl.Test.Http
 
 			var resp = await "http://some-api.com".GetAsync();
 			Assert.AreEqual(234, resp.StatusCode);
-			Assert.IsTrue(resp.Headers.TryGetValue("my-header", out var headerVal));
+			Assert.IsTrue(resp.Headers.TryGetFirst("my-header", out var headerVal));
 			Assert.AreEqual("hi", headerVal);
 
 			var data = await resp.GetJsonAsync<TestData>();

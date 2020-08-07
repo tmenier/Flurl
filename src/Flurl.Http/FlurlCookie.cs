@@ -37,6 +37,8 @@ namespace Flurl.Http
 		private bool _httpOnly;
 		private SameSite? _sameSite;
 
+		private bool _locked;
+
 		/// <summary>
 		/// Creates a new FlurlCookie.
 		/// </summary>
@@ -50,11 +52,6 @@ namespace Flurl.Http
 			OriginUrl = originUrl;
 			DateReceived = dateReceived ?? DateTimeOffset.UtcNow;
 		}
-
-		/// <summary>
-		/// Event raised when a cookie is changed.
-		/// </summary>
-		internal event EventHandler<string> Changed;
 
 		/// <summary>
 		/// The URL that originally sent the Set-Cookie response header. If adding to a CookieJar, this is required unless
@@ -78,7 +75,7 @@ namespace Flurl.Http
 		/// </summary>
 		public string Value {
 			get => _value;
-			set => UpdateAndNotify(ref _value, value);
+			set => Update(ref _value, value);
 		}
 
 		/// <summary>
@@ -86,7 +83,7 @@ namespace Flurl.Http
 		/// </summary>
 		public DateTimeOffset? Expires {
 			get => _expires;
-			set => UpdateAndNotify(ref _expires, value);
+			set => Update(ref _expires, value);
 		}
 
 		/// <summary>
@@ -94,7 +91,7 @@ namespace Flurl.Http
 		/// </summary>
 		public int? MaxAge {
 			get => _maxAge;
-			set => UpdateAndNotify(ref _maxAge, value);
+			set => Update(ref _maxAge, value);
 		}
 
 		/// <summary>
@@ -102,7 +99,7 @@ namespace Flurl.Http
 		/// </summary>
 		public string Domain {
 			get => _domain;
-			set => UpdateAndNotify(ref _domain, value);
+			set => Update(ref _domain, value);
 		}
 
 		/// <summary>
@@ -110,7 +107,7 @@ namespace Flurl.Http
 		/// </summary>
 		public string Path {
 			get => _path;
-			set => UpdateAndNotify(ref _path, value);
+			set => Update(ref _path, value);
 		}
 
 		/// <summary>
@@ -118,7 +115,7 @@ namespace Flurl.Http
 		/// </summary>
 		public bool Secure {
 			get => _secure;
-			set => UpdateAndNotify(ref _secure, value);
+			set => Update(ref _secure, value);
 		}
 
 		/// <summary>
@@ -126,7 +123,7 @@ namespace Flurl.Http
 		/// </summary>
 		public bool HttpOnly {
 			get => _httpOnly;
-			set => UpdateAndNotify(ref _httpOnly, value);
+			set => Update(ref _httpOnly, value);
 		}
 
 		/// <summary>
@@ -134,17 +131,37 @@ namespace Flurl.Http
 		/// </summary>
 		public SameSite? SameSite {
 			get => _sameSite;
-			set => UpdateAndNotify(ref _sameSite, value);
+			set => Update(ref _sameSite, value);
 		}
 
-		private void UpdateAndNotify<T>(ref T field, T newVal, [CallerMemberName]string propName = null) {
+		/// <summary>
+		/// Generates a key based on cookie Name, Domain, and Path (using OriginalUrl in the absence of Domain/Path).
+		/// Used by CookieJar to determine whether to add a cookie or update an existing one.
+		/// </summary>
+		public string GetKey() {
+			var domain = string.IsNullOrEmpty(Domain) ? "*" + OriginUrl.Host : Domain;
+			var path = string.IsNullOrEmpty(Path) ? OriginUrl.Path : Path;
+			if (path.Length == 0) path = "/";
+			return $"{domain}{path}:{Name.ToLowerInvariant()}";
+		}
+
+		/// <summary>
+		/// Makes this cookie immutable. Call when added to a jar.
+		/// </summary>
+		internal void Lock() {
+			_locked = true;
+		}
+
+		private void Update<T>(ref T field, T newVal, [CallerMemberName]string propName = null) {
 			// == throws with generics (strangely), and .Equals needs a null check. Jon Skeet to the rescue.
 			// https://stackoverflow.com/a/390974/62600
 			if (EqualityComparer<T>.Default.Equals(field, newVal))
 				return;
 
+			if (_locked)
+				throw new Exception("After a cookie has been added to a CookieJar, it becomes immutable and cannot be changed.");
+
 			field = newVal;
-			Changed?.Invoke(this, propName);
 		}
 	}
 }
