@@ -118,6 +118,37 @@ namespace Flurl.Http
 				}
 			}
 
+			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Cookie_prefixes
+
+			if (cookie.Name.StartsWith("__Host-")) {
+				if (!cookie.OriginUrl.IsSecureScheme) {
+					reason = "Cookie named with __Host- prefix must originate from a secure (https) domain.";
+					return false;
+				}
+				if (!cookie.Secure) {
+					reason = "Cookie named with __Host- prefix must contain the Secure attribute.";
+					return false;
+				}
+				if (!string.IsNullOrEmpty(cookie.Domain)) {
+					reason = "Cookie named with __Host- prefix must not contain the Domain attribute.";
+					return false;
+				}
+				if (cookie.Path != "/") {
+					reason = "Cookie named with __Host- prefix must contain the Path attribute with a value of '/'.";
+					return false;
+				}
+			}
+			if (cookie.Name.StartsWith("__Secure-")) {
+				if (!cookie.OriginUrl.IsSecureScheme) {
+					reason = "Cookie named with __Secure- prefix must originate from a secure (https) domain.";
+					return false;
+				}
+				if (!cookie.Secure) {
+					reason = "Cookie named with __Secure- prefix must contain the Secure attribute.";
+					return false;
+				}
+			}
+
 			// it seems intuitive tht a non-empty path should start with /, but I can't find this in any spec
 			//if (!string.IsNullOrEmpty(Path) && !Path.StartsWith("/")) {
 			//	reason = $"{Path} is not a valid Path. A non-empty Path must start with a / character.";

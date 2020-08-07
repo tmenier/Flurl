@@ -191,7 +191,7 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task request_cookies_do_not_overwrite_jar() {
+		public void request_cookies_do_not_overwrite_jar() {
 			var jar = new CookieJar()
 				.AddOrReplace("b", 10, "https://cookies.com")
 				.AddOrReplace("c", 11, "https://cookies.com");
@@ -322,6 +322,29 @@ namespace Flurl.Test.Http
 		public void validates_secure() {
 			var cookie = new FlurlCookie("x", "foo", "http://insecure.com") { Secure = true };
 			AssertCookie(cookie, false, false);
+		}
+
+		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Cookie_prefixes
+		[TestCase("__Host-", "https://cookies.com", true, null, "/", true)]
+		[TestCase("__Host-", "http://cookies.com", true, null, "/", false)]
+		[TestCase("__Host-", "https://cookies.com", false, null, "/", false)]
+		[TestCase("__Host-", "https://cookies.com", true, "cookies.com", "/", false)]
+		[TestCase("__Host-", "https://cookies.com", true, null, null, false)]
+		[TestCase("__Host-", "https://cookies.com", true, null, "/a", false)]
+
+		[TestCase("__Secure-", "https://cookies.com", true, null, "/", true)]
+		[TestCase("__Secure-", "http://cookies.com", true, null, "/", false)]
+		[TestCase("__Secure-", "https://cookies.com", false, null, "/", false)]
+		[TestCase("__Secure-", "https://cookies.com", true, "cookies.com", "/", true)]
+		[TestCase("__Secure-", "https://cookies.com", true, null, null, true)]
+		[TestCase("__Secure-", "https://cookies.com", true, null, "/a", true)]
+		public void validates_cookie_prefix(string prefix, string origin, bool secure, string domain, string path, bool valid) {
+			var cookie = new FlurlCookie(prefix + "x", "foo", origin.AppendPathSegment("a")) {
+				Secure = secure,
+				Domain = domain,
+				Path = path
+			};
+			AssertCookie(cookie, valid, false);
 		}
 
 		[Test]
