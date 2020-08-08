@@ -21,7 +21,7 @@ namespace Flurl
 		}
 		
 		/// <summary>
-		/// Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a seperator.
+		/// Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a separator.
 		/// </summary>
 		/// <param name="url">This URL.</param>
 		/// <param name="segments">The segments to append</param>
@@ -31,7 +31,7 @@ namespace Flurl
 		}
 		
 		/// <summary>
-		/// Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a seperator.
+		/// Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a separator.
 		/// </summary>
 		/// <param name="url">This URL.</param>
 		/// <param name="segments">The segments to append</param>
@@ -203,7 +203,7 @@ namespace Flurl
 		}
 		
 		/// <summary>
-		/// Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a seperator.
+		/// Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a separator.
 		/// </summary>
 		/// <param name="uri">This System.Uri.</param>
 		/// <param name="segments">The segments to append</param>
@@ -213,7 +213,7 @@ namespace Flurl
 		}
 		
 		/// <summary>
-		/// Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a seperator.
+		/// Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a separator.
 		/// </summary>
 		/// <param name="uri">This System.Uri.</param>
 		/// <param name="segments">The segments to append</param>

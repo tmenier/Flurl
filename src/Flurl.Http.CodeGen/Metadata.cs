@@ -19,10 +19,10 @@ namespace Flurl.Http.CodeGen
 				.AddArg("segment", "object", "The segment to append")
 				.AddArg("fullyEncode", "bool", "If true, URL-encodes reserved characters such as '/', '+', and '%'. Otherwise, only encodes strictly illegal characters (including '%' but only when not followed by 2 hex characters).", "false");
 
-			yield return Create("AppendPathSegments", "Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a seperator.")
+			yield return Create("AppendPathSegments", "Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a separator.")
 				.AddArg("segments", "params object[]", "The segments to append");
 
-			yield return Create("AppendPathSegments", "Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a seperator.")
+			yield return Create("AppendPathSegments", "Appends multiple segments to the URL path, ensuring there is one and only one '/' character as a separator.")
 				.AddArg("segments", "IEnumerable<object>", "The segments to append");
 
 			yield return Create("RemovePathSegment", "Removes the last path segment from the URL.");
@@ -83,7 +83,7 @@ namespace Flurl.Http.CodeGen
 			yield return Create("WithHeader", "Creates a new FlurlRequest and sets a request header.")
 				.AddArg("name", "string", "The header name.")
 				.AddArg("value", "object", "The header value.");
-			yield return Create("WithHeaders", "Creates a new FlurlRequest and sets request headers based on property names/values of the provided object, or keys/values if object is a dictionary, to be sent")
+			yield return Create("WithHeaders", "Creates a new FlurlRequest and sets request headers based on property names/values of the provided object, or keys/values if object is a dictionary, to be sent.")
 				.AddArg("headers", "object", "Names/values of HTTP headers to set. Typically an anonymous object or IDictionary.")
 				.AddArg("replaceUnderscoreWithHyphen", "bool", "If true, underscores in property names will be replaced by hyphens. Default is true.", "true");
 			yield return Create("WithBasicAuth", "Creates a new FlurlRequest and sets the Authorization header according to Basic Authentication protocol.")
@@ -93,16 +93,17 @@ namespace Flurl.Http.CodeGen
 				.AddArg("token", "string", "The acquired oAuth bearer token.");
 
 			// cookie extensions
-			yield return Create("EnableCookies", "Creates a new FlurlRequest and allows cookies to be sent and received. Not necessary to call when setting cookies via WithCookie/WithCookies.");
-			yield return Create("WithCookie", "Creates a new FlurlRequest and sets an HTTP cookie to be sent")
-				.AddArg("cookie", "Cookie", "");
-			yield return Create("WithCookie", "Creates a new FlurlRequest and sets an HTTP cookie to be sent.")
+			yield return Create("WithCookie", "Creates a new FlurlRequest and adds a name-value pair to its Cookie header. " +
+											  "To automatically maintain a cookie \"session\", consider using a CookieJar or CookieSession instead.")
 				.AddArg("name", "string", "The cookie name.")
-				.AddArg("value", "object", "The cookie value.")
-				.AddArg("expires", "DateTime?", "The cookie expiration (optional). If excluded, cookie only lives for duration of session.", "null");
-			yield return Create("WithCookies", "Creates a new FlurlRequest and sets HTTP cookies to be sent, based on property names / values of the provided object, or keys / values if object is a dictionary.")
-				.AddArg("cookies", "object", "Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.")
-				.AddArg("expires", "DateTime?", "Expiration for all cookies (optional). If excluded, cookies only live for duration of session.", "null");
+				.AddArg("value", "object", "The cookie value.");
+			yield return Create("WithCookies", "Creates a new FlurlRequest and adds name-value pairs to its Cookie header based on property names/values of the provided object, or keys/values if object is a dictionary. " +
+			                                   "To automatically maintain a cookie \"session\", consider using a CookieJar or CookieSession instead.")
+				.AddArg("values", "object", "Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.");
+			yield return Create("WithCookies", "Creates a new FlurlRequest and sets the CookieJar associated with this request, which will be updated with any Set-Cookie headers present in the response and is suitable for reuse in subsequent requests.")
+				.AddArg("cookieJar", "CookieJar", "The CookieJar.");
+			yield return Create("WithCookies", "Creates a new FlurlRequest and associates it with a new CookieJar, which will be updated with any Set-Cookie headers present in the response and is suitable for reuse in subsequent requests.")
+				.AddArg("cookieJar", "CookieJar", "The created CookieJar, which can be reused in subsequent requests.", isOut: true);
 
 			// settings extensions
 			yield return Create("ConfigureRequest", "Creates a new FlurlRequest and allows changing its Settings inline.")
@@ -113,9 +114,11 @@ namespace Flurl.Http.CodeGen
 				.AddArg("seconds", "int", "Seconds to wait before the request times out.");
 			yield return Create("AllowHttpStatus", "Creates a new FlurlRequest and adds a pattern representing an HTTP status code or range of codes which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.")
 				.AddArg("pattern", "string", "Examples: \"3xx\", \"100,300,600\", \"100-299,6xx\"");
-			yield return Create("AllowHttpStatus", "Creates a new FlurlRequest and adds an HttpStatusCode which (in addtion to 2xx) will NOT result in a FlurlHttpException being thrown.")
+			yield return Create("AllowHttpStatus", "Creates a new FlurlRequest and adds an HttpStatusCode which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.")
 				.AddArg("statusCodes", "params HttpStatusCode[]", "The HttpStatusCode(s) to allow.");
 			yield return Create("AllowAnyHttpStatus", "Creates a new FlurlRequest and configures it to allow any returned HTTP status without throwing a FlurlHttpException.");
+			yield return Create("WithAutoRedirect", "Creates a new FlurlRequest and configures whether redirects are automatically followed.")
+				.AddArg("enabled", "bool", "true if Flurl should automatically send a new request to the redirect URL, false if it should not.");
 
 			yield return Create("WithClient", "Creates a new FlurlRequest and configures it to use the given IFlurlClient.")
 				.AddArg("client", "IFlurlClient", "The IFlurlClient to use to send the request.");

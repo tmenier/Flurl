@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -49,48 +49,6 @@ namespace Flurl.Test.Http
 			finally {
 				Directory.Delete(folder, true);
 			}
-		}
-
-		[Test]
-		public async Task can_set_request_cookies() {
-			var cli = new FlurlClient();
-			var resp = await cli.Request("https://httpbin.org/cookies").WithCookies(new { x = 1, y = 2 }).GetJsonAsync();
-
-			// httpbin returns json representation of cookies that were set on the server.
-			Assert.AreEqual("1", resp.cookies.x);
-			Assert.AreEqual("2", resp.cookies.y);
-		}
-
-		[Test]
-		public async Task can_set_cookies_before_setting_url() {
-			var cli = new FlurlClient().WithCookie("z", "999");
-			var resp = await cli.Request("https://httpbin.org/cookies").GetJsonAsync();
-			Assert.AreEqual("999", resp.cookies.z);
-		}
-
-		[Test]
-		public async Task can_get_response_cookies() {
-			var cli = new FlurlClient().EnableCookies();
-			await cli.Request("https://httpbin.org/cookies/set?z=999").HeadAsync();
-			Assert.AreEqual("999", cli.Cookies["z"].Value);
-		}
-
-		[Test]
-		public async Task can_persist_cookies() {
-			var cli = new FlurlClient("https://httpbin.org/cookies");
-			var req = cli.Request().WithCookie("z", 999);
-			// cookie should be set
-			Assert.AreEqual("999", cli.Cookies["z"].Value);
-			Assert.AreEqual("999", req.Cookies["z"].Value);
-
-			await req.HeadAsync();
-			// FlurlClient should be re-used, so cookie should stick
-			Assert.AreEqual("999", cli.Cookies["z"].Value);
-			Assert.AreEqual("999", req.Cookies["z"].Value);
-
-			// httpbin returns json representation of cookies that were set on the server.
-			var resp = await cli.Request().GetJsonAsync();
-			Assert.AreEqual("999", resp.cookies.z);
 		}
 
 		[Test]
@@ -250,7 +208,7 @@ namespace Flurl.Test.Http
 				cts.Cancel();
 				await task;
 			});
-			Assert.That(ex.InnerException is TaskCanceledException);
+			Assert.That(ex.InnerException is OperationCanceledException);
 			Assert.IsTrue(cts.Token.IsCancellationRequested);
 
 			// timeout with cancellation token set
@@ -260,31 +218,8 @@ namespace Flurl.Test.Http
 					.WithTimeout(TimeSpan.FromMilliseconds(50))
 					.GetAsync(cts.Token);
 			});
-			Assert.That(ex.InnerException is TaskCanceledException);
+			Assert.That(ex.InnerException is OperationCanceledException);
 			Assert.IsFalse(cts.Token.IsCancellationRequested);
-		}
-
-		[Test]
-		public async Task can_set_request_cookies_with_a_delegating_handler() {
-			var resp = await new FlurlClient("http://httpbin.org")
-				.Configure(settings => settings.HttpClientFactory = new DelegatingHandlerHttpClientFactory())
-				.Request("cookies")
-				.WithCookies(new { x = 1, y = 2 })
-				.GetJsonAsync();
-
-			// httpbin returns json representation of cookies that were set on the server.
-			Assert.AreEqual("1", resp.cookies.x);
-			Assert.AreEqual("2", resp.cookies.y);
-		}
-
-		[Test]
-		public async Task can_get_response_cookies_with_a_delegating_handler() {
-			var cli = new FlurlClient("https://httpbin.org")
-				.Configure(settings => settings.HttpClientFactory = new DelegatingHandlerHttpClientFactory())
-				.EnableCookies();
-
-			await cli.Request("cookies/set?z=999").HeadAsync();
-			Assert.AreEqual("999", cli.Cookies["z"].Value);
 		}
 
 		[Test]
@@ -311,14 +246,14 @@ namespace Flurl.Test.Http
 			var h = cli1.HttpClient; // force (lazy) instantiation
 
 			using (var test = new HttpTest()) {
-				test.Settings.CookiesEnabled = false;
+				test.Settings.Redirects.Enabled = false;
 
 				test.RespondWith("foo!");
 				var s = await cli1.Request("http://www.google.com")
-					.EnableCookies() // test says cookies are off, and test should always win
+					.WithAutoRedirect(true) // test says redirects are off, and test should always win
 					.GetStringAsync();
 				Assert.AreEqual("foo!", s);
-				Assert.IsFalse(cli1.Settings.CookiesEnabled);
+				Assert.IsFalse(cli1.Settings.Redirects.Enabled);
 
 				var cli2 = new FlurlClient();
 				cli2.Settings.HttpClientFactory = new DefaultHttpClientFactory();
@@ -326,10 +261,10 @@ namespace Flurl.Test.Http
 
 				test.RespondWith("foo 2!");
 				s = await cli2.Request("http://www.google.com")
-					.EnableCookies() // test says cookies are off, and test should always win
+					.WithAutoRedirect(true) // test says redirects are off, and test should always win
 					.GetStringAsync();
 				Assert.AreEqual("foo 2!", s);
-				Assert.IsFalse(cli2.Settings.CookiesEnabled);
+				Assert.IsFalse(cli2.Settings.Redirects.Enabled);
 			}
 		}
 
@@ -350,18 +285,61 @@ namespace Flurl.Test.Http
 			}
 		}
 
-		public class DelegatingHandlerHttpClientFactory : DefaultHttpClientFactory
-		{
-			public override HttpMessageHandler CreateMessageHandler() {
-				var handler = base.CreateMessageHandler();
+		#region cookies
+		[Test]
+		public async Task can_send_cookies() {
+			var req = "https://httpbin.org/cookies".WithCookies(new { x = 1, y = 2 });
+			Assert.AreEqual(2, req.Cookies.Count());
+			Assert.IsTrue(req.Cookies.Contains(("x", "1")));
+			Assert.IsTrue(req.Cookies.Contains(("y", "2")));
 
-				return new PassThroughDelegatingHandler(new PassThroughDelegatingHandler(handler));
-			}
+			var s = await req.GetStringAsync();
 
-			public class PassThroughDelegatingHandler : DelegatingHandler
-			{
-				public PassThroughDelegatingHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
+			var resp = await req.WithAutoRedirect(false).GetJsonAsync();
+			// httpbin returns json representation of cookies that were sent
+			Assert.AreEqual("1", resp.cookies.x);
+			Assert.AreEqual("2", resp.cookies.y);
+		}
+
+		[Test]
+		public async Task can_receive_cookies() {
+			// endpoint does a redirect, so we need to disable auto-redirect in order to see the cookie in the response
+			var resp = await "https://httpbin.org/cookies/set?z=999".WithAutoRedirect(false).GetAsync();
+			Assert.AreEqual("999", resp.Cookies.FirstOrDefault(c => c.Name == "z")?.Value);
+
+
+			// but using WithCookies we can capture it even with redirects enabled
+			await "https://httpbin.org/cookies/set?z=999".WithCookies(out var cookies).GetAsync();
+			Assert.AreEqual("999", cookies.FirstOrDefault(c => c.Name == "z")?.Value);
+
+			// this works with redirects too
+			using (var session = new CookieSession("https://httpbin.org/cookies")) {
+				await session.Request("set?z=999").GetAsync();
+				Assert.AreEqual("999", session.Cookies.FirstOrDefault(c => c.Name == "z")?.Value);
 			}
 		}
+
+		[Test]
+		public async Task can_set_cookies_before_setting_url() {
+			var req = new FlurlRequest().WithCookie("z", "999");
+			req.Url = "https://httpbin.org/cookies";
+			var resp = await req.GetJsonAsync();
+			Assert.AreEqual("999", resp.cookies.z);
+		}
+
+		[Test]
+		public async Task can_send_different_cookies_per_request() {
+			var cli = new FlurlClient();
+
+			var req1 = cli.Request("https://httpbin.org/cookies").WithCookie("x", "123");
+			var req2 = cli.Request("https://httpbin.org/cookies").WithCookie("x", "abc");
+
+			var resp2 = await req2.GetJsonAsync();
+			var resp1 = await req1.GetJsonAsync();
+
+			Assert.AreEqual("123", resp1.cookies.x);
+			Assert.AreEqual("abc", resp2.cookies.x);
+		}
+		#endregion
 	}
 }

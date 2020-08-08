@@ -32,8 +32,7 @@ namespace Flurl.Test.Http
 		[Test]
 		public void can_set_header() {
 			var sc = GetSettingsContainer().WithHeader("a", 1);
-			Assert.AreEqual(1, sc.Headers.Count);
-			Assert.AreEqual(1, sc.Headers["a"]);
+			Assert.AreEqual(("a", 1), sc.Headers.Single());
 		}
 
 		[Test]
@@ -41,8 +40,8 @@ namespace Flurl.Test.Http
 			// null values shouldn't be added
 			var sc = GetSettingsContainer().WithHeaders(new { a = "b", one = 2, three = (object)null });
 			Assert.AreEqual(2, sc.Headers.Count);
-			Assert.AreEqual("b", sc.Headers["a"]);
-			Assert.AreEqual(2, sc.Headers["one"]);
+			Assert.IsTrue(sc.Headers.Contains("a", "b"));
+			Assert.IsTrue(sc.Headers.Contains("one", 2));
 		}
 
 		[Test]
@@ -51,48 +50,48 @@ namespace Flurl.Test.Http
 			Assert.AreEqual(2, sc.Headers.Count);
 			sc.WithHeader("b", null);
 			Assert.AreEqual(1, sc.Headers.Count);
-			Assert.AreEqual("a", sc.Headers.Keys.Single());
+			Assert.IsFalse(sc.Headers.Contains("b"));
 		}
 
 		[Test]
 		public void can_set_headers_from_dictionary() {
 			var sc = GetSettingsContainer().WithHeaders(new Dictionary<string, object> { { "a", "b" }, { "one", 2 } });
 			Assert.AreEqual(2, sc.Headers.Count);
-			Assert.AreEqual("b", sc.Headers["a"]);
-			Assert.AreEqual(2, sc.Headers["one"]);
+			Assert.IsTrue(sc.Headers.Contains("a", "b"));
+			Assert.IsTrue(sc.Headers.Contains("one", 2));
 		}
 
 		[Test]
 		public void underscores_in_properties_convert_to_hyphens_in_header_names() {
 			var sc = GetSettingsContainer().WithHeaders(new { User_Agent = "Flurl", Cache_Control = "no-cache" });
-			Assert.IsTrue(sc.Headers.ContainsKey("User-Agent"));
-			Assert.IsTrue(sc.Headers.ContainsKey("Cache-Control"));
+			Assert.IsTrue(sc.Headers.Contains("User-Agent"));
+			Assert.IsTrue(sc.Headers.Contains("Cache-Control"));
 
 			// make sure we can disable the behavior
 			sc.WithHeaders(new { no_i_really_want_underscores = "foo" }, false);
-			Assert.IsTrue(sc.Headers.ContainsKey("no_i_really_want_underscores"));
+			Assert.IsTrue(sc.Headers.Contains("no_i_really_want_underscores"));
 
 			// dictionaries don't get this behavior since you can use hyphens explicitly
 			sc.WithHeaders(new Dictionary<string, string> { { "exclude_dictionaries", "bar" } });
-			Assert.IsTrue(sc.Headers.ContainsKey("exclude_dictionaries"));
+			Assert.IsTrue(sc.Headers.Contains("exclude_dictionaries"));
 
 			// same with strings
 			sc.WithHeaders("exclude_strings=123");
-			Assert.IsTrue(sc.Headers.ContainsKey("exclude_strings"));
+			Assert.IsTrue(sc.Headers.Contains("exclude_strings"));
 		}
 
 		[Test]
 		public void can_setup_oauth_bearer_token() {
 			var sc = GetSettingsContainer().WithOAuthBearerToken("mytoken");
 			Assert.AreEqual(1, sc.Headers.Count);
-			Assert.AreEqual("Bearer mytoken", sc.Headers["Authorization"]);
+			Assert.IsTrue(sc.Headers.Contains("Authorization", "Bearer mytoken"));
 		}
 
 		[Test]
 		public void can_setup_basic_auth() {
 			var sc = GetSettingsContainer().WithBasicAuth("user", "pass");
 			Assert.AreEqual(1, sc.Headers.Count);
-			Assert.AreEqual("Basic dXNlcjpwYXNz", sc.Headers["Authorization"]);
+			Assert.IsTrue(sc.Headers.Contains("Authorization", "Basic dXNlcjpwYXNz"));
 		}
 
 		[Test]
@@ -140,26 +139,26 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void WithUrl_shares_client_but_not_Url() {
-			var cli = new FlurlClient().WithCookie("mycookie", "123");
+			var cli = new FlurlClient().WithHeader("myheader", "123");
 			var req1 = cli.Request("http://www.api.com/for-req1");
 			var req2 = cli.Request("http://www.api.com/for-req2");
 			var req3 = cli.Request("http://www.api.com/for-req3");
 
-			CollectionAssert.AreEquivalent(req1.Cookies, req2.Cookies);
-			CollectionAssert.AreEquivalent(req1.Cookies, req3.Cookies);
+			CollectionAssert.AreEquivalent(req1.Headers, req2.Headers);
+			CollectionAssert.AreEquivalent(req1.Headers, req3.Headers);
 			var urls = new[] { req1, req2, req3 }.Select(c => c.Url.ToString());
 			CollectionAssert.AllItemsAreUnique(urls);
 		}
 
 		[Test]
 		public void WithClient_shares_client_but_not_Url() {
-			var cli = new FlurlClient().WithCookie("mycookie", "123");
+			var cli = new FlurlClient().WithHeader("myheader", "123");
 			var req1 = "http://www.api.com/for-req1".WithClient(cli);
 			var req2 = "http://www.api.com/for-req2".WithClient(cli);
 			var req3 = "http://www.api.com/for-req3".WithClient(cli);
 
-			CollectionAssert.AreEquivalent(req1.Cookies, req2.Cookies);
-			CollectionAssert.AreEquivalent(req1.Cookies, req3.Cookies);
+			CollectionAssert.AreEquivalent(req1.Headers, req2.Headers);
+			CollectionAssert.AreEquivalent(req1.Headers, req3.Headers);
 			var urls = new[] { req1, req2, req3 }.Select(c => c.Url.ToString());
 			CollectionAssert.AllItemsAreUnique(urls);
 		}

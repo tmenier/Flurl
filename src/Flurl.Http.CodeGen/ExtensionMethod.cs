@@ -11,6 +11,14 @@ namespace Flurl.Http.CodeGen
 		public string Type { get; set; }
 		public string Description { get; set; }
 		public string Default { get; set; }
+		public bool IsOut { get; set; }
+
+		public override string ToString() {
+			var result = IsOut ? "out " : "";
+			result += $"{Type} {Name}";
+			if (Default != null) result += $" = {Default}";
+			return result;
+		}
 	}
 
 	public class ExtensionMethod
@@ -20,18 +28,18 @@ namespace Flurl.Http.CodeGen
 		public bool IsGeneric { get; set; }
 		public MethodArg ExtendedTypeArg { get; set; }
 		public IList<MethodArg> Args { get; } = new List<MethodArg>();
-		public string ReturnType { get; set; } //= "IFlurlRequest";
-		public string ReturnDescrip { get; set; } //= "The IFlurlRequest.";
+		public string ReturnType { get; set; }
+		public string ReturnDescrip { get; set; }
+
+		protected ExtensionMethod() { }
 
 		public ExtensionMethod(string name, string description) {
 			Name = name;
 			Description = description;
 		}
 
-		protected ExtensionMethod() { }
-
-		public ExtensionMethod AddArg(string name, string type, string description, string defaultVal = null) {
-			Args.Add(new MethodArg { Name = name, Type = type, Description = description, Default = defaultVal });
+		public ExtensionMethod AddArg(string name, string type, string description, string defaultVal = null, bool isOut = false) {
+			Args.Add(new MethodArg { Name = name, Type = type, Description = description, Default = defaultVal, IsOut = isOut });
 			return this;
 		}
 
@@ -58,7 +66,7 @@ namespace Flurl.Http.CodeGen
 			writer.WriteLine($"/// <returns>{ReturnDescrip}</returns>");
 
 			var argList = new List<string> { $"this {ExtendedTypeArg.Type} {ExtendedTypeArg.Name}" };
-			argList.AddRange(Args.Select(p => $"{p.Type} {p.Name}" + (p.Default == null ? "" : $" = {p.Default}")));
+			argList.AddRange(Args.Select(p => p.ToString()));
 			var genericArg = IsGeneric ? "<T>" : "";
 			writer.WriteLine($"public static {ReturnType} {Name}{genericArg}({string.Join(", ", argList)}) {{");
 			writeBody();
@@ -68,7 +76,7 @@ namespace Flurl.Http.CodeGen
 		public void Write(CodeWriter writer, string forwardCallToObject) {
 			Write(writer, () => {
 				var genericArg = IsGeneric ? "<T>" : "";
-				var argList = string.Join(", ", Args.Select(p => p.Name));
+				var argList = string.Join(", ", Args.Select(p => p.IsOut ? $"out {p.Name}" : p.Name));
 				writer.WriteLine($"return {forwardCallToObject}.{Name}{genericArg}({argList});");
 			});
 		}

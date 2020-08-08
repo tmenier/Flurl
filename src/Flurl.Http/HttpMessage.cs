@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 using Flurl.Http.Content;
 using Flurl.Util;
 
@@ -68,8 +64,9 @@ namespace Flurl.Http
 						Content.Headers.TryAddWithoutValidation(name, new[] { value.ToInvariantString() });
 					break;
 				default:
-					// it's a request-level header
-					Headers.Remove(name);
+					// it's a request/response-level header
+					if (!name.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase)) // multiple set-cookie headers are allowed
+						Headers.Remove(name);
 					if (value != null)
 						Headers.TryAddWithoutValidation(name, new[] { value.ToInvariantString() });
 					break;
@@ -78,7 +75,7 @@ namespace Flurl.Http
 
 		public string GetHeaderValue(string name) {
 			return (Headers.TryGetValues(name, out var vals) || Content?.Headers.TryGetValues(name, out vals) == true) ?
-				string.Join(" ", vals) : null;
+				string.Join(",", vals) : null; // multiple values should be comma delimited https://stackoverflow.com/a/3097052/62600
 		}
 	}
 }

@@ -1,11 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
-using System.Linq;
 using Flurl.Http.Configuration;
 using Flurl.Http.Testing;
-using Flurl.Util;
 
 namespace Flurl.Http
 {
@@ -92,10 +90,7 @@ namespace Flurl.Http
 		}
 
 		/// <inheritdoc />
-		public IDictionary<string, object> Headers { get; } = new Dictionary<string, object>();
-
-		/// <inheritdoc />
-		public IDictionary<string, Cookie> Cookies { get; } = new Dictionary<string, Cookie>();
+		public INameValueList<object> Headers { get; } = new NameValueList<object>();
 
 		/// <inheritdoc />
 		public HttpClient HttpClient => HttpTest.Current?.HttpClient ?? _injectedClient ?? GetHttpClient();
@@ -144,18 +139,8 @@ namespace Flurl.Http
 		public HttpMessageHandler HttpMessageHandler => HttpTest.Current?.HttpMessageHandler ?? _httpMessageHandler?.Value;
 
 		/// <inheritdoc />
-		public IFlurlRequest Request(params object[] urlSegments) {
-			var parts = new List<string>(urlSegments.Select(s => s.ToInvariantString()));
-			if (!Url.IsValid(parts.FirstOrDefault()) && !string.IsNullOrEmpty(BaseUrl))
-				parts.Insert(0, BaseUrl);
-
-			if (!parts.Any())
-				throw new ArgumentException("Cannot create a Request. BaseUrl is not defined and no segments were passed.");
-			if (!Url.IsValid(parts[0]))
-				throw new ArgumentException("Cannot create a Request. Neither BaseUrl nor the first segment passed is a valid URL.");
-
-			return new FlurlRequest(Url.Combine(parts.ToArray())).WithClient(this);
-		}
+		public IFlurlRequest Request(params object[] urlSegments) =>
+			new FlurlRequest(BaseUrl, urlSegments).WithClient(this);
 
 		FlurlHttpSettings IHttpSettingsContainer.Settings {
 			get => Settings;

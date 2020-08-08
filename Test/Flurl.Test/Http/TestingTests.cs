@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -353,19 +352,16 @@ namespace Flurl.Test.Http
 			HttpTest.RespondWith(headers: new { h1 = "foo" });
 
 			var resp = await "http://www.api.com".GetAsync();
-			Assert.AreEqual(1, resp.Headers.Count());
-			Assert.AreEqual("h1", resp.Headers.First().Key);
-			Assert.AreEqual("foo", resp.Headers.First().Value);
+			Assert.AreEqual(("h1", "foo"), resp.Headers.Single());
 		}
 
 		[Test]
 		public async Task can_fake_cookies() {
 			HttpTest.RespondWith(cookies: new { c1 = "foo" });
 
-			var req = "http://www.api.com".EnableCookies();
-			await req.GetAsync();
-			Assert.AreEqual(1, req.Cookies.Count);
-			Assert.AreEqual("foo", req.Cookies["c1"].Value);
+			var resp = await "http://www.api.com".GetAsync();
+			Assert.AreEqual(1, resp.Cookies.Count);
+			Assert.AreEqual("foo", resp.Cookies.FirstOrDefault(c => c.Name == "c1")?.Value);
 		}
 
 		// https://github.com/tmenier/Flurl/issues/175
@@ -382,12 +378,12 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void can_configure_settings_for_test() {
-			Assert.IsFalse(new FlurlRequest().Settings.CookiesEnabled);
-			using (new HttpTest().Configure(settings => settings.CookiesEnabled = true)) {
-				Assert.IsTrue(new FlurlRequest().Settings.CookiesEnabled);
+			Assert.IsTrue(new FlurlRequest().Settings.Redirects.Enabled);
+			using (new HttpTest().Configure(settings => settings.Redirects.Enabled = false)) {
+				Assert.IsFalse(new FlurlRequest().Settings.Redirects.Enabled);
 			}
 			// test disposed, should revert back to global settings
-			Assert.IsFalse(new FlurlRequest().Settings.CookiesEnabled);
+			Assert.IsTrue(new FlurlRequest().Settings.Redirects.Enabled);
 		}
 
 		[Test]
@@ -425,7 +421,7 @@ namespace Flurl.Test.Http
 		public async Task can_fake_content_headers() {
 			HttpTest.RespondWith("<xml></xml>", 200, new { Content_Type = "text/xml" });
 			await "http://api.com".GetAsync();
-			HttpTest.ShouldHaveMadeACall().With(call => call.Response.Headers.Any(kv => kv.Key == "Content-Type" && kv.Value == "text/xml"));
+			HttpTest.ShouldHaveMadeACall().With(call => call.Response.Headers.Contains(("Content-Type", "text/xml")));
 			HttpTest.ShouldHaveMadeACall().With(call => call.HttpResponseMessage.Content.Headers.ContentType.MediaType == "text/xml");
 		}
 
@@ -435,7 +431,7 @@ namespace Flurl.Test.Http
 				httpTest.RespondWith("Hello");
 				var flurClient = new FlurlClient();
 				// use the underlying HttpClient directly
-				await flurClient.HttpClient.GetStringAsync("http://google.com/");
+				await flurClient.HttpClient.GetStringAsync("https://www.google.com/");
 				CollectionAssert.IsEmpty(httpTest.CallLog);
 			}
 		}

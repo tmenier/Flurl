@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using Flurl.Util;
 
 namespace Flurl.Http
@@ -14,55 +9,62 @@ namespace Flurl.Http
 	public static class CookieExtensions
 	{
 		/// <summary>
-		/// Allows cookies to be sent and received. Not necessary to call when setting cookies via WithCookie/WithCookies.
+		/// Adds or updates a name-value pair in this request's Cookie header.
+		/// To automatically maintain a cookie "session", consider using a CookieJar or CookieSession instead.
 		/// </summary>
-		/// <param name="clientOrRequest">The IFlurlClient or IFlurlRequest.</param>
-		/// <returns>This IFlurlClient.</returns>
-		public static T EnableCookies<T>(this T clientOrRequest) where T : IHttpSettingsContainer {
-			clientOrRequest.Settings.CookiesEnabled = true;
-			return clientOrRequest;
-		}
-
-		/// <summary>
-		/// Sets an HTTP cookie to be sent with this IFlurlRequest or all requests made with this IFlurlClient.
-		/// </summary>
-		/// <param name="clientOrRequest">The IFlurlClient or IFlurlRequest.</param>
-		/// <param name="cookie">The cookie to set.</param>
-		/// <returns>This IFlurlClient.</returns>
-		public static T WithCookie<T>(this T clientOrRequest, Cookie cookie) where T : IHttpSettingsContainer {
-			clientOrRequest.Settings.CookiesEnabled = true;
-			clientOrRequest.Cookies[cookie.Name] = cookie;
-			return clientOrRequest;
-		}
-
-		/// <summary>
-		/// Sets an HTTP cookie to be sent with this IFlurlRequest or all requests made with this IFlurlClient.
-		/// </summary>
-		/// <param name="clientOrRequest">The IFlurlClient or IFlurlRequest.</param>
+		/// <param name="request">The IFlurlRequest.</param>
 		/// <param name="name">The cookie name.</param>
 		/// <param name="value">The cookie value.</param>
-		/// <param name="expires">The cookie expiration (optional). If excluded, cookie only lives for duration of session.</param>
-		/// <returns>This IFlurlClient.</returns>
-		public static T WithCookie<T>(this T clientOrRequest, string name, object value, DateTime? expires = null) where T : IHttpSettingsContainer {
-			var cookie = new Cookie(name, value?.ToInvariantString()) { Expires = expires ?? DateTime.MinValue };
-			return clientOrRequest.WithCookie(cookie);
+		/// <returns>This IFlurlClient instance.</returns>
+		public static IFlurlRequest WithCookie(this IFlurlRequest request, string name, object value) {
+			var cookies = new NameValueList<string>(request.Cookies);
+			cookies.AddOrReplace(name, value.ToInvariantString());
+			return request.WithHeader("Cookie", CookieCutter.ToRequestHeader(cookies));
 		}
 
 		/// <summary>
-		/// Sets HTTP cookies to be sent with this IFlurlRequest or all requests made with this IFlurlClient, based on property names/values of the provided object, or keys/values if object is a dictionary.
+		/// Adds or updates name-value pairs in this request's Cookie header, based on property names/values
+		/// of the provided object, or keys/values if object is a dictionary.
+		/// To automatically maintain a cookie "session", consider using a CookieJar or CookieSession instead.
 		/// </summary>
-		/// <param name="clientOrRequest">The IFlurlClient or IFlurlRequest.</param>
-		/// <param name="cookies">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
-		/// <param name="expires">Expiration for all cookies (optional). If excluded, cookies only live for duration of session.</param>
+		/// <param name="request">The IFlurlRequest.</param>
+		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
 		/// <returns>This IFlurlClient.</returns>
-		public static T WithCookies<T>(this T clientOrRequest, object cookies, DateTime? expires = null) where T : IHttpSettingsContainer {
-			if (cookies == null)
-				return clientOrRequest;
+		public static IFlurlRequest WithCookies(this IFlurlRequest request, object values) {
+			var cookies = new NameValueList<string>(request.Cookies);
+			// although rare, we need to accommodate the possibility of multiple cookies with the same name
+			foreach (var group in values.ToKeyValuePairs().GroupBy(x => x.Key)) {
+				// add or replace the first one (by name)
+				cookies.AddOrReplace(group.Key, group.First().Value.ToInvariantString());
+				// append the rest
+				foreach (var kv in group.Skip(1))
+					cookies.Add(kv.Key, kv.Value.ToInvariantString());
+			}
+			return request.WithHeader("Cookie", CookieCutter.ToRequestHeader(cookies));
+		}
 
-			foreach (var kv in cookies.ToKeyValuePairs())
-				clientOrRequest.WithCookie(kv.Key, kv.Value, expires);
+		/// <summary>
+		/// Sets the CookieJar associated with this request, which will be updated with any Set-Cookie headers present
+		/// in the response and is suitable for reuse in subsequent requests.
+		/// </summary>
+		/// <param name="request">The IFlurlRequest.</param>
+		/// <param name="cookieJar">The CookieJar.</param>
+		/// <returns>This IFlurlClient instance.</returns>
+		public static IFlurlRequest WithCookies(this IFlurlRequest request, CookieJar cookieJar) {
+			request.CookieJar = cookieJar;
+			return request;
+		}
 
-			return clientOrRequest;
+		/// <summary>
+		/// Creates a new CookieJar and associates it with this request, which will be updated with any Set-Cookie
+		/// headers present in the response and is suitable for reuse in subsequent requests.
+		/// </summary>
+		/// <param name="request">The IFlurlRequest.</param>
+		/// <param name="cookieJar">The created CookieJar, which can be reused in subsequent requests.</param>
+		/// <returns>This IFlurlClient instance.</returns>
+		public static IFlurlRequest WithCookies(this IFlurlRequest request, out CookieJar cookieJar) {
+			cookieJar = new CookieJar();
+			return request.WithCookies(cookieJar);
 		}
 	}
 }
