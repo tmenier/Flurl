@@ -104,6 +104,15 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public async Task allow_specific_http_status_also_allows_2xx() {
+			using (var test = new HttpTest()) {
+				test.RespondWith("I'm just an innocent 2xx, I should never fail!", 201);
+				var sc = GetSettingsContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
+				await GetRequest(sc).GetAsync(); // no exception = pass
+			}
+		}
+
+		[Test]
 		public void can_clear_non_success_status() {
 			using (var test = new HttpTest()) {
 				test.RespondWith("I'm a teapot", 418);
