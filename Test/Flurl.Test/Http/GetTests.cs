@@ -112,45 +112,39 @@ namespace Flurl.Test.Http
 			}
 		}
 
-		[Test]
-		public async Task can_get_error_json_typed() {
+		[TestCase(false)]
+		[TestCase(true)]
+		public async Task can_get_error_json_typed(bool useShortcut) {
 			HttpTest.RespondWithJson(new { code = 999, message = "our server crashed" }, 500);
 
 			try {
 				await "http://api.com".GetStringAsync();
 			}
 			catch (FlurlHttpException ex) {
-				var error = await ex.GetResponseJsonAsync<TestError>();
+				var error = useShortcut ?
+					await ex.GetResponseJsonAsync<TestError>() :
+					await ex.Call.Response.GetJsonAsync<TestError>();
 				Assert.IsNotNull(error);
 				Assert.AreEqual(999, error.code);
 				Assert.AreEqual("our server crashed", error.message);
-
-				// doing it this way should be equivalent
-				var error2 = await ex.Call.Response.GetJsonAsync<TestError>();
-				Assert.IsNotNull(error2);
-				Assert.AreEqual(999, error2.code);
-				Assert.AreEqual("our server crashed", error2.message);
 			}
 		}
 
-		[Test]
-		public async Task can_get_error_json_untyped() {
+		[TestCase(false)]
+		[TestCase(true)]
+		public async Task can_get_error_json_untyped(bool useShortcut) {
 			HttpTest.RespondWithJson(new { code = 999, message = "our server crashed" }, 500);
 
 			try {
 				await "http://api.com".GetStringAsync();
 			}
 			catch (FlurlHttpException ex) {
-				var error = await ex.Call.Response.GetJsonAsync(); // error is a dynamic this time
+				var error = useShortcut ? // error is a dynamic this time
+					await ex.GetResponseJsonAsync() :
+					await ex.Call.Response.GetJsonAsync();
 				Assert.IsNotNull(error);
 				Assert.AreEqual(999, error.code);
 				Assert.AreEqual("our server crashed", error.message);
-
-				// should be equivalent, but for good measure do them in the opposite order compared to the previous test
-				var error2 = await ex.GetResponseJsonAsync();
-				Assert.IsNotNull(error2);
-				Assert.AreEqual(999, error2.code);
-				Assert.AreEqual("our server crashed", error2.message);
 			}
 		}
 

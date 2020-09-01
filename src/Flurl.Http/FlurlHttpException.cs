@@ -52,7 +52,6 @@ namespace Flurl.Http
 		/// <returns>A task whose result is the string contents of the response body.</returns>
 		public Task<string> GetResponseStringAsync() => Call?.Response?.GetStringAsync() ?? Task.FromResult((string)null);
 
-
 		/// <summary>
 		/// Deserializes the JSON response body to an object of the given type.
 		/// </summary>
@@ -64,7 +63,8 @@ namespace Flurl.Http
 		/// Deserializes the JSON response body to a dynamic object.
 		/// </summary>
 		/// <returns>A task whose result is an object containing data in the response body.</returns>
-		public async Task<dynamic> GetResponseJsonAsync() => (Call?.Response == null) ? null : await Call.Response.GetJsonAsync();
+		public async Task<dynamic> GetResponseJsonAsync() => (Call?.Response == null) ? null :
+			await Call.Response.GetJsonAsync().ConfigureAwait(false);
 	}
 
 	/// <summary>
