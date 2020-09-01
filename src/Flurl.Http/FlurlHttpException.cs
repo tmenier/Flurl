@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Dynamic;
 using System.Threading.Tasks;
+using Flurl.Http;
 
 namespace Flurl.Http
 {
@@ -43,6 +45,26 @@ namespace Flurl.Http
 				$"Call failed with status code {call.Response.StatusCode} ({call.HttpResponseMessage.ReasonPhrase}): {call}":
 				$"Call failed. {inner?.Message} {call}";
 		}
+
+		/// <summary>
+		/// Gets the response body of the failed call.
+		/// </summary>
+		/// <returns>A task whose result is the string contents of the response body.</returns>
+		public Task<string> GetResponseStringAsync() => Call?.Response?.GetStringAsync() ?? Task.FromResult((string)null);
+
+
+		/// <summary>
+		/// Deserializes the JSON response body to an object of the given type.
+		/// </summary>
+		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
+		/// <returns>A task whose result is an object containing data in the response body.</returns>
+		public Task<T> GetResponseJsonAsync<T>() => Call?.Response?.GetJsonAsync<T>() ?? Task.FromResult(default(T));
+
+		/// <summary>
+		/// Deserializes the JSON response body to a dynamic object.
+		/// </summary>
+		/// <returns>A task whose result is an object containing data in the response body.</returns>
+		public async Task<dynamic> GetResponseJsonAsync() => (Call?.Response == null) ? null : await Call.Response.GetJsonAsync();
 	}
 
 	/// <summary>
@@ -68,7 +90,7 @@ namespace Flurl.Http
 	public class FlurlParsingException : FlurlHttpException
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="Flurl.Http.FlurlParsingException"/> class.
+		/// Initializes a new instance of the <see cref="FlurlParsingException"/> class.
 		/// </summary>
 		/// <param name="call">Details of the HTTP call that caused the exception.</param>
 		/// <param name="expectedFormat">The format that could not be parsed to, i.e. JSON.</param>

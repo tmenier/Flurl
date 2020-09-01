@@ -48,9 +48,11 @@ namespace Flurl.Test.Http
 		    }
 		    catch (FlurlParsingException ex) {
 			    Assert.AreEqual("Response could not be deserialized to JSON: GET http://myapi.com", ex.Message);
+				// these are equivalent:
+			    Assert.AreEqual("{ \"invalid JSON!", await ex.GetResponseStringAsync());
 			    Assert.AreEqual("{ \"invalid JSON!", await ex.Call.Response.GetStringAsync());
 				// will differ if you're using a different serializer (which you probably aren't):
-			    Assert.IsInstanceOf<Newtonsoft.Json.JsonReaderException>(ex.InnerException);
+				Assert.IsInstanceOf<Newtonsoft.Json.JsonReaderException>(ex.InnerException);
 		    }
 		}
 	}
