@@ -94,7 +94,7 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task can_detect_circular_redirects() {
+		public void can_detect_circular_redirects() {
 			HttpTest
 				.RespondWith("", 301, new { Location = "/redir1" })
 				.RespondWith("", 301, new { Location = "/redir2" })
