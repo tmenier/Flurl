@@ -29,11 +29,16 @@ namespace Flurl.Http.Configuration
 		/// customize the result.
 		/// </summary>
 		public virtual HttpMessageHandler CreateMessageHandler() {
-			var httpClientHandler = new HttpClientHandler {
-				// flurl has its own mechanisms for managing cookies and redirects
-				UseCookies = false,
-				AllowAutoRedirect = false
-			};
+			var httpClientHandler = new HttpClientHandler();
+
+			// flurl has its own mechanisms for managing cookies and redirects
+
+			try { httpClientHandler.UseCookies = false; }
+			catch (PlatformNotSupportedException) { } // look out for WASM platforms (#543)
+
+			if (httpClientHandler.SupportsRedirectConfiguration)
+				httpClientHandler.AllowAutoRedirect = false;
+
 			if (httpClientHandler.SupportsAutomaticDecompression) {
 				// #266
 				// deflate not working? see #474
