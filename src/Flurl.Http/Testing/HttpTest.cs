@@ -12,9 +12,7 @@ namespace Flurl.Http.Testing
 	/// An object whose existence puts Flurl.Http into test mode where actual HTTP calls are faked. Provides a response
 	/// queue, call log, and assertion helpers for use in Arrange/Act/Assert style tests.
 	/// </summary>
-#if NET45
 	[Serializable]
-#endif
 	public class HttpTest : HttpTestSetup, IDisposable
 	{
 		private readonly ConcurrentQueue<FlurlCall> _calls = new ConcurrentQueue<FlurlCall>();
@@ -106,17 +104,8 @@ namespace Flurl.Http.Testing
 			SetCurrentTest(null);
 		}
 
-#if NET45
-		private static void SetCurrentTest(HttpTest test) => System.Runtime.Remoting.Messaging.CallContext.LogicalSetData("FlurlHttpTest", test);
-		private static HttpTest GetCurrentTest() => System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("FlurlHttpTest") as HttpTest;
-#elif NETSTANDARD1_1
-		private static HttpTest _test;
-		private static void SetCurrentTest(HttpTest test) => _test = test;
-		private static HttpTest GetCurrentTest() => _test;
-#else
 		private static readonly System.Threading.AsyncLocal<HttpTest> _test = new System.Threading.AsyncLocal<HttpTest>();
 		private static void SetCurrentTest(HttpTest test) => _test.Value = test;
 		private static HttpTest GetCurrentTest() => _test.Value;
-#endif
 	}
 }

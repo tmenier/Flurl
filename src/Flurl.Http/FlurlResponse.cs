@@ -190,7 +190,7 @@ namespace Flurl.Http
 					_capturedBody?.ToString();
 			}
 
-#if NETSTANDARD1_3 || NETSTANDARD2_0
+#if NETSTANDARD2_0
 			// https://stackoverflow.com/questions/46119872/encoding-issues-with-net-core-2 (#86)
 			System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 #endif

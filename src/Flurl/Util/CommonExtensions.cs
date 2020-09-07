@@ -42,9 +42,7 @@ namespace Flurl.Util
 				obj == null ? null :
 				obj is DateTime dt ? dt.ToString("o", CultureInfo.InvariantCulture) :
 				obj is DateTimeOffset dto ? dto.ToString("o", CultureInfo.InvariantCulture) :
-#if !NETSTANDARD1_0
 				obj is IConvertible c ? c.ToString(CultureInfo.InvariantCulture) :
-#endif
 				obj is IFormattable f ? f.ToString(null, CultureInfo.InvariantCulture) :
 				obj.ToString();
 		}
@@ -70,31 +68,18 @@ namespace Flurl.Util
 			return Url.ParseQueryParams(s).Select(p => new KeyValuePair<string, object>(p.Name, p.Value));
 		}
 
-		private static IEnumerable<KeyValuePair<string, object>> ObjectToKV(object obj) {
-#if NETSTANDARD1_0
-			return from prop in obj.GetType().GetRuntimeProperties()
-				let getter = prop.GetMethod
-				where getter?.IsPublic == true
-				let val = getter.Invoke(obj, null)
-				select new KeyValuePair<string, object>(prop.Name, val);
-#else
-			return from prop in obj.GetType().GetProperties()
-				let getter = prop.GetGetMethod(false)
-				where getter != null
-				let val = getter.Invoke(obj, null)
-				select new KeyValuePair<string, object>(prop.Name, val);
-#endif
-		}
+		private static IEnumerable<KeyValuePair<string, object>> ObjectToKV(object obj) =>
+			from prop in obj.GetType().GetProperties()
+			let getter = prop.GetGetMethod(false)
+			where getter != null
+			let val = getter.Invoke(obj, null)
+			select new KeyValuePair<string, object>(prop.Name, val);
 
 		private static IEnumerable<KeyValuePair<string, object>> CollectionToKV(IEnumerable col) {
 			bool TryGetProp(object obj, string name, out object value) {
-#if NETSTANDARD1_0
-				var prop = obj.GetType().GetRuntimeProperty(name);
-				var field = obj.GetType().GetRuntimeField(name);
-#else
 				var prop = obj.GetType().GetProperty(name);
 				var field = obj.GetType().GetField(name);
-#endif
+
 				if (prop != null) {
 					value = prop.GetValue(obj, null);
 					return true;
