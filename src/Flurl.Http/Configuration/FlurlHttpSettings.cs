@@ -229,7 +229,7 @@ namespace Flurl.Http.Configuration
 			Timeout = TimeSpan.FromSeconds(100); // same as HttpClient
 			JsonSerializer = new NewtonsoftJsonSerializer(null);
 			UrlEncodedSerializer = new DefaultUrlEncodedSerializer();
-			FlurlClientFactory = new PerHostFlurlClientFactory();
+			FlurlClientFactory = new DefaultFlurlClientFactory();
 			HttpClientFactory = new DefaultHttpClientFactory();
 			Redirects.Enabled = true;
 			Redirects.AllowSecureToInsecure = false;
