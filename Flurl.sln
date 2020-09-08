@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flurl", "src\Flurl\Flurl.csproj", "{117B6C6E-53F9-45AE-9439-F4FB7E21B116}"
 EndProject
@@ -22,8 +22,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PackageTesters", "PackageTe
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PackageTester.Shared", "PackageTesters\PackageTester.Shared\PackageTester.Shared.shproj", "{D4717AA7-5549-4BAD-81C5-406844A12990}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTester.NETCore", "PackageTesters\PackageTester.NETCore\PackageTester.NETCore.csproj", "{0231607B-9CA3-4277-9F19-9925694D22E0}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{B6BF9238-4541-4E1F-955E-C95F1C2A1F46}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
@@ -36,9 +34,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{B6BF9238
 		Build\test.sh = Build\test.sh
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTester.NET45", "PackageTesters\PackageTester.NET45\PackageTester.NET45.csproj", "{63FD500A-7449-46E6-92C3-24CE92E817C7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTester.net461", "PackageTesters\PackageTester.net461\PackageTester.net461.csproj", "{1C17F6CB-6AD2-488A-9747-DE0EDD6F401D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTester.NET461", "PackageTesters\PackageTester.NET461\PackageTester.NET461.csproj", "{D64CF01E-1FA6-4177-A062-163470A35682}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTester.netcore2", "PackageTesters\PackageTester.netcore2\PackageTester.netcore2.csproj", "{7D891924-DC5A-4EBD-945E-29F3765BF08F}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -65,18 +63,14 @@ Global
 		{DF68EB0E-9566-4577-B709-291520383F8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF68EB0E-9566-4577-B709-291520383F8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF68EB0E-9566-4577-B709-291520383F8D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0231607B-9CA3-4277-9F19-9925694D22E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0231607B-9CA3-4277-9F19-9925694D22E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0231607B-9CA3-4277-9F19-9925694D22E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0231607B-9CA3-4277-9F19-9925694D22E0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{63FD500A-7449-46E6-92C3-24CE92E817C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{63FD500A-7449-46E6-92C3-24CE92E817C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{63FD500A-7449-46E6-92C3-24CE92E817C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{63FD500A-7449-46E6-92C3-24CE92E817C7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D64CF01E-1FA6-4177-A062-163470A35682}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D64CF01E-1FA6-4177-A062-163470A35682}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D64CF01E-1FA6-4177-A062-163470A35682}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D64CF01E-1FA6-4177-A062-163470A35682}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C17F6CB-6AD2-488A-9747-DE0EDD6F401D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C17F6CB-6AD2-488A-9747-DE0EDD6F401D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C17F6CB-6AD2-488A-9747-DE0EDD6F401D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C17F6CB-6AD2-488A-9747-DE0EDD6F401D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D891924-DC5A-4EBD-945E-29F3765BF08F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D891924-DC5A-4EBD-945E-29F3765BF08F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D891924-DC5A-4EBD-945E-29F3765BF08F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D891924-DC5A-4EBD-945E-29F3765BF08F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -87,9 +81,8 @@ Global
 		{C0BC328E-BA47-467A-8893-91DBA8A24ACD} = {B82E8094-AFA9-466E-9E60-473B7B89AFE2}
 		{DF68EB0E-9566-4577-B709-291520383F8D} = {86A5ACB4-F3B3-4395-A5D5-924C9F35F628}
 		{D4717AA7-5549-4BAD-81C5-406844A12990} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
-		{0231607B-9CA3-4277-9F19-9925694D22E0} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
-		{63FD500A-7449-46E6-92C3-24CE92E817C7} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
-		{D64CF01E-1FA6-4177-A062-163470A35682} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
+		{1C17F6CB-6AD2-488A-9747-DE0EDD6F401D} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
+		{7D891924-DC5A-4EBD-945E-29F3765BF08F} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {61289482-AC5A-44E1-AEA1-76A3F3CCB6A4}
