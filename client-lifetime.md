@@ -9,7 +9,7 @@ Flurl.Http uses [HttpClient](https://msdn.microsoft.com/en-us/library/system.net
 
 > HttpClient is intended to be instantiated once and re-used throughout the life of an application. Especially in server applications, creating a new HttpClient instance for every request will exhaust the number of sockets available under heavy loads. This will result in SocketException errors.
 
-Starting in version 2.0, Flurl.Http adheres to this guidance by default. Fluent methods like this will create an HTTP client lazily, cache it, and resue it for every call to the same _host_:
+Starting in version 2.0, Flurl.Http adheres to this guidance by default. Fluent methods like this will create an HTTP client lazily, cache it, and reuse it for every call to the same _host_:
 
 ```c#
 var data = await "http://api.com/endpoint".GetJsonAsync();
