@@ -134,11 +134,11 @@ namespace Flurl.Http
 		}
 
 		/// <inheritdoc />
-		public INameValueList<object> Headers { get; } = new NameValueList<object>();
+		public INameValueList<string> Headers { get; } = new NameValueList<string>();
 
 		/// <inheritdoc />
 		public IEnumerable<(string Name, string Value)> Cookies =>
-			CookieCutter.ParseRequestHeader(Headers.FirstOrDefault("Cookie")?.ToInvariantString());
+			CookieCutter.ParseRequestHeader(Headers.FirstOrDefault("Cookie"));
 
 		/// <inheritdoc />
 		public CookieJar CookieJar {

@@ -32,7 +32,7 @@ namespace Flurl.Test.Http
 		[Test]
 		public void can_set_header() {
 			var sc = GetSettingsContainer().WithHeader("a", 1);
-			Assert.AreEqual(("a", 1), sc.Headers.Single());
+			Assert.AreEqual(("a", "1"), sc.Headers.Single());
 		}
 
 		[Test]
@@ -41,7 +41,7 @@ namespace Flurl.Test.Http
 			var sc = GetSettingsContainer().WithHeaders(new { a = "b", one = 2, three = (object)null });
 			Assert.AreEqual(2, sc.Headers.Count);
 			Assert.IsTrue(sc.Headers.Contains("a", "b"));
-			Assert.IsTrue(sc.Headers.Contains("one", 2));
+			Assert.IsTrue(sc.Headers.Contains("one", "2"));
 		}
 
 		[Test]
@@ -58,7 +58,7 @@ namespace Flurl.Test.Http
 			var sc = GetSettingsContainer().WithHeaders(new Dictionary<string, object> { { "a", "b" }, { "one", 2 } });
 			Assert.AreEqual(2, sc.Headers.Count);
 			Assert.IsTrue(sc.Headers.Contains("a", "b"));
-			Assert.IsTrue(sc.Headers.Contains("one", 2));
+			Assert.IsTrue(sc.Headers.Contains("one", "2"));
 		}
 
 		[Test]

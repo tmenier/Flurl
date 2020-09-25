@@ -17,6 +17,6 @@ namespace Flurl.Http
 		/// <summary>
 		/// Collection of headers sent on this request or all requests using this client.
 		/// </summary>
-		INameValueList<object> Headers { get; }
+		INameValueList<string> Headers { get; }
     }
 }

@@ -90,7 +90,7 @@ namespace Flurl.Http
 		}
 
 		/// <inheritdoc />
-		public INameValueList<object> Headers { get; } = new NameValueList<object>();
+		public INameValueList<string> Headers { get; } = new NameValueList<string>();
 
 		/// <inheritdoc />
 		public HttpClient HttpClient => HttpTest.Current?.HttpClient ?? _injectedClient ?? GetHttpClient();
