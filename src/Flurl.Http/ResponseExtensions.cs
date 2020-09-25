@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Flurl.Util;
 
 namespace Flurl.Http
 {
 	/// <summary>
-	/// Extension methods off HttpResponseMessage, and async extension methods off Task&lt;IFlurlResponse&gt;
-	/// that allow chaining off methods like SendAsync without the need for nested awaits.
+	/// ReceiveXXX extension methods off Task&lt;IFlurlResponse&gt; that allow chaining off methods like SendAsync
+	/// without the need for nested awaits.
 	/// </summary>
-	public static class HttpResponseMessageExtensions
+	public static class ResponseExtensions
 	{
 		/// <summary>
 		/// Deserializes JSON-formatted HTTP response body to object of type T. Intended to chain off an async HTTP.
@@ -96,37 +94,6 @@ namespace Flurl.Http
 				if (resp == null) return null;
 				return await resp.GetBytesAsync().ConfigureAwait(false);
 			}
-		}
-
-		/// <summary>
-		/// Set a header on this HttpResponseMessage (default), or its Content property if it's a known content-level header.
-		/// No validation. Overwrites any existing value(s) for the header. 
-		/// </summary>
-		/// <param name="response">The HttpResponseMessage.</param>
-		/// <param name="name">The header name.</param>
-		/// <param name="value">The header value.</param>
-		/// <param name="createContentIfNecessary">If it's a content-level header and there is no content, this determines whether to create an empty HttpContent or just ignore the header.</param>
-		public static void SetHeader(this HttpResponseMessage response, string name, object value, bool createContentIfNecessary = true) {
-			new HttpMessage(response).SetHeader(name, value, createContentIfNecessary);
-		}
-
-		/// <summary>
-		/// Gets the value of a header on this HttpResponseMessage (default), or its Content property.
-		/// Returns null if the header doesn't exist.
-		/// </summary>
-		/// <param name="response">The HttpResponseMessage.</param>
-		/// <param name="name">The header name.</param>
-		/// <returns>The header value.</returns>
-		public static string GetHeaderValue(this HttpResponseMessage response, string name) {
-			return new HttpMessage(response).GetHeaderValue(name);
-		}
-
-		// https://github.com/tmenier/Flurl/pull/76, https://github.com/dotnet/corefx/issues/5014
-		internal static HttpContent StripCharsetQuotes(this HttpContent content) {
-			var header = content?.Headers?.ContentType;
-			if (header?.CharSet != null)
-				header.CharSet = header.CharSet.StripQuotes();
-			return content;
 		}
 	}
 }
