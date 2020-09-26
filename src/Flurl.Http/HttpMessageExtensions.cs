@@ -83,7 +83,7 @@ namespace Flurl.Http
 					break;
 				default:
 					// it's a request/response-level header
-					if (!name.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase)) // multiple set-cookie headers are allowed
+					if (!name.OrdinalEquals("Set-Cookie", true)) // multiple set-cookie headers are allowed
 						msg.Headers.Remove(name);
 					if (value != null)
 						msg.Headers.TryAddWithoutValidation(name, new[] { value.ToInvariantString() });

@@ -319,7 +319,7 @@ namespace Flurl.Http.Testing
 			return With(call => {
 				var val = call.Request.Headers.FirstOrDefault("Authorization");
 				if (val == null) return false;
-				if (!val.StartsWith("Basic ")) return false;
+				if (!val.OrdinalStartsWith("Basic ")) return false;
 				if ((username ?? "*") == "*" && (password ?? "*") == "*") return true;
 				var encodedCreds = val.Substring(6);
 				try {

@@ -38,19 +38,19 @@ namespace Flurl.Http
 
 				// ordinal string compare is both safest and fastest
 				// https://docs.microsoft.com/en-us/dotnet/standard/base-types/best-practices-strings#recommendations-for-string-usage
-				else if (pair.Name.Equals("Expires", StringComparison.OrdinalIgnoreCase))
+				else if (pair.Name.OrdinalEquals("Expires", true))
 					cookie.Expires = DateTimeOffset.TryParse(pair.Value, out var d) ? d : (DateTimeOffset?)null;
-				else if (pair.Name.Equals("Max-Age", StringComparison.OrdinalIgnoreCase))
+				else if (pair.Name.OrdinalEquals("Max-Age", true))
 					cookie.MaxAge = int.TryParse(pair.Value, out var i) ? i : (int?)null;
-				else if (pair.Name.Equals("Domain", StringComparison.OrdinalIgnoreCase))
+				else if (pair.Name.OrdinalEquals("Domain", true))
 					cookie.Domain = pair.Value;
-				else if (pair.Name.Equals("Path", StringComparison.OrdinalIgnoreCase))
+				else if (pair.Name.OrdinalEquals("Path", true))
 					cookie.Path = pair.Value;
-				else if (pair.Name.Equals("HttpOnly", StringComparison.OrdinalIgnoreCase))
+				else if (pair.Name.OrdinalEquals("HttpOnly", true))
 					cookie.HttpOnly = true;
-				else if (pair.Name.Equals("Secure", StringComparison.OrdinalIgnoreCase))
+				else if (pair.Name.OrdinalEquals("Secure", true))
 					cookie.Secure = true;
-				else if (pair.Name.Equals("SameSite", StringComparison.OrdinalIgnoreCase))
+				else if (pair.Name.OrdinalEquals("SameSite", true))
 					cookie.SameSite = Enum.TryParse<SameSite>(pair.Value, true, out var val) ? val : (SameSite?)null;
 			}
 			return cookie;
@@ -103,11 +103,11 @@ namespace Flurl.Http
 					reason = "Domain cannot be set when origin URL is an IP address.";
 					return false;
 				}
-				if (!cookie.Domain.Trim('.').Contains(".")) {
+				if (!cookie.Domain.Trim('.').OrdinalContains(".")) {
 					reason = $"{cookie.Domain} is not a valid value for Domain.";
 					return false;
 				}
-				var host = cookie.Domain.StartsWith(".") ? cookie.Domain.Substring(1) : cookie.Domain;
+				var host = cookie.Domain.OrdinalStartsWith(".") ? cookie.Domain.Substring(1) : cookie.Domain;
 				var fakeUrl = new Url("https://" + host);
 				if (fakeUrl.IsRelative || fakeUrl.Host != host) {
 					reason = $"{cookie.Domain} is not a valid Domain. A non-empty Domain must be a valid URI host (no scheme, path, port, etc).";
@@ -120,7 +120,7 @@ namespace Flurl.Http
 
 			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Cookie_prefixes
 
-			if (cookie.Name.StartsWith("__Host-")) {
+			if (cookie.Name.OrdinalStartsWith("__Host-")) {
 				if (!cookie.OriginUrl.IsSecureScheme) {
 					reason = "Cookie named with __Host- prefix must originate from a secure (https) domain.";
 					return false;
@@ -138,7 +138,7 @@ namespace Flurl.Http
 					return false;
 				}
 			}
-			if (cookie.Name.StartsWith("__Secure-")) {
+			if (cookie.Name.OrdinalStartsWith("__Secure-")) {
 				if (!cookie.OriginUrl.IsSecureScheme) {
 					reason = "Cookie named with __Secure- prefix must originate from a secure (https) domain.";
 					return false;
@@ -150,7 +150,7 @@ namespace Flurl.Http
 			}
 
 			// it seems intuitive tht a non-empty path should start with /, but I can't find this in any spec
-			//if (!string.IsNullOrEmpty(Path) && !Path.StartsWith("/")) {
+			//if (!string.IsNullOrEmpty(Path) && !Path.OrdinalStartsWith("/")) {
 			//	reason = $"{Path} is not a valid Path. A non-empty Path must start with a / character.";
 			//	return false;
 			//}
@@ -199,18 +199,18 @@ namespace Flurl.Http
 			reason = "ok";
 
 			if (!string.IsNullOrEmpty(cookie.Domain)) {
-				var domain = cookie.Domain.StartsWith(".") ? cookie.Domain.Substring(1) : cookie.Domain;
-				if (requestUrl.Host.Equals(domain, StringComparison.OrdinalIgnoreCase))
+				var domain = cookie.Domain.OrdinalStartsWith(".") ? cookie.Domain.Substring(1) : cookie.Domain;
+				if (requestUrl.Host.OrdinalEquals(domain, true))
 					return true;
 
-				if (requestUrl.Host.EndsWith("." + domain, StringComparison.OrdinalIgnoreCase))
+				if (requestUrl.Host.OrdinalEndsWith("." + domain, true))
 					return true;
 
 				reason = $"Cookie with Domain={cookie.Domain} should not be sent to {requestUrl.Host}.";
 				return false;
 			}
 			else {
-				if (requestUrl.Host.Equals(cookie.OriginUrl.Host, StringComparison.OrdinalIgnoreCase))
+				if (requestUrl.Host.OrdinalEquals(cookie.OriginUrl.Host, true))
 					return true;
 
 				reason = $"Cookie set from {cookie.OriginUrl.Host} without Domain specified should only be sent to that specific host, not {requestUrl.Host}.";
@@ -225,10 +225,10 @@ namespace Flurl.Http
 			if (cookie.Path == "/")
 				return true;
 
-			var cookiePath = (cookie.Path?.StartsWith("/") == true) ? cookie.Path : cookie.OriginUrl.Path;
+			var cookiePath = (cookie.Path?.OrdinalStartsWith("/") == true) ? cookie.Path : cookie.OriginUrl.Path;
 			if (cookiePath == "")
 				cookiePath = "/";
-			else if (cookiePath.Length > 1 && cookiePath.EndsWith("/"))
+			else if (cookiePath.Length > 1 && cookiePath.OrdinalEndsWith("/"))
 				cookiePath = cookiePath.TrimEnd('/');
 
 			if (cookiePath == "/")
@@ -236,10 +236,10 @@ namespace Flurl.Http
 
 			var requestPath = (requestUrl.Path.Length > 0) ? requestUrl.Path : "/";
 
-			if (requestPath.Equals(cookiePath, StringComparison.Ordinal)) // Path is case-sensitive, unlike Domain
+			if (requestPath.OrdinalEquals(cookiePath)) // Path is case-sensitive, unlike Domain
 				return true;
 
-			if (requestPath.StartsWith(cookiePath, StringComparison.Ordinal) && requestPath[cookiePath.Length] == '/')
+			if (requestPath.OrdinalStartsWith(cookiePath) && requestPath[cookiePath.Length] == '/')
 				return true;
 
 			reason = string.IsNullOrEmpty(cookie.Path) ?
@@ -258,7 +258,7 @@ namespace Flurl.Http
 		//			var line = await reader.ReadLineAsync();
 		//			if (line == null) break;
 		//			if (line.Trim() == "") continue;
-		//			if (line.StartsWith("//")) continue;
+		//			if (line.OrdinalStartsWith("//")) continue;
 		//			if (line == domain) return true;
 		//		}
 		//	}

@@ -263,7 +263,7 @@ namespace Flurl.Http
 
 			if (Url.IsValid(location))
 				redir.Url = new Url(location);
-			else if (location.StartsWith("/"))
+			else if (location.OrdinalStartsWith("/"))
 				redir.Url = new Url(this.Url.Root).AppendPathSegment(location);
 			else
 				redir.Url = new Url(this.Url.Root).AppendPathSegments(this.Url.Path, location);

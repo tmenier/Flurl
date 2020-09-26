@@ -3,8 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+
+[assembly: InternalsVisibleTo("Flurl.Http")]
 
 namespace Flurl.Util
 {
@@ -47,8 +49,20 @@ namespace Flurl.Util
 				obj.ToString();
 		}
 
+		internal static bool OrdinalEquals(this string s, string value, bool ignoreCase = false) =>
+			s != null && s.Equals(value, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+
+		internal static bool OrdinalContains(this string s, string value, bool ignoreCase = false) =>
+			s != null && s.IndexOf(value, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal) >= 0;
+
+		internal static bool OrdinalStartsWith(this string s, string value, bool ignoreCase = false) =>
+			s != null && s.StartsWith(value, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+
+		internal static bool OrdinalEndsWith(this string s, string value, bool ignoreCase = false) =>
+			s != null && s.EndsWith(value, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+
 		/// <summary>
-		/// Splits at the first occurence of the given separator.
+		/// Splits at the first occurrence of the given separator.
 		/// </summary>
 		/// <param name="s">The string to split.</param>
 		/// <param name="separator">The separator to split on.</param>
@@ -96,7 +110,7 @@ namespace Flurl.Util
 				name = null;
 				val = null;
 				return
-					item.GetType().Name.Contains("Tuple") &&
+					item.GetType().Name.OrdinalContains("Tuple") &&
 					TryGetProp(item, "Item1", out name) &&
 					TryGetProp(item, "Item2", out val) &&
 					!TryGetProp(item, "Item3", out _);

@@ -136,7 +136,7 @@ namespace Flurl
 		/// <summary>
 		/// True if Url is absolute and scheme is https or wss.
 		/// </summary>
-		public bool IsSecureScheme => !IsRelative && (Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) || Scheme.Equals("wss", StringComparison.OrdinalIgnoreCase));
+		public bool IsSecureScheme => !IsRelative && (Scheme.OrdinalEquals("https", true) || Scheme.OrdinalEquals("wss", true));
 		#endregion
 
 		#region ctors and parsing methods
@@ -181,18 +181,18 @@ namespace Flurl
 				_scheme = uri.Scheme;
 				_userInfo = uri.UserInfo;
 				_host = uri.Host;
-				_port = uri.Authority.EndsWith($":{uri.Port}") ? uri.Port : (int?)null; // don't default Port if not included
+				_port = uri.Authority.OrdinalEndsWith($":{uri.Port}") ? uri.Port : (int?)null; // don't default Port if not included
 				_pathSegments = new List<string>();
 				if (uri.AbsolutePath.Length > 0 && uri.AbsolutePath != "/")
 					AppendPathSegment(uri.AbsolutePath);
 				_queryParams = new QueryParamCollection(uri.Query);
 				_fragment = uri.Fragment.TrimStart('#'); // quirk - formal def of fragment does not include the #
 
-				_leadingSlash = uri.OriginalString.StartsWith(Root + "/");
-				_trailingSlash = _pathSegments.Any() && uri.AbsolutePath.EndsWith("/");
+				_leadingSlash = uri.OriginalString.OrdinalStartsWith(Root + "/");
+				_trailingSlash = _pathSegments.Any() && uri.AbsolutePath.OrdinalEndsWith("/");
 
 				// more quirk fixes
-				var hasAuthority = uri.OriginalString.StartsWith($"{Scheme}://");
+				var hasAuthority = uri.OriginalString.OrdinalStartsWith($"{Scheme}://");
 				if (hasAuthority && Authority.Length == 0 && PathSegments.Any()) {
 					// Uri didn't parse Authority when it should have
 					_host = _pathSegments[0];
@@ -207,11 +207,11 @@ namespace Flurl
 				}
 			}
 			// if it's relative, System.Uri refuses to parse any of it. these hacks will force the matter
-			else if (uri.OriginalString.StartsWith("//")) {
+			else if (uri.OriginalString.OrdinalStartsWith("//")) {
 				ParseInternal(new Uri("http:" + uri.OriginalString));
 				_scheme = "";
 			}
-			else if (uri.OriginalString.StartsWith("/")) {
+			else if (uri.OriginalString.OrdinalStartsWith("/")) {
 				ParseInternal(new Uri("http://temp.com" + uri.OriginalString));
 				_scheme = "";
 				_host = "";
@@ -276,7 +276,7 @@ namespace Flurl
 				var subpath = segment.ToInvariantString();
 				foreach (var s in ParsePathSegments(subpath))
 					PathSegments.Add(s);
-				_trailingSlash = subpath.EndsWith("/");
+				_trailingSlash = subpath.OrdinalEndsWith("/");
 			}
 
 			_leadingSlash = true;
@@ -543,7 +543,7 @@ namespace Flurl
 		/// </summary>
 		/// <param name="obj">The object to compare to this instance.</param>
 		/// <returns></returns>
-		public override bool Equals(object obj) => obj is Url url && this.ToString().Equals(url.ToString());
+		public override bool Equals(object obj) => obj is Url url && this.ToString().OrdinalEquals(url.ToString());
 
 		/// <summary>
 		/// Returns the hashcode for this Url.
@@ -575,9 +575,9 @@ namespace Flurl
 				if (string.IsNullOrEmpty(part))
 					continue;
 
-				if (result.EndsWith("?") || part.StartsWith("?"))
+				if (result.OrdinalEndsWith("?") || part.OrdinalStartsWith("?"))
 					result = CombineEnsureSingleSeparator(result, part, '?');
-				else if (result.EndsWith("#") || part.StartsWith("#"))
+				else if (result.OrdinalEndsWith("#") || part.OrdinalStartsWith("#"))
 					result = CombineEnsureSingleSeparator(result, part, '#');
 				else if (inFragment)
 					result += part;
@@ -586,11 +586,11 @@ namespace Flurl
 				else
 					result = CombineEnsureSingleSeparator(result, part, '/');
 
-				if (part.Contains("#")) {
+				if (part.OrdinalContains("#")) {
 					inQuery = false;
 					inFragment = true;
 				}
-				else if (!inFragment && part.Contains("?")) {
+				else if (!inFragment && part.OrdinalContains("?")) {
 					inQuery = true;
 				}
 			}
@@ -655,7 +655,7 @@ namespace Flurl
 			// in that % isn't illegal if it's the start of a %-encoded sequence https://stackoverflow.com/a/47636037/62600
 
 			// no % characters, so avoid the regex overhead
-			if (!s.Contains("%"))
+			if (!s.OrdinalContains("%"))
 				return Uri.EscapeUriString(s);
 
 			// pick out all %-hex-hex matches and avoid double-encoding 

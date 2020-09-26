@@ -21,8 +21,8 @@ namespace Flurl.Http.Testing
 		internal static bool HasAnyVerb(this FlurlCall call, string[] verbs) {
 			// for good measure, check both FlurlRequest.Verb and HttpRequestMessage.Method
 			return verbs.Any(verb =>
-				call.Request.Verb.Method.Equals(verb, StringComparison.OrdinalIgnoreCase) &&
-				call.HttpRequestMessage.Method.Method.Equals(verb, StringComparison.OrdinalIgnoreCase));
+				call.Request.Verb.Method.OrdinalEquals(verb, true) &&
+				call.HttpRequestMessage.Method.Method.OrdinalEquals(verb, true));
 		}
 
 		/// <summary>
@@ -94,7 +94,7 @@ namespace Flurl.Http.Testing
 			// avoid regex'ing in simple cases
 			if (string.IsNullOrEmpty(pattern) || pattern == "*") return true;
 			if (string.IsNullOrEmpty(textToCheck)) return false;
-			if (!pattern.Contains("*")) return textToCheck == pattern;
+			if (!pattern.OrdinalContains("*")) return textToCheck == pattern;
 
 			var regex = "^" + Regex.Escape(pattern).Replace("\\*", "(.*)") + "$";
 			return Regex.IsMatch(textToCheck ?? "", regex);
