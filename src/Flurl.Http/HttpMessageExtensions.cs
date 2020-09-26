@@ -91,7 +91,6 @@ namespace Flurl.Http
 			}
 		}
 
-
 		/// <summary>
 		/// Wrapper class for treating HttpRequestMessage and HttpResponseMessage uniformly. (Unfortunately they don't have a common interface.)
 		/// </summary>
