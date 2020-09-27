@@ -181,7 +181,7 @@ namespace Flurl
 				_scheme = uri.Scheme;
 				_userInfo = uri.UserInfo;
 				_host = uri.Host;
-				_port = uri.Authority.OrdinalEndsWith($":{uri.Port}") ? uri.Port : (int?)null; // don't default Port if not included
+				_port = _baseUrl.OrdinalStartsWith($"{Root}:{uri.Port}") ? uri.Port : (int?)null; // don't default Port if not included explicitly
 				_pathSegments = new List<string>();
 				if (uri.AbsolutePath.Length > 0 && uri.AbsolutePath != "/")
 					AppendPathSegment(uri.AbsolutePath);

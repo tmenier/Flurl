@@ -559,5 +559,14 @@ namespace Flurl.Test.UrlBuilder
 			Assert.IsInstanceOf<Url>(url);
 			Assert.AreEqual("http://mysite.com", url.ToString());
 		}
+
+		[Test] // https://github.com/tmenier/Flurl/issues/510
+		public void uri_with_default_port_parses_correctly() {
+			var originalString = "https://someurl.net:443/api/somepath";
+			var uri = new Uri(originalString);
+			var url = new Url(uri);
+			Assert.AreEqual(443, url.Port);
+			Assert.AreEqual(originalString, url.ToString());
+		}
 	}
 }
