@@ -11,7 +11,7 @@ namespace Flurl
 	/// </summary>
 	public class Url
 	{
-		private string _baseUrl;
+		private string _originalString;
 		private bool _parsed;
 
 		private string _scheme;
@@ -145,8 +145,8 @@ namespace Flurl
 		/// </summary>
 		/// <param name="baseUrl">The URL to use as a starting point (required)</param>
 		/// <exception cref="ArgumentNullException"><paramref name="baseUrl"/> is <see langword="null" />.</exception>
-		public Url(string baseUrl) {
-			_baseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
+		public Url(string baseUrl = null) {
+			_originalString = baseUrl;
 		}
 
 		/// <summary>
@@ -155,7 +155,7 @@ namespace Flurl
 		/// <param name="uri">The System.Uri (required)</param>
 		/// <exception cref="ArgumentNullException"><paramref name="uri"/> is <see langword="null" />.</exception>
 		public Url(Uri uri) {
-			_baseUrl = (uri ?? throw new ArgumentNullException(nameof(uri))).OriginalString;
+			_originalString = (uri ?? throw new ArgumentNullException(nameof(uri))).OriginalString;
 			ParseInternal(uri); // parse eagerly, taking advantage of the fact that we already have a parsed Uri
 		}
 		
@@ -175,13 +175,13 @@ namespace Flurl
 		private void ParseInternal(Uri uri = null) {
 			_parsed = true;
 
-			uri = uri ?? new Uri(_baseUrl, UriKind.RelativeOrAbsolute);
+			uri = uri ?? new Uri(_originalString ?? "", UriKind.RelativeOrAbsolute);
 
 			if (uri.IsAbsoluteUri) {
 				_scheme = uri.Scheme;
 				_userInfo = uri.UserInfo;
 				_host = uri.Host;
-				_port = _baseUrl.OrdinalStartsWith($"{Root}:{uri.Port}") ? uri.Port : (int?)null; // don't default Port if not included explicitly
+				_port = _originalString?.OrdinalStartsWith($"{Root}:{uri.Port}") == true ? uri.Port : (int?)null; // don't default Port if not included explicitly
 				_pathSegments = new List<string>();
 				if (uri.AbsolutePath.Length > 0 && uri.AbsolutePath != "/")
 					AppendPathSegment(uri.AbsolutePath);
@@ -495,7 +495,7 @@ namespace Flurl
 		/// <returns></returns>
 		public string ToString(bool encodeSpaceAsPlus) {
 			if (!_parsed)
-				return _baseUrl;
+				return _originalString ?? "";
 
 			return string.Concat(
 				Root,

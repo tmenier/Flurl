@@ -42,6 +42,11 @@ namespace Flurl.Test.UrlBuilder
 		}
 
 		[Test]
+		public void uri_cannot_be_null() {
+			Assert.Throws<ArgumentNullException>(() => new Url((Uri)null));
+		}
+
+		[Test]
 		public void can_set_query_params() {
 			var url = "http://www.mysite.com/more"
 				.SetQueryParam("x", 1)
@@ -169,12 +174,6 @@ namespace Flurl.Test.UrlBuilder
 		[TestCase(NullValueHandling.Remove, ExpectedResult = "http://www.mysite.com?x=1&z=foo")]
 		public string can_control_null_value_behavior_in_query_params(NullValueHandling nullValueHandling) {
 			return "http://www.mysite.com?y=2".SetQueryParams(new { x = 1, y = (string)null, z = "foo" }, nullValueHandling).ToString();
-		}
-
-		[Test]
-		public void constructor_requires_nonnull_arg() {
-			Assert.Throws<ArgumentNullException>(() => new Url((string)null));
-			Assert.Throws<ArgumentNullException>(() => new Url((Uri)null));
 		}
 
 		[Test]
@@ -567,6 +566,18 @@ namespace Flurl.Test.UrlBuilder
 			var url = new Url(uri);
 			Assert.AreEqual(443, url.Port);
 			Assert.AreEqual(originalString, url.ToString());
+		}
+
+		[Test]
+		public void can_have_empty_ctor() {
+			var url1 = new Url();
+			Assert.AreEqual("", url1.ToString());
+
+			var url2 = new Url {
+				Host = "192.168.1.1",
+				Scheme = "http"
+			};
+			Assert.AreEqual("http://192.168.1.1", url2.ToString());
 		}
 	}
 }
