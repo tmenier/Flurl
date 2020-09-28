@@ -48,6 +48,15 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public async Task can_post_nothing() {
+			await "http://some-api.com".PostAsync();
+			HttpTest.ShouldHaveCalled("http://some-api.com")
+				.WithVerb(HttpMethod.Post)
+				.WithRequestBody("")
+				.Times(1);
+		}
+
+		[Test]
 		public async Task can_receive_json() {
 			HttpTest.RespondWithJson(new TestData { id = 1, name = "Frank" });
 

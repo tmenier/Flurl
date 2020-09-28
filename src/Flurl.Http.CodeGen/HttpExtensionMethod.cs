@@ -20,7 +20,7 @@ namespace Flurl.Http.CodeGen
 				else if (reqBodyType == "String")
 					AddArg("data", "string", "Contents of the request body.");
 				else if (reqBodyType == null)
-					AddArg("content", "HttpContent", "Contents of the request body.");
+					AddArg("content", "HttpContent", "Contents of the request body.", "null");
 				else
 					AddArg("data", "object", "Contents of the request body.");
 			}
