@@ -109,10 +109,7 @@ namespace Flurl
 		/// </summary>
 		public string Query {
 			get => QueryParams.ToString();
-			set {
-				QueryParams.Clear();
-				QueryParams.AddRange(ParseQueryParams(value));
-			}
+			set => EnsureParsed()._queryParams = new QueryParamCollection(value);
 		}
 
 		/// <summary>
@@ -226,20 +223,14 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Parses a URL query to a QueryParamCollection dictionary.
+		/// Parses a URL query to a QueryParamCollection.
 		/// </summary>
 		/// <param name="query">The URL query to parse.</param>
-		public static IEnumerable<QueryParameter> ParseQueryParams(string query) {
+		public static IEnumerable<(string Name, QueryParamValue Value)> ParseQueryParams(string query) {
 			query = query?.TrimStart('?');
-			if (string.IsNullOrEmpty(query))
-				return Enumerable.Empty<QueryParameter>();
-
-			return
-				from p in query.Split('&')
-				let pair = p.SplitOnFirstOccurence("=")
-				let name = pair[0]
-				let value = (pair.Length == 1) ? null : pair[1]
-				select new QueryParameter(name, value, true);
+			return (string.IsNullOrEmpty(query)) ?
+				Enumerable.Empty<(string, QueryParamValue)>() :
+				query.ToKeyValuePairs().Select(kv => (kv.Key, new QueryParamValue(kv.Value, true)));
 		}
 
 		/// <summary>
@@ -335,7 +326,7 @@ namespace Flurl
 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
 		/// <returns>The Url object with the query parameter added</returns>
 		public Url SetQueryParam(string name, object value, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
-			QueryParams.Merge(name, value, false, nullValueHandling);
+			QueryParams.AddOrReplace(name, value, false, nullValueHandling);
 			return this;
 		}
 
@@ -349,7 +340,7 @@ namespace Flurl
 		/// <returns>The Url object with the query parameter added</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
 		public Url SetQueryParam(string name, string value, bool isEncoded = false, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
-			QueryParams.Merge(name, value, isEncoded, nullValueHandling);
+			QueryParams.AddOrReplace(name, value, isEncoded, nullValueHandling);
 			return this;
 		}
 
@@ -359,7 +350,7 @@ namespace Flurl
 		/// <param name="name">Name of query parameter</param>
 		/// <returns>The Url object with the query parameter added</returns>
 		public Url SetQueryParam(string name) {
-			QueryParams.Merge(name, null, false, NullValueHandling.NameOnly);
+			QueryParams.AddOrReplace(name, null, false, NullValueHandling.NameOnly);
 			return this;
 		}
 
@@ -370,7 +361,12 @@ namespace Flurl
 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
 		/// <returns>The Url object with the query parameters added</returns>
 		public Url SetQueryParams(object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
-			QueryParams.Merge(values, nullValueHandling);
+			if (values == null)
+				return this;
+
+			foreach (var kv in values.ToKeyValuePairs())
+				SetQueryParam(kv.Key, kv.Value, nullValueHandling);
+
 			return this;
 		}
 

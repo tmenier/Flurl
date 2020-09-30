@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -55,17 +55,29 @@ namespace Flurl.Test.UrlBuilder
 		public void can_parse_query_params() {
 			var q = new Url("http://www.mysite.com/more?x=1&y=2&z=3&y=4&abc&xyz&foo=&=bar&y=6").QueryParams;
 
-			Assert.AreEqual(9, q.Count);
-			Assert.AreEqual(new[] { "x", "y", "z", "y", "abc", "xyz", "foo", "", "y", }, q.Select(p => p.Name));
-			Assert.AreEqual(new[] { "1", "2", "3", "4", null, null, "", "bar", "6", }, q.Select(p => p.Value));
+			Assert.AreEqual(new (string, object)[] {
+				("x", "1"),
+				("y", "2"),
+				("z", "3"),
+				("y", "4"),
+				("abc", null),
+				("xyz", null),
+				("foo", ""),
+				("", "bar"),
+				("y", "6")
+			}, q.ToArray());
 
-			Assert.AreEqual("1", q["x"]);
-			Assert.AreEqual(new[] { "2", "4", "6" }, q["y"]); // group values of same name into array
-			Assert.AreEqual("3", q["z"]);
-			Assert.AreEqual(null, q["abc"]);
-			Assert.AreEqual(null, q["xyz"]);
-			Assert.AreEqual("", q["foo"]);
-			Assert.AreEqual("bar", q[""]);
+			Assert.AreEqual(("y", "4"), q[3]);
+			Assert.AreEqual("foo", q[6].Name);
+			Assert.AreEqual("bar", q[7].Value);
+
+			Assert.AreEqual("1", q.FirstOrDefault("x"));
+			Assert.AreEqual(new[] { "2", "4", "6" }, q.GetAll("y")); // group values of same name into array
+			Assert.AreEqual("3", q.FirstOrDefault("z"));
+			Assert.AreEqual(null, q.FirstOrDefault("abc"));
+			Assert.AreEqual(null, q.FirstOrDefault("xyz"));
+			Assert.AreEqual("", q.FirstOrDefault("foo"));
+			Assert.AreEqual("bar", q.FirstOrDefault(""));
 		}
 
 		[TestCase("http://www.mysite.com/more?x=1&y=2", true)]
@@ -83,14 +95,14 @@ namespace Flurl.Test.UrlBuilder
 		[Test]
 		public void interprets_plus_as_space() {
 			var url = new Url("http://www.mysite.com/foo+bar?x=1+2");
-			Assert.AreEqual("1 2", url.QueryParams["x"]);
+			Assert.AreEqual("1 2", url.QueryParams.FirstOrDefault("x"));
 		}
 
 		[Test] // #437
 		public void interprets_encoded_plus_as_plus() {
 			var urlStr = "http://google.com/search?q=param_with_%2B";
 			var url = new Url(urlStr);
-			var paramValue = url.QueryParams["q"];
+			var paramValue = url.QueryParams.FirstOrDefault("q");
 			Assert.AreEqual("param_with_+", paramValue);
 		}
 

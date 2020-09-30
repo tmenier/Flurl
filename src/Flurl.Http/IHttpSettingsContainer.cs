@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Flurl.Http.Configuration;
+using Flurl.Util;
 
 namespace Flurl.Http
 {

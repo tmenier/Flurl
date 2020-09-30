@@ -30,7 +30,7 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		internal static bool HasQueryParam(this FlurlCall call, string name, object value = null) {
 			if (value == null)
-				return call.Request.Url.QueryParams.ContainsKey(name);
+				return call.Request.Url.QueryParams.Contains(name);
 
 			var paramVals = call.Request.Url.QueryParams
 				.Where(p => p.Name == name)

@@ -16,7 +16,7 @@ namespace Flurl.Test.Http
 		    var vals = new {
 			    a = "foo",
 			    b = 333,
-			    c = (string)null, // exlude
+			    c = (string)null, // exclude
 			    d = ""
 		    };
 

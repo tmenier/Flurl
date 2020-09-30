@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -76,7 +76,7 @@ namespace Flurl.Test.UrlBuilder
 		[Test]
 		public void enumerable_query_param_is_split_into_multiple() {
 			var url = "http://www.mysite.com".SetQueryParam("x", new[] { "a", "b", null, "c" });
-			Assert.AreEqual("http://www.mysite.com?x=a&x=b&x&x=c", url.ToString());
+			Assert.AreEqual("http://www.mysite.com?x=a&x=b&x=c", url.ToString());
 		}
 
 		[Test]
@@ -489,42 +489,33 @@ namespace Flurl.Test.UrlBuilder
 		[Test]
 		public void can_manipulate_query_params() {
 			var url = new Url("https://api.com/foo#bar");
-			url.QueryParams.Add(new QueryParameter("x", 0));
+			url.QueryParams.Add("x", 0);
 			Assert.AreEqual("https://api.com/foo?x=0#bar", url.ToString());
 			url.QueryParams.Add("y", 1);
 			Assert.AreEqual("https://api.com/foo?x=0&y=1#bar", url.ToString());
-			url.QueryParams["x"] = "hi!";
+			url.QueryParams.AddOrReplace("x", "hi!");
 			Assert.AreEqual("https://api.com/foo?x=hi%21&y=1#bar", url.ToString());
-			url.QueryParams["z"] = new[] { 8, 9, 10 };
+			url.QueryParams.AddOrReplace("z", new[] { 8, 9, 10 });
 			Assert.AreEqual("https://api.com/foo?x=hi%21&y=1&z=8&z=9&z=10#bar", url.ToString());
 			url.QueryParams.Remove("y");
 			Assert.AreEqual("https://api.com/foo?x=hi%21&z=8&z=9&z=10#bar", url.ToString());
-			url.QueryParams.RemoveAt(2);
-			Assert.AreEqual("https://api.com/foo?x=hi%21&z=8&z=10#bar", url.ToString());
-			url.QueryParams[0] = null;
-			Assert.AreEqual("https://api.com/foo?z=8&z=10#bar", url.ToString());
+			url.QueryParams.AddOrReplace("x", null);
+			Assert.AreEqual("https://api.com/foo?z=8&z=9&z=10#bar", url.ToString());
 			url.QueryParams.Clear();
 			Assert.AreEqual("https://api.com/foo#bar", url.ToString());
-		}
-
-		[Test]
-		public void can_sort_query_params() {
-			var url = new Url("http://www.mysite.com/more?z=1&y=2&x=3");
-			url.QueryParams.Sort((x, y) => x.Name.CompareTo(y.Name));
-			Assert.AreEqual("http://www.mysite.com/more?x=3&y=2&z=1", url.ToString());
 		}
 
 		[Test]
 		public void can_modify_query_param_array() {
 			var url = new Url("http://www.mysite.com/more?x=1&y=2&x=2&z=4");
 			// go from 2 values to 3, order should be preserved
-			url.QueryParams["x"] = new[] { 8, 9, 10 };
+			url.QueryParams.AddOrReplace("x", new[] { 8, 9, 10 });
 			Assert.AreEqual("http://www.mysite.com/more?x=8&y=2&x=9&z=4&x=10", url.ToString());
 			// go from 3 values to 2, order should be preserved
-			url.QueryParams["x"] = new[] { 101, 102 };
+			url.QueryParams.AddOrReplace("x", new[] { 101, 102 });
 			Assert.AreEqual("http://www.mysite.com/more?x=101&y=2&x=102&z=4", url.ToString());
 			// wipe them out. all of them.
-			url.QueryParams["x"] = null;
+			url.QueryParams.AddOrReplace("x", null);
 			Assert.AreEqual("http://www.mysite.com/more?y=2&z=4", url.ToString());
 		}
 
