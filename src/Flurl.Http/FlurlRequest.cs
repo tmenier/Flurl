@@ -134,11 +134,11 @@ namespace Flurl.Http
 		}
 
 		/// <inheritdoc />
-		public INameValueList<object> Headers { get; } = new NameValueList<object>();
+		public INameValueList<string> Headers { get; } = new NameValueList<string>();
 
 		/// <inheritdoc />
 		public IEnumerable<(string Name, string Value)> Cookies =>
-			CookieCutter.ParseRequestHeader(Headers.FirstOrDefault("Cookie")?.ToInvariantString());
+			CookieCutter.ParseRequestHeader(Headers.FirstOrDefault("Cookie"));
 
 		/// <inheritdoc />
 		public CookieJar CookieJar {
@@ -160,66 +160,34 @@ namespace Flurl.Http
 			Verb = verb;
 
 			var request = new HttpRequestMessage(verb, Url) { Content = content };
+			SyncHeaders(request);
 			var call = new FlurlCall {
 				Request = this,
 				RedirectedFrom = _redirectedFrom,
 				HttpRequestMessage = request
 			};
-			request.SetHttpCall(call);
+			request.SetFlurlCall(call);
 
 			await RaiseEventAsync(Settings.BeforeCall, Settings.BeforeCallAsync, call).ConfigureAwait(false);
-			request.RequestUri = Url.ToUri(); // in case it was modified in the handler above
 
-			var cancellationTokenWithTimeout = cancellationToken;
-			CancellationTokenSource timeoutTokenSource = null;
-
-			if (Settings.Timeout.HasValue) {
-				timeoutTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-				timeoutTokenSource.CancelAfter(Settings.Timeout.Value);
-				cancellationTokenWithTimeout = timeoutTokenSource.Token;
-			}
+			// in case URL or headers were modified in the handler above
+			request.RequestUri = Url.ToUri();
+			SyncHeaders(request);
 
 			call.StartedUtc = DateTime.UtcNow;
-			try {
-				SyncHeaders(request);
+			var ct = GetCancellationTokenWithTimeout(cancellationToken, out var cts);
 
-				var response = await Client.HttpClient.SendAsync(request, completionOption, cancellationTokenWithTimeout).ConfigureAwait(false);
+			try {
+
+				var response = await Client.HttpClient.SendAsync(request, completionOption, ct).ConfigureAwait(false);
 				call.HttpResponseMessage = response;
 				call.HttpResponseMessage.RequestMessage = request;
 				call.Response = new FlurlResponse(call.HttpResponseMessage, CookieJar);
 
-				if (Settings.Redirects.Enabled)
-					call.Redirect = GetRedirect(call);
-
-				if (call.Redirect != null)
-					await RaiseEventAsync(Settings.OnRedirect, Settings.OnRedirectAsync, call).ConfigureAwait(false);
-
-				if (call.Redirect?.Follow == true) {
-					CheckForCircularRedirects(call);
-
-					var redir = new FlurlRequest(call.Redirect.Url)
-						.WithHeaders(this.Headers)
-						.WithCookies(call.Response.Cookies) as FlurlRequest;
-
-					redir.Client = Client;
-					redir._redirectedFrom = call;
-					redir.Settings.Defaults = Settings;
-
-					var changeToGet = call.Redirect.ChangeVerbToGet;
-
-					if (!Settings.Redirects.ForwardAuthorizationHeader)
-						redir.Headers.Remove("Authorization");
-					if (changeToGet)
-						redir.Headers.Remove("Transfer-Encoding");
-
-					return await redir.SendAsync(
-						changeToGet ? HttpMethod.Get : verb,
-						changeToGet ? null : content,
-						cancellationToken,
-						completionOption).ConfigureAwait(false);
+				if (call.Succeeded) {
+					var redirResponse = await ProcessRedirectAsync(call, cancellationToken, completionOption).ConfigureAwait(false);
+					return redirResponse ?? call.Response;
 				}
-				else if (call.Succeeded)
-					return call.Response;
 				else
 					throw new FlurlHttpException(call, null);
 			}
@@ -228,8 +196,7 @@ namespace Flurl.Http
 			}
 			finally {
 				request.Dispose();
-				timeoutTokenSource?.Dispose();
-
+				cts?.Dispose();
 				call.EndedUtc = DateTime.UtcNow;
 				await RaiseEventAsync(Settings.AfterCall, Settings.AfterCallAsync, call).ConfigureAwait(false);
 			}
@@ -251,6 +218,58 @@ namespace Flurl.Http
 			}
 		}
 
+		private CancellationToken GetCancellationTokenWithTimeout(CancellationToken original, out CancellationTokenSource timeoutTokenSource) {
+			timeoutTokenSource = null;
+			if (Settings.Timeout.HasValue) {
+				timeoutTokenSource = CancellationTokenSource.CreateLinkedTokenSource(original);
+				timeoutTokenSource.CancelAfter(Settings.Timeout.Value);
+				return timeoutTokenSource.Token;
+			}
+			else {
+				return original;
+			}
+		}
+
+		private async Task<IFlurlResponse> ProcessRedirectAsync(FlurlCall call, CancellationToken cancellationToken, HttpCompletionOption completionOption) {
+			if (Settings.Redirects.Enabled)
+				call.Redirect = GetRedirect(call);
+
+			if (call.Redirect == null)
+				return null;
+
+			await RaiseEventAsync(Settings.OnRedirect, Settings.OnRedirectAsync, call).ConfigureAwait(false);
+
+			if (call.Redirect.Follow != true)
+				return null;
+
+			CheckForCircularRedirects(call);
+
+			var redir = new FlurlRequest(call.Redirect.Url);
+			redir.Client = Client;
+			redir._redirectedFrom = call;
+			redir.Settings.Defaults = Settings;
+			redir.WithHeaders(this.Headers).WithCookies(call.Response.Cookies);
+
+			var changeToGet = call.Redirect.ChangeVerbToGet;
+
+			if (!Settings.Redirects.ForwardAuthorizationHeader)
+				redir.Headers.Remove("Authorization");
+			if (changeToGet)
+				redir.Headers.Remove("Transfer-Encoding");
+
+			var ct = GetCancellationTokenWithTimeout(cancellationToken, out var cts);
+			try {
+				return await redir.SendAsync(
+					changeToGet ? HttpMethod.Get : call.HttpRequestMessage.Method,
+					changeToGet ? null : call.HttpRequestMessage.Content,
+					cancellationToken,
+					completionOption).ConfigureAwait(false);
+			}
+			finally {
+				cts?.Dispose();
+			}
+		}
+
 		// partially lifted from https://github.com/dotnet/runtime/blob/master/src/libraries/System.Net.Http/src/System/Net/Http/SocketsHttpHandler/RedirectHandler.cs
 		private FlurlRedirect GetRedirect(FlurlCall call) {
 			if (call.Response.StatusCode < 300 || call.Response.StatusCode > 399)
@@ -263,7 +282,7 @@ namespace Flurl.Http
 
 			if (Url.IsValid(location))
 				redir.Url = new Url(location);
-			else if (location.StartsWith("/"))
+			else if (location.OrdinalStartsWith("/"))
 				redir.Url = new Url(this.Url.Root).AppendPathSegment(location);
 			else
 				redir.Url = new Url(this.Url.Root).AppendPathSegments(this.Url.Path, location);

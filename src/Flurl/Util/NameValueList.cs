@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Flurl.Http
+namespace Flurl.Util
 {
 	/// <summary>
 	/// Defines common methods for INameValueList and IReadOnlyNameValueList.
@@ -47,7 +47,7 @@ namespace Flurl.Http
 		void Add(string name, TValue value);
 
 		/// <summary>
-		/// Replaces the first occurence of the given Name with the given Value and removes any others,
+		/// Replaces the first occurrence of the given Name with the given Value and removes any others,
 		/// or adds a new Name/Value pair if none exist.
 		/// </summary>
 		void AddOrReplace(string name, TValue value);

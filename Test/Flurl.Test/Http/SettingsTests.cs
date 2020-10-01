@@ -216,7 +216,7 @@ namespace Flurl.Test.Http
 		[Test]
 		public void can_configure_client_from_FlurlHttp_object() {
 			FlurlHttp.ConfigureClient("http://host1.com/foo", cli => cli.Settings.Redirects.Enabled = false);
-			Assert.IsFalse(new FlurlRequest("https://host1.com/bar").Client.Settings.Redirects.Enabled); // different URL but same host, so should use same client
+			Assert.IsFalse(new FlurlRequest("http://host1.com/bar").Client.Settings.Redirects.Enabled); // different URL but same host, so should use same client
 			Assert.IsTrue(new FlurlRequest("http://host2.com").Client.Settings.Redirects.Enabled);
 		}
 	}

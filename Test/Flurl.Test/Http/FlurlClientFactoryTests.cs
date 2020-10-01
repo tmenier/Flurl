@@ -13,14 +13,24 @@ namespace Flurl.Test.Http
     public class FlurlClientFactoryTests
     {
 	    [Test]
-	    public void per_host_factory_provides_same_client_per_host() {
-		    var fac = new PerHostFlurlClientFactory();
+	    public void default_factory_provides_same_client_per_host_scheme_port() {
+		    var fac = new DefaultFlurlClientFactory();
 		    var cli1 = fac.Get("http://api.com/foo");
-		    var cli2 = fac.Get("https://api.com/bar");
+		    var cli2 = fac.Get("http://api.com/bar");
+		    var cli3 = fac.Get("https://api.com/foo");
+		    var cli4 = fac.Get("https://api.com/bar");
+		    var cli5 = fac.Get("https://api.com:1234/foo");
+		    var cli6 = fac.Get("https://api.com:1234/bar");
+
 		    Assert.AreSame(cli1, cli2);
+		    Assert.AreSame(cli3, cli4);
+		    Assert.AreSame(cli5, cli6);
+
+		    Assert.AreNotSame(cli1, cli3);
+		    Assert.AreNotSame(cli3, cli5);
 	    }
 
-	    [Test]
+		[Test]
 	    public void per_base_url_factory_provides_same_client_per_provided_url() {
 		    var fac = new PerBaseUrlFlurlClientFactory();
 		    var cli1 = fac.Get("http://api.com/foo");
@@ -32,15 +42,15 @@ namespace Flurl.Test.Http
 
 	    [Test]
 	    public void can_configure_client_from_factory() {
-		    var fac = new PerHostFlurlClientFactory()
+		    var fac = new DefaultFlurlClientFactory()
 			    .ConfigureClient("http://api.com/foo", c => c.Settings.Timeout = TimeSpan.FromSeconds(123));
-		    Assert.AreEqual(TimeSpan.FromSeconds(123), fac.Get("https://api.com/bar").Settings.Timeout);
+		    Assert.AreEqual(TimeSpan.FromSeconds(123), fac.Get("http://api.com/bar").Settings.Timeout);
 		    Assert.AreNotEqual(TimeSpan.FromSeconds(123), fac.Get("http://api2.com/foo").Settings.Timeout);
 	    }
 
 		[Test]
 	    public async Task ConfigureClient_is_thread_safe() {
-		    var fac = new PerHostFlurlClientFactory();
+		    var fac = new DefaultFlurlClientFactory();
 		    var sequence = new List<int>();
 
 		    var task1 = Task.Run(() => fac.ConfigureClient("http://api.com", c => {

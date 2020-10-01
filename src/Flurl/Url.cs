@@ -11,7 +11,7 @@ namespace Flurl
 	/// </summary>
 	public class Url
 	{
-		private string _baseUrl;
+		private string _originalString;
 		private bool _parsed;
 
 		private string _scheme;
@@ -109,10 +109,7 @@ namespace Flurl
 		/// </summary>
 		public string Query {
 			get => QueryParams.ToString();
-			set {
-				QueryParams.Clear();
-				QueryParams.AddRange(ParseQueryParams(value));
-			}
+			set => EnsureParsed()._queryParams = new QueryParamCollection(value);
 		}
 
 		/// <summary>
@@ -136,7 +133,7 @@ namespace Flurl
 		/// <summary>
 		/// True if Url is absolute and scheme is https or wss.
 		/// </summary>
-		public bool IsSecureScheme => !IsRelative && (Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) || Scheme.Equals("wss", StringComparison.OrdinalIgnoreCase));
+		public bool IsSecureScheme => !IsRelative && (Scheme.OrdinalEquals("https", true) || Scheme.OrdinalEquals("wss", true));
 		#endregion
 
 		#region ctors and parsing methods
@@ -145,8 +142,8 @@ namespace Flurl
 		/// </summary>
 		/// <param name="baseUrl">The URL to use as a starting point (required)</param>
 		/// <exception cref="ArgumentNullException"><paramref name="baseUrl"/> is <see langword="null" />.</exception>
-		public Url(string baseUrl) {
-			_baseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
+		public Url(string baseUrl = null) {
+			_originalString = baseUrl;
 		}
 
 		/// <summary>
@@ -155,7 +152,7 @@ namespace Flurl
 		/// <param name="uri">The System.Uri (required)</param>
 		/// <exception cref="ArgumentNullException"><paramref name="uri"/> is <see langword="null" />.</exception>
 		public Url(Uri uri) {
-			_baseUrl = (uri ?? throw new ArgumentNullException(nameof(uri))).OriginalString;
+			_originalString = (uri ?? throw new ArgumentNullException(nameof(uri))).OriginalString;
 			ParseInternal(uri); // parse eagerly, taking advantage of the fact that we already have a parsed Uri
 		}
 		
@@ -175,24 +172,24 @@ namespace Flurl
 		private void ParseInternal(Uri uri = null) {
 			_parsed = true;
 
-			uri = uri ?? new Uri(_baseUrl, UriKind.RelativeOrAbsolute);
+			uri = uri ?? new Uri(_originalString ?? "", UriKind.RelativeOrAbsolute);
 
 			if (uri.IsAbsoluteUri) {
 				_scheme = uri.Scheme;
 				_userInfo = uri.UserInfo;
 				_host = uri.Host;
-				_port = uri.Authority.EndsWith($":{uri.Port}") ? uri.Port : (int?)null; // don't default Port if not included
+				_port = _originalString?.OrdinalStartsWith($"{Root}:{uri.Port}") == true ? uri.Port : (int?)null; // don't default Port if not included explicitly
 				_pathSegments = new List<string>();
 				if (uri.AbsolutePath.Length > 0 && uri.AbsolutePath != "/")
 					AppendPathSegment(uri.AbsolutePath);
 				_queryParams = new QueryParamCollection(uri.Query);
 				_fragment = uri.Fragment.TrimStart('#'); // quirk - formal def of fragment does not include the #
 
-				_leadingSlash = uri.OriginalString.StartsWith(Root + "/");
-				_trailingSlash = _pathSegments.Any() && uri.AbsolutePath.EndsWith("/");
+				_leadingSlash = uri.OriginalString.OrdinalStartsWith(Root + "/");
+				_trailingSlash = _pathSegments.Any() && uri.AbsolutePath.OrdinalEndsWith("/");
 
 				// more quirk fixes
-				var hasAuthority = uri.OriginalString.StartsWith($"{Scheme}://");
+				var hasAuthority = uri.OriginalString.OrdinalStartsWith($"{Scheme}://");
 				if (hasAuthority && Authority.Length == 0 && PathSegments.Any()) {
 					// Uri didn't parse Authority when it should have
 					_host = _pathSegments[0];
@@ -207,11 +204,11 @@ namespace Flurl
 				}
 			}
 			// if it's relative, System.Uri refuses to parse any of it. these hacks will force the matter
-			else if (uri.OriginalString.StartsWith("//")) {
+			else if (uri.OriginalString.OrdinalStartsWith("//")) {
 				ParseInternal(new Uri("http:" + uri.OriginalString));
 				_scheme = "";
 			}
-			else if (uri.OriginalString.StartsWith("/")) {
+			else if (uri.OriginalString.OrdinalStartsWith("/")) {
 				ParseInternal(new Uri("http://temp.com" + uri.OriginalString));
 				_scheme = "";
 				_host = "";
@@ -226,21 +223,10 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// Parses a URL query to a QueryParamCollection dictionary.
+		/// Parses a URL query to a QueryParamCollection.
 		/// </summary>
 		/// <param name="query">The URL query to parse.</param>
-		public static IEnumerable<QueryParameter> ParseQueryParams(string query) {
-			query = query?.TrimStart('?');
-			if (string.IsNullOrEmpty(query))
-				return Enumerable.Empty<QueryParameter>();
-
-			return
-				from p in query.Split('&')
-				let pair = p.SplitOnFirstOccurence("=")
-				let name = pair[0]
-				let value = (pair.Length == 1) ? null : pair[1]
-				select new QueryParameter(name, value, true);
-		}
+		public static QueryParamCollection ParseQueryParams(string query) => new QueryParamCollection(query);
 
 		/// <summary>
 		/// Splits the given path into segments, encoding illegal characters, "?", and "#".
@@ -276,7 +262,7 @@ namespace Flurl
 				var subpath = segment.ToInvariantString();
 				foreach (var s in ParsePathSegments(subpath))
 					PathSegments.Add(s);
-				_trailingSlash = subpath.EndsWith("/");
+				_trailingSlash = subpath.OrdinalEndsWith("/");
 			}
 
 			_leadingSlash = true;
@@ -335,7 +321,7 @@ namespace Flurl
 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
 		/// <returns>The Url object with the query parameter added</returns>
 		public Url SetQueryParam(string name, object value, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
-			QueryParams.Merge(name, value, false, nullValueHandling);
+			QueryParams.AddOrReplace(name, value, false, nullValueHandling);
 			return this;
 		}
 
@@ -349,7 +335,7 @@ namespace Flurl
 		/// <returns>The Url object with the query parameter added</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
 		public Url SetQueryParam(string name, string value, bool isEncoded = false, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
-			QueryParams.Merge(name, value, isEncoded, nullValueHandling);
+			QueryParams.AddOrReplace(name, value, isEncoded, nullValueHandling);
 			return this;
 		}
 
@@ -359,7 +345,7 @@ namespace Flurl
 		/// <param name="name">Name of query parameter</param>
 		/// <returns>The Url object with the query parameter added</returns>
 		public Url SetQueryParam(string name) {
-			QueryParams.Merge(name, null, false, NullValueHandling.NameOnly);
+			QueryParams.AddOrReplace(name, null, false, NullValueHandling.NameOnly);
 			return this;
 		}
 
@@ -370,7 +356,12 @@ namespace Flurl
 		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
 		/// <returns>The Url object with the query parameters added</returns>
 		public Url SetQueryParams(object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
-			QueryParams.Merge(values, nullValueHandling);
+			if (values == null)
+				return this;
+
+			foreach (var kv in values.ToKeyValuePairs())
+				SetQueryParam(kv.Key, kv.Value, nullValueHandling);
+
 			return this;
 		}
 
@@ -495,7 +486,7 @@ namespace Flurl
 		/// <returns></returns>
 		public string ToString(bool encodeSpaceAsPlus) {
 			if (!_parsed)
-				return _baseUrl;
+				return _originalString ?? "";
 
 			return string.Concat(
 				Root,
@@ -543,7 +534,7 @@ namespace Flurl
 		/// </summary>
 		/// <param name="obj">The object to compare to this instance.</param>
 		/// <returns></returns>
-		public override bool Equals(object obj) => obj is Url url && this.ToString().Equals(url.ToString());
+		public override bool Equals(object obj) => obj is Url url && this.ToString().OrdinalEquals(url.ToString());
 
 		/// <summary>
 		/// Returns the hashcode for this Url.
@@ -575,9 +566,9 @@ namespace Flurl
 				if (string.IsNullOrEmpty(part))
 					continue;
 
-				if (result.EndsWith("?") || part.StartsWith("?"))
+				if (result.OrdinalEndsWith("?") || part.OrdinalStartsWith("?"))
 					result = CombineEnsureSingleSeparator(result, part, '?');
-				else if (result.EndsWith("#") || part.StartsWith("#"))
+				else if (result.OrdinalEndsWith("#") || part.OrdinalStartsWith("#"))
 					result = CombineEnsureSingleSeparator(result, part, '#');
 				else if (inFragment)
 					result += part;
@@ -586,11 +577,11 @@ namespace Flurl
 				else
 					result = CombineEnsureSingleSeparator(result, part, '/');
 
-				if (part.Contains("#")) {
+				if (part.OrdinalContains("#")) {
 					inQuery = false;
 					inFragment = true;
 				}
-				else if (!inFragment && part.Contains("?")) {
+				else if (!inFragment && part.OrdinalContains("?")) {
 					inQuery = true;
 				}
 			}
@@ -655,7 +646,7 @@ namespace Flurl
 			// in that % isn't illegal if it's the start of a %-encoded sequence https://stackoverflow.com/a/47636037/62600
 
 			// no % characters, so avoid the regex overhead
-			if (!s.Contains("%"))
+			if (!s.OrdinalContains("%"))
 				return Uri.EscapeUriString(s);
 
 			// pick out all %-hex-hex matches and avoid double-encoding 

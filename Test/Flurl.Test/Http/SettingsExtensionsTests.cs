@@ -32,7 +32,7 @@ namespace Flurl.Test.Http
 		[Test]
 		public void can_set_header() {
 			var sc = GetSettingsContainer().WithHeader("a", 1);
-			Assert.AreEqual(("a", 1), sc.Headers.Single());
+			Assert.AreEqual(("a", "1"), sc.Headers.Single());
 		}
 
 		[Test]
@@ -41,7 +41,7 @@ namespace Flurl.Test.Http
 			var sc = GetSettingsContainer().WithHeaders(new { a = "b", one = 2, three = (object)null });
 			Assert.AreEqual(2, sc.Headers.Count);
 			Assert.IsTrue(sc.Headers.Contains("a", "b"));
-			Assert.IsTrue(sc.Headers.Contains("one", 2));
+			Assert.IsTrue(sc.Headers.Contains("one", "2"));
 		}
 
 		[Test]
@@ -58,7 +58,7 @@ namespace Flurl.Test.Http
 			var sc = GetSettingsContainer().WithHeaders(new Dictionary<string, object> { { "a", "b" }, { "one", 2 } });
 			Assert.AreEqual(2, sc.Headers.Count);
 			Assert.IsTrue(sc.Headers.Contains("a", "b"));
-			Assert.IsTrue(sc.Headers.Contains("one", 2));
+			Assert.IsTrue(sc.Headers.Contains("one", "2"));
 		}
 
 		[Test]
@@ -100,6 +100,15 @@ namespace Flurl.Test.Http
 				test.RespondWith("Nothing to see here", 404);
 				var sc = GetSettingsContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
 				await GetRequest(sc).DeleteAsync(); // no exception = pass
+			}
+		}
+
+		[Test]
+		public async Task allow_specific_http_status_also_allows_2xx() {
+			using (var test = new HttpTest()) {
+				test.RespondWith("I'm just an innocent 2xx, I should never fail!", 201);
+				var sc = GetSettingsContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
+				await GetRequest(sc).GetAsync(); // no exception = pass
 			}
 		}
 

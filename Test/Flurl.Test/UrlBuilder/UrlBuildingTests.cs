@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -42,6 +42,11 @@ namespace Flurl.Test.UrlBuilder
 		}
 
 		[Test]
+		public void uri_cannot_be_null() {
+			Assert.Throws<ArgumentNullException>(() => new Url((Uri)null));
+		}
+
+		[Test]
 		public void can_set_query_params() {
 			var url = "http://www.mysite.com/more"
 				.SetQueryParam("x", 1)
@@ -71,7 +76,7 @@ namespace Flurl.Test.UrlBuilder
 		[Test]
 		public void enumerable_query_param_is_split_into_multiple() {
 			var url = "http://www.mysite.com".SetQueryParam("x", new[] { "a", "b", null, "c" });
-			Assert.AreEqual("http://www.mysite.com?x=a&x=b&x&x=c", url.ToString());
+			Assert.AreEqual("http://www.mysite.com?x=a&x=b&x=c", url.ToString());
 		}
 
 		[Test]
@@ -169,12 +174,6 @@ namespace Flurl.Test.UrlBuilder
 		[TestCase(NullValueHandling.Remove, ExpectedResult = "http://www.mysite.com?x=1&z=foo")]
 		public string can_control_null_value_behavior_in_query_params(NullValueHandling nullValueHandling) {
 			return "http://www.mysite.com?y=2".SetQueryParams(new { x = 1, y = (string)null, z = "foo" }, nullValueHandling).ToString();
-		}
-
-		[Test]
-		public void constructor_requires_nonnull_arg() {
-			Assert.Throws<ArgumentNullException>(() => new Url((string)null));
-			Assert.Throws<ArgumentNullException>(() => new Url((Uri)null));
 		}
 
 		[Test]
@@ -490,42 +489,33 @@ namespace Flurl.Test.UrlBuilder
 		[Test]
 		public void can_manipulate_query_params() {
 			var url = new Url("https://api.com/foo#bar");
-			url.QueryParams.Add(new QueryParameter("x", 0));
+			url.QueryParams.Add("x", 0);
 			Assert.AreEqual("https://api.com/foo?x=0#bar", url.ToString());
 			url.QueryParams.Add("y", 1);
 			Assert.AreEqual("https://api.com/foo?x=0&y=1#bar", url.ToString());
-			url.QueryParams["x"] = "hi!";
+			url.QueryParams.AddOrReplace("x", "hi!");
 			Assert.AreEqual("https://api.com/foo?x=hi%21&y=1#bar", url.ToString());
-			url.QueryParams["z"] = new[] { 8, 9, 10 };
+			url.QueryParams.AddOrReplace("z", new[] { 8, 9, 10 });
 			Assert.AreEqual("https://api.com/foo?x=hi%21&y=1&z=8&z=9&z=10#bar", url.ToString());
 			url.QueryParams.Remove("y");
 			Assert.AreEqual("https://api.com/foo?x=hi%21&z=8&z=9&z=10#bar", url.ToString());
-			url.QueryParams.RemoveAt(2);
-			Assert.AreEqual("https://api.com/foo?x=hi%21&z=8&z=10#bar", url.ToString());
-			url.QueryParams[0] = null;
-			Assert.AreEqual("https://api.com/foo?z=8&z=10#bar", url.ToString());
+			url.QueryParams.AddOrReplace("x", null);
+			Assert.AreEqual("https://api.com/foo?z=8&z=9&z=10#bar", url.ToString());
 			url.QueryParams.Clear();
 			Assert.AreEqual("https://api.com/foo#bar", url.ToString());
-		}
-
-		[Test]
-		public void can_sort_query_params() {
-			var url = new Url("http://www.mysite.com/more?z=1&y=2&x=3");
-			url.QueryParams.Sort((x, y) => x.Name.CompareTo(y.Name));
-			Assert.AreEqual("http://www.mysite.com/more?x=3&y=2&z=1", url.ToString());
 		}
 
 		[Test]
 		public void can_modify_query_param_array() {
 			var url = new Url("http://www.mysite.com/more?x=1&y=2&x=2&z=4");
 			// go from 2 values to 3, order should be preserved
-			url.QueryParams["x"] = new[] { 8, 9, 10 };
+			url.QueryParams.AddOrReplace("x", new[] { 8, 9, 10 });
 			Assert.AreEqual("http://www.mysite.com/more?x=8&y=2&x=9&z=4&x=10", url.ToString());
 			// go from 3 values to 2, order should be preserved
-			url.QueryParams["x"] = new[] { 101, 102 };
+			url.QueryParams.AddOrReplace("x", new[] { 101, 102 });
 			Assert.AreEqual("http://www.mysite.com/more?x=101&y=2&x=102&z=4", url.ToString());
 			// wipe them out. all of them.
-			url.QueryParams["x"] = null;
+			url.QueryParams.AddOrReplace("x", null);
 			Assert.AreEqual("http://www.mysite.com/more?y=2&z=4", url.ToString());
 		}
 
@@ -558,6 +548,27 @@ namespace Flurl.Test.UrlBuilder
 			url = new Uri("http://mysite.com/hello").ResetToRoot();
 			Assert.IsInstanceOf<Url>(url);
 			Assert.AreEqual("http://mysite.com", url.ToString());
+		}
+
+		[Test] // https://github.com/tmenier/Flurl/issues/510
+		public void uri_with_default_port_parses_correctly() {
+			var originalString = "https://someurl.net:443/api/somepath";
+			var uri = new Uri(originalString);
+			var url = new Url(uri);
+			Assert.AreEqual(443, url.Port);
+			Assert.AreEqual(originalString, url.ToString());
+		}
+
+		[Test]
+		public void can_have_empty_ctor() {
+			var url1 = new Url();
+			Assert.AreEqual("", url1.ToString());
+
+			var url2 = new Url {
+				Host = "192.168.1.1",
+				Scheme = "http"
+			};
+			Assert.AreEqual("http://192.168.1.1", url2.ToString());
 		}
 	}
 }

@@ -3,8 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+
+[assembly: InternalsVisibleTo("Flurl.Http")]
 
 namespace Flurl.Util
 {
@@ -22,7 +24,7 @@ namespace Flurl.Util
 		/// <param name="obj">The object to parse into key-value pairs</param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentNullException"><paramref name="obj"/> is <see langword="null" />.</exception>
-		public static IEnumerable<KeyValuePair<string, object>> ToKeyValuePairs(this object obj) {
+		public static IEnumerable<(string Key, object Value)> ToKeyValuePairs(this object obj) {
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
@@ -42,15 +44,25 @@ namespace Flurl.Util
 				obj == null ? null :
 				obj is DateTime dt ? dt.ToString("o", CultureInfo.InvariantCulture) :
 				obj is DateTimeOffset dto ? dto.ToString("o", CultureInfo.InvariantCulture) :
-#if !NETSTANDARD1_0
 				obj is IConvertible c ? c.ToString(CultureInfo.InvariantCulture) :
-#endif
 				obj is IFormattable f ? f.ToString(null, CultureInfo.InvariantCulture) :
 				obj.ToString();
 		}
 
+		internal static bool OrdinalEquals(this string s, string value, bool ignoreCase = false) =>
+			s != null && s.Equals(value, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+
+		internal static bool OrdinalContains(this string s, string value, bool ignoreCase = false) =>
+			s != null && s.IndexOf(value, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal) >= 0;
+
+		internal static bool OrdinalStartsWith(this string s, string value, bool ignoreCase = false) =>
+			s != null && s.StartsWith(value, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+
+		internal static bool OrdinalEndsWith(this string s, string value, bool ignoreCase = false) =>
+			s != null && s.EndsWith(value, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+
 		/// <summary>
-		/// Splits at the first occurence of the given separator.
+		/// Splits at the first occurrence of the given separator.
 		/// </summary>
 		/// <param name="s">The string to split.</param>
 		/// <param name="separator">The separator to split on.</param>
@@ -66,35 +78,30 @@ namespace Flurl.Util
 				new[] { s.Substring(0, i), s.Substring(i + separator.Length) };
 		}
 
-		private static IEnumerable<KeyValuePair<string, object>> StringToKV(string s) {
-			return Url.ParseQueryParams(s).Select(p => new KeyValuePair<string, object>(p.Name, p.Value));
+		private static IEnumerable<(string Key, object Value)> StringToKV(string s) {
+			if (string.IsNullOrEmpty(s))
+				return Enumerable.Empty<(string, object)>();
+
+			return
+				from p in s.Split('&')
+				let pair = p.SplitOnFirstOccurence("=")
+				let name = pair[0]
+				let value = (pair.Length == 1) ? null : pair[1]
+				select (name, (object)value);
 		}
 
-		private static IEnumerable<KeyValuePair<string, object>> ObjectToKV(object obj) {
-#if NETSTANDARD1_0
-			return from prop in obj.GetType().GetRuntimeProperties()
-				let getter = prop.GetMethod
-				where getter?.IsPublic == true
-				let val = getter.Invoke(obj, null)
-				select new KeyValuePair<string, object>(prop.Name, val);
-#else
-			return from prop in obj.GetType().GetProperties()
-				let getter = prop.GetGetMethod(false)
-				where getter != null
-				let val = getter.Invoke(obj, null)
-				select new KeyValuePair<string, object>(prop.Name, val);
-#endif
-		}
+		private static IEnumerable<(string Name, object Value)> ObjectToKV(object obj) =>
+			from prop in obj.GetType().GetProperties()
+			let getter = prop.GetGetMethod(false)
+			where getter != null
+			let val = getter.Invoke(obj, null)
+			select (prop.Name, val);
 
-		private static IEnumerable<KeyValuePair<string, object>> CollectionToKV(IEnumerable col) {
+		private static IEnumerable<(string Key, object Value)> CollectionToKV(IEnumerable col) {
 			bool TryGetProp(object obj, string name, out object value) {
-#if NETSTANDARD1_0
-				var prop = obj.GetType().GetRuntimeProperty(name);
-				var field = obj.GetType().GetRuntimeField(name);
-#else
 				var prop = obj.GetType().GetProperty(name);
 				var field = obj.GetType().GetField(name);
-#endif
+
 				if (prop != null) {
 					value = prop.GetValue(obj, null);
 					return true;
@@ -111,7 +118,7 @@ namespace Flurl.Util
 				name = null;
 				val = null;
 				return
-					item.GetType().Name.Contains("Tuple") &&
+					item.GetType().Name.OrdinalContains("Tuple") &&
 					TryGetProp(item, "Item1", out name) &&
 					TryGetProp(item, "Item2", out val) &&
 					!TryGetProp(item, "Item3", out _);
@@ -129,9 +136,9 @@ namespace Flurl.Util
 				if (item == null)
 					continue;
 				if (!IsTuple2(item, out var name, out var val) && !LooksLikeKV(item, out name, out val))
-					yield return new KeyValuePair<string, object>(item.ToInvariantString(), null);
+					yield return (item.ToInvariantString(), null);
 				else if (name != null)
-					yield return new KeyValuePair<string, object>(name.ToInvariantString(), val);
+					yield return (name.ToInvariantString(), val);
 			}
 		}
 

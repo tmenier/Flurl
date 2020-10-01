@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using Flurl.Http.Configuration;
 using Flurl.Http.Testing;
+using Flurl.Util;
 
 namespace Flurl.Http
 {
@@ -90,7 +91,7 @@ namespace Flurl.Http
 		}
 
 		/// <inheritdoc />
-		public INameValueList<object> Headers { get; } = new NameValueList<object>();
+		public INameValueList<string> Headers { get; } = new NameValueList<string>();
 
 		/// <inheritdoc />
 		public HttpClient HttpClient => HttpTest.Current?.HttpClient ?? _injectedClient ?? GetHttpClient();

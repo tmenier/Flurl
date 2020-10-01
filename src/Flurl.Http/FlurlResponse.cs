@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http.Configuration;
+using Flurl.Util;
 
 namespace Flurl.Http
 {
@@ -148,7 +149,7 @@ namespace Flurl.Http
 			if (_streamRead)
 				return _capturedBody is T body ? body : default(T);
 
-			var call = ResponseMessage.RequestMessage.GetHttpCall();
+			var call = ResponseMessage.RequestMessage.GetFlurlCall();
 			_serializer = call.Request.Settings.JsonSerializer;
 			using (var stream = await ResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false)) {
 				try {
@@ -190,11 +191,18 @@ namespace Flurl.Http
 					_capturedBody?.ToString();
 			}
 
-#if NETSTANDARD1_3 || NETSTANDARD2_0
+#if NETSTANDARD2_0
 			// https://stackoverflow.com/questions/46119872/encoding-issues-with-net-core-2 (#86)
 			System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 #endif
-			_capturedBody = await ResponseMessage.Content.StripCharsetQuotes().ReadAsStringAsync();
+			// strip quotes from charset so .NET doesn't choke on them
+			// https://github.com/dotnet/corefx/issues/5014
+			// https://github.com/tmenier/Flurl/pull/76
+			var ct = ResponseMessage.Content.Headers?.ContentType;
+			if (ct?.CharSet != null)
+				ct.CharSet = ct.CharSet.StripQuotes();
+
+			_capturedBody = await ResponseMessage.Content.ReadAsStringAsync();
 			_streamRead = true;
 			return (string)_capturedBody;
 		}

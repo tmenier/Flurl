@@ -35,31 +35,29 @@ namespace Flurl.Http.Content
 		/// <param name="name">The control name of the part.</param>
 		/// <param name="content">The HttpContent of the part.</param>
 		/// <returns>This CapturedMultipartContent instance (supports method chaining).</returns>
-		public CapturedMultipartContent Add(string name, HttpContent content) => AddInternal(name, content, true, null);
+		public CapturedMultipartContent Add(string name, HttpContent content) => AddInternal(name, content, null);
 
 		/// <summary>
 		/// Add a simple string part to the multipart request.
 		/// </summary>
-		/// <param name="name">The control name of the part.</param>
-		/// <param name="content">The string content of the part.</param>
-		/// <param name="encoding">The encoding of the part.</param>
-		/// <param name="mediaType">The media type of the part.</param>
+		/// <param name="name">The name of the part.</param>
+		/// <param name="value">The string value of the part.</param>
+		/// <param name="contentType">The value of the Content-Type header for this part. If null (the default), header will be excluded, which complies with the HTML 5 standard.</param>
 		/// <returns>This CapturedMultipartContent instance (supports method chaining).</returns>
-		public CapturedMultipartContent AddString(string name, string content, Encoding encoding = null, string mediaType = null) =>
-			AddInternal(name, new CapturedStringContent(content, encoding, mediaType), false, null);
+		public CapturedMultipartContent AddString(string name, string value, string contentType = null) =>
+			AddInternal(name, new CapturedStringContent(value, contentType), null);
 
 		/// <summary>
 		/// Add multiple string parts to the multipart request by parsing an object's properties into control name/content pairs.
 		/// </summary>
 		/// <param name="data">The object (typically anonymous) whose properties are parsed into control name/content pairs.</param>
-		/// <param name="encoding">The encoding of the parts.</param>
-		/// <param name="mediaType">The media type of the parts.</param>
+		/// <param name="contentType">The value of the Content-Type header for this part. If null, header will be excluded, which complies with the HTML 5 standard.</param>
 		/// <returns>This CapturedMultipartContent instance (supports method chaining).</returns>
-		public CapturedMultipartContent AddStringParts(object data, Encoding encoding = null, string mediaType = null) {
+		public CapturedMultipartContent AddStringParts(object data, string contentType = null) {
 			foreach (var kv in data.ToKeyValuePairs()) {
 				if (kv.Value == null)
 					continue;
-				AddString(kv.Key, kv.Value.ToInvariantString(), encoding, mediaType);
+				AddString(kv.Key, kv.Value.ToInvariantString(), contentType);
 			}
 			return this;
 		}
@@ -71,7 +69,7 @@ namespace Flurl.Http.Content
 		/// <param name="data">The content of the part, which will be serialized to JSON.</param>
 		/// <returns>This CapturedMultipartContent instance (supports method chaining).</returns>
 		public CapturedMultipartContent AddJson(string name, object data) =>
-			AddInternal(name, new CapturedJsonContent(_settings.JsonSerializer.Serialize(data)), false, null);
+			AddInternal(name, new CapturedJsonContent(_settings.JsonSerializer.Serialize(data)), null);
 
 		/// <summary>
 		/// Add a URL-encoded part to the multipart request.
@@ -80,7 +78,7 @@ namespace Flurl.Http.Content
 		/// <param name="data">The content of the part, whose properties will be parsed and serialized to URL-encoded format.</param>
 		/// <returns>This CapturedMultipartContent instance (supports method chaining).</returns>
 		public CapturedMultipartContent AddUrlEncoded(string name, object data) =>
-			AddInternal(name, new CapturedUrlEncodedContent(_settings.UrlEncodedSerializer.Serialize(data)), false, null);
+			AddInternal(name, new CapturedUrlEncodedContent(_settings.UrlEncodedSerializer.Serialize(data)), null);
 
 		/// <summary>
 		/// Adds a file to the multipart request from a stream.
@@ -88,14 +86,14 @@ namespace Flurl.Http.Content
 		/// <param name="name">The control name of the part.</param>
 		/// <param name="stream">The file stream to send.</param>
 		/// <param name="fileName">The filename, added to the Content-Disposition header of the part.</param>
-		/// <param name="mediaType">The media type of the file.</param>
+		/// <param name="contentType">The content type of the file.</param>
 		/// <param name="bufferSize">The buffer size of the stream upload in bytes. Defaults to 4096.</param>
 		/// <returns>This CapturedMultipartContent instance (supports method chaining).</returns>
-		public CapturedMultipartContent AddFile(string name, Stream stream, string fileName, string mediaType = null, int bufferSize = 4096) {
+		public CapturedMultipartContent AddFile(string name, Stream stream, string fileName, string contentType = null, int bufferSize = 4096) {
 			var content = new StreamContent(stream, bufferSize);
-			if (mediaType != null)
-				content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
-			return AddInternal(name, content, true, fileName);
+			if (contentType != null)
+				content.Headers.TryAddWithoutValidation("Content-Type", contentType);
+			return AddInternal(name, content, fileName);
 		}
 
 		/// <summary>
@@ -103,26 +101,21 @@ namespace Flurl.Http.Content
 		/// </summary>
 		/// <param name="name">The control name of the part.</param>
 		/// <param name="path">The local path to the file.</param>
-		/// <param name="mediaType">The media type of the file.</param>
+		/// <param name="contentType">The content type of the file.</param>
 		/// <param name="bufferSize">The buffer size of the stream upload in bytes. Defaults to 4096.</param>
 		/// <param name="fileName">The filename, added to the Content-Disposition header of the part. Defaults to local file name.</param>
 		/// <returns>This CapturedMultipartContent instance (supports method chaining).</returns>
-		public CapturedMultipartContent AddFile(string name, string path, string mediaType = null, int bufferSize = 4096, string fileName = null) {
+		public CapturedMultipartContent AddFile(string name, string path, string contentType = null, int bufferSize = 4096, string fileName = null) {
 			fileName = fileName ?? FileUtil.GetFileName(path);
 			var content = new FileContent(path, bufferSize);
-			if (mediaType != null)
-				content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
-			return AddInternal(name, content, true, fileName);
+			if (contentType != null)
+				content.Headers.TryAddWithoutValidation("Content-Type", contentType);
+			return AddInternal(name, content, fileName);
 		}
 
-		private CapturedMultipartContent AddInternal(string name, HttpContent content, bool allowContentType, string fileName) {
+		private CapturedMultipartContent AddInternal(string name, HttpContent content, string fileName) {
 			if (string.IsNullOrWhiteSpace(name))
 				throw new ArgumentException("name must not be empty", nameof(name));
-
-			// StringContent is the simplest way to add a string part, but it always
-			// includes Content-Type, and per HTML spec that's not allowed (#392)
-			if (!allowContentType && content.Headers.Contains("Content-Type"))
-				content.Headers.Remove("Content-Type");
 
 			content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") {
 				Name = name,

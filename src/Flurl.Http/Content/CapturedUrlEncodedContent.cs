@@ -11,6 +11,6 @@
 		/// Initializes a new instance of the <see cref="CapturedUrlEncodedContent"/> class.
 		/// </summary>
 		/// <param name="data">Content represented as a (typically anonymous) object, which will be parsed into name/value pairs.</param>
-		public CapturedUrlEncodedContent(string data) : base(data, null, "application/x-www-form-urlencoded") { }
+		public CapturedUrlEncodedContent(string data) : base(data, "application/x-www-form-urlencoded") { }
 	}
 }

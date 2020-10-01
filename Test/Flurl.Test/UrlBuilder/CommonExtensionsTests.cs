@@ -18,11 +18,7 @@ namespace Flurl.Test.UrlBuilder
 				three = (string)null
 			}.ToKeyValuePairs();
 
-			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
-				{ "one", 1 },
-				{ "two", "foo" },
-				{ "three", null }
-			}, kv);
+			AssertKV(kv, ("one", 1), ("two", "foo"), ("three", null));
 		}
 
 		[Test]
@@ -34,11 +30,7 @@ namespace Flurl.Test.UrlBuilder
 				{ "three", null }
 			}.ToKeyValuePairs();
 
-			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
-				{ "one", 1 },
-				{ "two", "foo" },
-				{ "three", null }
-			}, kv);
+			AssertKV(kv, ( "one", 1 ), ( "two", "foo" ), ( "three", null ));
 		}
 
 		[Test]
@@ -51,11 +43,7 @@ namespace Flurl.Test.UrlBuilder
 				new KeyValuePair<object, object>(null, "four"),
 			}.ToKeyValuePairs();
 
-			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
-				{ "one", 1 },
-				{ "two", "foo" },
-				{ "three", null }
-			}, kv);
+			AssertKV(kv, ("one", 1), ("two", "foo"), ("three", null));
 		}
 
 		[Test]
@@ -71,24 +59,14 @@ namespace Flurl.Test.UrlBuilder
 				new { name = "four", value = "bar" } // lower-case should work too
 			}.ToKeyValuePairs().ToList();
 
-			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
-				{ "one", 1 },
-				{ "two", "foo" },
-				{ "three", null },
-				{ "four", "bar" }
-			}, kv);
+			AssertKV(kv, ("one", 1), ("two", "foo"), ("three", null), ("four", "bar"));
 		}
 
 		[Test]
 		public void can_parse_string_to_kv()
 		{
 			var kv = "one=1&two=foo&three".ToKeyValuePairs();
-
-			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
-				{ "one", "1" },
-				{ "two", "foo" },
-				{ "three", null }
-			}, kv);
+			AssertKV(kv, ("one", "1"), ("two", "foo"), ("three", null));
 		}
 
 		[Test]
@@ -121,10 +99,7 @@ namespace Flurl.Test.UrlBuilder
 				WriteOnly = "a,b"
 			}.ToKeyValuePairs();
 
-			CollectionAssert.AreEquivalent(new Dictionary<string, object> {
-				{ "Read1", "a" },
-				{ "Read2", "b" }
-			}, kv);
+			AssertKV(kv, ("Read1", "a"), ("Read2", "b"));
 		}
 
 		[Test]
@@ -143,6 +118,10 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual("2017-12-01T02:34:56.7890000", new DateTime(2017, 12, 1, 2, 34, 56, 789, DateTimeKind.Unspecified).ToInvariantString());
 			Assert.AreEqual("2017-12-01T02:34:56.7890000Z", new DateTime(2017, 12, 1, 2, 34, 56, 789, DateTimeKind.Utc).ToInvariantString());
 			Assert.AreEqual("2017-12-01T02:34:56.7890000-06:00", new DateTimeOffset(2017, 12, 1, 2, 34, 56, 789, TimeSpan.FromHours(-6)).ToInvariantString());
+		}
+
+		private void AssertKV(IEnumerable<(string, object)> actual, params (string, object)[] expected) {
+			CollectionAssert.AreEqual(expected, actual);
 		}
 	}
 }
