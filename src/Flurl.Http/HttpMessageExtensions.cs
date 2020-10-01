@@ -38,7 +38,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Associate a FlurlCall object with this request
 		/// </summary>
-		internal static void SetHttpCall(this HttpRequestMessage request, FlurlCall call) {
+		internal static void SetFlurlCall(this HttpRequestMessage request, FlurlCall call) {
 			if (request?.Properties != null)
 				request.Properties["FlurlHttpCall"] = call;
 		}
@@ -46,7 +46,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Get the FlurlCall associated with this request, if any.
 		/// </summary>
-		internal static FlurlCall GetHttpCall(this HttpRequestMessage request) {
+		internal static FlurlCall GetFlurlCall(this HttpRequestMessage request) {
 			if (request?.Properties != null && request.Properties.TryGetValue("FlurlHttpCall", out var obj) && obj is FlurlCall call)
 				return call;
 			return null;

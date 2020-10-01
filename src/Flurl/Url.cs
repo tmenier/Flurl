@@ -226,12 +226,7 @@ namespace Flurl
 		/// Parses a URL query to a QueryParamCollection.
 		/// </summary>
 		/// <param name="query">The URL query to parse.</param>
-		public static IEnumerable<(string Name, QueryParamValue Value)> ParseQueryParams(string query) {
-			query = query?.TrimStart('?');
-			return (string.IsNullOrEmpty(query)) ?
-				Enumerable.Empty<(string, QueryParamValue)>() :
-				query.ToKeyValuePairs().Select(kv => (kv.Key, new QueryParamValue(kv.Value, true)));
-		}
+		public static QueryParamCollection ParseQueryParams(string query) => new QueryParamCollection(query);
 
 		/// <summary>
 		/// Splits the given path into segments, encoding illegal characters, "?", and "#".

@@ -25,7 +25,7 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
 			if (HttpTest.Current != null) {
-				var call = request.GetHttpCall();
+				var call = request.GetFlurlCall();
 				if (call != null) {
 					HttpTest.Current.LogCall(call);
 					var setup = HttpTest.Current.FindSetup(call);

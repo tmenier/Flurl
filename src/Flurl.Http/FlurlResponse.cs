@@ -149,7 +149,7 @@ namespace Flurl.Http
 			if (_streamRead)
 				return _capturedBody is T body ? body : default(T);
 
-			var call = ResponseMessage.RequestMessage.GetHttpCall();
+			var call = ResponseMessage.RequestMessage.GetFlurlCall();
 			_serializer = call.Request.Settings.JsonSerializer;
 			using (var stream = await ResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false)) {
 				try {
