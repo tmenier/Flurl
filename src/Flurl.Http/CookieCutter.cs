@@ -178,7 +178,6 @@ namespace Flurl.Http
 			return false;
 		}
 
-
 		/// <summary>
 		/// True if this cookie should be sent in a request to the given URL. If false, provides a descriptive reason.
 		/// </summary>

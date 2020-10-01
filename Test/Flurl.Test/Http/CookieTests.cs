@@ -375,6 +375,36 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("x=foo3; x=foo2; y=bar", req.Headers.FirstOrDefault("Cookie"));
 		}
 
+		[Test]
+		public async Task expired_deletes_from_jar() {
+			// because the standard https://stackoverflow.com/a/53573622/62600
+			HttpTest
+				.RespondWith("", headers: new[] {
+					("Set-Cookie", "x=foo"),
+					("Set-Cookie", "y=bar"),
+					("Set-Cookie", "z=bazz")
+				})
+				.RespondWith("", headers: new[] { ("Set-Cookie", $"x=foo; Expires={DateTime.UtcNow.AddSeconds(-1):R}") })
+				.RespondWith("", headers: new[] { ("Set-Cookie", "y=bar; Max-Age=0") })
+				// not relevant to the request so shouldn't be deleted
+				.RespondWith("", headers: new[] { ("Set-Cookie", "z=bazz; Path=/a; Max-Age=0") });
+
+			await "https://cookies.com".WithCookies(out var jar).GetAsync();
+			Assert.AreEqual(3, jar.Count);
+
+			await "https://cookies.com".WithCookies(jar).GetAsync();
+			Assert.AreEqual(2, jar.Count);
+			Assert.AreEqual("y", jar.Select(c => c.Name).OrderBy(n => n).First());
+
+			await "https://cookies.com".WithCookies(jar).GetAsync();
+			Assert.AreEqual(1, jar.Count);
+			Assert.AreEqual("z", jar.Single().Name);
+
+			await "https://cookies.com".WithCookies(jar).GetAsync();
+			Assert.AreEqual(1, jar.Count);
+			Assert.AreEqual("z", jar.Single().Name);
+		}
+
 		/// <summary>
 		/// Performs a series of behavioral checks against a cookie based on its state. Used by lots of tests to make them more robust.
 		/// </summary>

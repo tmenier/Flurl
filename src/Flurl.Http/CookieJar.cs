@@ -43,8 +43,15 @@ namespace Flurl.Http
 		/// </summary>
 		/// <returns>true if cookie is valid and was added or updated. If false, provides descriptive reason.</returns>
 		public bool TryAddOrReplace(FlurlCookie cookie, out string reason) {
-			if (!cookie.IsValid(out reason) || cookie.IsExpired(out reason))
+			if (!cookie.IsValid(out reason))
 				return false;
+
+			if (cookie.IsExpired(out reason)) {
+				// when server sends an expired cookie, it's effectively an instruction for client to delete it.
+				// https://stackoverflow.com/a/53573622/62600
+				_dict.TryRemove(cookie.GetKey(), out _);
+				return false;
+			}
 
 			cookie.Lock(); // makes immutable
 			_dict[cookie.GetKey()] = cookie;
