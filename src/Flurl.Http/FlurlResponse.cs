@@ -115,7 +115,7 @@ namespace Flurl.Http
 		}
 
 		private IReadOnlyNameValueList<string> LoadHeaders() {
-			var result = new NameValueList<string>();
+			var result = new NameValueList<string>(false);
 
 			foreach (var h in ResponseMessage.Headers)
 			foreach (var v in h.Value)

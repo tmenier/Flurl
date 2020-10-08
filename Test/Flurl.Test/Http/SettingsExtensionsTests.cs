@@ -81,6 +81,14 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public void header_names_are_case_insensitive() {
+			var sc = GetSettingsContainer().WithHeader("a", 1).WithHeader("A", 2);
+			Assert.AreEqual(1, sc.Headers.Count);
+			Assert.AreEqual("A", sc.Headers.Single().Name);
+			Assert.AreEqual("2", sc.Headers.Single().Value);
+		}
+
+		[Test]
 		public void can_setup_oauth_bearer_token() {
 			var sc = GetSettingsContainer().WithOAuthBearerToken("mytoken");
 			Assert.AreEqual(1, sc.Headers.Count);

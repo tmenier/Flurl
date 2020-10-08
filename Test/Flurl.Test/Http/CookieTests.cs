@@ -405,6 +405,22 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("z", jar.Single().Name);
 		}
 
+		[Test]
+		public void names_are_case_sensitive() {
+			var req = new FlurlRequest().WithCookie("a", 1).WithCookie("A", 2).WithCookie("a", 3);
+			Assert.AreEqual(2, req.Cookies.Count());
+			CollectionAssert.AreEquivalent(new[] { "a", "A" }, req.Cookies.Select(c => c.Name));
+			CollectionAssert.AreEquivalent(new[] { "3", "2" }, req.Cookies.Select(c => c.Value));
+
+			var jar = new CookieJar()
+				.AddOrReplace("a", 1, "https://cookies.com")
+				.AddOrReplace("A", 2, "https://cookies.com")
+				.AddOrReplace("a", 3, "https://cookies.com");
+			Assert.AreEqual(2, jar.Count);
+			CollectionAssert.AreEquivalent(new[] { "a", "A" }, jar.Select(c => c.Name));
+			CollectionAssert.AreEquivalent(new[] { "3", "2" }, jar.Select(c => c.Value));
+		}
+
 		/// <summary>
 		/// Performs a series of behavioral checks against a cookie based on its state. Used by lots of tests to make them more robust.
 		/// </summary>

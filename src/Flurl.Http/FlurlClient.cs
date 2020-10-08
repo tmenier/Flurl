@@ -91,7 +91,7 @@ namespace Flurl.Http
 		}
 
 		/// <inheritdoc />
-		public INameValueList<string> Headers { get; } = new NameValueList<string>();
+		public INameValueList<string> Headers { get; } = new NameValueList<string>(false); // header names are case-insensitive https://stackoverflow.com/a/5259004/62600
 
 		/// <inheritdoc />
 		public HttpClient HttpClient => HttpTest.Current?.HttpClient ?? _injectedClient ?? GetHttpClient();

@@ -142,7 +142,7 @@ namespace Flurl.Http
 			var domain = string.IsNullOrEmpty(Domain) ? "*" + OriginUrl.Host : Domain;
 			var path = string.IsNullOrEmpty(Path) ? OriginUrl.Path : Path;
 			if (path.Length == 0) path = "/";
-			return $"{domain}{path}:{Name.ToLowerInvariant()}";
+			return $"{domain}{path}:{Name}";
 		}
 
 		/// <summary>
