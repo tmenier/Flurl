@@ -249,13 +249,31 @@ namespace Flurl.Test.Http
 			AssertCookie(cookie, true, false, url, shouldSend);
 		}
 
-		[TestCase("/a", "/a", true)]
-		[TestCase("/a", "/a/", true)]
-		[TestCase("/a", "/a/hello", true)]
-		[TestCase("/a", "/ab", false)]
-		[TestCase("/a", "/", false)]
+		// default path is /
+		[TestCase("", "/", true)]
+		[TestCase("", "/a/b/c", true)]
+		[TestCase("/", "", true)]
+		[TestCase("/", "/a/b/c", true)]
+		[TestCase("/a", "", true)]
+		[TestCase("/a", "/", true)]
+		[TestCase("/a", "/a/b/c", true)]
+		[TestCase("/a", "/x", true)]
+
+		// default path is /a
+		[TestCase("/a/", "", false)]
+		[TestCase("/a/", "/", false)]
+		[TestCase("/a/", "/a", true)]
+		[TestCase("/a/", "/a/b/c", true)]
+		[TestCase("/a/", "/a/x", true)]
+		[TestCase("/a/", "/x", false)]
+		[TestCase("/a/b", "", false)]
+		[TestCase("/a/b", "/", false)]
+		[TestCase("/a/b", "/a", true)]
+		[TestCase("/a/b", "/a/b/c", true)]
+		[TestCase("/a/b", "/a/x", true)]
+		[TestCase("/a/b", "/x", false)]
 		public void cookies_without_path_sent_to_origin_subpath(string originPath, string requestPath, bool shouldSend) {
-			var origin = "https://cookies.com".AppendPathSegment(originPath);
+			var origin = "https://cookies.com" + originPath;
 			var cookie = new FlurlCookie("x", "foo", origin);
 			var url = "https://cookies.com".AppendPathSegment(requestPath);
 			AssertCookie(cookie, true, false, url, shouldSend);

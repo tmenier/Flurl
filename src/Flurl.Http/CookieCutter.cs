@@ -217,17 +217,21 @@ namespace Flurl.Http
 			}
 		}
 
-		// https://tools.ietf.org/html/rfc6265#section-5.1.4
 		private static bool IsPathMatch(this FlurlCookie cookie, Url requestUrl, out string reason) {
 			reason = "ok";
 
-			if (cookie.Path == "/")
-				return true;
+			// implementation of default-path algorithm https://tools.ietf.org/html/rfc6265#section-5.1.4
+			string GetDefaultPath() {
+				var origPath = cookie.OriginUrl.Path;
+				if (origPath == "" || origPath[0] != '/') return "/";
+				if (origPath.Count(c => c == '/') <= 1) return "/";
+				return origPath.Substring(0, origPath.LastIndexOf('/'));
+			}
 
-			var cookiePath = (cookie.Path?.OrdinalStartsWith("/") == true) ? cookie.Path : cookie.OriginUrl.Path;
-			if (cookiePath == "")
-				cookiePath = "/";
-			else if (cookiePath.Length > 1 && cookiePath.OrdinalEndsWith("/"))
+			// https://tools.ietf.org/html/rfc6265#section-5.2.4
+			var cookiePath = (cookie.Path?.OrdinalStartsWith("/") == true) ? cookie.Path : GetDefaultPath();
+
+			if (cookiePath.Length > 1 && cookiePath.OrdinalEndsWith("/"))
 				cookiePath = cookiePath.TrimEnd('/');
 
 			if (cookiePath == "/")
