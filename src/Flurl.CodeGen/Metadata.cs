@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Flurl.Http.CodeGen
+namespace Flurl.CodeGen
 {
 	public static class Metadata
 	{

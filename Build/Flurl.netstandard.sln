@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl", "..\src\Flurl\Flurl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl.Http", "..\src\Flurl.Http\Flurl.Http.csproj", "{2760549B-586D-4660-A881-51767823BDCA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl.Http.CodeGen", "..\src\Flurl.Http.CodeGen\Flurl.Http.CodeGen.csproj", "{DCB24996-3FE7-4218-B4A4-2748235A6235}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl.CodeGen", "..\src\Flurl.CodeGen\Flurl.CodeGen.csproj", "{DCB24996-3FE7-4218-B4A4-2748235A6235}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl.Test", "..\Test\Flurl.Test\Flurl.Test.csproj", "{0E1584BA-B4E7-4DAE-8B95-463F7414B2FC}"
 EndProject
