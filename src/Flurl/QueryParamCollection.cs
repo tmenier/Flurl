@@ -11,7 +11,7 @@ namespace Flurl
 	/// </summary>
 	public class QueryParamCollection : IReadOnlyNameValueList<object>
 	{
-		private readonly NameValueList<QueryParamValue> _values = new NameValueList<QueryParamValue>();
+		private readonly NameValueList<QueryParamValue> _values = new NameValueList<QueryParamValue>(true);
 
 		/// <summary>
 		/// Returns a new instance of QueryParamCollection

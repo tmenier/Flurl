@@ -17,7 +17,7 @@ dotnet --info
 
 dotnet restore -v m "${NETSTANDARD_SLN}"
 
-dotnet run -c Release -p "${SCRIPT_ROOT}/../src/Flurl.Http.CodeGen/Flurl.Http.CodeGen.csproj" "${SCRIPT_ROOT}/../src/Flurl.Http/GeneratedExtensions.cs"
+dotnet run -c Release -p "${SCRIPT_ROOT}/../src/Flurl.CodeGen/Flurl.CodeGen.csproj" "${SCRIPT_ROOT}/../src/Flurl.Http/GeneratedExtensions.cs"
 
 dotnet build -c Release "${SCRIPT_ROOT}/../src/Flurl/"
 dotnet build -c Release "${SCRIPT_ROOT}/../src/Flurl.Http/"

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Flurl.Http.CodeGen
+namespace Flurl.CodeGen
 {
     /// <summary>
     /// Wraps a StreamWriter. Mainly just keeps track of indentation.

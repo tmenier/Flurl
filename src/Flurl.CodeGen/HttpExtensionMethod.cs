@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Flurl.Http.CodeGen
+namespace Flurl.CodeGen
 {
 	public class HttpExtensionMethod : ExtensionMethod
 	{

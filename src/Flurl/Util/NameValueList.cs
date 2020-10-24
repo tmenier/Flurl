@@ -72,15 +72,20 @@ namespace Flurl.Util
 	/// </summary>
 	public class NameValueList<TValue> : List<(string Name, TValue Value)>, INameValueList<TValue>, IReadOnlyNameValueList<TValue>
 	{
+		private bool _caseSensitiveNames;
+
 		/// <summary>
 		/// Instantiates a new empty NameValueList.
 		/// </summary>
-		public NameValueList() { }
+		public NameValueList(bool caseSensitiveNames) {
+			_caseSensitiveNames = caseSensitiveNames;
+		}
 
 		/// <summary>
 		/// Instantiates a new NameValueList with the Name/Value pairs provided.
 		/// </summary>
-		public NameValueList(IEnumerable<(string Name, TValue Value)> items) {
+		public NameValueList(IEnumerable<(string Name, TValue Value)> items, bool caseSensitiveNames) {
+			_caseSensitiveNames = caseSensitiveNames;
 			AddRange(items);
 		}
 
@@ -92,7 +97,7 @@ namespace Flurl.Util
 			var i = 0;
 			var replaced = false;
 			while (i < this.Count) {
-				if (this[i].Name != name)
+				if (!this[i].Name.OrdinalEquals(name, !_caseSensitiveNames))
 					i++;
 				else if (replaced)
 					this.RemoveAt(i);
@@ -108,7 +113,7 @@ namespace Flurl.Util
 		}
 
 		/// <inheritdoc />
-		public bool Remove(string name) => RemoveAll(x => x.Name == name) > 0;
+		public bool Remove(string name) => RemoveAll(x => x.Name.OrdinalEquals(name, !_caseSensitiveNames)) > 0;
 
 		/// <inheritdoc />
 		public TValue FirstOrDefault(string name) => GetAll(name).FirstOrDefault();
@@ -124,10 +129,12 @@ namespace Flurl.Util
 		}
 
 		/// <inheritdoc />
-		public IEnumerable<TValue> GetAll(string name) => this.Where(x => x.Name == name).Select(x => x.Value);
+		public IEnumerable<TValue> GetAll(string name) => this
+			.Where(x => x.Name.OrdinalEquals(name, !_caseSensitiveNames))
+			.Select(x => x.Value);
 
 		/// <inheritdoc />
-		public bool Contains(string name) => this.Any(x => x.Name == name);
+		public bool Contains(string name) => this.Any(x => x.Name.OrdinalEquals(name, !_caseSensitiveNames));
 
 		/// <inheritdoc />
 		public bool Contains(string name, TValue value) => Contains((name, value));

@@ -249,13 +249,31 @@ namespace Flurl.Test.Http
 			AssertCookie(cookie, true, false, url, shouldSend);
 		}
 
-		[TestCase("/a", "/a", true)]
-		[TestCase("/a", "/a/", true)]
-		[TestCase("/a", "/a/hello", true)]
-		[TestCase("/a", "/ab", false)]
-		[TestCase("/a", "/", false)]
+		// default path is /
+		[TestCase("", "/", true)]
+		[TestCase("", "/a/b/c", true)]
+		[TestCase("/", "", true)]
+		[TestCase("/", "/a/b/c", true)]
+		[TestCase("/a", "", true)]
+		[TestCase("/a", "/", true)]
+		[TestCase("/a", "/a/b/c", true)]
+		[TestCase("/a", "/x", true)]
+
+		// default path is /a
+		[TestCase("/a/", "", false)]
+		[TestCase("/a/", "/", false)]
+		[TestCase("/a/", "/a", true)]
+		[TestCase("/a/", "/a/b/c", true)]
+		[TestCase("/a/", "/a/x", true)]
+		[TestCase("/a/", "/x", false)]
+		[TestCase("/a/b", "", false)]
+		[TestCase("/a/b", "/", false)]
+		[TestCase("/a/b", "/a", true)]
+		[TestCase("/a/b", "/a/b/c", true)]
+		[TestCase("/a/b", "/a/x", true)]
+		[TestCase("/a/b", "/x", false)]
 		public void cookies_without_path_sent_to_origin_subpath(string originPath, string requestPath, bool shouldSend) {
-			var origin = "https://cookies.com".AppendPathSegment(originPath);
+			var origin = "https://cookies.com" + originPath;
 			var cookie = new FlurlCookie("x", "foo", origin);
 			var url = "https://cookies.com".AppendPathSegment(requestPath);
 			AssertCookie(cookie, true, false, url, shouldSend);
@@ -403,6 +421,22 @@ namespace Flurl.Test.Http
 			await "https://cookies.com".WithCookies(jar).GetAsync();
 			Assert.AreEqual(1, jar.Count);
 			Assert.AreEqual("z", jar.Single().Name);
+		}
+
+		[Test]
+		public void names_are_case_sensitive() {
+			var req = new FlurlRequest().WithCookie("a", 1).WithCookie("A", 2).WithCookie("a", 3);
+			Assert.AreEqual(2, req.Cookies.Count());
+			CollectionAssert.AreEquivalent(new[] { "a", "A" }, req.Cookies.Select(c => c.Name));
+			CollectionAssert.AreEquivalent(new[] { "3", "2" }, req.Cookies.Select(c => c.Value));
+
+			var jar = new CookieJar()
+				.AddOrReplace("a", 1, "https://cookies.com")
+				.AddOrReplace("A", 2, "https://cookies.com")
+				.AddOrReplace("a", 3, "https://cookies.com");
+			Assert.AreEqual(2, jar.Count);
+			CollectionAssert.AreEquivalent(new[] { "a", "A" }, jar.Select(c => c.Name));
+			CollectionAssert.AreEquivalent(new[] { "3", "2" }, jar.Select(c => c.Value));
 		}
 
 		/// <summary>

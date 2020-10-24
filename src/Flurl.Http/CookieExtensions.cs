@@ -17,7 +17,7 @@ namespace Flurl.Http
 		/// <param name="value">The cookie value.</param>
 		/// <returns>This IFlurlClient instance.</returns>
 		public static IFlurlRequest WithCookie(this IFlurlRequest request, string name, object value) {
-			var cookies = new NameValueList<string>(request.Cookies);
+			var cookies = new NameValueList<string>(request.Cookies, true); // cookie names are case-sensitive https://stackoverflow.com/a/11312272/62600
 			cookies.AddOrReplace(name, value.ToInvariantString());
 			return request.WithHeader("Cookie", CookieCutter.ToRequestHeader(cookies));
 		}
@@ -31,7 +31,7 @@ namespace Flurl.Http
 		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
 		/// <returns>This IFlurlClient.</returns>
 		public static IFlurlRequest WithCookies(this IFlurlRequest request, object values) {
-			var cookies = new NameValueList<string>(request.Cookies);
+			var cookies = new NameValueList<string>(request.Cookies, true); // cookie names are case-sensitive https://stackoverflow.com/a/11312272/62600
 			// although rare, we need to accommodate the possibility of multiple cookies with the same name
 			foreach (var group in values.ToKeyValuePairs().GroupBy(x => x.Key)) {
 				// add or replace the first one (by name)

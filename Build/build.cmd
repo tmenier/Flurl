@@ -9,7 +9,7 @@ exit /b 1
 echo Restoring dependencies was successful.
 )
 
-@set project=..\src\Flurl.Http.CodeGen\Flurl.Http.CodeGen.csproj
+@set project=..\src\Flurl.CodeGen\Flurl.CodeGen.csproj
 
 @call dotnet run -c Release -p %project% ..
 @if ERRORLEVEL 1 (
