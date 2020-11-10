@@ -26,7 +26,7 @@ So if you want to use Flurl's goodness while maintaining tight control over `Htt
 ```c#
 using (var cli = new FlurlClient("https://api.com").WithOAUthBearerToken(token))
 {
-    await cli.Request("path", "to", "endpoioint").PostJsonAsync(thing);
+    await cli.Request("path", "to", "endpoint").PostJsonAsync(thing);
     var stuff = await cli.Request("things").SetQueryParam("id", thing.Id).GetAsync();
 }
 ```
