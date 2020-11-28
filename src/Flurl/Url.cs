@@ -155,7 +155,7 @@ namespace Flurl
 			_originalString = (uri ?? throw new ArgumentNullException(nameof(uri))).OriginalString;
 			ParseInternal(uri); // parse eagerly, taking advantage of the fact that we already have a parsed Uri
 		}
-		
+
 		/// <summary>
 		/// Parses a URL string into a Flurl.Url object.
 		/// </summary>
@@ -178,18 +178,18 @@ namespace Flurl
 				_scheme = uri.Scheme;
 				_userInfo = uri.UserInfo;
 				_host = uri.Host;
-				_port = _originalString?.OrdinalStartsWith($"{Root}:{uri.Port}") == true ? uri.Port : (int?)null; // don't default Port if not included explicitly
+				_port = _originalString?.OrdinalStartsWith($"{Root}:{uri.Port}", ignoreCase: true) == true ? uri.Port : (int?)null; // don't default Port if not included explicitly
 				_pathSegments = new List<string>();
 				if (uri.AbsolutePath.Length > 0 && uri.AbsolutePath != "/")
 					AppendPathSegment(uri.AbsolutePath);
 				_queryParams = new QueryParamCollection(uri.Query);
 				_fragment = uri.Fragment.TrimStart('#'); // quirk - formal def of fragment does not include the #
 
-				_leadingSlash = uri.OriginalString.OrdinalStartsWith(Root + "/");
+				_leadingSlash = uri.OriginalString.OrdinalStartsWith(Root + "/", ignoreCase: true);
 				_trailingSlash = _pathSegments.Any() && uri.AbsolutePath.OrdinalEndsWith("/");
 
 				// more quirk fixes
-				var hasAuthority = uri.OriginalString.OrdinalStartsWith($"{Scheme}://");
+				var hasAuthority = uri.OriginalString.OrdinalStartsWith($"{Scheme}://", ignoreCase: true);
 				if (hasAuthority && Authority.Length == 0 && PathSegments.Any()) {
 					// Uri didn't parse Authority when it should have
 					_host = _pathSegments[0];
@@ -649,7 +649,7 @@ namespace Flurl
 			if (!s.OrdinalContains("%"))
 				return Uri.EscapeUriString(s);
 
-			// pick out all %-hex-hex matches and avoid double-encoding 
+			// pick out all %-hex-hex matches and avoid double-encoding
 			return Regex.Replace(s, "(.*?)((%[0-9A-Fa-f]{2})|$)", c => {
 				var a = c.Groups[1].Value; // group 1 is a sequence with no %-encoding - encode illegal characters
 				var b = c.Groups[2].Value; // group 2 is a valid 3-character %-encoded sequence - leave it alone!

@@ -27,6 +27,9 @@ namespace Flurl.Test.UrlBuilder
 		[TestCase("tel:+1-816-555-1212", "tel", "", "", "", null, "+1-816-555-1212", "", "")]
 		[TestCase("telnet://192.0.2.16:80/", "telnet", "192.0.2.16:80", "", "192.0.2.16", 80, "/", "", "")]
 		[TestCase("urn:oasis:names:specification:docbook:dtd:xml:4.1.2", "urn", "", "", "", null, "oasis:names:specification:docbook:dtd:xml:4.1.2", "", "")]
+		// with uppercase letters
+		[TestCase("http://www.mySite.com:8080/With/Path?x=1?Y=2", "http", "www.mysite.com:8080", "", "www.mysite.com", 8080, "/With/Path", "x=1?Y=2", "")]
+		[TestCase("HTTP://www.mysite.com:8080", "http", "www.mysite.com:8080", "", "www.mysite.com", 8080, "", "", "")]
 		public void can_parse_url_parts(string url, string scheme, string authority, string userInfo, string host, int? port, string path, string query, string fragment) {
 			// there's a few ways to get Url object so let's check all of them
 			foreach (var parsed in new[] { new Url(url), Url.Parse(url), new Url(new Uri(url, UriKind.RelativeOrAbsolute)) }) {
