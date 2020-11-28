@@ -81,7 +81,7 @@ namespace Flurl.Http
 		/// True if response was received with any success status or a match with AllowedHttpStatusRange setting.
 		/// </summary>
 		public bool Succeeded =>
-			HttpRequestMessage == null ? false :
+			HttpResponseMessage == null ? false :
 			(int)HttpResponseMessage.StatusCode < 400 ? true :
 			string.IsNullOrEmpty(Request?.Settings?.AllowedHttpStatusRange) ? false :
 			HttpStatusRangeParser.IsMatch(Request.Settings.AllowedHttpStatusRange, HttpResponseMessage.StatusCode);
