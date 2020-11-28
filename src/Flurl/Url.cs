@@ -265,7 +265,7 @@ namespace Flurl
 				_trailingSlash = subpath.OrdinalEndsWith("/");
 			}
 
-			_leadingSlash = true;
+			_leadingSlash |= !IsRelative;
 			return this;
 		}
 

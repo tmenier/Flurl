@@ -176,10 +176,14 @@ namespace Flurl.Test.UrlBuilder
 			return "http://www.mysite.com?y=2".SetQueryParams(new { x = 1, y = (string)null, z = "foo" }, nullValueHandling).ToString();
 		}
 
-		[Test]
-		public void can_append_path_segment() {
-			var url = "http://www.mysite.com".AppendPathSegment("endpoint");
-			Assert.AreEqual("http://www.mysite.com/endpoint", url.ToString());
+		[TestCase("http://www.mysite.com", "endpoint", "http://www.mysite.com/endpoint")]
+		[TestCase("path1", "path2", "path1/path2")] // #568
+		[TestCase("/path1/path2", "path3", "/path1/path2/path3")]
+		public void can_append_path_segment(string original, string segment, string result) {
+			Assert.AreEqual(result, original.AppendPathSegment(segment).ToString());
+			Assert.AreEqual(result, original.AppendPathSegment("/" + segment).ToString());
+			Assert.AreEqual(result, (original + "/").AppendPathSegment(segment).ToString());
+			Assert.AreEqual(result, (original + "/").AppendPathSegment("/" + segment).ToString());
 		}
 
 		[Test]
