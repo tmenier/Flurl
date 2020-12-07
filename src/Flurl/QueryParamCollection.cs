@@ -187,9 +187,7 @@ namespace Flurl
 		public object Value { get; }
 
 		public string Encode(bool encodeSpaceAsPlus) =>
-			(Value == null) ? null :
-			(_encodedValue != null) ? _encodedValue :
-			(Value is string s) ? Url.Encode(s, encodeSpaceAsPlus) :
-			Value.ToInvariantString();
+			Value == null ? null :
+			_encodedValue ?? Url.Encode(Value is string s ? s : Value.ToInvariantString(), encodeSpaceAsPlus);
 	}
 }

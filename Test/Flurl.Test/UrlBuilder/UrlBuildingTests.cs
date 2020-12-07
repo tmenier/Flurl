@@ -303,6 +303,13 @@ namespace Flurl.Test.UrlBuilder
 		}
 
 		[Test]
+		public void encodes_date_query_param() {
+			var date = new DateTime(2000, 01, 01, 01, 00, 00, 00, DateTimeKind.Utc);
+			var url = "http://www.mysite.com".SetQueryParams(new { date = date });
+			Assert.AreEqual("http://www.mysite.com?date=2000-01-01T01%3A00%3A00.0000000Z", url.ToString());
+		}
+
+		[Test]
 		public void does_not_reencode_encoded_query_values() {
 			var url = "http://www.mysite.com".SetQueryParam("x", "%CD%EE%E2%FB%E9%20%E3%EE%E4", true);
 			Assert.AreEqual("http://www.mysite.com?x=%CD%EE%E2%FB%E9%20%E3%EE%E4", url.ToString());
