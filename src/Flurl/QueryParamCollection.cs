@@ -190,6 +190,6 @@ namespace Flurl
 			(Value == null) ? null :
 			(_encodedValue != null) ? _encodedValue :
 			(Value is string s) ? Url.Encode(s, encodeSpaceAsPlus) :
-			Value.ToInvariantString();
+			Url.Encode(Value.ToInvariantString(), encodeSpaceAsPlus);
 	}
 }

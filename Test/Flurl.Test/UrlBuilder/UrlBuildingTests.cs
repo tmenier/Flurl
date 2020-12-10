@@ -302,6 +302,13 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual("http://www.mysite.com?x=%2450&y=2%2B2%3D4", url.ToString());
 		}
 
+		[Test] // #582
+		public void encodes_date_type_query_param() {
+			var date = new DateTime(2020, 12, 6, 10, 45, 1);
+			var url = "http://www.mysite.com".SetQueryParam("date", date);
+			Assert.AreEqual("http://www.mysite.com?date=2020-12-06T10%3A45%3A01.0000000", url.ToString());
+		}
+
 		[Test]
 		public void does_not_reencode_encoded_query_values() {
 			var url = "http://www.mysite.com".SetQueryParam("x", "%CD%EE%E2%FB%E9%20%E3%EE%E4", true);
