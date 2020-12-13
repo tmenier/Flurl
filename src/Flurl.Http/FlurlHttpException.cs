@@ -40,10 +40,13 @@ namespace Flurl.Http
 		public FlurlHttpException(FlurlCall call) : this(call, BuildMessage(call, null), null) { }
 
 		private static string BuildMessage(FlurlCall call, Exception inner) {
-			return
-				(call.Response != null && !call.Succeeded) ?
-				$"Call failed with status code {call.Response.StatusCode} ({call.HttpResponseMessage.ReasonPhrase}): {call}":
-				$"Call failed. {inner?.Message} {call}";
+			if (call?.Response != null && !call.Succeeded)
+				return $"Call failed with status code {call.Response.StatusCode} ({call.HttpResponseMessage.ReasonPhrase}): {call}";
+
+			var msg = "Call failed.";
+			if (inner != null) msg += " " + inner.Message;
+			if (call != null) msg += " " + call;
+			return msg;
 		}
 
 		/// <summary>
