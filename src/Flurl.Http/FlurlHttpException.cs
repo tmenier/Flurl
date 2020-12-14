@@ -43,10 +43,9 @@ namespace Flurl.Http
 			if (call?.Response != null && !call.Succeeded)
 				return $"Call failed with status code {call.Response.StatusCode} ({call.HttpResponseMessage.ReasonPhrase}): {call}";
 
-			var msg = "Call failed.";
-			if (inner != null) msg += " " + inner.Message;
-			if (call != null) msg += " " + call;
-			return msg;
+			var msg = "Call failed";
+			if (inner != null) msg += ". " + inner.Message.TrimEnd('.');
+			return msg + ((call == null) ? "." : $": {call}");
 		}
 
 		/// <summary>
@@ -82,9 +81,8 @@ namespace Flurl.Http
 		/// <param name="inner">The inner exception.</param>
 		public FlurlHttpTimeoutException(FlurlCall call, Exception inner) : base(call, BuildMessage(call), inner) { }
 
-		private static string BuildMessage(FlurlCall call) {
-			return $"Call timed out: {call}";
-		}
+		private static string BuildMessage(FlurlCall call) =>
+			(call == null) ? "Call timed out." :  $"Call timed out: {call}";
 	}
 
 	/// <summary>
@@ -108,8 +106,8 @@ namespace Flurl.Http
 		public string ExpectedFormat { get; }
 
 		private static string BuildMessage(FlurlCall call, string expectedFormat) {
-			return $"Response could not be deserialized to {expectedFormat}: {call}";
+			var msg = $"Response could not be deserialized to {expectedFormat}";
+			return msg + ((call == null) ? "." : $": {call}");
 		}
 	}
-
 }
