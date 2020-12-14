@@ -32,7 +32,7 @@ namespace Flurl.Http
 		HttpResponseMessage ResponseMessage { get; }
 
 		/// <summary>
-		/// Gets the status code of the response.
+		/// Gets the HTTP status code of the response.
 		/// </summary>
 		int StatusCode { get; }
 

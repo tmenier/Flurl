@@ -49,6 +49,11 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
+		/// Gets the HTTP status code of the response if a response was received, otherwise null.
+		/// </summary>
+		public int? StatusCode => Call?.Response?.StatusCode;
+
+		/// <summary>
 		/// Gets the response body of the failed call.
 		/// </summary>
 		/// <returns>A task whose result is the string contents of the response body.</returns>
