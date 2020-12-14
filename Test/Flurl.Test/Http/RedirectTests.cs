@@ -17,7 +17,7 @@ namespace Flurl.Test.Http
 			HttpTest
 				.RespondWith("", 302, new { Location = "http://redir.com/foo" })
 				.RespondWith("", 302, new { Location = "/redir2" })
-				.RespondWith("", 302, new { Location = "redir3" })
+				.RespondWith("", 302, new { Location = "redir3?x=1&y=2#foo" })
 				.RespondWith("done!");
 
 			var resp = await "http://start.com".PostStringAsync("foo!").ReceiveString();
@@ -30,8 +30,24 @@ namespace Flurl.Test.Http
 				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://start.com");
 			HttpTest.ShouldHaveCalled("http://redir.com/redir2").WithVerb(HttpMethod.Get).WithRequestBody("")
 				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://redir.com/foo");
-			HttpTest.ShouldHaveCalled("http://redir.com/redir2/redir3").WithVerb(HttpMethod.Get).WithRequestBody("")
+			HttpTest.ShouldHaveCalled("http://redir.com/redir2/redir3?x=1&y=2#foo").WithVerb(HttpMethod.Get).WithRequestBody("")
 				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://redir.com/redir2");
+		}
+
+		[Test]
+		public async Task redirect_location_inherits_fragment_when_none() {
+			HttpTest
+				.RespondWith("", 302, new { Location = "/redir1" })
+				.RespondWith("", 302, new { Location = "/redir2#bar" })
+				.RespondWith("", 302, new { Location = "/redir3" })
+				.RespondWith("done!");
+			await "http://start.com?x=y#foo".GetAsync();
+
+			HttpTest.ShouldHaveCalled("http://start.com?x=y#foo");
+			// also asserts that they do NOT inherit query params in the same way
+			HttpTest.ShouldHaveCalled("http://start.com/redir1#foo");
+			HttpTest.ShouldHaveCalled("http://start.com/redir2#bar");
+			HttpTest.ShouldHaveCalled("http://start.com/redir3#bar");
 		}
 
 		[TestCase(false)]
