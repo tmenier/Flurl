@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -15,11 +16,12 @@ namespace Flurl.Http.Content
 	public class CapturedMultipartContent : MultipartContent
 	{
 		private readonly FlurlHttpSettings _settings;
+		private readonly List<HttpContent> _capturedParts = new List<HttpContent>();
 
 		/// <summary>
 		/// Gets an array of HttpContent objects that make up the parts of the multipart request.
 		/// </summary>
-		public HttpContent[] Parts => this.ToArray();
+		public IReadOnlyList<HttpContent> Parts => _capturedParts;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CapturedMultipartContent"/> class.
@@ -122,6 +124,9 @@ namespace Flurl.Http.Content
 				FileName = fileName,
 				FileNameStar = fileName
 			};
+			// The base class's collection of parts is cleared on Dispose, which isn't exactly in the spirit of "Captured",
+			// which is why we need to add it to this other collection. (#580)
+			_capturedParts.Add(content);
 			base.Add(content);
 			return this;
 		}
