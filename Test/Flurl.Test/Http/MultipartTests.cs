@@ -5,7 +5,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Flurl.Http;
 using Flurl.Http.Content;
+using Flurl.Http.Testing;
 using NUnit.Framework;
 
 namespace Flurl.Test.Http
@@ -13,8 +15,8 @@ namespace Flurl.Test.Http
 	[TestFixture, Parallelizable]
     public class MultipartTests
     {
-		[Test]
-		public void can_build_multipart_content() {
+	    [Test]
+		public async Task can_build_and_send_multipart_content() {
 			var content = new CapturedMultipartContent()
 				.AddString("string", "foo")
 				.AddString("string2", "bar", "text/blah")
@@ -24,15 +26,26 @@ namespace Flurl.Test.Http
 				.AddJson("json", new { foo = "bar" })
 				.AddUrlEncoded("urlEnc", new { fizz = "buzz" });
 
-			Assert.AreEqual(8, content.Parts.Length);
-			AssertStringPart<CapturedStringContent>(content.Parts[0], "string", "foo", null);
-			AssertStringPart<CapturedStringContent>(content.Parts[1], "string2", "bar", "text/blah");
-			AssertStringPart<CapturedStringContent>(content.Parts[2], "part1", "1", null);
-			AssertStringPart<CapturedStringContent>(content.Parts[3], "part2", "2", null);
-			AssertFilePart(content.Parts[4], "file1", "image1.jpg", "image/jpeg");
-			AssertFilePart(content.Parts[5], "file2", "new-name.jpg", "image/jpeg");
-			AssertStringPart<CapturedJsonContent>(content.Parts[6], "json", "{\"foo\":\"bar\"}", "application/json; charset=UTF-8");
-			AssertStringPart<CapturedUrlEncodedContent>(content.Parts[7], "urlEnc", "fizz=buzz", "application/x-www-form-urlencoded");
+			void AssertAll() {
+				Assert.AreEqual(8, content.Parts.Count);
+				AssertStringPart<CapturedStringContent>(content.Parts[0], "string", "foo", null);
+				AssertStringPart<CapturedStringContent>(content.Parts[1], "string2", "bar", "text/blah");
+				AssertStringPart<CapturedStringContent>(content.Parts[2], "part1", "1", null);
+				AssertStringPart<CapturedStringContent>(content.Parts[3], "part2", "2", null);
+				AssertFilePart(content.Parts[4], "file1", "image1.jpg", "image/jpeg");
+				AssertFilePart(content.Parts[5], "file2", "new-name.jpg", "image/jpeg");
+				AssertStringPart<CapturedJsonContent>(content.Parts[6], "json", "{\"foo\":\"bar\"}", "application/json; charset=UTF-8");
+				AssertStringPart<CapturedUrlEncodedContent>(content.Parts[7], "urlEnc", "fizz=buzz", "application/x-www-form-urlencoded");
+			}
+
+			// Assert before and after sending a request. MultipartContent clears the parts collection after request is sent;
+			// CapturedMultipartContent (as the name implies) should preserve it (#580)
+
+			AssertAll();
+			using (var test = new HttpTest()) {
+				await "https://upload.com".PostAsync(content);
+			}
+			AssertAll();
 		}
 
 		private void AssertStringPart<TContent>(HttpContent part, string name, string content, string contentType) {

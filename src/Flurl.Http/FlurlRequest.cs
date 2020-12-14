@@ -283,13 +283,14 @@ namespace Flurl.Http
 			if (Url.IsValid(location))
 				redir.Url = new Url(location);
 			else if (location.OrdinalStartsWith("/"))
-				redir.Url = new Url(this.Url.Root).AppendPathSegment(location);
+				redir.Url = Url.Combine(this.Url.Root, location);
 			else
-				redir.Url = new Url(this.Url.Root).AppendPathSegments(this.Url.Path, location);
+				redir.Url = Url.Combine(this.Url.Root, this.Url.Path, location);
 
 			// Per https://tools.ietf.org/html/rfc7231#section-7.1.2, a redirect location without a
 			// fragment should inherit the fragment from the original URI.
-			redir.Url.Fragment = this.Url.Fragment;
+			if (string.IsNullOrEmpty(redir.Url.Fragment))
+				redir.Url.Fragment = this.Url.Fragment;
 
 			redir.Count = 1 + (call.RedirectedFrom?.Redirect?.Count ?? 0);
 

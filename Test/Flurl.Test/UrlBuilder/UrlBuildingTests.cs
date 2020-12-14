@@ -176,10 +176,14 @@ namespace Flurl.Test.UrlBuilder
 			return "http://www.mysite.com?y=2".SetQueryParams(new { x = 1, y = (string)null, z = "foo" }, nullValueHandling).ToString();
 		}
 
-		[Test]
-		public void can_append_path_segment() {
-			var url = "http://www.mysite.com".AppendPathSegment("endpoint");
-			Assert.AreEqual("http://www.mysite.com/endpoint", url.ToString());
+		[TestCase("http://www.mysite.com", "endpoint", "http://www.mysite.com/endpoint")]
+		[TestCase("path1", "path2", "path1/path2")] // #568
+		[TestCase("/path1/path2", "path3", "/path1/path2/path3")]
+		public void can_append_path_segment(string original, string segment, string result) {
+			Assert.AreEqual(result, original.AppendPathSegment(segment).ToString());
+			Assert.AreEqual(result, original.AppendPathSegment("/" + segment).ToString());
+			Assert.AreEqual(result, (original + "/").AppendPathSegment(segment).ToString());
+			Assert.AreEqual(result, (original + "/").AppendPathSegment("/" + segment).ToString());
 		}
 
 		[Test]
@@ -296,6 +300,13 @@ namespace Flurl.Test.UrlBuilder
 		public void encodes_query_params() {
 			var url = "http://www.mysite.com".SetQueryParams(new { x = "$50", y = "2+2=4" });
 			Assert.AreEqual("http://www.mysite.com?x=%2450&y=2%2B2%3D4", url.ToString());
+		}
+
+		[Test] // #582
+		public void encodes_date_type_query_param() {
+			var date = new DateTime(2020, 12, 6, 10, 45, 1);
+			var url = "http://www.mysite.com".SetQueryParam("date", date);
+			Assert.AreEqual("http://www.mysite.com?date=2020-12-06T10%3A45%3A01.0000000", url.ToString());
 		}
 
 		[Test]

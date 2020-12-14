@@ -55,5 +55,11 @@ namespace Flurl.Test.Http
 				Assert.IsInstanceOf<Newtonsoft.Json.JsonReaderException>(ex.InnerException);
 		    }
 		}
+
+	    [Test] // #579
+		public void can_create_empty() {
+		    var ex = new FlurlHttpException(null);
+		    Assert.AreEqual("Call failed.", ex.Message);
+	    }
 	}
 }
