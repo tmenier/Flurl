@@ -132,7 +132,7 @@ namespace Flurl.Http
 		}
 
 		private IReadOnlyList<FlurlCookie> LoadCookies() {
-			var url = ResponseMessage.RequestMessage.RequestUri.ToString();
+			var url = ResponseMessage.RequestMessage.RequestUri.AbsoluteUri;
 			return ResponseMessage.Headers.TryGetValues("Set-Cookie", out var headerValues) ?
 				headerValues.Select(hv => CookieCutter.ParseResponseHeader(url, hv)).ToList() :
 				new List<FlurlCookie>();
