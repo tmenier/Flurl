@@ -282,6 +282,8 @@ namespace Flurl.Http
 
 			if (Url.IsValid(location))
 				redir.Url = new Url(location);
+			else if (location.OrdinalStartsWith("//"))
+				redir.Url = new Url(this.Url.Scheme + ":" + location);
 			else if (location.OrdinalStartsWith("/"))
 				redir.Url = Url.Combine(this.Url.Root, location);
 			else
