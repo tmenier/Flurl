@@ -340,6 +340,15 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("123", resp1.cookies.x);
 			Assert.AreEqual("abc", resp2.cookies.x);
 		}
+
+		[Test]
+		public async Task can_receive_cookie_from_redirect_response_and_add_it_to_jar() {
+			// use httpbingo instead of httpbin because of redirect issue https://github.com/postmanlabs/httpbin/issues/617
+			var resp = await "https://httpbingo.org/redirect-to".SetQueryParam("url", "/cookies/set?x=foo").WithCookies(out var jar).GetJsonAsync();
+
+			Assert.AreEqual("foo", resp.x);
+			Assert.AreEqual(1, jar.Count);
+		}
 		#endregion
 	}
 }
