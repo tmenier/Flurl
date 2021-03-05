@@ -248,7 +248,10 @@ namespace Flurl.Http
 			redir.Client = Client;
 			redir._redirectedFrom = call;
 			redir.Settings.Defaults = Settings;
-			redir.WithHeaders(this.Headers).WithCookies(call.Response.Cookies);
+			redir.WithHeaders(this.Headers);
+			if (CookieJar != null) {
+				redir.WithCookies(CookieJar);
+			}
 
 			var changeToGet = call.Redirect.ChangeVerbToGet;
 

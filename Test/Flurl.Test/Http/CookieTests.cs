@@ -439,6 +439,19 @@ namespace Flurl.Test.Http
 			CollectionAssert.AreEquivalent(new[] { "3", "2" }, jar.Select(c => c.Value));
 		}
 
+		[Test]
+		public async Task cookie_received_from_redirect_response_is_added_to_jar() {
+			HttpTest
+				.RespondWith("redir", 302, new { Location = "/redir1" }, cookies: new { x = "foo" })
+				.RespondWith("hi", cookies: new { y = "bar" });
+
+			await "https://cookies.com".WithCookies(out var jar).GetAsync();
+
+			Assert.AreEqual(2, jar.Count);
+			Assert.AreEqual(1, jar.Count(c => c.Name == "x" && c.Value == "foo"));
+			Assert.AreEqual(1, jar.Count(c => c.Name == "y" && c.Value == "bar"));
+		}
+
 		/// <summary>
 		/// Performs a series of behavioral checks against a cookie based on its state. Used by lots of tests to make them more robust.
 		/// </summary>
