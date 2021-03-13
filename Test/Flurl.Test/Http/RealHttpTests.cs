@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -283,6 +284,22 @@ namespace Flurl.Test.Http
 				Assert.AreEqual(4, test.CallLog.Count);
 				test.ShouldHaveCalled("https://httpbin*").Times(2);
 			}
+		}
+
+		[Test]
+		public async Task does_not_create_empty_content_on_redir_get() {
+			// This is to avoid a bug on .NET Framework only, which throws if you do a GET with any non-null HttpContent.
+			// Flurl was creating an empty one as part of copying headers on redirect, which resulted in #583
+			var calls = new List<FlurlCall>();
+			var resp = await "http://httpbingo.org/redirect-to?url=http%3A%2F%2Fexample.com%2F".ConfigureRequest(c => {
+				c.BeforeCall = call => calls.Add(call);
+			}).PostUrlEncodedAsync("test=test");
+
+			Assert.AreEqual(2, calls.Count);
+			Assert.AreEqual(HttpMethod.Post, calls[0].Request.Verb);
+			Assert.IsNotNull(calls[0].HttpRequestMessage.Content);
+			Assert.AreEqual(HttpMethod.Get, calls[1].Request.Verb);
+			Assert.IsNull(calls[1].HttpRequestMessage.Content);
 		}
 
 		#region cookies

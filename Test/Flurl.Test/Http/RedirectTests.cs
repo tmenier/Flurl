@@ -66,8 +66,8 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveMadeACall().Times(enabled ? 2 : 1);
 		}
 
-		[Test]
-		public async Task redirect_preserves_most_headers() {
+		[Test, Combinatorial]
+		public async Task can_configure_header_forwarding([Values(false, true)] bool fwdAuth, [Values(false, true)] bool fwdCookies, [Values(false, true)] bool fwdOther) {
 			HttpTest
 				.RespondWith("", 302, new { Location = "/next" })
 				.RespondWith("done!");
@@ -75,21 +75,32 @@ namespace Flurl.Test.Http
 			await "http://start.com"
 				.WithHeaders(new {
 					Authorization = "xyz",
+					Cookie = "x=foo;y=bar",
 					Transfer_Encoding = "chunked",
-					Custom_Header = "foo"
+					Custom1 = "foo",
+					Custom2 = "bar"
+				})
+				.OnRedirect(call => {
+					call.Redirect.ForwardAuthorizationHeader = fwdAuth;
+					call.Redirect.ForwardCookies = fwdCookies;
+					call.Redirect.ForwardHeaders = fwdOther;
 				})
 				.PostAsync(null);
 
 			HttpTest.ShouldHaveCalled("http://start.com")
-				.WithHeader("Custom-Header")
 				.WithHeader("Authorization")
-				.WithHeader("Transfer-Encoding");
+				.WithHeader("Cookie")
+				.WithHeader("Transfer-Encoding")
+				.WithHeader("Custom1")
+				.WithHeader("Custom2");
 
 			HttpTest.ShouldHaveCalled("http://start.com/next")
-				.WithHeader("Custom-Header", "foo")
-				// except these 2:
-				.WithoutHeader("Authorization")
-				.WithoutHeader("Transfer-Encoding");
+				.With(call =>
+					call.Request.Headers.Contains("Authorization") == fwdAuth &&
+					call.Request.Headers.Contains("Cookie") == fwdCookies &&
+					call.Request.Headers.Contains("Custom1") == fwdOther &&
+					call.Request.Headers.Contains("Custom2") == fwdOther)
+				.WithoutHeader("Transfer-Encoding"); // special rule: never forward this if verb is changed to GET, which is is on a 302 POST
 		}
 
 		[TestCase(301, true)]

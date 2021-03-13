@@ -233,6 +233,8 @@ namespace Flurl.Http.Configuration
 			HttpClientFactory = new DefaultHttpClientFactory();
 			Redirects.Enabled = true;
 			Redirects.AllowSecureToInsecure = false;
+			Redirects.ForwardHeaders = false;
+			Redirects.ForwardCookies = true;
 			Redirects.ForwardAuthorizationHeader = false;
 			Redirects.MaxAutoRedirects = 10;
 		}
