@@ -234,7 +234,6 @@ namespace Flurl.Http.Configuration
 			Redirects.Enabled = true;
 			Redirects.AllowSecureToInsecure = false;
 			Redirects.ForwardHeaders = false;
-			Redirects.ForwardCookies = true;
 			Redirects.ForwardAuthorizationHeader = false;
 			Redirects.MaxAutoRedirects = 10;
 		}

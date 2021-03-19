@@ -452,6 +452,21 @@ namespace Flurl.Test.Http
 			Assert.AreEqual(1, jar.Count(c => c.Name == "y" && c.Value == "bar"));
 		}
 
+		[Test]
+		public async Task modified_cookie_forwarded_on_redirect() {
+			// https://github.com/tmenier/Flurl/issues/608#issuecomment-799699525
+			HttpTest
+				.RespondWith("redir", 302, new { Location = "/redir" }, cookies: new { x = "changed" })
+				.RespondWith("hi", cookies: new { x = "changed2" });
+
+			var jar = new CookieJar().AddOrReplace("x", "original", "https://cookies.com");
+			await "https://cookies.com".WithCookies(jar).GetAsync();
+
+			HttpTest.ShouldHaveCalled("https://cookies.com").WithCookie("x", "original");
+			HttpTest.ShouldHaveCalled("https://cookies.com/redir").WithCookie("x", "changed");
+			Assert.IsTrue(jar.Any(c => c.Name == "x" && c.Value == "changed2"));
+		}
+
 		/// <summary>
 		/// Performs a series of behavioral checks against a cookie based on its state. Used by lots of tests to make them more robust.
 		/// </summary>

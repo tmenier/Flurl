@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -67,7 +67,7 @@ namespace Flurl.Test.Http
 		}
 
 		[Test, Combinatorial]
-		public async Task can_configure_header_forwarding([Values(false, true)] bool fwdAuth, [Values(false, true)] bool fwdCookies, [Values(false, true)] bool fwdOther) {
+		public async Task can_configure_header_forwarding([Values(false, true)] bool fwdAuth, [Values(false, true)] bool fwdOther) {
 			HttpTest
 				.RespondWith("", 302, new { Location = "/next" })
 				.RespondWith("done!");
@@ -80,10 +80,9 @@ namespace Flurl.Test.Http
 					Custom1 = "foo",
 					Custom2 = "bar"
 				})
-				.OnRedirect(call => {
-					call.Redirect.ForwardAuthorizationHeader = fwdAuth;
-					call.Redirect.ForwardCookies = fwdCookies;
-					call.Redirect.ForwardHeaders = fwdOther;
+				.ConfigureRequest(settings => {
+					settings.Redirects.ForwardAuthorizationHeader = fwdAuth;
+					settings.Redirects.ForwardHeaders = fwdOther;
 				})
 				.PostAsync(null);
 
@@ -97,9 +96,9 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveCalled("http://start.com/next")
 				.With(call =>
 					call.Request.Headers.Contains("Authorization") == fwdAuth &&
-					call.Request.Headers.Contains("Cookie") == fwdCookies &&
 					call.Request.Headers.Contains("Custom1") == fwdOther &&
 					call.Request.Headers.Contains("Custom2") == fwdOther)
+				.WithoutHeader("Cookie") // special rule: never forward this when CookieJar isn't being used
 				.WithoutHeader("Transfer-Encoding"); // special rule: never forward this if verb is changed to GET, which is is on a 302 POST
 		}
 

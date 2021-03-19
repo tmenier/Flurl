@@ -210,7 +210,7 @@ namespace Flurl.Http
 
 			// copy headers from FlurlRequest to HttpRequestMessage
 			foreach (var header in Headers)
-				request.SetHeader(header.Name, header.Value, false);
+				request.SetHeader(header.Name, header.Value);
 
 			// copy headers from HttpContent to FlurlRequest
 			if (request.Content != null) {
@@ -251,16 +251,16 @@ namespace Flurl.Http
 				Settings = { Defaults = Settings }
 			};
 
-			if (CookieJar != null && call.Redirect.ForwardCookies)
+			if (CookieJar != null)
 				redir.CookieJar = CookieJar;
 
 			var changeToGet = call.Redirect.ChangeVerbToGet;
 
 			redir.WithHeaders(Headers.Where(h =>
-				h.Name.OrdinalEquals("Authorization", true) ? call.Redirect.ForwardAuthorizationHeader :
-				h.Name.OrdinalEquals("Cookie", true) ? call.Redirect.ForwardCookies :
-				h.Name.OrdinalEquals("Transfer-Encoding", true) ? call.Redirect.ForwardHeaders && !changeToGet :
-				call.Redirect.ForwardHeaders));
+				h.Name.OrdinalEquals("Cookie", true) ? false : // never blindly forward Cookie header; CookieJar should be used to ensure rules are enforced
+				h.Name.OrdinalEquals("Authorization", true) ? Settings.Redirects.ForwardAuthorizationHeader :
+				h.Name.OrdinalEquals("Transfer-Encoding", true) ? Settings.Redirects.ForwardHeaders && !changeToGet :
+				Settings.Redirects.ForwardHeaders));
 
 			var ct = GetCancellationTokenWithTimeout(cancellationToken, out var cts);
 			try {
@@ -283,11 +283,7 @@ namespace Flurl.Http
 			if (!call.Response.Headers.TryGetFirst("Location", out var location))
 				return null;
 
-			var redir = new FlurlRedirect {
-				ForwardHeaders = Settings.Redirects.ForwardHeaders,
-				ForwardCookies = Settings.Redirects.ForwardCookies,
-				ForwardAuthorizationHeader = Settings.Redirects.ForwardAuthorizationHeader
-			};
+			var redir = new FlurlRedirect();
 
 			if (Url.IsValid(location))
 				redir.Url = new Url(location);

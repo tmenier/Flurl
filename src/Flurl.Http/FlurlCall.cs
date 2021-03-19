@@ -120,24 +120,5 @@ namespace Flurl.Http
 		/// Otherwise, the original verb and body will be preserved in the redirect.
 		/// </summary>
 		public bool ChangeVerbToGet { get; set; }
-
-		/// <summary>
-		/// If true, request-level headers sent in the original request are forwarded in the redirect, with the
-		/// exception of Authorization and Cookie, which are configured independently via ForwardAuthorizationHeader
-		/// (defaults is false) and ForwardCookies (default is true) respectively.
-		/// </summary>
-		public bool ForwardHeaders { get; set; }
-
-		/// <summary>
-		/// If true, any Authorization header sent in the original request is forwarded in the redirect.
-		/// Default is false, as this behavior is usually considered insecure.
-		/// </summary>
-		public bool ForwardAuthorizationHeader { get; set; }
-
-		/// <summary>
-		/// If true, any Cookie header sent in the original request is forwarded in the redirect.
-		/// Default is true.
-		/// </summary>
-		public bool ForwardCookies { get; set; }
 	}
 }
