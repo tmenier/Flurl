@@ -261,7 +261,8 @@ namespace Flurl
 			else {
 				var subpath = segment.ToInvariantString();
 				foreach (var s in ParsePathSegments(subpath))
-					PathSegments.Add(s);
+					if (!string.IsNullOrEmpty(s))
+						PathSegments.Add(s);
 				_trailingSlash = subpath.OrdinalEndsWith("/");
 			}
 

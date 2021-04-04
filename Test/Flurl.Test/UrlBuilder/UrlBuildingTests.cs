@@ -186,6 +186,12 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual(result, (original + "/").AppendPathSegment("/" + segment).ToString());
 		}
 
+		[TestCase("http://www.mysite.com/", "http://www.mysite.com/")]
+		[TestCase("http://www.mysite.com", "http://www.mysite.com/")]
+		public void can_add_trailing_slash(string original, string result) {
+			Assert.AreEqual(result, original.AppendPathSegment("/").ToString());
+		}
+
 		[Test]
 		public void appending_null_path_segment_throws_arg_null_ex() {
 			Assert.Throws<ArgumentNullException>(() => "http://www.mysite.com".AppendPathSegment(null));
