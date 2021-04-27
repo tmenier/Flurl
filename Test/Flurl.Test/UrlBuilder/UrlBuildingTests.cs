@@ -604,5 +604,11 @@ namespace Flurl.Test.UrlBuilder
 			url.AppendPathSegment("///");
 			Assert.AreEqual("https://www.site.com/a/b/c///", url.ToString());
 		}
+
+		[Test]
+		public void url_trims_leading_and_trailing_whitespace() {
+			var url = new Url("  https://www.site.com \t");
+			Assert.AreEqual("https://www.site.com", url.ToString());
+		}
 	}
 }

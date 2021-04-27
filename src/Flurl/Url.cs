@@ -140,10 +140,9 @@ namespace Flurl
 		/// <summary>
 		/// Constructs a Url object from a string.
 		/// </summary>
-		/// <param name="baseUrl">The URL to use as a starting point (required)</param>
-		/// <exception cref="ArgumentNullException"><paramref name="baseUrl"/> is <see langword="null" />.</exception>
+		/// <param name="baseUrl">The URL to use as a starting point.</param>
 		public Url(string baseUrl = null) {
-			_originalString = baseUrl;
+			_originalString = baseUrl?.Trim();
 		}
 
 		/// <summary>
@@ -508,7 +507,7 @@ namespace Flurl
 				QueryParams.Any() ? "?" : "",
 				QueryParams.ToString(encodeSpaceAsPlus),
 				Fragment?.Length > 0 ? "#" : "",
-				Fragment);
+				Fragment).Trim();
 		}
 
 		/// <summary>
