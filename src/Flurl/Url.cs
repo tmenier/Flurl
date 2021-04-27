@@ -359,6 +359,9 @@ namespace Flurl
 			if (values == null)
 				return this;
 
+			if (values is string s)
+				return SetQueryParam(s);
+
 			foreach (var kv in values.ToKeyValuePairs())
 				SetQueryParam(kv.Key, kv.Value, nullValueHandling);
 
