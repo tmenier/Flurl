@@ -594,5 +594,15 @@ namespace Flurl.Test.UrlBuilder
 			};
 			Assert.AreEqual("http://192.168.1.1", url2.ToString());
 		}
+
+		[Test]
+		public void can_append_trailing_slash() {
+			var url = new Url("https://www.site.com/a/b/c");
+			Assert.AreEqual("https://www.site.com/a/b/c", url.ToString());
+			url.AppendPathSegment("/");
+			Assert.AreEqual("https://www.site.com/a/b/c/", url.ToString());
+			url.AppendPathSegment("///");
+			Assert.AreEqual("https://www.site.com/a/b/c///", url.ToString());
+		}
 	}
 }
