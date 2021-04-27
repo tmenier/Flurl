@@ -287,11 +287,12 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task does_not_create_empty_content_on_redir_get() {
-			// This is to avoid a bug on .NET Framework only, which throws if you do a GET with any non-null HttpContent.
-			// Flurl was creating an empty one as part of copying headers on redirect, which resulted in #583
+		public async Task does_not_create_empty_content_for_forwarding_content_header() {
+			// Flurl was auto-creating an empty HttpContent object in order to forward content-level headers,
+			// and on .NET Framework a GET with a non-null HttpContent throws an exceptions (#583)
 			var calls = new List<FlurlCall>();
 			var resp = await "http://httpbingo.org/redirect-to?url=http%3A%2F%2Fexample.com%2F".ConfigureRequest(c => {
+				c.Redirects.ForwardHeaders = true;
 				c.BeforeCall = call => calls.Add(call);
 			}).PostUrlEncodedAsync("test=test");
 

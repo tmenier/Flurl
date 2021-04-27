@@ -67,15 +67,15 @@ namespace Flurl.Http
 				case "expires":
 				case "last-modified":
 					// it's a content-level header
-					if (msg.Content == null && (!createContentIfNecessary || value == null))
-						break;
-
-					if (msg.Content == null) {
+					if (msg.Content != null) {
+						msg.Content.Headers.Remove(name);
+					}
+					else if (createContentIfNecessary && value != null) {
 						msg.Content = new CapturedStringContent("");
 						msg.Content.Headers.Clear();
 					}
 					else {
-						msg.Content.Headers.Remove(name);
+						break;
 					}
 
 					if (value != null)

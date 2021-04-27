@@ -210,7 +210,7 @@ namespace Flurl.Http
 
 			// copy headers from FlurlRequest to HttpRequestMessage
 			foreach (var header in Headers)
-				request.SetHeader(header.Name, header.Value);
+				request.SetHeader(header.Name, header.Value, false);
 
 			// copy headers from HttpContent to FlurlRequest
 			if (request.Content != null) {
