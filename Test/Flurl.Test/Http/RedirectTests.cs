@@ -33,7 +33,7 @@ namespace Flurl.Test.Http
 				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://redir.com/foo");
 			HttpTest.ShouldHaveCalled("http://redir.com/redir2/redir3?x=1&y=2#foo").WithVerb(HttpMethod.Get).WithRequestBody("")
 				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://redir.com/redir2");
-			HttpTest.ShouldHaveCalled("http://otherredir.com/bar/?a=b").WithVerb(HttpMethod.Get).WithRequestBody("")
+			HttpTest.ShouldHaveCalled("http://otherredir.com/bar/?a=b#foo").WithVerb(HttpMethod.Get).WithRequestBody("")
 				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://redir.com/redir2/redir3?x=1&y=2#foo");
 		}
 
