@@ -18,12 +18,13 @@ namespace Flurl.Test.Http
 				.RespondWith("", 302, new { Location = "http://redir.com/foo" })
 				.RespondWith("", 302, new { Location = "/redir2" })
 				.RespondWith("", 302, new { Location = "redir3?x=1&y=2#foo" })
+				.RespondWith("", 302, new { Location = "//otherredir.com/bar/?a=b" })
 				.RespondWith("done!");
 
 			var resp = await "http://start.com".PostStringAsync("foo!").ReceiveString();
 
 			Assert.AreEqual("done!", resp);
-			HttpTest.ShouldHaveMadeACall().Times(4);
+			HttpTest.ShouldHaveMadeACall().Times(5);
 			HttpTest.ShouldHaveCalled("http://start.com").WithVerb(HttpMethod.Post).WithRequestBody("foo!")
 				.With(call => call.RedirectedFrom == null);
 			HttpTest.ShouldHaveCalled("http://redir.com/foo").WithVerb(HttpMethod.Get).WithRequestBody("")
@@ -32,6 +33,8 @@ namespace Flurl.Test.Http
 				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://redir.com/foo");
 			HttpTest.ShouldHaveCalled("http://redir.com/redir2/redir3?x=1&y=2#foo").WithVerb(HttpMethod.Get).WithRequestBody("")
 				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://redir.com/redir2");
+			HttpTest.ShouldHaveCalled("http://otherredir.com/bar/?a=b#foo").WithVerb(HttpMethod.Get).WithRequestBody("")
+				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://redir.com/redir2/redir3?x=1&y=2#foo");
 		}
 
 		[Test]
