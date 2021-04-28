@@ -21,7 +21,7 @@ namespace Flurl.Http.Testing
 		/// <param name="urlPatterns">URL(s) or URL pattern(s) that this HttpTestSetup applies to. Can contain * wildcard.</param>
 		public FilteredHttpTestSetup(TestFlurlHttpSettings settings, params string[] urlPatterns) : base(settings) {
 			if (urlPatterns.Any())
-				With(call => urlPatterns.Any(p => Util.MatchesPattern(call.Request.Url, p)));
+				With(call => urlPatterns.Any(p => Util.MatchesUrlPattern(call.Request.Url, p)));
 		}
 
 		/// <summary>
