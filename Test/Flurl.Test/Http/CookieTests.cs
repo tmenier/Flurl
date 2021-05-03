@@ -163,12 +163,6 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public void url_decodes_cookie_value() {
-			var cookie = CookieCutter.ParseResponseHeader("https://cookies.com", "x=one%3A%20for%20the%20money");
-			Assert.AreEqual("one: for the money", cookie.Value);
-		}
-
-		[Test]
 		public void unquotes_cookie_value() {
 			var cookie = CookieCutter.ParseResponseHeader("https://cookies.com", "x=\"hello there\"" );
 			Assert.AreEqual("hello there", cookie.Value);
