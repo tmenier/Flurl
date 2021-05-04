@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -285,6 +286,23 @@ namespace Flurl.Test.Http
 			}
 		}
 
+		[Test]
+		public async Task does_not_create_empty_content_for_forwarding_content_header() {
+			// Flurl was auto-creating an empty HttpContent object in order to forward content-level headers,
+			// and on .NET Framework a GET with a non-null HttpContent throws an exceptions (#583)
+			var calls = new List<FlurlCall>();
+			var resp = await "http://httpbingo.org/redirect-to?url=http%3A%2F%2Fexample.com%2F".ConfigureRequest(c => {
+				c.Redirects.ForwardHeaders = true;
+				c.BeforeCall = call => calls.Add(call);
+			}).PostUrlEncodedAsync("test=test");
+
+			Assert.AreEqual(2, calls.Count);
+			Assert.AreEqual(HttpMethod.Post, calls[0].Request.Verb);
+			Assert.IsNotNull(calls[0].HttpRequestMessage.Content);
+			Assert.AreEqual(HttpMethod.Get, calls[1].Request.Verb);
+			Assert.IsNull(calls[1].HttpRequestMessage.Content);
+		}
+
 		#region cookies
 		[Test]
 		public async Task can_send_cookies() {
@@ -339,6 +357,15 @@ namespace Flurl.Test.Http
 
 			Assert.AreEqual("123", resp1.cookies.x);
 			Assert.AreEqual("abc", resp2.cookies.x);
+		}
+
+		[Test]
+		public async Task can_receive_cookie_from_redirect_response_and_add_it_to_jar() {
+			// use httpbingo instead of httpbin because of redirect issue https://github.com/postmanlabs/httpbin/issues/617
+			var resp = await "https://httpbingo.org/redirect-to".SetQueryParam("url", "/cookies/set?x=foo").WithCookies(out var jar).GetJsonAsync();
+
+			Assert.AreEqual("foo", resp.x);
+			Assert.AreEqual(1, jar.Count);
 		}
 		#endregion
 	}

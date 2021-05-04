@@ -140,10 +140,9 @@ namespace Flurl
 		/// <summary>
 		/// Constructs a Url object from a string.
 		/// </summary>
-		/// <param name="baseUrl">The URL to use as a starting point (required)</param>
-		/// <exception cref="ArgumentNullException"><paramref name="baseUrl"/> is <see langword="null" />.</exception>
+		/// <param name="baseUrl">The URL to use as a starting point.</param>
 		public Url(string baseUrl = null) {
-			_originalString = baseUrl;
+			_originalString = baseUrl?.Trim();
 		}
 
 		/// <summary>
@@ -234,11 +233,20 @@ namespace Flurl
 		/// <param name="path">The path to split.</param>
 		/// <returns></returns>
 		public static IEnumerable<string> ParsePathSegments(string path) {
-			return EncodeIllegalCharacters(path)
+			var segments = EncodeIllegalCharacters(path)
 				.Replace("?", "%3F")
 				.Replace("#", "%23")
-				.Trim('/')
 				.Split('/');
+
+			if (!segments.Any())
+				yield break;
+
+			// skip first and/or last segment if either empty, but not any in between. "///" should return 2 empty segments for example. 
+			var start = segments.First().Length > 0 ? 0 : 1;
+			var count = segments.Length - (segments.Last().Length > 0 ? 0 : 1);
+
+			for (var i = start; i < count; i++)
+				yield return segments[i];
 		}
 		#endregion
 
@@ -253,6 +261,8 @@ namespace Flurl
 		public Url AppendPathSegment(object segment, bool fullyEncode = false) {
 			if (segment == null)
 				throw new ArgumentNullException(nameof(segment));
+
+			EnsureParsed();
 
 			if (fullyEncode) {
 				PathSegments.Add(Uri.EscapeDataString(segment.ToInvariantString()));
@@ -358,6 +368,9 @@ namespace Flurl
 		public Url SetQueryParams(object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
 			if (values == null)
 				return this;
+
+			if (values is string s)
+				return SetQueryParam(s);
 
 			foreach (var kv in values.ToKeyValuePairs())
 				SetQueryParam(kv.Key, kv.Value, nullValueHandling);
@@ -494,7 +507,7 @@ namespace Flurl
 				QueryParams.Any() ? "?" : "",
 				QueryParams.ToString(encodeSpaceAsPlus),
 				Fragment?.Length > 0 ? "#" : "",
-				Fragment);
+				Fragment).Trim();
 		}
 
 		/// <summary>

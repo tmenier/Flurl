@@ -101,6 +101,20 @@ namespace Flurl.Test.UrlBuilder
 		}
 
 		[Test]
+		public void can_set_query_params_from_string() {
+			var url = "http://www.mysite.com".SetQueryParams("x=1&y=this%26that");
+			Assert.AreEqual("http://www.mysite.com?x=1&y=this%26that", url.ToString());
+		}
+
+		[Test] // https://github.com/tmenier/Flurl/issues/620
+		public void query_params_string_encodes_consistently_as_object() {
+			var qs = "x=1&y=this%26that";
+			var url1 = "http://www.mysite.com".SetQueryParams(qs as string);
+			var url2 = "http://www.mysite.com".SetQueryParams(qs as object);
+			Assert.AreEqual(url1.ToString(), url2.ToString());
+		}
+
+		[Test]
 		public void can_set_query_params_from_dictionary() {
 			// let's challenge it a little with non-string keys
 			var url = "http://www.mysite.com".SetQueryParams(new Dictionary<int, string> { { 1, "x" }, { 2, "y" } });
@@ -118,15 +132,14 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual("http://foo.com?x=1&y=2&x=3", url.ToString());
 		}
 
-		private IEnumerable<string> GetQueryParamNames() {
-			yield return "abc";
-			yield return "123";
-			yield return null;
-			yield return "456";
-		}
-
 		[Test]
 		public void can_set_multiple_no_value_query_params_from_enumerable_string() {
+			IEnumerable<string> GetQueryParamNames() {
+				yield return "abc";
+				yield return "123";
+				yield return null;
+				yield return "456";
+			}
 			var url = "http://www.mysite.com".SetQueryParams(GetQueryParamNames());
 			Assert.AreEqual("http://www.mysite.com?abc&123&456", url.ToString());
 		}
@@ -580,6 +593,22 @@ namespace Flurl.Test.UrlBuilder
 				Scheme = "http"
 			};
 			Assert.AreEqual("http://192.168.1.1", url2.ToString());
+		}
+
+		[Test]
+		public void can_append_trailing_slash() {
+			var url = new Url("https://www.site.com/a/b/c");
+			Assert.AreEqual("https://www.site.com/a/b/c", url.ToString());
+			url.AppendPathSegment("/");
+			Assert.AreEqual("https://www.site.com/a/b/c/", url.ToString());
+			url.AppendPathSegment("///");
+			Assert.AreEqual("https://www.site.com/a/b/c///", url.ToString());
+		}
+
+		[Test]
+		public void url_trims_leading_and_trailing_whitespace() {
+			var url = new Url("  https://www.site.com \t");
+			Assert.AreEqual("https://www.site.com", url.ToString());
 		}
 	}
 }

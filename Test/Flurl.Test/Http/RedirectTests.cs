@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -18,12 +18,13 @@ namespace Flurl.Test.Http
 				.RespondWith("", 302, new { Location = "http://redir.com/foo" })
 				.RespondWith("", 302, new { Location = "/redir2" })
 				.RespondWith("", 302, new { Location = "redir3?x=1&y=2#foo" })
+				.RespondWith("", 302, new { Location = "//otherredir.com/bar/?a=b" })
 				.RespondWith("done!");
 
 			var resp = await "http://start.com".PostStringAsync("foo!").ReceiveString();
 
 			Assert.AreEqual("done!", resp);
-			HttpTest.ShouldHaveMadeACall().Times(4);
+			HttpTest.ShouldHaveMadeACall().Times(5);
 			HttpTest.ShouldHaveCalled("http://start.com").WithVerb(HttpMethod.Post).WithRequestBody("foo!")
 				.With(call => call.RedirectedFrom == null);
 			HttpTest.ShouldHaveCalled("http://redir.com/foo").WithVerb(HttpMethod.Get).WithRequestBody("")
@@ -32,6 +33,8 @@ namespace Flurl.Test.Http
 				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://redir.com/foo");
 			HttpTest.ShouldHaveCalled("http://redir.com/redir2/redir3?x=1&y=2#foo").WithVerb(HttpMethod.Get).WithRequestBody("")
 				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://redir.com/redir2");
+			HttpTest.ShouldHaveCalled("http://otherredir.com/bar/?a=b#foo").WithVerb(HttpMethod.Get).WithRequestBody("")
+				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://redir.com/redir2/redir3?x=1&y=2#foo");
 		}
 
 		[Test]
@@ -66,8 +69,8 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveMadeACall().Times(enabled ? 2 : 1);
 		}
 
-		[Test]
-		public async Task redirect_preserves_most_headers() {
+		[Test, Combinatorial]
+		public async Task can_configure_header_forwarding([Values(false, true)] bool fwdAuth, [Values(false, true)] bool fwdOther) {
 			HttpTest
 				.RespondWith("", 302, new { Location = "/next" })
 				.RespondWith("done!");
@@ -75,21 +78,31 @@ namespace Flurl.Test.Http
 			await "http://start.com"
 				.WithHeaders(new {
 					Authorization = "xyz",
+					Cookie = "x=foo;y=bar",
 					Transfer_Encoding = "chunked",
-					Custom_Header = "foo"
+					Custom1 = "foo",
+					Custom2 = "bar"
+				})
+				.ConfigureRequest(settings => {
+					settings.Redirects.ForwardAuthorizationHeader = fwdAuth;
+					settings.Redirects.ForwardHeaders = fwdOther;
 				})
 				.PostAsync(null);
 
 			HttpTest.ShouldHaveCalled("http://start.com")
-				.WithHeader("Custom-Header")
 				.WithHeader("Authorization")
-				.WithHeader("Transfer-Encoding");
+				.WithHeader("Cookie")
+				.WithHeader("Transfer-Encoding")
+				.WithHeader("Custom1")
+				.WithHeader("Custom2");
 
 			HttpTest.ShouldHaveCalled("http://start.com/next")
-				.WithHeader("Custom-Header", "foo")
-				// except these 2:
-				.WithoutHeader("Authorization")
-				.WithoutHeader("Transfer-Encoding");
+				.With(call =>
+					call.Request.Headers.Contains("Authorization") == fwdAuth &&
+					call.Request.Headers.Contains("Custom1") == fwdOther &&
+					call.Request.Headers.Contains("Custom2") == fwdOther)
+				.WithoutHeader("Cookie") // special rule: never forward this when CookieJar isn't being used
+				.WithoutHeader("Transfer-Encoding"); // special rule: never forward this if verb is changed to GET, which is is on a 302 POST
 		}
 
 		[TestCase(301, true)]

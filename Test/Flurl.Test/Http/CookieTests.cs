@@ -163,12 +163,6 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public void url_decodes_cookie_value() {
-			var cookie = CookieCutter.ParseResponseHeader("https://cookies.com", "x=one%3A%20for%20the%20money");
-			Assert.AreEqual("one: for the money", cookie.Value);
-		}
-
-		[Test]
 		public void unquotes_cookie_value() {
 			var cookie = CookieCutter.ParseResponseHeader("https://cookies.com", "x=\"hello there\"" );
 			Assert.AreEqual("hello there", cookie.Value);
@@ -437,6 +431,34 @@ namespace Flurl.Test.Http
 			Assert.AreEqual(2, jar.Count);
 			CollectionAssert.AreEquivalent(new[] { "a", "A" }, jar.Select(c => c.Name));
 			CollectionAssert.AreEquivalent(new[] { "3", "2" }, jar.Select(c => c.Value));
+		}
+
+		[Test]
+		public async Task cookie_received_from_redirect_response_is_added_to_jar() {
+			HttpTest
+				.RespondWith("redir", 302, new { Location = "/redir1" }, cookies: new { x = "foo" })
+				.RespondWith("hi", cookies: new { y = "bar" });
+
+			await "https://cookies.com".WithCookies(out var jar).GetAsync();
+
+			Assert.AreEqual(2, jar.Count);
+			Assert.AreEqual(1, jar.Count(c => c.Name == "x" && c.Value == "foo"));
+			Assert.AreEqual(1, jar.Count(c => c.Name == "y" && c.Value == "bar"));
+		}
+
+		[Test]
+		public async Task modified_cookie_forwarded_on_redirect() {
+			// https://github.com/tmenier/Flurl/issues/608#issuecomment-799699525
+			HttpTest
+				.RespondWith("redir", 302, new { Location = "/redir" }, cookies: new { x = "changed" })
+				.RespondWith("hi", cookies: new { x = "changed2" });
+
+			var jar = new CookieJar().AddOrReplace("x", "original", "https://cookies.com");
+			await "https://cookies.com".WithCookies(jar).GetAsync();
+
+			HttpTest.ShouldHaveCalled("https://cookies.com").WithCookie("x", "original");
+			HttpTest.ShouldHaveCalled("https://cookies.com/redir").WithCookie("x", "changed");
+			Assert.IsTrue(jar.Any(c => c.Name == "x" && c.Value == "changed2"));
 		}
 
 		/// <summary>

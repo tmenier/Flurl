@@ -19,7 +19,7 @@ namespace Flurl.Http
 			if (string.IsNullOrEmpty(headerValue)) yield break;
 
 			foreach (var pair in GetPairs(headerValue))
-				yield return (pair.Name, Url.Decode(pair.Value, false));
+				yield return (pair.Name, pair.Value);
 		}
 
 		/// <summary>
@@ -34,7 +34,7 @@ namespace Flurl.Http
 			FlurlCookie cookie = null;
 			foreach (var pair in GetPairs(headerValue)) {
 				if (cookie == null)
-					cookie = new FlurlCookie(pair.Name, Url.Decode(pair.Value.Trim('"'), false), url, DateTimeOffset.UtcNow);
+					cookie = new FlurlCookie(pair.Name, pair.Value.Trim('"'), url, DateTimeOffset.UtcNow);
 
 				// ordinal string compare is both safest and fastest
 				// https://docs.microsoft.com/en-us/dotnet/standard/base-types/best-practices-strings#recommendations-for-string-usage
@@ -72,7 +72,7 @@ namespace Flurl.Http
 			if (cookies?.Any() != true) return null;
 
 			return string.Join("; ", cookies.Select(c =>
-				$"{Url.Encode(c.Name)}={Url.Encode(c.Value)}"));
+				$"{c.Name}={c.Value}"));
 		}
 
 		/// <summary>
