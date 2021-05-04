@@ -138,6 +138,29 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("query param conditions met!", await "http://api.com?x=1&y=2&z=3&c=yes".GetStringAsync());
 		}
 
+		[Test] // #596
+		public async Task url_patterns_ignore_query_when_not_specified() {
+			HttpTest.ForCallsTo("http://api.com/1").RespondWith("one");
+			HttpTest.ForCallsTo("http://api.com/2").WithAnyQueryParam().RespondWith("two");
+			HttpTest.ForCallsTo("http://api.com/3").WithoutQueryParams().RespondWith("three");
+
+			Assert.AreEqual("one", await "http://api.com/1".GetStringAsync());
+			Assert.AreEqual("one", await "http://api.com/1?x=foo&y=bar".GetStringAsync());
+
+			Assert.AreEqual("", await "http://api.com/2".GetStringAsync());
+			Assert.AreEqual("two", await "http://api.com/2?x=foo&y=bar".GetStringAsync());
+
+			Assert.AreEqual("three", await "http://api.com/3".GetStringAsync());
+			Assert.AreEqual("", await "http://api.com/3?x=foo&y=bar".GetStringAsync());
+
+			HttpTest.ShouldHaveCalled("http://api.com/1").Times(2);
+			HttpTest.ShouldHaveCalled("http://api.com/1").WithAnyQueryParam().Times(1);
+			HttpTest.ShouldHaveCalled("http://api.com/1").WithoutQueryParams().Times(1);
+			HttpTest.ShouldHaveCalled("http://api.com/1?x=foo").Times(1);
+			HttpTest.ShouldHaveCalled("http://api.com/1?x=foo").WithQueryParam("y").Times(1);
+			HttpTest.ShouldHaveCalled("http://api.com/1?x=foo").WithQueryParam("y", "bar").Times(1);
+		}
+
 		[Test]
 		public async Task can_respond_based_on_headers() {
 			HttpTest

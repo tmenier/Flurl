@@ -90,6 +90,23 @@ namespace Flurl.Http.Testing
 			return valueToMatch?.ToInvariantString() == value?.ToInvariantString();
 		}
 
+		/// <summary>
+		/// same as MatchesPattern, but doesn't require trailing * to ignore query string
+		/// </summary>
+		internal static bool MatchesUrlPattern(string url, string pattern) {
+			if (MatchesPattern(url, pattern))
+				return true;
+			if (pattern.OrdinalEndsWith("*"))
+				return false;
+			if (pattern.OrdinalContains("?"))
+				return MatchesPattern(url, pattern + "&*");
+			else
+				return MatchesPattern(url, pattern + "?*");
+		}
+
+		/// <summary>
+		/// match simple patterns with * wildcard
+		/// </summary>
 		internal static bool MatchesPattern(string textToCheck, string pattern) {
 			// avoid regex'ing in simple cases
 			if (string.IsNullOrEmpty(pattern) || pattern == "*") return true;

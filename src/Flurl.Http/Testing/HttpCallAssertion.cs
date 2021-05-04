@@ -68,7 +68,7 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		/// <param name="urlPattern">Can contain * wildcard.</param>
 		public HttpCallAssertion WithUrlPattern(string urlPattern) {
-			return With(c => Util.MatchesPattern(c.Request.Url, urlPattern), $"URL pattern {urlPattern}");
+			return With(c => Util.MatchesUrlPattern(c.Request.Url, urlPattern), $"URL pattern {urlPattern}");
 		}
 
 		/// <summary>
