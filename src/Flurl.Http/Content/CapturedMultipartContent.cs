@@ -32,6 +32,25 @@ namespace Flurl.Http.Content
 		}
 
 		/// <summary>
+		/// Initializes a new instance of the <see cref="CapturedMultipartContent"/> class.
+		/// </summary>
+		/// <param name="subtype">The subtype of the multipart content.</param>
+		/// <param name="settings">The FlurlHttpSettings used to serialize each content part. (Defaults to FlurlHttp.GlobalSettings.)</param>
+		public CapturedMultipartContent(string subtype, FlurlHttpSettings settings = null) : base(subtype) {
+			_settings = settings ?? FlurlHttp.GlobalSettings;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CapturedMultipartContent"/> class.
+		/// </summary>
+		/// <param name="subtype">The subtype of the multipart content.</param>
+		/// <param name="boundary">The boundary string for the multipart content.</param>
+		/// <param name="settings">The FlurlHttpSettings used to serialize each content part. (Defaults to FlurlHttp.GlobalSettings.)</param>
+		public CapturedMultipartContent(string subtype, string boundary, FlurlHttpSettings settings = null) : base(subtype, boundary) {
+			_settings = settings ?? FlurlHttp.GlobalSettings;
+		}
+
+		/// <summary>
 		/// Add a content part to the multipart request.
 		/// </summary>
 		/// <param name="name">The control name of the part.</param>
