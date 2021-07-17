@@ -146,25 +146,39 @@ namespace Flurl.Http
 
 		/// <inheritdoc />
 		public async Task<T> GetJsonAsync<T>() {
-			if (_streamRead)
-				return _capturedBody is T body ? body : default(T);
+			if (_streamRead) {
+				if (_capturedBody == null) return default;
+				if (_capturedBody is T body) return body;
+			}
 
 			var call = ResponseMessage.RequestMessage.GetFlurlCall();
-			_serializer = call.Request.Settings.JsonSerializer;
-			using (var stream = await ResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false)) {
-				try {
-					_capturedBody = _serializer.Deserialize<T>(stream);
-					_streamRead = true;
-					return (T)_capturedBody;
+			_serializer = _serializer ?? call.Request.Settings.JsonSerializer;
+
+			try {
+				if (_streamRead) {
+					// Stream was read but captured as a different type than T. If it was captured as a string,
+					// we should be in good shape. If it was deserialized to a different type, the best we can
+					// do is serialize it and then deserialize to T, and we could lose data. But that's a very
+					// uncommon scenario, hopefully. https://github.com/tmenier/Flurl/issues/571#issuecomment-881712479
+					var s = _capturedBody as string ?? _serializer.Serialize(_capturedBody);
+					_capturedBody = _serializer.Deserialize<T>(s);
 				}
-				catch (Exception ex) {
-					_serializer = null;
-					_capturedBody = await ResponseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-					_streamRead = true;
-					call.Exception = new FlurlParsingException(call, "JSON", ex);
-					await FlurlRequest.HandleExceptionAsync(call, call.Exception, CancellationToken.None).ConfigureAwait(false);
-					return default(T);
+				else {
+					using (var stream = await ResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false))
+						_capturedBody = _serializer.Deserialize<T>(stream);
 				}
+				return (T)_capturedBody;
+			}
+			catch (Exception ex) {
+				_serializer = null;
+				_capturedBody = await ResponseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+				_streamRead = true;
+				call.Exception = new FlurlParsingException(call, "JSON", ex);
+				await FlurlRequest.HandleExceptionAsync(call, call.Exception, CancellationToken.None).ConfigureAwait(false);
+				return default;
+			}
+			finally {
+				_streamRead = true;
 			}
 		}
 
