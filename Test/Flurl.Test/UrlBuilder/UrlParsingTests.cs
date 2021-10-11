@@ -115,5 +115,13 @@ namespace Flurl.Test.UrlBuilder
 			var url = new Url(expected);
 			Assert.AreEqual(expected, url.ToString());
 		}
+
+		[Test] // #656
+		public void queryparams_uses_equals() {
+			var url = new Url("http://www.mysite.com?param=1");
+			// String gets boxed, so we need to use Equals, instead of ==
+			var contains = url.QueryParams.Contains("param", "1");
+			Assert.IsTrue(contains);
+		}
 	}
 }

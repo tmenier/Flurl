@@ -161,7 +161,7 @@ namespace Flurl
 		public bool Contains(string name) => _values.Contains(name);
 
 		/// <inheritdoc />>
-		public bool Contains(string name, object value) => _values.Any(qv => qv.Name == name && qv.Value.Value == value);
+		public bool Contains(string name, object value) => _values.Any(qv => qv.Name == name && qv.Value.Value.Equals(value));
 	}
 
 	/// <summary>
