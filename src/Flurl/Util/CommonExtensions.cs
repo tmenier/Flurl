@@ -95,7 +95,26 @@ namespace Flurl.Util
 			let getter = prop.GetGetMethod(false)
 			where getter != null
 			let val = getter.Invoke(obj, null)
-			select (prop.Name, val);
+			select (prop.Name, GetDeclaredTypeValue(val, prop.PropertyType));
+
+		internal static object GetDeclaredTypeValue(object value, Type declaredType) {
+			if (value == null || value.GetType() == declaredType)
+				return value;
+
+			// added to deal with https://github.com/tmenier/Flurl/issues/632
+			// thx @j2jensen!
+			if (value is IEnumerable col
+			    && declaredType.IsGenericType
+			    && declaredType.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+			    && !col.GetType().GetInterfaces().Contains(declaredType)
+			    && declaredType.IsInstanceOfType(col))
+			{
+				var elementType = declaredType.GetGenericArguments()[0];
+				return col.Cast<object>().Select(element => Convert.ChangeType(element, elementType));
+			}
+
+			return Convert.ChangeType(value, declaredType);
+		}
 
 		private static IEnumerable<(string Key, object Value)> CollectionToKV(IEnumerable col) {
 			bool TryGetProp(object obj, string name, out object value) {
