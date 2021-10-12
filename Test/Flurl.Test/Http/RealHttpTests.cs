@@ -231,13 +231,24 @@ namespace Flurl.Test.Http
 			var cli = new FlurlClient("http://www.google.com");
 			cli.Settings.ConnectionLeaseTimeout = TimeSpan.FromMilliseconds(1000);
 
-			// ping google for about 2.5 seconds
+			var httpClients = new List<HttpClient>();
 			var tasks = new List<Task>();
-			for (var i = 0; i < 100; i++) {
+
+			// ping google for about 2.5 seconds
+			for (var i = 0; i < 25; i++) {
+				if (!httpClients.Contains(cli.HttpClient))
+					httpClients.Add(cli.HttpClient);
 				tasks.Add(cli.Request().HeadAsync());
-				await Task.Delay(25);
+				await Task.Delay(100);
 			}
 			await Task.WhenAll(tasks); // failed HTTP status, etc, would throw here and fail the test.
+
+			Assert.AreEqual(3, httpClients.Count);
+
+			// only the first one should be disposed, which isn't particularly simple to check
+			Assert.ThrowsAsync<ObjectDisposedException>(() => httpClients[0].GetAsync("http://www.google.com"));
+			await httpClients[1].GetAsync("http://www.google.com");
+			await httpClients[2].GetAsync("http://www.google.com");
 		}
 
 		[Test]
