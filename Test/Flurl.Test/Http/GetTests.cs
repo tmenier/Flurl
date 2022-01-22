@@ -181,10 +181,63 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveMadeACall().WithContentType("application/json");
 		}
 
+		[Test] // #571
+		public async Task can_deserialize_after_callback_reads_string() {
+			HttpTest.RespondWithJson(new TestData { id = 123, name = "foo" });
+			string logMe = null;
+			var result = await new FlurlRequest("http://api.com")
+				.AfterCall( async call => logMe = await call.Response.GetStringAsync())
+				.GetJsonAsync<TestData>();
+
+			Assert.IsNotNull(result);
+			Assert.AreEqual(123, result.id);
+			Assert.AreEqual("foo", result.name);
+			Assert.AreEqual("{\"id\":123,\"name\":\"foo\"}", logMe);
+		}
+
+		[Test] // #571 (opposite of previous test and probably less common)
+		public async Task can_read_string_after_callback_deserializes() {
+			HttpTest.RespondWithJson(new TestData { id = 123, name = "foo" });
+			TestData logMe = null;
+			var result = await new FlurlRequest("http://api.com")
+				.AfterCall(async call => logMe = await call.Response.GetJsonAsync<TestData>())
+				.GetStringAsync();
+
+			Assert.AreEqual("{\"id\":123,\"name\":\"foo\"}", result);
+			Assert.IsNotNull(logMe);
+			Assert.AreEqual(123, logMe.id);
+			Assert.AreEqual("foo", logMe.name);
+		}
+
+		[Test] // #571
+		public async Task can_deserialize_as_different_type_than_callback() {
+			HttpTest.RespondWithJson(new TestData2 { id = 123, somethingElse = "bar" });
+			TestData logMe = null;
+			var result = await new FlurlRequest("http://api.com")
+				.AfterCall(async call => logMe = await call.Response.GetJsonAsync<TestData>())
+				.GetJsonAsync<TestData2>();
+
+			Assert.IsNotNull(result);
+			Assert.AreEqual(123, result.id);
+			// This doesn't work because we deserialized to TestData first, which doesn't have somethingElse, so that value is lost.
+			//Assert.AreEqual("bar", result.somethingElse);
+			Assert.IsNull(result.somethingElse);
+
+			Assert.IsNotNull(logMe);
+			Assert.AreEqual(123, logMe.id);
+			Assert.IsNull(logMe.name);
+		}
+
 		private class TestData
 		{
 			public int id { get; set; }
 			public string name { get; set; }
+		}
+
+		private class TestData2
+		{
+			public int id { get; set; }
+			public string somethingElse { get; set; }
 		}
 
 		private class TestError

@@ -106,7 +106,7 @@ namespace Flurl.Http
 
 		/// <inheritdoc />
 		public IFlurlClient Client {
-			get => 
+			get =>
 				(_client != null) ? _client :
 				(Url != null) ? FlurlHttp.GlobalSettings.FlurlClientFactory.Get(Url) :
 				null;
@@ -205,7 +205,7 @@ namespace Flurl.Http
 
 		private void SyncHeaders(HttpRequestMessage request) {
 			// copy any client-level (default) headers to this request
-			foreach (var header in Client.Headers.Where(h => !this.Headers.Contains(h.Name)))
+			foreach (var header in Client.Headers.Where(h => !this.Headers.Contains(h.Name)).ToList())
 				this.Headers.Add(header.Name, header.Value);
 
 			// copy headers from FlurlRequest to HttpRequestMessage

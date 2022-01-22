@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -58,6 +59,30 @@ namespace Flurl.Test.UrlBuilder
 				.SetQueryParam("", "bar");
 
 			Assert.AreEqual("http://www.mysite.com/more?x=1&y=2&y=4&y=6&z=3&abc&xyz&foo=&=bar", url.ToString());
+		}
+
+		// #641 (oddly, passing the params object ("" or null) via another TestCase arg didn't repro the bug in the null case)
+		[TestCase("http://www.mysite.com/more")]
+		[TestCase("http://www.mysite.com/more?x=1")]
+		public void ignores_null_or_empty_query_params(string original) {
+			var modified1 = original.SetQueryParams("").ToString();
+			Assert.AreEqual(original, modified1);
+			var modified2 = original.SetQueryParams(null).ToString();
+			Assert.AreEqual(original, modified2);
+		}
+
+		[Test] // #632
+		public void can_set_query_params_to_enums_cast_to_ints() {
+			var enumValues = new[] { FileMode.Append, FileMode.Create };
+			var intValues = enumValues.Cast<int>();
+
+			var url = "http://www.mysite.com/more".SetQueryParams(new { Filter = intValues });
+			Assert.AreEqual("http://www.mysite.com/more?Filter=6&Filter=2", url.ToString());
+
+			// This still doesn't work but is fixable with major changes that break at least one scenario:
+			// https://github.com/tmenier/Flurl/issues/632#issuecomment-940507935
+			// url = "http://www.mysite.com/more".SetQueryParam("Filter", intValues);
+			// Assert.AreEqual("http://www.mysite.com/more?Filter=6&Filter=2", url.ToString());
 		}
 
 		[Test] // #301

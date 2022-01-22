@@ -384,8 +384,12 @@ namespace Flurl
 		/// <param name="names">Names of query parameters.</param>
 		/// <returns>The Url object with the query parameter added</returns>
 		public Url SetQueryParams(IEnumerable<string> names) {
-			foreach (var name in names.Where(n => n != null))
+			if (names == null)
+				return this;
+
+			foreach (var name in names.Where(n => !string.IsNullOrEmpty(n)))
 				SetQueryParam(name);
+
 			return this;
 		}
 
