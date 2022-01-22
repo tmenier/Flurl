@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,7 +55,7 @@ namespace Flurl
 				return;
 			}
 
-			foreach (var val in SplitCollection(value)) {
+			foreach (var val in SplitCollection(value).ToList()) {
 				if (val == null && nullValueHandling != NullValueHandling.NameOnly)
 					continue;
 				_values.Add(name, new QueryParamValue(val, isEncoded));
@@ -81,7 +80,6 @@ namespace Flurl
 			// example: x has values at positions 2 and 4 in the query string, then we set x to
 			// an array of 4 values. We want to replace the values at positions 2 and 4 with the
 			// first 2 values of the new array, then append the remaining 2 values to the end.
-			//var parameters = this.Where(p => p.Name == name).ToArray();
 			var values = new Queue<object>(SplitCollection(value));
 
 			var old = _values.ToArray();
@@ -93,7 +91,7 @@ namespace Flurl
 					continue;
 				}
 
-				if (!values.Any())
+				if (values.Count == 0)
 					continue; // remove, effectively
 
 				var val = values.Dequeue();
@@ -106,7 +104,7 @@ namespace Flurl
 			}
 
 			// add the rest to the end
-			while (values.Any()) {
+			while (values.Count > 0) {
 				Add(name, values.Dequeue(), isEncoded, nullValueHandling);
 			}
 		}
@@ -117,7 +115,7 @@ namespace Flurl
 			else if (value is string s)
 				yield return s;
 			else if (value is IEnumerable en) {
-				foreach (var item in en.Cast<object>().SelectMany(SplitCollection))
+				foreach (var item in en.Cast<object>().SelectMany(SplitCollection).ToList())
 					yield return item;
 			}
 			else
@@ -163,7 +161,7 @@ namespace Flurl
 		public bool Contains(string name) => _values.Contains(name);
 
 		/// <inheritdoc />>
-		public bool Contains(string name, object value) => _values.Any(qv => qv.Name == name && qv.Value.Value == value);
+		public bool Contains(string name, object value) => _values.Any(qv => qv.Name == name && qv.Value.Value.Equals(value));
 	}
 
 	/// <summary>
