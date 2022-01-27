@@ -71,6 +71,16 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual(original, modified2);
 		}
 
+		[Test] // #669
+		public void can_set_query_params_using_objects_with_nullable_types() {
+			int? x = 1;
+			int? y = null;
+			var query = new { x, y };
+			var url = new Url("https://api.com");
+			url.SetQueryParams(query);
+			Assert.AreEqual("https://api.com?x=1", url.ToString());
+		}
+
 		[Test] // #632
 		public void can_set_query_params_to_enums_cast_to_ints() {
 			var enumValues = new[] { FileMode.Append, FileMode.Create };
