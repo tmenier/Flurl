@@ -101,6 +101,10 @@ namespace Flurl.Util
 			if (value == null || value.GetType() == declaredType)
 				return value;
 
+			// without this we had https://github.com/tmenier/Flurl/issues/669
+			// related: https://stackoverflow.com/q/3531318/62600
+			declaredType = Nullable.GetUnderlyingType(declaredType) ?? declaredType;
+
 			// added to deal with https://github.com/tmenier/Flurl/issues/632
 			// thx @j2jensen!
 			if (value is IEnumerable col
