@@ -30,7 +30,7 @@ namespace Flurl.Http.Testing
 					HttpTest.Current.LogCall(call);
 					var setup = HttpTest.Current.FindSetup(call);
 					if (setup?.FakeRequest == true) {
-						var resp = setup.GetNextResponse() ?? new HttpResponseMessage {
+						var resp = setup.GetNextResponse(request) ?? new HttpResponseMessage {
 							StatusCode = HttpStatusCode.OK,
 							Content = new StringContent("")
 						};

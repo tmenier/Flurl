@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http;
+using Flurl.Http.Content;
 using Flurl.Http.Testing;
 using NUnit.Framework;
 
@@ -498,6 +499,22 @@ namespace Flurl.Test.Http
 					test.ShouldHaveMadeACall().Times(10);
 				}
 			}
+		}
+
+		[Test] // #673
+		public async Task can_use_request_in_response()
+		{
+			HttpTest.RespondWith(request =>
+			{
+				var requestBody = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+				return new CapturedStringContent(requestBody);
+			});
+
+			var receivedString = await "http://api.com"
+				.PostStringAsync("hello world")
+				.ReceiveString();
+			
+			Assert.AreEqual("hello world", receivedString);
 		}
 	}
 }
