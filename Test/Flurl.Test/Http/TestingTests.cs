@@ -363,7 +363,7 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task can_simulate_excepion() {
+		public async Task can_simulate_exception() {
 			var expectedException = new SocketException();
 			HttpTest.SimulateException(expectedException);
 			try {
