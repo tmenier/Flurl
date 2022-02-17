@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Sockets;
 using Flurl.Http.Configuration;
 
 namespace Flurl.Http.Testing
