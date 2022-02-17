@@ -111,6 +111,16 @@ namespace Flurl.Http.Testing
 		}
 
 		/// <summary>
+		/// Add the throwing of an exception to the response queue
+		/// </summary>
+		/// <param name="exception"></param>
+		/// <returns></returns>
+		public HttpTestSetup SimulateException(Exception exception) {
+			_responses.Add(() => throw exception);
+			return this;
+		}
+
+		/// <summary>
 		/// Do NOT fake requests for this setup. Typically called on a filtered setup, i.e. HttpTest.ForCallsTo(urlPattern).AllowRealHttp();
 		/// </summary>
 		public void AllowRealHttp() {
