@@ -15,7 +15,7 @@ namespace Flurl.Http.Testing
 	/// </summary>
 	public abstract class HttpTestSetup
 	{
-		private readonly List<Func<HttpResponseMessage>> _responses = new List<Func<HttpResponseMessage>>();
+		private readonly List<Func<HttpRequestMessage, HttpResponseMessage>> _responses = new List<Func<HttpRequestMessage, HttpResponseMessage>>();
 
 		private int _respIndex = 0;
 		private bool _allowRealHttp = false;
@@ -35,12 +35,12 @@ namespace Flurl.Http.Testing
 
 		internal bool FakeRequest => !_allowRealHttp;
 
-		internal HttpResponseMessage GetNextResponse() {
+		internal HttpResponseMessage GetNextResponse(HttpRequestMessage request) {
 			if (!_responses.Any())
 				return null;
 
 			// atomically get the next response in the list, or the last one if we're past the end
-			return _responses[Math.Min(Interlocked.Increment(ref _respIndex), _responses.Count) - 1]();
+			return _responses[Math.Min(Interlocked.Increment(ref _respIndex), _responses.Count) - 1](request);
 		}
 
 		/// <summary>
@@ -79,11 +79,25 @@ namespace Flurl.Http.Testing
 		/// <param name="cookies">The simulated response cookies. Optional.</param>
 		/// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names of headers will be replaced by hyphens. Default is true.</param>
 		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
-		public HttpTestSetup RespondWith(Func<HttpContent> buildContent = null, int status = 200, object headers = null, object cookies = null, bool replaceUnderscoreWithHyphen = true) {
-			_responses.Add(() => {
+		public HttpTestSetup RespondWith(Func<HttpContent> buildContent, int status = 200, object headers = null, object cookies = null, bool replaceUnderscoreWithHyphen = true)
+		{
+			return RespondWith(request => buildContent?.Invoke(), status, headers, cookies, replaceUnderscoreWithHyphen);
+		}
+
+		/// <summary>
+		/// Adds a fake HTTP response to the response queue.
+		/// </summary>
+		/// <param name="buildContent">A function that builds the simulated response body content. Optional.</param>
+		/// <param name="status">The simulated HTTP status. Optional. Default is 200.</param>
+		/// <param name="headers">The simulated response headers. Optional.</param>
+		/// <param name="cookies">The simulated response cookies. Optional.</param>
+		/// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names of headers will be replaced by hyphens. Default is true.</param>
+		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
+		public HttpTestSetup RespondWith(Func<HttpRequestMessage, HttpContent> buildContent = null, int status = 200, object headers = null, object cookies = null, bool replaceUnderscoreWithHyphen = true) {
+			return RespondWith(request => {
 				var response = new HttpResponseMessage {
 					StatusCode = (HttpStatusCode)status,
-					Content = buildContent?.Invoke()
+					Content = buildContent?.Invoke(request)
 				};
 
 				if (headers != null) {
@@ -99,6 +113,15 @@ namespace Flurl.Http.Testing
 				}
 				return response;
 			});
+		}
+		
+		/// <summary>
+		/// Adds a fake HTTP response to the response queue.
+		/// </summary>
+		/// <param name="buildResponse">A function that builds the simulated response.</param>
+		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
+		public HttpTestSetup RespondWith(Func<HttpRequestMessage, HttpResponseMessage> buildResponse) {
+			_responses.Add(buildResponse);
 			return this;
 		}
 
@@ -106,7 +129,7 @@ namespace Flurl.Http.Testing
 		/// Adds a simulated timeout response to the response queue.
 		/// </summary>
 		public HttpTestSetup SimulateTimeout() {
-			_responses.Add(() => new TimeoutResponseMessage());
+			_responses.Add(request => new TimeoutResponseMessage());
 			return this;
 		}
 
