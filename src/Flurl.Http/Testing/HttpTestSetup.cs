@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using Flurl.Http.Configuration;
 using Flurl.Http.Content;
 using Flurl.Util;
@@ -105,16 +106,13 @@ namespace Flurl.Http.Testing
 		/// <summary>
 		/// Adds a simulated timeout response to the response queue.
 		/// </summary>
-		public HttpTestSetup SimulateTimeout() {
-			_responses.Add(() => new TimeoutResponseMessage());
-			return this;
-		}
+		public HttpTestSetup SimulateTimeout() =>
+			SimulateException(new TaskCanceledException(null, new TimeoutException())); // inner exception covers the .net5+ case https://stackoverflow.com/a/65989456/62600
 
 		/// <summary>
-		/// Add the throwing of an exception to the response queue
+		/// Adds the throwing of an exception to the response queue.
 		/// </summary>
-		/// <param name="exception"></param>
-		/// <returns></returns>
+		/// <param name="exception">The exception to throw when the call is simulated.</param>
 		public HttpTestSetup SimulateException(Exception exception) {
 			_responses.Add(() => throw exception);
 			return this;

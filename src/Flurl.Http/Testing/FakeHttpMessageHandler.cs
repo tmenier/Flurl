@@ -35,12 +35,7 @@ namespace Flurl.Http.Testing
 							Content = new StringContent("")
 						};
 
-						var tcs = new TaskCompletionSource<HttpResponseMessage>();
-						if (resp is TimeoutResponseMessage)
-							tcs.SetCanceled();
-						else
-							tcs.SetResult(resp);
-						return tcs.Task;
+						return Task.FromResult(resp);
 					}
 				}
 			}
