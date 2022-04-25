@@ -95,6 +95,18 @@ namespace Flurl.Test.UrlBuilder
 			// Assert.AreEqual("http://www.mysite.com/more?Filter=6&Filter=2", url.ToString());
 		}
 
+		[Test] // #672
+		public void can_set_query_params_using_object_with_ienumerable() {
+			var model = new ModelWithIEnumerable { Values = Enumerable.Range(1, 3).ToArray() };
+			var url = "https://api.com".SetQueryParams(model);
+			Assert.AreEqual("https://api.com?Values=1&Values=2&Values=3", url.ToString());
+		}
+
+		class ModelWithIEnumerable
+		{
+			public IEnumerable<int> Values { get; set; }
+		}
+
 		[Test] // #301
 		public void setting_query_param_array_creates_multiple() {
 			var q = "http://www.mysite.com".SetQueryParam("x", new[] { 1, 2, 3 }).QueryParams;
