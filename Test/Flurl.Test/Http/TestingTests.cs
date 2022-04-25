@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Flurl.Http.Testing;
@@ -361,16 +362,39 @@ namespace Flurl.Test.Http
 			}
 		}
 
-	    [Test]
+		[Test]
+		public async Task can_simulate_exception() {
+			var expectedException = new SocketException();
+			HttpTest.SimulateException(expectedException);
+			try {
+				await "http://www.api.com".GetAsync();
+				Assert.Fail("Exception was not thrown!");
+			}
+			catch (FlurlHttpException ex) {
+				Assert.AreEqual(expectedException, ex.InnerException);
+			}
+		}
+
+		[Test]
 	    public async Task can_simulate_timeout_with_exception_handled() {
 	        HttpTest.SimulateTimeout();
-	        var result = await "http://www.api.com"
-	            .ConfigureRequest(c => c.OnError = call => call.ExceptionHandled = true)
-	            .GetAsync();
-	        Assert.IsNull(result);
-	    }
+	        var exceptionCaught = false;
 
-	    [Test]
+	        var resp = await "http://api.com"
+		        .ConfigureRequest(c => c.OnError = call => {
+			        exceptionCaught = true;
+			        var ex = call.Exception as TaskCanceledException;
+			        Assert.NotNull(ex);
+			        Assert.IsInstanceOf<TimeoutException>(ex.InnerException);
+			        call.ExceptionHandled = true;
+		        })
+		        .GetAsync();
+
+	        Assert.IsNull(resp);
+	        Assert.IsTrue(exceptionCaught);
+		}
+
+		[Test]
 		public async Task can_fake_headers() {
 			HttpTest.RespondWith(headers: new { h1 = "foo" });
 

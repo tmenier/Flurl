@@ -3,7 +3,7 @@
     <TargetFrameworks>netstandard2.0;net461;net472</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>Flurl.Http</PackageId>
-    <Version>3.2.2</Version>
+    <Version>3.2.3</Version>
     <Authors>Todd Menier</Authors>
     <Description>A fluent, portable, testable HTTP client library.</Description>
     <PackageProjectUrl>https://flurl.dev</PackageProjectUrl>
@@ -34,7 +34,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="Flurl" Version="3.0.4" />
+    <PackageReference Include="Flurl" Version="3.0.5" />
     <None Include="..\..\icon.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 

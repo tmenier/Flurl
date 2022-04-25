@@ -117,7 +117,7 @@ namespace Flurl.Util
 				return col.Cast<object>().Select(element => Convert.ChangeType(element, elementType));
 			}
 
-			return Convert.ChangeType(value, declaredType);
+			return value;
 		}
 
 		private static IEnumerable<(string Key, object Value)> CollectionToKV(IEnumerable col) {
