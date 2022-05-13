@@ -53,6 +53,31 @@ namespace Flurl.CodeGen
 			yield return Create("SetQueryParams", "Creates a new Url object from the string and adds multiple parameters without values to the query.")
 				.AddArg("names", "params string[]", "Names of query parameters");
 
+			yield return Create("AppendQueryParam", "Creates a new Url object from the string and adds a parameter to the query.")
+				.AddArg("name", "string", "Name of query parameter")
+				.AddArg("value", "object", "Value of query parameter")
+				.AddArg("nullValueHandling", "NullValueHandling", "Indicates how to handle null values. Defaults to Remove (any existing)", "NullValueHandling.Remove");
+
+			yield return Create("AppendQueryParam", "Creates a new Url object from the string and adds a parameter to the query.")
+				.AddArg("name", "string", "Name of query parameter")
+				.AddArg("value", "string", "Value of query parameter")
+				.AddArg("isEncoded", "bool", "Set to true to indicate the value is already URL-encoded. Defaults to false.", "false")
+				.AddArg("nullValueHandling", "NullValueHandling", "Indicates how to handle null values. Defaults to Remove (any existing).", "NullValueHandling.Remove");
+
+			yield return Create("AppendQueryParam", "Creates a new Url object from the string and adds a parameter without a value to the query.")
+				.AddArg("name", "string", "Name of query parameter");
+
+			yield return Create("AppendQueryParam", "Creates a new Url object from the string, parses values object into name/value pairs, and adds them to the query, overwriting any that already exist.")
+				.AddArg("values", "object", "Typically an anonymous object, ie: new { x = 1, y = 2 }")
+				.AddArg("nullValueHandling", "NullValueHandling", "Indicates how to handle null values. Defaults to Remove (any existing)", "NullValueHandling.Remove");
+
+			yield return Create("AppendQueryParam", "Creates a new Url object from the string and adds multiple parameters without values to the query.")
+				.AddArg("names", "IEnumerable<string>", "Names of query parameters.");
+
+			yield return Create("AppendQueryParam", "Creates a new Url object from the string and adds multiple parameters without values to the query.")
+				.AddArg("names", "params string[]", "Names of query parameters");
+
+
 			yield return Create("RemoveQueryParam", "Creates a new Url object from the string and removes a name/value pair from the query by name.")
 				.AddArg("name", "string", "Query string parameter name to remove");
 
@@ -98,7 +123,7 @@ namespace Flurl.CodeGen
 				.AddArg("name", "string", "The cookie name.")
 				.AddArg("value", "object", "The cookie value.");
 			yield return Create("WithCookies", "Creates a new FlurlRequest and adds name-value pairs to its Cookie header based on property names/values of the provided object, or keys/values if object is a dictionary. " +
-			                                   "To automatically maintain a cookie \"session\", consider using a CookieJar or CookieSession instead.")
+											   "To automatically maintain a cookie \"session\", consider using a CookieJar or CookieSession instead.")
 				.AddArg("values", "object", "Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.");
 			yield return Create("WithCookies", "Creates a new FlurlRequest and sets the CookieJar associated with this request, which will be updated with any Set-Cookie headers present in the response and is suitable for reuse in subsequent requests.")
 				.AddArg("cookieJar", "CookieJar", "The CookieJar.");

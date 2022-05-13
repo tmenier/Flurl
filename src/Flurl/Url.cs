@@ -401,6 +401,83 @@ namespace Flurl
 		public Url SetQueryParams(params string[] names) => SetQueryParams(names as IEnumerable<string>);
 
 		/// <summary>
+		/// Adds a parameter to the query.
+		/// </summary>
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		public Url AppendQueryParam(string name, object value, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			QueryParams.Add(name, value, false, nullValueHandling);
+			return this;
+		}
+
+		/// <summary>
+		/// Adds a parameter to the query.
+		/// </summary>
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
+		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
+		public Url AppendQueryParam(string name, string value, bool isEncoded = false, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			QueryParams.Add(name, value, isEncoded, nullValueHandling);
+			return this;
+		}
+
+		/// <summary>
+		/// Adds a parameter without a value to the query.
+		/// </summary>
+		/// <param name="name">Name of query parameter</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		public Url AppendQueryParam(string name) {
+			QueryParams.Add(name, null, false, NullValueHandling.NameOnly);
+			return this;
+		}
+
+		/// <summary>
+		/// Parses values (usually an anonymous object or dictionary) into name/value pairs and adds them to the query.
+		/// </summary>
+		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+		/// <returns>The Url object with the query parameters added</returns>
+		public Url AppendQueryParam(object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			if (values == null)
+				return this;
+
+			if (values is string s)
+				return AppendQueryParam(s);
+
+			foreach (var kv in values.ToKeyValuePairs())
+				AppendQueryParam(kv.Key, kv.Value, nullValueHandling);
+
+			return this;
+		}
+
+		/// <summary>
+		/// Adds multiple parameters without values to the query.
+		/// </summary>
+		/// <param name="names">Names of query parameters.</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		public Url AppendQueryParam(IEnumerable<string> names) {
+			if (names == null)
+				return this;
+
+			foreach (var name in names.Where(n => !string.IsNullOrEmpty(n)))
+				AppendQueryParam(name);
+
+			return this;
+		}
+
+		/// <summary>
+		/// Adds multiple parameters without values to the query.
+		/// </summary>
+		/// <param name="names">Names of query parameters</param>
+		/// <returns>The Url object with the query parameter added.</returns>
+		public Url AppendQueryParam(params string[] names) => SetQueryParams(names as IEnumerable<string>);
+
+		/// <summary>
 		/// Removes a name/value pair from the query by name.
 		/// </summary>
 		/// <param name="name">Query string parameter name to remove</param>
