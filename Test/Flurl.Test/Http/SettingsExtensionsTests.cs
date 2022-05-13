@@ -88,6 +88,25 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("2", sc.Headers.Single().Value);
 		}
 
+		[Test] // #623
+		public async Task header_values_are_trimmed() {
+			var sc = GetSettingsContainer().WithHeader("a", "   1 \t\r\n");
+			sc.Headers.Add("b", "   2   ");
+
+			Assert.AreEqual(2, sc.Headers.Count);
+			Assert.AreEqual("1", sc.Headers[0].Value);
+			// Not trimmed when added directly to Headers collection (implementation seemed like overkill),
+			// but below we'll make sure it happens on HttpRequestMessage when request is sent.
+			Assert.AreEqual("   2   ", sc.Headers[1].Value);
+
+			using (var test = new HttpTest()) {
+				await GetRequest(sc).GetAsync();
+				var sentHeaders = test.CallLog[0].HttpRequestMessage.Headers;
+				Assert.AreEqual("1", sentHeaders.GetValues("a").Single());
+				Assert.AreEqual("2", sentHeaders.GetValues("b").Single());
+			}
+		}
+
 		[Test]
 		public void can_setup_oauth_bearer_token() {
 			var sc = GetSettingsContainer().WithOAuthBearerToken("mytoken");
