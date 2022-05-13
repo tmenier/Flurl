@@ -76,6 +76,20 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("good job", data);
 		}
 
+		[Test] // #606
+		public async Task get_string_is_empty_for_null_content() {
+			HttpTest.RespondWith(status: 200);
+
+			var s = await "https://api.com".GetStringAsync();
+			Assert.AreEqual("", s);
+
+			// also works the long way
+			var resp = await "https://api.com".PostAsync();
+			Assert.IsNull(resp.ResponseMessage.Content);
+			s = await resp.GetStringAsync();
+			Assert.AreEqual("", s);
+		}
+
 		[Test]
 		public async Task can_get_stream() {
 			HttpTest.RespondWith("good job");
