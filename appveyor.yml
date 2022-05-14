@@ -15,4 +15,4 @@ test_script:
   - cmd: call cmd /C "cd .\build & test.cmd"
 
 artifacts:
-  - path: '**\*.nupkg'
+  - path: '**\*.*nupkg'

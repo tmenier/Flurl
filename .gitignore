@@ -2,7 +2,7 @@ bin
 obj
 packages
 *.suo
-*.nupkg
+*.*nupkg
 *.DotSettings.user
 *.xproj.user
 .vs
