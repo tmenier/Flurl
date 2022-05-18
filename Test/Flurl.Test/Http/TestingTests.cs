@@ -36,7 +36,7 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task no_response_setup_returns_empty_reponse() {
+		public async Task no_response_setup_returns_empty_response() {
 			await "http://www.api.com".GetAsync();
 
 			var lastCall = HttpTest.CallLog.Last();
@@ -454,7 +454,7 @@ namespace Flurl.Test.Http
 				CallAndAssertCountAsync(6));
 		}
 
-		[Test]
+		[Test] // #285
 		public async Task does_not_throw_nullref_for_empty_content() {
 			await "http://some-api.com".AppendPathSegment("foo").SendAsync(HttpMethod.Post, null);
 			await "http://some-api.com".AppendPathSegment("foo").PostJsonAsync(new { foo = "bar" });

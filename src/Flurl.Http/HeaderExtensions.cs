@@ -24,7 +24,7 @@ namespace Flurl.Http
 		    if (value == null)
 			    clientOrRequest.Headers.Remove(name);
 			else
-			    clientOrRequest.Headers.AddOrReplace(name, value.ToInvariantString());
+			    clientOrRequest.Headers.AddOrReplace(name, value.ToInvariantString().Trim());
 		    return clientOrRequest;
 	    }
 
