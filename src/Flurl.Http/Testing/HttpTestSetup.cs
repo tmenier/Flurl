@@ -54,7 +54,6 @@ namespace Flurl.Http.Testing
 		/// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names of headers will be replaced by hyphens. Default is true.</param>
 		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
 		public HttpTestSetup RespondWith(string body, int status = 200, object headers = null, object cookies = null, bool replaceUnderscoreWithHyphen = true) {
-			if (body == null) throw new ArgumentNullException(nameof(body));
 			return RespondWith(() => new CapturedStringContent(body), status, headers, cookies, replaceUnderscoreWithHyphen);
 		}
 
