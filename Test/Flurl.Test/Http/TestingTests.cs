@@ -44,6 +44,27 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("", await lastCall.Response.GetStringAsync());
 		}
 
+		[Test] // #606
+		public async Task null_response_setup_returns_empty_response() {
+			HttpTest
+				.RespondWith(status: 200)
+				.RespondWith((string)null, status: 200)
+				.RespondWith(() => null, status: 200);
+
+			var s = await "https://api.com".GetStringAsync();
+			Assert.AreEqual("", s);
+
+			s = await "https://api.com".GetStringAsync();
+			Assert.AreEqual("", s);
+
+			// in the last scenario, the whole HttpContent is null
+			var resp = await "https://api.com".PostAsync();
+			Assert.IsNull(resp.ResponseMessage.Content);
+			s = await resp.GetStringAsync(); // ...but even in this case we should get an empty string here
+			Assert.AreEqual("", s);
+		}
+
+
 		[Test]
 		public async Task can_setup_multiple_responses() {
 			HttpTest

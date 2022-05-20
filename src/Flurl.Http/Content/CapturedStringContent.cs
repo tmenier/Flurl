@@ -19,8 +19,8 @@ namespace Flurl.Http.Content
 		/// Initializes a new instance of <see cref="CapturedStringContent"/> with a Content-Type header of text/plain; charset=UTF-8
 		/// </summary>
 		/// <param name="content">The content.</param>
-		public CapturedStringContent(string content) : base(content) {
-			Content = content;
+		public CapturedStringContent(string content) : base(content ?? "") {
+			Content = content ?? "";
 		}
 
 		/// <summary>
