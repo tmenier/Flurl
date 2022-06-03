@@ -43,7 +43,7 @@ namespace Flurl.Test.Http
 		    HttpTest.RespondWith("{ \"invalid JSON!");
 
 		    try {
-			    await "http://myapi.com".GetJsonAsync();
+			    await "http://myapi.com".GetJsonAsync<object>();
 			    Assert.Fail("should have failed to parse response.");
 		    }
 		    catch (FlurlParsingException ex) {

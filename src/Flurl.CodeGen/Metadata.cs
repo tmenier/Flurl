@@ -144,16 +144,13 @@ namespace Flurl.CodeGen
 		/// HTTP-calling methods for all valid verb/content type combinations (PutStringAsync, PatchJsonAsync, etc),
 		/// with generic and non-generic overloads.
 		/// </summary>
-		public static IEnumerable<HttpExtensionMethod> GetHttpCallingExtensions(MethodArg extendedArg) {
-			return
-				from verb in new[] { null, "Get", "Post", "Head", "Put", "Delete", "Patch", "Options" }
-				from reqType in new[] { null, "Json", "String", "UrlEncoded" }
-				from respType in new[] { null, "Json", "JsonList", "String", "Stream", "Bytes" }
-				where IsSupportedCombo(verb, reqType, respType, extendedArg.Type)
-				from isGeneric in new[] { true, false }
-				where !isGeneric || AllowDeserializeToGeneric(respType)
-				select new HttpExtensionMethod(verb, isGeneric, reqType, respType) { ExtendedTypeArg = extendedArg };
-		}
+		public static IEnumerable<HttpExtensionMethod> GetHttpCallingExtensions(MethodArg extendedArg) =>
+			from verb in new[] { null, "Get", "Post", "Head", "Put", "Delete", "Patch", "Options" }
+			from reqType in new[] { null, "Json", "String", "UrlEncoded" }
+			from respType in new[] { null, "Json", "String", "Stream", "Bytes" }
+			where IsSupportedCombo(verb, reqType, respType, extendedArg.Type)
+			let isGenenric = (respType == "Json")
+			select new HttpExtensionMethod(verb, isGenenric, reqType, respType) { ExtendedTypeArg = extendedArg };
 
 		private static bool IsSupportedCombo(string verb, string reqType, string respType, string extensionType) {
 			if (respType != null && verb != "Get")
@@ -169,15 +166,6 @@ namespace Flurl.CodeGen
 					return reqType != null || extensionType != "IFlurlRequest";
 				default: // Get, Head, Delete, Options
 					return reqType == null;
-			}
-		}
-
-		private static bool AllowDeserializeToGeneric(string deserializeType) {
-			switch (deserializeType) {
-				case "Json":
-					return true;
-				default:
-					return false;
 			}
 		}
 	}

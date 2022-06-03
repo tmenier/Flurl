@@ -43,31 +43,6 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task can_get_json_dynamic() {
-			HttpTest.RespondWithJson(new { id = 1, name = "Frank" });
-
-			var data = await "http://some-api.com".GetJsonAsync();
-
-			Assert.AreEqual(1, data.id);
-			Assert.AreEqual("Frank", data.name);
-		}
-
-		[Test]
-		public async Task can_get_json_dynamic_list() {
-			HttpTest.RespondWithJson(new[] {
-				new { id = 1, name = "Frank" },
-				new { id = 2, name = "Claire" }
-			});
-
-			var data = await "http://some-api.com".GetJsonListAsync();
-
-			Assert.AreEqual(1, data[0].id);
-			Assert.AreEqual("Frank", data[0].name);
-			Assert.AreEqual(2, data[1].id);
-			Assert.AreEqual("Claire", data[1].name);
-		}
-
-		[Test]
 		public async Task can_get_string() {
 			HttpTest.RespondWith("good job");
 
@@ -114,7 +89,7 @@ namespace Flurl.Test.Http
 
 		[TestCase(false)]
 		[TestCase(true)]
-		public async Task can_get_error_json_typed(bool useShortcut) {
+		public async Task can_get_error_json(bool useShortcut) {
 			HttpTest.RespondWithJson(new { code = 999, message = "our server crashed" }, 500);
 
 			try {
@@ -124,24 +99,6 @@ namespace Flurl.Test.Http
 				var error = useShortcut ?
 					await ex.GetResponseJsonAsync<TestError>() :
 					await ex.Call.Response.GetJsonAsync<TestError>();
-				Assert.IsNotNull(error);
-				Assert.AreEqual(999, error.code);
-				Assert.AreEqual("our server crashed", error.message);
-			}
-		}
-
-		[TestCase(false)]
-		[TestCase(true)]
-		public async Task can_get_error_json_untyped(bool useShortcut) {
-			HttpTest.RespondWithJson(new { code = 999, message = "our server crashed" }, 500);
-
-			try {
-				await "http://api.com".GetStringAsync();
-			}
-			catch (FlurlHttpException ex) {
-				var error = useShortcut ? // error is a dynamic this time
-					await ex.GetResponseJsonAsync() :
-					await ex.Call.Response.GetJsonAsync();
 				Assert.IsNotNull(error);
 				Assert.AreEqual(999, error.code);
 				Assert.AreEqual("our server crashed", error.message);

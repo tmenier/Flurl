@@ -1,6 +1,3 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
 namespace Flurl.CodeGen
 {
 	public class HttpExtensionMethod : ExtensionMethod
@@ -44,31 +41,20 @@ namespace Flurl.CodeGen
 		public string RequestBodyType { get; }
 		public string ResponseBodyType { get; }
 
-		public string TaskArg {
-			get {
-				switch (ResponseBodyType) {
-					case "Json": return IsGeneric ? "T" : "dynamic";
-					case "JsonList": return "IList<dynamic>";
-					case "String": return "string";
-					case "Stream": return "Stream";
-					case "Bytes": return "byte[]";
-					default: return "IFlurlResponse";
-				}
-			}
-		}
+		public string TaskArg => ResponseBodyType switch {
+			"Json" => "T",
+			"String" => "string",
+			"Stream" => "Stream",
+			"Bytes" => "byte[]",
+			_ => "IFlurlResponse"
+		};
 
-		public string ReturnTypeDescription {
-			get {
-				//var response = (xm.DeserializeToType == null) ? "" : "" + xm.TaskArg;
-				switch (ResponseBodyType) {
-					case "Json": return "the JSON response body deserialized to " + (IsGeneric ? "an object of type T" : "a dynamic");
-					case "JsonList": return "the JSON response body deserialized to a list of dynamics";
-					case "String": return "the response body as a string";
-					case "Stream": return "the response body as a Stream";
-					case "Bytes": return "the response body as a byte array";
-					default: return "the received IFlurlResponse";
-				}
-			}
-		}
+		public string ReturnTypeDescription => ResponseBodyType switch {
+			"Json" => "the JSON response body deserialized to an object of type T",
+			"String" => "the response body as a string",
+			"Stream" => "the response body as a Stream",
+			"Bytes" => "the response body as a byte array",
+			_ => "the received IFlurlResponse"
+		};
 	}
 }
