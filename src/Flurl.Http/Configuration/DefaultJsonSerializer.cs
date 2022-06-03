@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Security.Cryptography;
 using System.Text.Json;
 
 namespace Flurl.Http.Configuration
@@ -29,12 +30,12 @@ namespace Flurl.Http.Configuration
 		/// Deserializes the specified JSON string to an object of type T.
 		/// </summary>
 		/// <param name="s">The JSON string to deserialize.</param>
-		public T Deserialize<T>(string s) => JsonSerializer.Deserialize<T>(s, _options);
+		public T Deserialize<T>(string s) => string.IsNullOrWhiteSpace(s) ? default : JsonSerializer.Deserialize<T>(s, _options);
 
 		/// <summary>
 		/// Deserializes the specified stream to an object of type T.
 		/// </summary>
 		/// <param name="stream">The stream to deserialize.</param>
-		public T Deserialize<T>(Stream stream) => JsonSerializer.Deserialize<T>(stream, _options);
+		public T Deserialize<T>(Stream stream) => stream.Length == 0 ? default : JsonSerializer.Deserialize<T>(stream, _options);
 	}
 }
