@@ -152,7 +152,7 @@ namespace Flurl.Http
 			}
 
 			var call = ResponseMessage.RequestMessage.GetFlurlCall();
-			_serializer = _serializer ?? call.Request.Settings.JsonSerializer;
+			_serializer ??= call.Request.Settings.JsonSerializer;
 
 			try {
 				if (_streamRead) {
@@ -164,8 +164,8 @@ namespace Flurl.Http
 					_capturedBody = _serializer.Deserialize<T>(s);
 				}
 				else {
-					using (var stream = await ResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false))
-						_capturedBody = _serializer.Deserialize<T>(stream);
+					using var stream = await ResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
+					_capturedBody = _serializer.Deserialize<T>(stream);
 				}
 				return (T)_capturedBody;
 			}

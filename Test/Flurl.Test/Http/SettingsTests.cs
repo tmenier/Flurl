@@ -118,7 +118,7 @@ namespace Flurl.Test.Http
 
 			GetSettings().ResetDefaults();
 
-			Assert.That(GetSettings().JsonSerializer is NewtonsoftJsonSerializer);
+			Assert.That(GetSettings().JsonSerializer is DefaultJsonSerializer);
 			Assert.IsTrue(GetSettings().Redirects.Enabled);
 			Assert.IsNull(GetSettings().BeforeCall);
 			Assert.AreEqual(10, GetSettings().Redirects.MaxAutoRedirects);
@@ -256,8 +256,10 @@ namespace Flurl.Test.Http
 		private class FakeSerializer : ISerializer
 		{
 			public string Serialize(object obj) => "foo";
-			public T Deserialize<T>(string s) => default(T);
-			public T Deserialize<T>(Stream stream) => default(T);
+			public T Deserialize<T>(string s) => default;
+			public T Deserialize<T>(Stream stream) => default;
+			public dynamic Deserialize(string s) => default;
+			public dynamic Deserialize(Stream stream) => default;
 		}
 	}
 
