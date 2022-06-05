@@ -51,19 +51,11 @@ namespace Flurl.Test.Http
 				.RespondWith((string)null, status: 200)
 				.RespondWith(() => null, status: 200);
 
-			var s = await "https://api.com".GetStringAsync();
-			Assert.AreEqual("", s);
-
-			s = await "https://api.com".GetStringAsync();
-			Assert.AreEqual("", s);
-
-			// in the last scenario, the whole HttpContent is null
-			var resp = await "https://api.com".PostAsync();
-			Assert.IsNull(resp.ResponseMessage.Content);
-			s = await resp.GetStringAsync(); // ...but even in this case we should get an empty string here
-			Assert.AreEqual("", s);
+			for (var i = 0; i < 3; i++) {
+				var s = await "https://api.com".GetStringAsync();
+				Assert.AreEqual("", s);
+			}
 		}
-
 
 		[Test]
 		public async Task can_setup_multiple_responses() {
@@ -420,7 +412,7 @@ namespace Flurl.Test.Http
 			HttpTest.RespondWith(headers: new { h1 = "foo" });
 
 			var resp = await "http://www.api.com".GetAsync();
-			Assert.AreEqual(("h1", "foo"), resp.Headers.Single());
+			Assert.AreEqual("foo", resp.Headers.FirstOrDefault("h1"));
 		}
 
 		[Test]
@@ -435,12 +427,12 @@ namespace Flurl.Test.Http
 		// https://github.com/tmenier/Flurl/issues/175
 		[Test]
 		public async Task can_deserialize_default_response_more_than_once() {
-			var resp = await "http://www.api.com".GetJsonAsync();
+			var resp = await "http://www.api.com".GetJsonAsync<object>();
 			Assert.IsNull(resp);
 			// bug: couldn't deserialize here due to reading stream twice
-			resp = await "http://www.api.com".GetJsonAsync();
+			resp = await "http://www.api.com".GetJsonAsync<object>();
 			Assert.IsNull(resp);
-			resp = await "http://www.api.com".GetJsonAsync();
+			resp = await "http://www.api.com".GetJsonAsync<object>();
 			Assert.IsNull(resp);
 		}
 

@@ -11,9 +11,8 @@ namespace Flurl.Http.Configuration
 	public class DefaultUrlEncodedSerializer : ISerializer
 	{
 		/// <summary>
-		/// Serializes the specified object.
+		/// Serializes the specified object to a URL-encoded string.
 		/// </summary>
-		/// <param name="obj">The object.</param>
 		public string Serialize(object obj) {
 			if (obj == null)
 				return null;
@@ -25,23 +24,13 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <summary>
-		/// Deserializes the specified s.
+		/// Deserializing a URL-encoded string is not supported.
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="s">The s.</param>
-		/// <exception cref="NotImplementedException">Deserializing to UrlEncoded not supported.</exception>
-		public T Deserialize<T>(string s) {
-			throw new NotImplementedException("Deserializing to UrlEncoded is not supported.");
-		}
+		public T Deserialize<T>(string s) => throw new NotImplementedException("Deserializing a URL-encoded string is not supported.");
 
 		/// <summary>
-		/// Deserializes the specified stream.
+		/// Deserializing a URL-encoded string is not supported.
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="stream">The stream.</param>
-		/// <exception cref="NotImplementedException">Deserializing to UrlEncoded not supported.</exception>
-		public T Deserialize<T>(Stream stream) {
-			throw new NotImplementedException("Deserializing to UrlEncoded is not supported.");
-		}
+		public T Deserialize<T>(Stream stream) => throw new NotImplementedException("Deserializing a URL-encoded string is not supported.");
 	}
 }

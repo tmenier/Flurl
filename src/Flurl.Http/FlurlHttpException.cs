@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Dynamic;
 using System.Threading.Tasks;
-using Flurl.Http;
 
 namespace Flurl.Http
 {
@@ -65,13 +63,6 @@ namespace Flurl.Http
 		/// <typeparam name="T">A type whose structure matches the expected JSON response.</typeparam>
 		/// <returns>A task whose result is an object containing data in the response body.</returns>
 		public Task<T> GetResponseJsonAsync<T>() => Call?.Response?.GetJsonAsync<T>() ?? Task.FromResult(default(T));
-
-		/// <summary>
-		/// Deserializes the JSON response body to a dynamic object.
-		/// </summary>
-		/// <returns>A task whose result is an object containing data in the response body.</returns>
-		public async Task<dynamic> GetResponseJsonAsync() => (Call?.Response == null) ? null :
-			await Call.Response.GetJsonAsync().ConfigureAwait(false);
 	}
 
 	/// <summary>

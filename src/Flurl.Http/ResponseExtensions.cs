@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Flurl.Http
@@ -24,32 +21,6 @@ namespace Flurl.Http
 			using (var resp = await response.ConfigureAwait(false)) {
 				if (resp == null) return default(T);
 				return await resp.GetJsonAsync<T>().ConfigureAwait(false);
-			}
-		}
-
-		/// <summary>
-		/// Deserializes JSON-formatted HTTP response body to a dynamic object. Intended to chain off an async call.
-		/// </summary>
-		/// <returns>A Task whose result is a dynamic object containing data in the response body.</returns>
-		/// <example>d = await url.PostAsync(data).ReceiveJson()</example>
-		/// <exception cref="FlurlHttpException">Condition.</exception>
-		public static async Task<dynamic> ReceiveJson(this Task<IFlurlResponse> response) {
-			using (var resp = await response.ConfigureAwait(false)) {
-				if (resp == null) return null;
-				return await resp.GetJsonAsync().ConfigureAwait(false);
-			}
-		}
-
-		/// <summary>
-		/// Deserializes JSON-formatted HTTP response body to a list of dynamic objects. Intended to chain off an async call.
-		/// </summary>
-		/// <returns>A Task whose result is a list of dynamic objects containing data in the response body.</returns>
-		/// <example>d = await url.PostAsync(data).ReceiveJsonList()</example>
-		/// <exception cref="FlurlHttpException">Condition.</exception>
-		public static async Task<IList<dynamic>> ReceiveJsonList(this Task<IFlurlResponse> response) {
-			using (var resp = await response.ConfigureAwait(false)) {
-				if (resp == null) return null;
-				return await resp.GetJsonListAsync().ConfigureAwait(false);
 			}
 		}
 

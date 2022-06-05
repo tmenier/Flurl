@@ -227,7 +227,7 @@ namespace Flurl.Http.Configuration
 		public override void ResetDefaults() {
 			base.ResetDefaults();
 			Timeout = TimeSpan.FromSeconds(100); // same as HttpClient
-			JsonSerializer = new NewtonsoftJsonSerializer(null);
+			JsonSerializer = new DefaultJsonSerializer();
 			UrlEncodedSerializer = new DefaultUrlEncodedSerializer();
 			FlurlClientFactory = new DefaultFlurlClientFactory();
 			HttpClientFactory = new DefaultHttpClientFactory();

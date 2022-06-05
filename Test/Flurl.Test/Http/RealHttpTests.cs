@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -18,6 +19,15 @@ namespace Flurl.Test.Http
 	[TestFixture, Parallelizable]
 	public class RealHttpTests
 	{
+		public class HttpBinResponse
+		{
+			public Dictionary<string, JsonElement> json { get; set; }
+			public Dictionary<string, string> args { get; set; }
+			public Dictionary<string, string> form { get; set; }
+			public Dictionary<string, string> cookies { get; set; }
+			public Dictionary<string, string> files { get; set; }
+		}
+
 		[TestCase("gzip", "gzipped")]
 		[TestCase("deflate", "deflated"), Ignore("#474")]
 		public async Task decompresses_automatically(string encoding, string jsonKey) {
@@ -54,9 +64,9 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_post_and_receive_json() {
-			var result = await "https://httpbin.org/post".PostJsonAsync(new { a = 1, b = 2 }).ReceiveJson();
-			Assert.AreEqual(result.json.a, 1);
-			Assert.AreEqual(result.json.b, 2);
+			var result = await "https://httpbin.org/post".PostJsonAsync(new { a = 1, b = 2 }).ReceiveJson<HttpBinResponse>();
+			Assert.AreEqual(1, result.json["a"].GetInt32());
+			Assert.AreEqual(2, result.json["b"].GetInt32());
 		}
 
 		[Test]
@@ -115,12 +125,12 @@ namespace Flurl.Test.Http
 							// content.Headers.ContentLength = 735;
 						})
 						//.ReceiveString();
-						.ReceiveJson();
-					Assert.AreEqual("1", resp.form.a);
-					Assert.AreEqual("2", resp.form.b);
-					Assert.AreEqual("hello!", resp.form.DataField);
-					Assert.AreEqual("file contents 1", resp.files.File1);
-					Assert.AreEqual("file contents 2", resp.files.File2);
+						.ReceiveJson<HttpBinResponse>();
+					Assert.AreEqual("1", resp.form["a"]);
+					Assert.AreEqual("2", resp.form["b"]);
+					Assert.AreEqual("hello!", resp.form["DataField"]);
+					Assert.AreEqual("file contents 1", resp.files["File1"]);
+					Assert.AreEqual("file contents 2", resp.files["File2"]);
 				}
 			}
 			finally {
@@ -138,7 +148,7 @@ namespace Flurl.Test.Http
 						call.ExceptionHandled = true;
 						handlerCalled = true;
 					};
-				}).GetJsonAsync();
+				}).GetAsync();
 				Assert.IsTrue(handlerCalled, "error handler should have been called.");
 			}
 			catch (FlurlHttpException) {
@@ -156,7 +166,7 @@ namespace Flurl.Test.Http
 						ex = call.Exception;
 						call.ExceptionHandled = true;
 					};
-				}).GetJsonAsync();
+				}).GetJsonAsync<object>();
 				Assert.IsNotNull(ex, "error handler should have been called.");
 				Assert.IsInstanceOf<FlurlParsingException>(ex);
 			}
@@ -288,7 +298,7 @@ namespace Flurl.Test.Http
 
 				Assert.AreEqual("foo", await "https://www.google.com".GetStringAsync());
 				Assert.AreNotEqual("foo", await "https://httpbin.org/get".GetStringAsync());
-				Assert.AreEqual("bar", (await "https://httpbin.org/get?x=bar".GetJsonAsync()).args.x);
+				Assert.AreEqual("bar", (await "https://httpbin.org/get?x=bar".GetJsonAsync<HttpBinResponse>()).args["x"]);
 				Assert.AreEqual("foo", await "https://www.microsoft.com".GetStringAsync());
 
 				// real calls still get logged
@@ -324,10 +334,10 @@ namespace Flurl.Test.Http
 
 			var s = await req.GetStringAsync();
 
-			var resp = await req.WithAutoRedirect(false).GetJsonAsync();
+			var resp = await req.WithAutoRedirect(false).GetJsonAsync<HttpBinResponse>();
 			// httpbin returns json representation of cookies that were sent
-			Assert.AreEqual("1", resp.cookies.x);
-			Assert.AreEqual("2", resp.cookies.y);
+			Assert.AreEqual("1", resp.cookies["x"]);
+			Assert.AreEqual("2", resp.cookies["y"]);
 		}
 
 		[Test]
@@ -352,8 +362,8 @@ namespace Flurl.Test.Http
 		public async Task can_set_cookies_before_setting_url() {
 			var req = new FlurlRequest().WithCookie("z", "999");
 			req.Url = "https://httpbin.org/cookies";
-			var resp = await req.GetJsonAsync();
-			Assert.AreEqual("999", resp.cookies.z);
+			var resp = await req.GetJsonAsync<HttpBinResponse>();
+			Assert.AreEqual("999", resp.cookies["z"]);
 		}
 
 		[Test]
@@ -363,19 +373,22 @@ namespace Flurl.Test.Http
 			var req1 = cli.Request("https://httpbin.org/cookies").WithCookie("x", "123");
 			var req2 = cli.Request("https://httpbin.org/cookies").WithCookie("x", "abc");
 
-			var resp2 = await req2.GetJsonAsync();
-			var resp1 = await req1.GetJsonAsync();
+			var resp2 = await req2.GetJsonAsync<HttpBinResponse>();
+			var resp1 = await req1.GetJsonAsync<HttpBinResponse>();
 
-			Assert.AreEqual("123", resp1.cookies.x);
-			Assert.AreEqual("abc", resp2.cookies.x);
+			Assert.AreEqual("123", resp1.cookies["x"]);
+			Assert.AreEqual("abc", resp2.cookies["x"]);
 		}
 
 		[Test]
 		public async Task can_receive_cookie_from_redirect_response_and_add_it_to_jar() {
 			// use httpbingo instead of httpbin because of redirect issue https://github.com/postmanlabs/httpbin/issues/617
-			var resp = await "https://httpbingo.org/redirect-to".SetQueryParam("url", "/cookies/set?x=foo").WithCookies(out var jar).GetJsonAsync();
+			var resp = await "https://httpbingo.org/redirect-to"
+				.SetQueryParam("url", "/cookies/set?x=foo")
+				.WithCookies(out var jar)
+				.GetJsonAsync<Dictionary<string, string>>();
 
-			Assert.AreEqual("foo", resp.x);
+			Assert.AreEqual("foo", resp["x"]);
 			Assert.AreEqual(1, jar.Count);
 		}
 		#endregion

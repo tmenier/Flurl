@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -44,22 +43,6 @@ namespace Flurl.Http
 		/// <example>x = await url.PostAsync(data).GetJson&lt;T&gt;()</example>
 		/// <exception cref="FlurlHttpException">Condition.</exception>
 		Task<T> GetJsonAsync<T>();
-
-		/// <summary>
-		/// Deserializes JSON-formatted HTTP response body to a dynamic object.
-		/// </summary>
-		/// <returns>A Task whose result is a dynamic object containing data in the response body.</returns>
-		/// <example>d = await url.PostAsync(data).GetJson()</example>
-		/// <exception cref="FlurlHttpException">Condition.</exception>
-		Task<dynamic> GetJsonAsync();
-
-		/// <summary>
-		/// Deserializes JSON-formatted HTTP response body to a list of dynamic objects.
-		/// </summary>
-		/// <returns>A Task whose result is a list of dynamic objects containing data in the response body.</returns>
-		/// <example>d = await url.PostAsync(data).GetJsonList()</example>
-		/// <exception cref="FlurlHttpException">Condition.</exception>
-		Task<IList<dynamic>> GetJsonListAsync();
 
 		/// <summary>
 		/// Returns HTTP response body as a string.
@@ -152,7 +135,7 @@ namespace Flurl.Http
 			}
 
 			var call = ResponseMessage.RequestMessage.GetFlurlCall();
-			_serializer = _serializer ?? call.Request.Settings.JsonSerializer;
+			_serializer ??= call.Request.Settings.JsonSerializer;
 
 			try {
 				if (_streamRead) {
@@ -164,8 +147,8 @@ namespace Flurl.Http
 					_capturedBody = _serializer.Deserialize<T>(s);
 				}
 				else {
-					using (var stream = await ResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false))
-						_capturedBody = _serializer.Deserialize<T>(stream);
+					using var stream = await ResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
+					_capturedBody = _serializer.Deserialize<T>(stream);
 				}
 				return (T)_capturedBody;
 			}
@@ -180,18 +163,6 @@ namespace Flurl.Http
 			finally {
 				_streamRead = true;
 			}
-		}
-
-		/// <inheritdoc />
-		public async Task<dynamic> GetJsonAsync() {
-			dynamic d = await GetJsonAsync<ExpandoObject>().ConfigureAwait(false);
-			return d;
-		}
-
-		/// <inheritdoc />
-		public async Task<IList<dynamic>> GetJsonListAsync() {
-			dynamic[] d = await GetJsonAsync<ExpandoObject[]>().ConfigureAwait(false);
-			return d;
 		}
 
 		/// <inheritdoc />
