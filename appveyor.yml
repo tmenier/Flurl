@@ -1,6 +1,6 @@
 version: 1.0.0-{branch}-{build}
 
-image: Visual Studio 2019
+image: Visual Studio 2022
 
 init:
   - dotnet --version
