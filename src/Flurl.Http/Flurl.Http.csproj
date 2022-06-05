@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461;net472</TargetFrameworks>
+    <TargetFrameworks>net6.0;netstandard2.0;net461</TargetFrameworks>
     <LangVersion>8.0</LangVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>Flurl.Http</PackageId>
@@ -48,7 +48,7 @@
     <PackageReference Include="System.Text.Json" Version="6.0.4" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)'=='net461' Or '$(TargetFramework)'=='net472'">
+  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
     <Reference Include="System.Net.Http" />
     <PackageReference Include="System.Text.Json" Version="6.0.4" />
   </ItemGroup>

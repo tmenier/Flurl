@@ -289,14 +289,12 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual(expected, url.ToString());
 		}
 
-#if !NETCOREAPP1_1
 		[Test]
 		public void url_ToString_uses_invariant_culture() {
 			Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("es-ES");
 			var url = "http://www.mysite.com".SetQueryParam("x", 1.1);
 			Assert.AreEqual("http://www.mysite.com?x=1.1", url.ToString());
 		}
-#endif
 
 		[Test]
 		public void can_reset_to_root() {

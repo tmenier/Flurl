@@ -35,6 +35,20 @@ namespace Flurl.Http
 			new HttpMessage(response).SetHeader(name, value, createContentIfNecessary);
 		}
 
+#if NET5_0_OR_GREATER // https://github.com/dotnet/docs/blob/main/includes/preprocessor-symbols.md
+		/// <summary>
+		/// Associate a FlurlCall object with this request
+		/// </summary>
+		internal static void SetFlurlCall(this HttpRequestMessage request, FlurlCall call) {
+			request?.Options.Set(new HttpRequestOptionsKey<FlurlCall>("FlurlHttpCall"), call);
+		}
+
+		/// <summary>
+		/// Get the FlurlCall associated with this request, if any.
+		/// </summary>
+		internal static FlurlCall GetFlurlCall(this HttpRequestMessage request) =>
+			request?.Options.TryGetValue(new HttpRequestOptionsKey<FlurlCall>("FlurlHttpCall"), out var call) == true ? call : null;
+#else
 		/// <summary>
 		/// Associate a FlurlCall object with this request
 		/// </summary>
@@ -46,11 +60,9 @@ namespace Flurl.Http
 		/// <summary>
 		/// Get the FlurlCall associated with this request, if any.
 		/// </summary>
-		internal static FlurlCall GetFlurlCall(this HttpRequestMessage request) {
-			if (request?.Properties != null && request.Properties.TryGetValue("FlurlHttpCall", out var obj) && obj is FlurlCall call)
-				return call;
-			return null;
-		}
+		internal static FlurlCall GetFlurlCall(this HttpRequestMessage request) =>
+			request?.Properties?.TryGetValue("FlurlHttpCall", out var call) == true ? call as FlurlCall : null;
+#endif
 
 		private static void SetHeader(this HttpMessage msg, string name, object value, bool createContentIfNecessary) {
 			switch (name.ToLower()) {
