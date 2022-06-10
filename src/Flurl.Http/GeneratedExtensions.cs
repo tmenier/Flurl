@@ -533,6 +533,32 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
+		/// Creates a new FlurlRequest and asynchronously downloads a file.
+		/// </summary>
+		/// <param name="url">This Flurl.Url.</param>
+		/// <param name="localFolderPath">Path of local folder where file is to be downloaded.</param>
+		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
+		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
+		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+		/// <returns>A Task whose result is the local path of the downloaded file.</returns>
+		public static Task<string> DownloadFileAsync(this Url url, string localFolderPath, string localFileName = null, int bufferSize = 4096, HttpCompletionOption completionOption = HttpCompletionOption.ResponseHeadersRead, CancellationToken cancellationToken = default) {
+			return new FlurlRequest(url).DownloadFileAsync(localFolderPath, localFileName, bufferSize, completionOption, cancellationToken);
+		}
+		
+		/// <summary>
+		/// Creates a FlurlRequest and sends an asynchronous multipart/form-data POST request.
+		/// </summary>
+		/// <param name="url">This Flurl.Url.</param>
+		/// <param name="buildContent">A delegate for building the content parts.</param>
+		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
+		public static Task<IFlurlResponse> PostMultipartAsync(this Url url, Action<CapturedMultipartContent> buildContent, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+			return new FlurlRequest(url).PostMultipartAsync(buildContent, completionOption, cancellationToken);
+		}
+		
+		/// <summary>
 		/// Creates a new FlurlRequest and sets a request header.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
@@ -693,30 +719,6 @@ namespace Flurl.Http
 		/// <returns>A new IFlurlRequest.</returns>
 		public static IFlurlRequest WithClient(this Url url, IFlurlClient client) {
 			return new FlurlRequest(url).WithClient(client);
-		}
-		
-		/// <summary>
-		/// Creates a new FlurlRequest and asynchronously downloads a file.
-		/// </summary>
-		/// <param name="url">This Flurl.Url.</param>
-		/// <param name="localFolderPath">Path of local folder where file is to be downloaded.</param>
-		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
-		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
-		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-		/// <returns>A Task whose result is the local path of the downloaded file.</returns>
-		public static Task<string> DownloadFileAsync(this Url url, string localFolderPath, string localFileName = null, int bufferSize = 4096, CancellationToken cancellationToken = default) {
-			return new FlurlRequest(url).DownloadFileAsync(localFolderPath, localFileName, bufferSize, cancellationToken);
-		}
-		
-		/// <summary>
-		/// Creates a FlurlRequest and sends an asynchronous multipart/form-data POST request.
-		/// </summary>
-		/// <param name="url">This Flurl.Url.</param>
-		/// <param name="buildContent">A delegate for building the content parts.</param>
-		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
-		public static Task<IFlurlResponse> PostMultipartAsync(this Url url, Action<CapturedMultipartContent> buildContent, CancellationToken cancellationToken = default) {
-			return new FlurlRequest(url).PostMultipartAsync(buildContent, cancellationToken);
 		}
 		
 		/// <summary>
@@ -980,6 +982,32 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
+		/// Creates a new FlurlRequest and asynchronously downloads a file.
+		/// </summary>
+		/// <param name="url">This URL.</param>
+		/// <param name="localFolderPath">Path of local folder where file is to be downloaded.</param>
+		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
+		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
+		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+		/// <returns>A Task whose result is the local path of the downloaded file.</returns>
+		public static Task<string> DownloadFileAsync(this string url, string localFolderPath, string localFileName = null, int bufferSize = 4096, HttpCompletionOption completionOption = HttpCompletionOption.ResponseHeadersRead, CancellationToken cancellationToken = default) {
+			return new FlurlRequest(url).DownloadFileAsync(localFolderPath, localFileName, bufferSize, completionOption, cancellationToken);
+		}
+		
+		/// <summary>
+		/// Creates a FlurlRequest and sends an asynchronous multipart/form-data POST request.
+		/// </summary>
+		/// <param name="url">This URL.</param>
+		/// <param name="buildContent">A delegate for building the content parts.</param>
+		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
+		public static Task<IFlurlResponse> PostMultipartAsync(this string url, Action<CapturedMultipartContent> buildContent, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+			return new FlurlRequest(url).PostMultipartAsync(buildContent, completionOption, cancellationToken);
+		}
+		
+		/// <summary>
 		/// Creates a new FlurlRequest and sets a request header.
 		/// </summary>
 		/// <param name="url">This URL.</param>
@@ -1140,30 +1168,6 @@ namespace Flurl.Http
 		/// <returns>A new IFlurlRequest.</returns>
 		public static IFlurlRequest WithClient(this string url, IFlurlClient client) {
 			return new FlurlRequest(url).WithClient(client);
-		}
-		
-		/// <summary>
-		/// Creates a new FlurlRequest and asynchronously downloads a file.
-		/// </summary>
-		/// <param name="url">This URL.</param>
-		/// <param name="localFolderPath">Path of local folder where file is to be downloaded.</param>
-		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
-		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
-		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-		/// <returns>A Task whose result is the local path of the downloaded file.</returns>
-		public static Task<string> DownloadFileAsync(this string url, string localFolderPath, string localFileName = null, int bufferSize = 4096, CancellationToken cancellationToken = default) {
-			return new FlurlRequest(url).DownloadFileAsync(localFolderPath, localFileName, bufferSize, cancellationToken);
-		}
-		
-		/// <summary>
-		/// Creates a FlurlRequest and sends an asynchronous multipart/form-data POST request.
-		/// </summary>
-		/// <param name="url">This URL.</param>
-		/// <param name="buildContent">A delegate for building the content parts.</param>
-		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
-		public static Task<IFlurlResponse> PostMultipartAsync(this string url, Action<CapturedMultipartContent> buildContent, CancellationToken cancellationToken = default) {
-			return new FlurlRequest(url).PostMultipartAsync(buildContent, cancellationToken);
 		}
 		
 		/// <summary>
@@ -1427,6 +1431,32 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
+		/// Creates a new FlurlRequest and asynchronously downloads a file.
+		/// </summary>
+		/// <param name="uri">This System.Uri.</param>
+		/// <param name="localFolderPath">Path of local folder where file is to be downloaded.</param>
+		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
+		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
+		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+		/// <returns>A Task whose result is the local path of the downloaded file.</returns>
+		public static Task<string> DownloadFileAsync(this Uri uri, string localFolderPath, string localFileName = null, int bufferSize = 4096, HttpCompletionOption completionOption = HttpCompletionOption.ResponseHeadersRead, CancellationToken cancellationToken = default) {
+			return new FlurlRequest(uri).DownloadFileAsync(localFolderPath, localFileName, bufferSize, completionOption, cancellationToken);
+		}
+		
+		/// <summary>
+		/// Creates a FlurlRequest and sends an asynchronous multipart/form-data POST request.
+		/// </summary>
+		/// <param name="uri">This System.Uri.</param>
+		/// <param name="buildContent">A delegate for building the content parts.</param>
+		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
+		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
+		public static Task<IFlurlResponse> PostMultipartAsync(this Uri uri, Action<CapturedMultipartContent> buildContent, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+			return new FlurlRequest(uri).PostMultipartAsync(buildContent, completionOption, cancellationToken);
+		}
+		
+		/// <summary>
 		/// Creates a new FlurlRequest and sets a request header.
 		/// </summary>
 		/// <param name="uri">This System.Uri.</param>
@@ -1587,30 +1617,6 @@ namespace Flurl.Http
 		/// <returns>A new IFlurlRequest.</returns>
 		public static IFlurlRequest WithClient(this Uri uri, IFlurlClient client) {
 			return new FlurlRequest(uri).WithClient(client);
-		}
-		
-		/// <summary>
-		/// Creates a new FlurlRequest and asynchronously downloads a file.
-		/// </summary>
-		/// <param name="uri">This System.Uri.</param>
-		/// <param name="localFolderPath">Path of local folder where file is to be downloaded.</param>
-		/// <param name="localFileName">Name of local file. If not specified, the source filename (last segment of the URL) is used.</param>
-		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
-		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-		/// <returns>A Task whose result is the local path of the downloaded file.</returns>
-		public static Task<string> DownloadFileAsync(this Uri uri, string localFolderPath, string localFileName = null, int bufferSize = 4096, CancellationToken cancellationToken = default) {
-			return new FlurlRequest(uri).DownloadFileAsync(localFolderPath, localFileName, bufferSize, cancellationToken);
-		}
-		
-		/// <summary>
-		/// Creates a FlurlRequest and sends an asynchronous multipart/form-data POST request.
-		/// </summary>
-		/// <param name="uri">This System.Uri.</param>
-		/// <param name="buildContent">A delegate for building the content parts.</param>
-		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
-		public static Task<IFlurlResponse> PostMultipartAsync(this Uri uri, Action<CapturedMultipartContent> buildContent, CancellationToken cancellationToken = default) {
-			return new FlurlRequest(uri).PostMultipartAsync(buildContent, cancellationToken);
 		}
 		
 	}

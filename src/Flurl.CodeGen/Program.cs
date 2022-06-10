@@ -134,7 +134,11 @@ namespace Flurl.CodeGen
 			}
 
 			foreach (var xarg in _extendedArgs.Skip(1)) { // skip 1 because these don't apply to IFlurlRequest
-				foreach (var xm in Metadata.GetHttpCallingExtensions(xarg).Concat(Metadata.GetRequestReturningExtensions(xarg))) {
+				var all = Metadata.GetHttpCallingExtensions(xarg)
+					.Concat(Metadata.GetMiscAsyncExtensions(xarg))
+					.Concat(Metadata.GetRequestReturningExtensions(xarg));
+
+				foreach (var xm in all) {
 					Console.WriteLine($"writing {xm.Name} for {xarg.Type}...");
 					xm.Write(writer, $"new FlurlRequest({xarg.Name})");
 				}
