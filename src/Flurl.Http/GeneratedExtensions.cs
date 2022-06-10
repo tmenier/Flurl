@@ -712,16 +712,6 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and configures it to use the given IFlurlClient.
-		/// </summary>
-		/// <param name="url">This Flurl.Url.</param>
-		/// <param name="client">The IFlurlClient to use to send the request.</param>
-		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithClient(this Url url, IFlurlClient client) {
-			return new FlurlRequest(url).WithClient(client);
-		}
-		
-		/// <summary>
 		/// Creates a FlurlRequest and sends an asynchronous request.
 		/// </summary>
 		/// <param name="url">This URL.</param>
@@ -1161,16 +1151,6 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and configures it to use the given IFlurlClient.
-		/// </summary>
-		/// <param name="url">This URL.</param>
-		/// <param name="client">The IFlurlClient to use to send the request.</param>
-		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithClient(this string url, IFlurlClient client) {
-			return new FlurlRequest(url).WithClient(client);
-		}
-		
-		/// <summary>
 		/// Creates a FlurlRequest and sends an asynchronous request.
 		/// </summary>
 		/// <param name="uri">This System.Uri.</param>
@@ -1607,16 +1587,6 @@ namespace Flurl.Http
 		/// <returns>A new IFlurlRequest.</returns>
 		public static IFlurlRequest WithAutoRedirect(this Uri uri, bool enabled) {
 			return new FlurlRequest(uri).WithAutoRedirect(enabled);
-		}
-		
-		/// <summary>
-		/// Creates a new FlurlRequest and configures it to use the given IFlurlClient.
-		/// </summary>
-		/// <param name="uri">This System.Uri.</param>
-		/// <param name="client">The IFlurlClient to use to send the request.</param>
-		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithClient(this Uri uri, IFlurlClient client) {
-			return new FlurlRequest(uri).WithClient(client);
 		}
 		
 	}

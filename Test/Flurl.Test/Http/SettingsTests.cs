@@ -170,7 +170,7 @@ namespace Flurl.Test.Http
 			var client2 = new FlurlClient();
 			client2.Settings.Redirects.Enabled = false;
 
-			req.WithClient(client2);
+			req.Client = client2;
 			Assert.IsFalse(req.Settings.Redirects.Enabled, "request should inherit client settings when not set at request level");
 			Assert.AreEqual("4xx", req.Settings.AllowedHttpStatusRange, "request should inherit global settings when not set at request or client level");
 			Assert.AreEqual(123, req.Settings.Redirects.MaxAutoRedirects, "request should inherit global settings when not set at request or client level");

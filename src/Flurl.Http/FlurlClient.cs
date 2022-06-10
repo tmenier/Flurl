@@ -140,8 +140,7 @@ namespace Flurl.Http
 		public HttpMessageHandler HttpMessageHandler => HttpTest.Current?.HttpMessageHandler ?? _httpMessageHandler?.Value;
 
 		/// <inheritdoc />
-		public IFlurlRequest Request(params object[] urlSegments) =>
-			new FlurlRequest(BaseUrl, urlSegments).WithClient(this);
+		public IFlurlRequest Request(params object[] urlSegments) => new FlurlRequest(BaseUrl, urlSegments) { Client = this };
 
 		FlurlHttpSettings IHttpSettingsContainer.Settings {
 			get => Settings;

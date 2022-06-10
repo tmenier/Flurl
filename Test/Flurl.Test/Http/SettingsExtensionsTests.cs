@@ -187,19 +187,6 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public void WithClient_shares_client_but_not_Url() {
-			var cli = new FlurlClient().WithHeader("myheader", "123");
-			var req1 = "http://www.api.com/for-req1".WithClient(cli);
-			var req2 = "http://www.api.com/for-req2".WithClient(cli);
-			var req3 = "http://www.api.com/for-req3".WithClient(cli);
-
-			CollectionAssert.AreEquivalent(req1.Headers, req2.Headers);
-			CollectionAssert.AreEquivalent(req1.Headers, req3.Headers);
-			var urls = new[] { req1, req2, req3 }.Select(c => c.Url.ToString());
-			CollectionAssert.AllItemsAreUnique(urls);
-		}
-
-		[Test]
 		public void can_use_uri_with_WithUrl() {
 			var uri = new System.Uri("http://www.mysite.com/foo?x=1");
 			var req = new FlurlClient().Request(uri);
@@ -211,10 +198,9 @@ namespace Flurl.Test.Http
 			using (var test = new HttpTest()) {
 				var cli = new FlurlClient().Configure(s => s.AllowedHttpStatusRange = "*");
 				test.RespondWith("epic fail", 500);
-				Assert.ThrowsAsync<FlurlHttpException>(async () => await "http://www.api.com"
-					.ConfigureRequest(c => c.AllowedHttpStatusRange = "2xx")
-					.WithClient(cli) // client-level settings shouldn't win
-					.GetAsync());
+				var req = "http://www.api.com".ConfigureRequest(c => c.AllowedHttpStatusRange = "2xx");
+				req.Client = cli; // client-level settings shouldn't win
+				Assert.ThrowsAsync<FlurlHttpException>(async () => await req.GetAsync());
 			}
 		}
 	}

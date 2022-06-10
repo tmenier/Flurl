@@ -119,9 +119,6 @@ namespace Flurl.CodeGen
 			yield return Create("AllowAnyHttpStatus", "Creates a new FlurlRequest and configures it to allow any returned HTTP status without throwing a FlurlHttpException.");
 			yield return Create("WithAutoRedirect", "Creates a new FlurlRequest and configures whether redirects are automatically followed.")
 				.AddArg("enabled", "bool", "true if Flurl should automatically send a new request to the redirect URL, false if it should not.");
-
-			yield return Create("WithClient", "Creates a new FlurlRequest and configures it to use the given IFlurlClient.")
-				.AddArg("client", "IFlurlClient", "The IFlurlClient to use to send the request.");
 		}
 
 		/// <summary>
