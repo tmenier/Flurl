@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 
 namespace Flurl.CodeGen
 {
@@ -26,7 +27,7 @@ namespace Flurl.CodeGen
 					throw new Exception("how did we get here?");
 			}
 
-			AddArg("completionOption", "HttpCompletionOption", "The HttpCompletionOption used in the request. Optional.", "HttpCompletionOption.ResponseContentRead");
+			AddArg("completionOption", "HttpCompletionOption", "The HttpCompletionOption used in the request. Optional.", $"HttpCompletionOption.{DefaultHttpCompletionOption}");
 			AddArg("cancellationToken", "CancellationToken", "The token to monitor for cancellation requests.", "default");
 
 			Returns($"Task<{TaskArg}>", $"A Task whose result is {ReturnTypeDescription}.");
@@ -59,6 +60,11 @@ namespace Flurl.CodeGen
 			"Stream" => "the response body as a Stream",
 			"Bytes" => "the response body as a byte array",
 			_ => "the received IFlurlResponse"
+		};
+
+		public HttpCompletionOption DefaultHttpCompletionOption => ResponseBodyType switch {
+			"Stream" => HttpCompletionOption.ResponseHeadersRead, // #630
+			_ => HttpCompletionOption.ResponseContentRead
 		};
 	}
 }
