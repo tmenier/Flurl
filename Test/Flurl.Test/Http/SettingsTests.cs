@@ -278,20 +278,6 @@ namespace Flurl.Test.Http
 			Assert.IsInstanceOf<SomeCustomHttpClient>(cli.HttpClient);
 			Assert.IsInstanceOf<SomeCustomMessageHandler>(cli.HttpMessageHandler);
 		}
-
-		[Test]
-		public async Task connection_lease_timeout_creates_new_HttpClient() {
-			var cli = new FlurlClient("http://api.com");
-			cli.Settings.ConnectionLeaseTimeout = TimeSpan.FromMilliseconds(50);
-			var hc = cli.HttpClient;
-
-			await Task.Delay(25);
-			Assert.That(hc == cli.HttpClient);
-
-			// exceed the timeout
-			await Task.Delay(25);
-			Assert.That(hc != cli.HttpClient);
-		}
 	}
 
 	[TestFixture, Parallelizable]
