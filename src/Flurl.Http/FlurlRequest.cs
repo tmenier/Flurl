@@ -51,7 +51,7 @@ namespace Flurl.Http
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <param name="completionOption">The HttpCompletionOption used in the request. Optional.</param>
 		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
-		Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default(CancellationToken), HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead);
+		Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default);
 	}
 
 	/// <inheritdoc />
@@ -157,7 +157,7 @@ namespace Flurl.Http
 		}
 
 		/// <inheritdoc />
-		public async Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, CancellationToken cancellationToken = default, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead) {
+		public async Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
 			_client = Client; // "freeze" the client at this point to avoid excessive calls to FlurlClientFactory.Get (#374)
 			Verb = verb;
 
@@ -186,7 +186,7 @@ namespace Flurl.Http
 				call.Response = new FlurlResponse(call.HttpResponseMessage, CookieJar);
 
 				if (call.Succeeded) {
-					var redirResponse = await ProcessRedirectAsync(call, cancellationToken, completionOption).ConfigureAwait(false);
+					var redirResponse = await ProcessRedirectAsync(call, completionOption, cancellationToken).ConfigureAwait(false);
 					return redirResponse ?? call.Response;
 				}
 				else
@@ -231,7 +231,7 @@ namespace Flurl.Http
 			}
 		}
 
-		private async Task<IFlurlResponse> ProcessRedirectAsync(FlurlCall call, CancellationToken cancellationToken, HttpCompletionOption completionOption) {
+		private async Task<IFlurlResponse> ProcessRedirectAsync(FlurlCall call, HttpCompletionOption completionOption, CancellationToken cancellationToken) {
 			if (Settings.Redirects.Enabled)
 				call.Redirect = GetRedirect(call);
 
@@ -267,8 +267,8 @@ namespace Flurl.Http
 				return await redir.SendAsync(
 					changeToGet ? HttpMethod.Get : call.HttpRequestMessage.Method,
 					changeToGet ? null : call.HttpRequestMessage.Content,
-					ct,
-					completionOption).ConfigureAwait(false);
+					completionOption,
+					ct).ConfigureAwait(false);
 			}
 			finally {
 				cts?.Dispose();

@@ -20,10 +20,9 @@ namespace Flurl.Http
 		/// <param name="bufferSize">Buffer size in bytes. Default is 4096.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <returns>A Task whose result is the local path of the downloaded file.</returns>
-		public static async Task<string> DownloadFileAsync(this IFlurlRequest request, string localFolderPath, string localFileName = null, int bufferSize = 4096, CancellationToken cancellationToken = default(CancellationToken)) {
-			using (var resp = await request.SendAsync(HttpMethod.Get, cancellationToken: cancellationToken, completionOption: HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false)) {
-				localFileName =
-					localFileName ??
+		public static async Task<string> DownloadFileAsync(this IFlurlRequest request, string localFolderPath, string localFileName = null, int bufferSize = 4096, CancellationToken cancellationToken = default) {
+			using (var resp = await request.SendAsync(HttpMethod.Get, null, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false)) {
+				localFileName ??=
 					GetFileNameFromHeaders(resp.ResponseMessage) ??
 					GetFileNameFromPath(request);
 

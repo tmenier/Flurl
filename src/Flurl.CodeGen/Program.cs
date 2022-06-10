@@ -118,16 +118,14 @@ namespace Flurl.CodeGen
 						xm.HttpVerb == "Patch" ? "new HttpMethod(\"PATCH\")" : // there's no HttpMethod.Patch
 						"HttpMethod." + xm.HttpVerb);
 
-					if (xm.HasRequestBody)
-						args.Add("content: content");
-
-					args.Add("cancellationToken: cancellationToken");
-					args.Add("completionOption: completionOption");
+					args.Add(xm.HasRequestBody ? "content" : "null");
+					args.Add("completionOption");
+					args.Add("cancellationToken");
 
 					if (xm.RequestBodyType != null) {
 						writer.WriteLine("var content = new Captured@0Content(@1);",
 							xm.RequestBodyType,
-							xm.RequestBodyType == "String" ? "data" : $"request.Settings.{xm.RequestBodyType}Serializer.Serialize(data)");
+							xm.RequestBodyType == "String" ? "body" : $"request.Settings.{xm.RequestBodyType}Serializer.Serialize(body)");
 					}
 
 					var receive = (xm.ResponseBodyType != null) ? $".Receive{xm.ResponseBodyType}{genericArg}()" : "";

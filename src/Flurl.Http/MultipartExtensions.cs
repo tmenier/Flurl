@@ -18,10 +18,10 @@ namespace Flurl.Http
 		/// <param name="request">The IFlurlRequest.</param>
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
-		public static Task<IFlurlResponse> PostMultipartAsync(this IFlurlRequest request, Action<CapturedMultipartContent> buildContent, CancellationToken cancellationToken = default(CancellationToken)) {
+		public static Task<IFlurlResponse> PostMultipartAsync(this IFlurlRequest request, Action<CapturedMultipartContent> buildContent, CancellationToken cancellationToken = default) {
 			var cmc = new CapturedMultipartContent(request.Settings);
 			buildContent(cmc);
-			return request.SendAsync(HttpMethod.Post, cmc, cancellationToken);
+			return request.SendAsync(HttpMethod.Post, cmc, HttpCompletionOption.ResponseContentRead, cancellationToken);
 		}
 	}
 }

@@ -131,13 +131,13 @@ namespace Flurl.CodeGen
 				.AddArg("localFolderPath", "string", "Path of local folder where file is to be downloaded.")
 				.AddArg("localFileName", "string", "Name of local file. If not specified, the source filename (last segment of the URL) is used.", "null")
 				.AddArg("bufferSize", "int", "Buffer size in bytes. Default is 4096.", "4096")
-				.AddArg("cancellationToken", "CancellationToken", "The token to monitor for cancellation requests.", "default(CancellationToken)");
+				.AddArg("cancellationToken", "CancellationToken", "The token to monitor for cancellation requests.", "default");
 
 			yield return new ExtensionMethod("PostMultipartAsync", "Creates a FlurlRequest and sends an asynchronous multipart/form-data POST request.")
 				.Returns("Task<IFlurlResponse>", "A Task whose result is the received IFlurlResponse.")
 				.Extends(extendedArg)
 				.AddArg("buildContent", "Action<CapturedMultipartContent>", "A delegate for building the content parts.")
-				.AddArg("cancellationToken", "CancellationToken", "The token to monitor for cancellation requests.", "default(CancellationToken)");
+				.AddArg("cancellationToken", "CancellationToken", "The token to monitor for cancellation requests.", "default");
 		}
 
 		/// <summary>

@@ -158,7 +158,7 @@ namespace Flurl.Http.Configuration
 				testVals?.ContainsKey(propName) == true ? (T)testVals[propName] :
 				_vals.ContainsKey(propName) ? (T)_vals[propName] :
 				Defaults != null ? (T)Defaults.Get<T>(propName) :
-				default(T);
+				default;
 		}
 
 		/// <summary>

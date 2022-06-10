@@ -201,7 +201,7 @@ namespace Flurl.Test.Http
 		public void can_cancel_request() {
 			var cts = new CancellationTokenSource();
 			var ex = Assert.ThrowsAsync<FlurlHttpException>(async () => {
-				var task = "https://httpbin.org/delay/5".GetAsync(cts.Token);
+				var task = "https://httpbin.org/delay/5".GetAsync(cancellationToken: cts.Token);
 				cts.Cancel();
 				await task;
 			});
@@ -215,7 +215,7 @@ namespace Flurl.Test.Http
 			var ex = Assert.ThrowsAsync<FlurlHttpException>(async () => {
 				var task = "https://httpbin.org/delay/5"
 					.WithTimeout(TimeSpan.FromMilliseconds(50))
-					.GetAsync(cts.Token);
+					.GetAsync(cancellationToken: cts.Token);
 				cts.Cancel();
 				await task;
 			});
@@ -227,7 +227,7 @@ namespace Flurl.Test.Http
 			ex = Assert.ThrowsAsync<FlurlHttpTimeoutException>(async () => {
 				await "https://httpbin.org/delay/5"
 					.WithTimeout(TimeSpan.FromMilliseconds(50))
-					.GetAsync(cts.Token);
+					.GetAsync(cancellationToken: cts.Token);
 			});
 			Assert.That(ex.InnerException is OperationCanceledException);
 			Assert.IsFalse(cts.Token.IsCancellationRequested);
