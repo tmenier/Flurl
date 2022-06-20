@@ -19,7 +19,7 @@ namespace Flurl.Http
 		/// <exception cref="FlurlHttpException">Condition.</exception>
 		public static async Task<T> ReceiveJson<T>(this Task<IFlurlResponse> response) {
 			using (var resp = await response.ConfigureAwait(false)) {
-				if (resp == null) return default(T);
+				if (resp == null) return default;
 				return await resp.GetJsonAsync<T>().ConfigureAwait(false);
 			}
 		}

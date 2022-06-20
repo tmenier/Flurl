@@ -1,3 +1,6 @@
+using System;
+using System.Net.Http;
+
 namespace Flurl.CodeGen
 {
 	public class HttpExtensionMethod : ExtensionMethod
@@ -11,19 +14,21 @@ namespace Flurl.CodeGen
 			if (verb == null)
 				AddArg("verb", "HttpMethod", "The HTTP verb used to make the request.");
 
-			if (HasRequestBody)  {
+			if (HasRequestBody) {
 				if (reqBodyType == "Json")
-					AddArg("data", "object", "An object representing the request body, which will be serialized to JSON.");
+					AddArg("body", "object", "An object representing the request body, which will be serialized to JSON.");
+				else if (reqBodyType == "UrlEncoded")
+					AddArg("body", "object", "An object representing the request body, which will be serialized to a URL-encoded string.");
 				else if (reqBodyType == "String")
-					AddArg("data", "string", "Contents of the request body.");
+					AddArg("body", "string", "The request body.");
 				else if (reqBodyType == null)
-					AddArg("content", "HttpContent", "Contents of the request body.", "null");
+					AddArg("content", "HttpContent", "The request body content.", "null");
 				else
-					AddArg("data", "object", "Contents of the request body.");
+					throw new Exception("how did we get here?");
 			}
 
-			AddArg("cancellationToken", "CancellationToken", "The token to monitor for cancellation requests.", "default(CancellationToken)");
-			AddArg("completionOption", "HttpCompletionOption", "The HttpCompletionOption used in the request. Optional.", "HttpCompletionOption.ResponseContentRead");
+			AddArg("completionOption", "HttpCompletionOption", "The HttpCompletionOption used in the request. Optional.", $"HttpCompletionOption.{DefaultHttpCompletionOption}");
+			AddArg("cancellationToken", "CancellationToken", "The token to monitor for cancellation requests.", "default");
 
 			Returns($"Task<{TaskArg}>", $"A Task whose result is {ReturnTypeDescription}.");
 		}
@@ -55,6 +60,11 @@ namespace Flurl.CodeGen
 			"Stream" => "the response body as a Stream",
 			"Bytes" => "the response body as a byte array",
 			_ => "the received IFlurlResponse"
+		};
+
+		public HttpCompletionOption DefaultHttpCompletionOption => ResponseBodyType switch {
+			"Stream" => HttpCompletionOption.ResponseHeadersRead, // #630
+			_ => HttpCompletionOption.ResponseContentRead
 		};
 	}
 }

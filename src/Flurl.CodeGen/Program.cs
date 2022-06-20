@@ -118,16 +118,14 @@ namespace Flurl.CodeGen
 						xm.HttpVerb == "Patch" ? "new HttpMethod(\"PATCH\")" : // there's no HttpMethod.Patch
 						"HttpMethod." + xm.HttpVerb);
 
-					if (xm.HasRequestBody)
-						args.Add("content: content");
-
-					args.Add("cancellationToken: cancellationToken");
-					args.Add("completionOption: completionOption");
+					args.Add(xm.HasRequestBody ? "content" : "null");
+					args.Add("completionOption");
+					args.Add("cancellationToken");
 
 					if (xm.RequestBodyType != null) {
 						writer.WriteLine("var content = new Captured@0Content(@1);",
 							xm.RequestBodyType,
-							xm.RequestBodyType == "String" ? "data" : $"request.Settings.{xm.RequestBodyType}Serializer.Serialize(data)");
+							xm.RequestBodyType == "String" ? "body" : $"request.Settings.{xm.RequestBodyType}Serializer.Serialize(body)");
 					}
 
 					var receive = (xm.ResponseBodyType != null) ? $".Receive{xm.ResponseBodyType}{genericArg}()" : "";
@@ -136,7 +134,11 @@ namespace Flurl.CodeGen
 			}
 
 			foreach (var xarg in _extendedArgs.Skip(1)) { // skip 1 because these don't apply to IFlurlRequest
-				foreach (var xm in Metadata.GetHttpCallingExtensions(xarg).Concat(Metadata.GetRequestReturningExtensions(xarg))) {
+				var all = Metadata.GetHttpCallingExtensions(xarg)
+					.Concat(Metadata.GetMiscAsyncExtensions(xarg))
+					.Concat(Metadata.GetRequestReturningExtensions(xarg));
+
+				foreach (var xm in all) {
 					Console.WriteLine($"writing {xm.Name} for {xarg.Type}...");
 					xm.Write(writer, $"new FlurlRequest({xarg.Name})");
 				}

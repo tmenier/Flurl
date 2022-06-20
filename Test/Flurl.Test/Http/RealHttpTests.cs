@@ -201,7 +201,7 @@ namespace Flurl.Test.Http
 		public void can_cancel_request() {
 			var cts = new CancellationTokenSource();
 			var ex = Assert.ThrowsAsync<FlurlHttpException>(async () => {
-				var task = "https://httpbin.org/delay/5".GetAsync(cts.Token);
+				var task = "https://httpbin.org/delay/5".GetAsync(cancellationToken: cts.Token);
 				cts.Cancel();
 				await task;
 			});
@@ -215,7 +215,7 @@ namespace Flurl.Test.Http
 			var ex = Assert.ThrowsAsync<FlurlHttpException>(async () => {
 				var task = "https://httpbin.org/delay/5"
 					.WithTimeout(TimeSpan.FromMilliseconds(50))
-					.GetAsync(cts.Token);
+					.GetAsync(cancellationToken: cts.Token);
 				cts.Cancel();
 				await task;
 			});
@@ -227,38 +227,10 @@ namespace Flurl.Test.Http
 			ex = Assert.ThrowsAsync<FlurlHttpTimeoutException>(async () => {
 				await "https://httpbin.org/delay/5"
 					.WithTimeout(TimeSpan.FromMilliseconds(50))
-					.GetAsync(cts.Token);
+					.GetAsync(cancellationToken: cts.Token);
 			});
 			Assert.That(ex.InnerException is OperationCanceledException);
 			Assert.IsFalse(cts.Token.IsCancellationRequested);
-		}
-
-		[Test, Ignore("failing on AppVeyor, holding up bugfix release")]
-		public async Task connection_lease_timeout_doesnt_disrupt_calls() {
-			// testing this quickly is tricky. HttpClient will be replaced by a new instance after 1 timeout and disposed
-			// after another, so the timeout period (typically minutes in real-world scenarios) needs to be long enough
-			// that we don't dispose before the response from google is received. 1 second seems to work.
-			var cli = new FlurlClient("http://www.google.com");
-			cli.Settings.ConnectionLeaseTimeout = TimeSpan.FromMilliseconds(1000);
-
-			var httpClients = new List<HttpClient>();
-			var tasks = new List<Task>();
-
-			// ping google for about 2.5 seconds
-			for (var i = 0; i < 25; i++) {
-				if (!httpClients.Contains(cli.HttpClient))
-					httpClients.Add(cli.HttpClient);
-				tasks.Add(cli.Request().HeadAsync());
-				await Task.Delay(100);
-			}
-			await Task.WhenAll(tasks); // failed HTTP status, etc, would throw here and fail the test.
-
-			Assert.AreEqual(3, httpClients.Count);
-
-			// only the first one should be disposed, which isn't particularly simple to check
-			Assert.ThrowsAsync<ObjectDisposedException>(() => httpClients[0].GetAsync("http://www.google.com"));
-			await httpClients[1].GetAsync("http://www.google.com");
-			await httpClients[2].GetAsync("http://www.google.com");
 		}
 
 		[Test]

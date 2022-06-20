@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Net.Http;
 using Flurl.Http.Configuration;
 using Flurl.Http.Testing;
@@ -64,7 +62,7 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="baseUrl">The base URL associated with this client.</param>
 		public FlurlClient(string baseUrl = null) {
-			_httpClient = new Lazy<HttpClient>(CreateHttpClient);
+			_httpClient = new Lazy<HttpClient>(() => Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler));
 			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => Settings.HttpClientFactory.CreateMessageHandler());
 			BaseUrl = baseUrl;
 		}
@@ -86,7 +84,7 @@ namespace Flurl.Http
 
 		/// <inheritdoc />
 		public ClientFlurlHttpSettings Settings {
-			get => _settings ?? (_settings = new ClientFlurlHttpSettings());
+			get => _settings ??= new ClientFlurlHttpSettings();
 			set => _settings = value;
 		}
 
@@ -94,54 +92,13 @@ namespace Flurl.Http
 		public INameValueList<string> Headers { get; } = new NameValueList<string>(false); // header names are case-insensitive https://stackoverflow.com/a/5259004/62600
 
 		/// <inheritdoc />
-		public HttpClient HttpClient => HttpTest.Current?.HttpClient ?? _injectedClient ?? GetHttpClient();
-
-		private DateTime? _clientCreatedAt;
-		private HttpClient _zombieClient;
-		private readonly object _connectionLeaseLock = new object();
-
-		private HttpClient GetHttpClient() {
-			if (ConnectionLeaseExpired()) {
-				lock (_connectionLeaseLock) {
-					if (ConnectionLeaseExpired()) {
-						// when the connection lease expires, force a new HttpClient to be created, but don't
-						// dispose the old one just yet - it might have pending requests. Instead, it becomes
-						// a zombie and is disposed on the _next_ lease timeout, which should be safe.
-						_zombieClient?.Dispose();
-						_zombieClient = _httpClient.Value;
-						_httpClient = new Lazy<HttpClient>(CreateHttpClient);
-						_httpMessageHandler = new Lazy<HttpMessageHandler>(() => Settings.HttpClientFactory.CreateMessageHandler());
-						_clientCreatedAt = DateTime.UtcNow;
-					}
-				}
-			}
-			return _httpClient.Value;
-		}
-
-		private HttpClient CreateHttpClient() {
-			var cli = Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler);
-			_clientCreatedAt = DateTime.UtcNow;
-			return cli;
-		}
-
-		private bool ConnectionLeaseExpired() {
-			// for thread safety, capture these to temp variables
-			var createdAt = _clientCreatedAt;
-			var timeout = Settings.ConnectionLeaseTimeout;
-
-			return
-				_httpClient.IsValueCreated &&
-				createdAt.HasValue &&
-				timeout.HasValue &&
-				DateTime.UtcNow - createdAt.Value > timeout.Value;
-		}
+		public HttpClient HttpClient => HttpTest.Current?.HttpClient ?? _injectedClient ?? _httpClient.Value;
 
 		/// <inheritdoc />
 		public HttpMessageHandler HttpMessageHandler => HttpTest.Current?.HttpMessageHandler ?? _httpMessageHandler?.Value;
 
 		/// <inheritdoc />
-		public IFlurlRequest Request(params object[] urlSegments) =>
-			new FlurlRequest(BaseUrl, urlSegments).WithClient(this);
+		public IFlurlRequest Request(params object[] urlSegments) => new FlurlRequest(BaseUrl, urlSegments) { Client = this };
 
 		FlurlHttpSettings IHttpSettingsContainer.Settings {
 			get => Settings;

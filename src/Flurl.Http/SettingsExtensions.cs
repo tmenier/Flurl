@@ -34,17 +34,6 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// Fluently specify the IFlurlClient to use with this IFlurlRequest.
-		/// </summary>
-		/// <param name="request">The IFlurlRequest.</param>
-		/// <param name="client">The IFlurlClient to use when sending the request.</param>
-		/// <returns>A new IFlurlRequest to use in calling the Url</returns>
-		public static IFlurlRequest WithClient(this IFlurlRequest request, IFlurlClient client) {
-			request.Client = client;
-			return request;
-		}
-
-		/// <summary>
 		/// Sets the timeout for this IFlurlRequest or all requests made with this IFlurlClient.
 		/// </summary>
 		/// <param name="obj">The IFlurlClient or IFlurlRequest.</param>

@@ -170,7 +170,7 @@ namespace Flurl.Test.Http
 			var client2 = new FlurlClient();
 			client2.Settings.Redirects.Enabled = false;
 
-			req.WithClient(client2);
+			req.Client = client2;
 			Assert.IsFalse(req.Settings.Redirects.Enabled, "request should inherit client settings when not set at request level");
 			Assert.AreEqual("4xx", req.Settings.AllowedHttpStatusRange, "request should inherit global settings when not set at request or client level");
 			Assert.AreEqual(123, req.Settings.Redirects.MaxAutoRedirects, "request should inherit global settings when not set at request or client level");
@@ -277,20 +277,6 @@ namespace Flurl.Test.Http
 			cli.Settings.HttpClientFactory = new SomeCustomHttpClientFactory();
 			Assert.IsInstanceOf<SomeCustomHttpClient>(cli.HttpClient);
 			Assert.IsInstanceOf<SomeCustomMessageHandler>(cli.HttpMessageHandler);
-		}
-
-		[Test]
-		public async Task connection_lease_timeout_creates_new_HttpClient() {
-			var cli = new FlurlClient("http://api.com");
-			cli.Settings.ConnectionLeaseTimeout = TimeSpan.FromMilliseconds(50);
-			var hc = cli.HttpClient;
-
-			await Task.Delay(25);
-			Assert.That(hc == cli.HttpClient);
-
-			// exceed the timeout
-			await Task.Delay(25);
-			Assert.That(hc != cli.HttpClient);
 		}
 	}
 
