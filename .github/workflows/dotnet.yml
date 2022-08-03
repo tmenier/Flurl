@@ -21,6 +21,6 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build -c Release --no-restore
       - name: Test
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test --no-build -c Release /p:CollectCoverage=true /p:Threshold=80 /p:Include=\"[Flurl]*,[Flurl.Http]*\" /p:Exclude="[*]*.GeneratedExtensions"
