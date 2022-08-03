@@ -24,3 +24,8 @@ jobs:
         run: dotnet build -c Release --no-restore
       - name: Test
         run: dotnet test --no-build -c Release /p:CollectCoverage=true /p:Threshold=80 /p:Include=\"[Flurl]*,[Flurl.Http]*\" /p:Exclude="[*]*.GeneratedExtensions"
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: nuget-packages
+          path: "**/*.*nupkg"
