@@ -92,7 +92,6 @@ namespace Flurl.Test.UrlBuilder
 			var url = new Url(s);
 			var uri = url.ToUri();
 			Assert.AreEqual(s, uri.OriginalString);
-			Assert.AreEqual(isAbsolute, uri.IsAbsoluteUri);
 		}
 
 		[Test]
