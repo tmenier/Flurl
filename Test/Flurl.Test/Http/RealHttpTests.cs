@@ -40,8 +40,8 @@ namespace Flurl.Test.Http
 		}
 
 		[TestCase("https://httpbin.org/image/jpeg", null, "my-image.jpg", "my-image.jpg")]
-		// should use last path segment url-decoded (foo?bar:ding), then replace illegal path characters with _
-		[TestCase("https://httpbin.org/anything/foo%3Fbar%3Ading", null, null, "foo_bar_ding")]
+		// should use last path segment url-decoded (foo/bar), then replace illegal filename characters with _ ('/' and '\0' are only illegal chars in *nix)
+		[TestCase("https://httpbin.org/anything/foo%2Fbar", null, null, "foo_bar")]
 		// should use filename from content-disposition excluding any leading/trailing quotes
 		[TestCase("https://httpbin.org/response-headers", "attachment; filename=\"myfile.txt\"", null, "myfile.txt")]
 		// should prefer filename* over filename, per https://tools.ietf.org/html/rfc6266#section-4.3

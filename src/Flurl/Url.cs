@@ -173,7 +173,17 @@ namespace Flurl
 
 			uri = uri ?? new Uri(_originalString ?? "", UriKind.RelativeOrAbsolute);
 
-			if (uri.IsAbsoluteUri) {
+			if (uri.OriginalString.OrdinalStartsWith("//")) {
+				ParseInternal(new Uri("http:" + uri.OriginalString));
+				_scheme = "";
+			}
+			else if (uri.OriginalString.OrdinalStartsWith("/")) {
+				ParseInternal(new Uri("http://temp.com" + uri.OriginalString));
+				_scheme = "";
+				_host = "";
+				_leadingSlash = true;
+			}
+			else if (uri.IsAbsoluteUri) {
 				_scheme = uri.Scheme;
 				_userInfo = uri.UserInfo;
 				_host = uri.Host;
@@ -203,16 +213,6 @@ namespace Flurl
 				}
 			}
 			// if it's relative, System.Uri refuses to parse any of it. these hacks will force the matter
-			else if (uri.OriginalString.OrdinalStartsWith("//")) {
-				ParseInternal(new Uri("http:" + uri.OriginalString));
-				_scheme = "";
-			}
-			else if (uri.OriginalString.OrdinalStartsWith("/")) {
-				ParseInternal(new Uri("http://temp.com" + uri.OriginalString));
-				_scheme = "";
-				_host = "";
-				_leadingSlash = true;
-			}
 			else {
 				ParseInternal(new Uri("http://temp.com/" + uri.OriginalString));
 				_scheme = "";
