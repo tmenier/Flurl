@@ -1,14 +1,15 @@
-name: .NET
+name: CI
 
 on:
   push:
     branches: ["dev"]
   pull_request:
     branches: ["dev"]
+  workflow_dispatch: # manual trigger
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v3
