@@ -126,7 +126,7 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// True if URL does not start with a non-empty scheme. i.e. true for "https://www.site.com", false for "//www.site.com".
+		/// True if URL does not start with a non-empty scheme. i.e. false for "https://www.site.com", true for "//www.site.com".
 		/// </summary>
 		public bool IsRelative => string.IsNullOrEmpty(Scheme);
 
