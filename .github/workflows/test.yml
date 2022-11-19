@@ -1,0 +1,43 @@
+name: Test
+
+on: workflow_dispatch
+
+jobs:
+  show-version:
+    runs-on: ubuntu-latest
+    steps:
+    
+    - name: Get Flurl csproj version
+      id: csproj_ver_flurl
+      uses: KageKirin/get-csproj-version@v1.0.0
+      with:
+        file: src/Flurl/Flurl.csproj
+        
+    - name: Get Flurl latest release tag
+      id: release_ver_flurl
+      uses: oprypin/find-latest-tag@v1.1.1
+      with:
+        repository: tmenier/Flurl
+        releases-only: true
+        
+   - name: Get Flurl.Http csproj version
+      id: csproj_ver_flurl_http
+      uses: KageKirin/get-csproj-version@v1.0.0
+      with:
+        file: src/Flurl.Http/Flurl.Http.csproj
+        
+    - name: Get Flurl.Http latest release tag
+      id: release_ver_flurl_http
+      uses: oprypin/find-latest-tag@v1.1.1
+      with:
+        repository: tmenier/Flurl
+        releases-only: true
+        
+    - name: Echo
+      run: |
+        echo "Flurl csproj version: ${{ steps.csproj_ver_flurl.outputs.version }}"
+        echo "Flurl latest release tag: ${{ steps.release_ver_flurl.outputs.tag }}"
+        echo "Flurl.Http csproj version: ${{ steps.csproj_ver_flurl_http.outputs.version }}"
+        echo "Flurl.Http latest release tag: ${{ steps.release_ver_flurl_http.outputs.tag }}"
+
+        
