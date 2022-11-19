@@ -22,6 +22,7 @@ jobs:
       with:
         repository: tmenier/Flurl
         releases-only: true
+        regex: '^Flurl\.\d+'
         
     - name: Get Flurl.Http csproj version
       id: csproj_ver_flurl_http
@@ -35,6 +36,7 @@ jobs:
       with:
         repository: tmenier/Flurl
         releases-only: true
+        regex: '^Flurl\.Http\.\d+'
         
     - name: Echo
       run: |
