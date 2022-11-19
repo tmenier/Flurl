@@ -6,6 +6,9 @@ jobs:
   show-version:
     runs-on: ubuntu-latest
     steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
     
     - name: Get Flurl csproj version
       id: csproj_ver_flurl
