@@ -20,7 +20,7 @@ jobs:
         repository: tmenier/Flurl
         releases-only: true
         
-   - name: Get Flurl.Http csproj version
+    - name: Get Flurl.Http csproj version
       id: csproj_ver_flurl_http
       uses: KageKirin/get-csproj-version@v1.0.0
       with:
