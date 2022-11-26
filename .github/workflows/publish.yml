@@ -1,0 +1,26 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch: #manual trigger
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+          
+      - name: Download release artifacts
+        uses: robinraju/release-downloader@v1.6
+        with:
+          tag: ${{ github.event.release.tag_name }}
+          filename: "*.*nupkg"
+          token: ${{ github.token }}
+          
+      - name: Publish to NuGet
+        run: dotnet nuget push "*.nupkg" --api-key ${{secrets.nuget_api_key}} --source https://api.nuget.org/v3/index.json --skip-duplicate
