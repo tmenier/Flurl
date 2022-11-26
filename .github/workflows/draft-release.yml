@@ -81,8 +81,8 @@ jobs:
     - name: Draft Flurl.Http release
       env:
         CURRENT_TAG: ${{ steps.release_ver_flurl_http.outputs.tag }}
-        NEXT_TAG: "Flurl.${{ steps.csproj_ver_flurl_http.outputs.version }}"
-        RELEASE_NAME: "Flurl ${{ steps.csproj_ver_flurl_http.outputs.version }}"
+        NEXT_TAG: "Flurl.Http.${{ steps.csproj_ver_flurl_http.outputs.version }}"
+        RELEASE_NAME: "Flurl.Http ${{ steps.csproj_ver_flurl_http.outputs.version }}"
       if: env.NEXT_TAG != env.CURRENT_TAG
       uses: ncipollo/release-action@v1
       with:
