@@ -47,28 +47,28 @@ jobs:
         
     - name: Flurl Yes
       env:
-        CSPROJ_VER: "Flurl.${{ steps.csproj_ver_flurl.outputs.version }}"
-        RELEASE_VER: ${{ steps.release_ver_flurl.outputs.tag }}
-      if: env.CSPROJ_VER != env.RELEASE_VER
+        CURRENT_VER: ${{ steps.release_ver_flurl.outputs.tag }}
+        NEXT_VER: "Flurl.${{ steps.csproj_ver_flurl.outputs.version }}"
+      if: env.NEXT_VER != env.CURRENT_VER
       run: echo "SHOULD draft Flurl release"
 
     - name: Flurl No
       env:
-        CSPROJ_VER: "Flurl.${{ steps.csproj_ver_flurl.outputs.version }}"
-        RELEASE_VER: ${{ steps.release_ver_flurl.outputs.tag }}
-      if: env.CSPROJ_VER == env.RELEASE_VER
+        CURRENT_VER: ${{ steps.release_ver_flurl.outputs.tag }}
+        NEXT_VER: "Flurl.${{ steps.csproj_ver_flurl.outputs.version }}"
+      if: env.NEXT_VER == env.CURRENT_VER
       run: echo "SHOULD NOT draft Flurl release"
         
     - name: Flurl.Http Yes
       env:
-        CSPROJ_VER: "Flurl.Http.${{ steps.csproj_ver_flurl.outputs.version }}"
-        RELEASE_VER: ${{ steps.release_ver_flurl.outputs.tag }}
-      if: env.CSPROJ_VER != env.RELEASE_VER
+        CURRENT_VER: ${{ steps.release_ver_flurl.outputs.tag }}
+        NEXT_VER: "Flurl.Http.${{ steps.csproj_ver_flurl.outputs.version }}"
+      if: env.NEXT_VER != env.CURRENT_VER
       run: echo "SHOULD draft Flurl.Http release"
 
     - name: Flurl.Http No
       env:
-        CSPROJ_VER: "Flurl.Http.${{ steps.csproj_ver_flurl.outputs.version }}"
-        RELEASE_VER: ${{ steps.release_ver_flurl_http.outputs.tag }}
-      if: env.CSPROJ_VER == env.RELEASE_VER
+        CURRENT_VER: ${{ steps.release_ver_flurl_http.outputs.tag }}
+        NEXT_VER: "Flurl.Http.${{ steps.csproj_ver_flurl.outputs.version }}"
+      if: env.NEXT_VER == env.CURRENT_VER
       run: echo "SHOULD NOT draft Flurl.Http release"

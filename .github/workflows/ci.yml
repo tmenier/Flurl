@@ -4,29 +4,26 @@ on:
   push:
     branches: ["dev"]
   pull_request:
-    branches: ["dev"]
+    branches: ["dev", "master"]
   workflow_dispatch: # manual trigger
 
 jobs:
-  build:
+  build_test:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: 6.0.x
-      - name: Print .NET info
-        run: dotnet --info
-      - name: Restore dependencies
-        run: dotnet restore
-      - name: Build
-        run: dotnet build -c Release --no-restore
-      - name: Test
-        run: dotnet test --no-build -c Release /p:CollectCoverage=true /p:Threshold=80 /p:Include=\"[Flurl]*,[Flurl.Http]*\" /p:Exclude="[*]*.GeneratedExtensions"
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: nuget-packages
-          path: "**/*.*nupkg"
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build -c Release --no-restore
+
+    - name: Test
+      run: dotnet test --no-build -c Release /p:CollectCoverage=true /p:Threshold=80 /p:Include=\"[Flurl]*,[Flurl.Http]*\" /p:Exclude="[*]*.GeneratedExtensions"
