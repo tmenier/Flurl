@@ -16,7 +16,7 @@ namespace Flurl.Http.Configuration
 		/// </summary>
 		/// <param name="options">Options to control (de)serialization behavior.</param>
 		public DefaultJsonSerializer(JsonSerializerOptions options = null) {
-			_options = options ?? new JsonSerializerOptions();
+			_options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 		}
 
 		/// <summary>
