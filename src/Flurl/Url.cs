@@ -1,4 +1,4 @@
-﻿using Flurl.Util;
+using Flurl.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +23,8 @@ namespace Flurl
 		private int? _port;
 		private bool _leadingSlash;
 		private bool _trailingSlash;
+		private bool _trailingQmark;
+		private bool _trailingHash;
 
 		#region public properties
 		/// <summary>
@@ -158,17 +160,11 @@ namespace Flurl
 		/// <summary>
 		/// Parses a URL string into a Flurl.Url object.
 		/// </summary>
-		public static Url Parse(string url) {
-			return new Url(url);
-		}
+		public static Url Parse(string url) => new Url(url).ParseInternal();
 
-		private Url EnsureParsed() {
-			if (!_parsed)
-				ParseInternal();
-			return this;
-		}
+		private Url EnsureParsed() => _parsed ? this : ParseInternal();
 
-		private void ParseInternal(Uri uri = null) {
+		private Url ParseInternal(Uri uri = null) {
 			_parsed = true;
 
 			uri = uri ?? new Uri(_originalString ?? "", UriKind.RelativeOrAbsolute);
@@ -196,6 +192,8 @@ namespace Flurl
 
 				_leadingSlash = uri.OriginalString.OrdinalStartsWith(Root + "/", ignoreCase: true);
 				_trailingSlash = _pathSegments.Any() && uri.AbsolutePath.OrdinalEndsWith("/");
+				_trailingQmark = uri.Query == "?";
+				_trailingHash = uri.Fragment == "#";
 
 				// more quirk fixes
 				var hasAuthority = uri.OriginalString.OrdinalStartsWith($"{Scheme}://", ignoreCase: true);
@@ -219,6 +217,8 @@ namespace Flurl
 				_host = "";
 				_leadingSlash = false;
 			}
+
+			return this;
 		}
 
 		/// <summary>
@@ -508,9 +508,9 @@ namespace Flurl
 			return string.Concat(
 				Root,
 				encodeSpaceAsPlus ? Path.Replace("%20", "+") : Path,
-				QueryParams.Any() ? "?" : "",
+				_trailingQmark || QueryParams.Any() ? "?" : "",
 				QueryParams.ToString(encodeSpaceAsPlus),
-				Fragment?.Length > 0 ? "#" : "",
+				_trailingHash || Fragment?.Length > 0 ? "#" : "",
 				Fragment).Trim();
 		}
 

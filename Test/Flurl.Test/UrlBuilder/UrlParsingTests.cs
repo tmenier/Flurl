@@ -50,8 +50,18 @@ namespace Flurl.Test.UrlBuilder
 		[TestCase("http://www.no-trailing-slash.com", "")]
 		[TestCase("http://www.no-trailing-slash.com/a/b", "/a/b")]
 		[TestCase("http://www.no-trailing-slash.com/a/b?x=y", "/a/b")]
-		public void path_retains_trailing_slash(string url, string path) {
-			Assert.AreEqual(path, new Url(url).Path);
+		public void path_retains_trailing_slash(string original, string path) {
+			var url = Url.Parse(original);
+			Assert.AreEqual(original, url.ToString());
+			Assert.AreEqual(path, url.Path);
+		}
+
+		[TestCase("https://foo.com/x?")]
+		[TestCase("https://foo.com/x#")]
+		[TestCase("https://foo.com/x?#")]
+		public void retains_trailing_chars(string original) {
+			var url = Url.Parse(original);
+			Assert.AreEqual(original, url.ToString());
 		}
 
 		[Test]

@@ -536,5 +536,14 @@ namespace Flurl.Test.Http
 				}
 			}
 		}
+
+		// #721
+		[TestCase("https://api.com/foo?", "https://api.com/foo?")]
+		[TestCase("https://api.com/foo?", "https://api.com/foo")]
+		public async Task can_assert_url_ending_with_question_mark(string actual, string expected) {
+			using var httpTest = new HttpTest();
+			await actual.GetAsync();
+			httpTest.ShouldHaveCalled(expected);
+		}
 	}
 }
