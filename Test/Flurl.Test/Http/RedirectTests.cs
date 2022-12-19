@@ -122,17 +122,6 @@ namespace Flurl.Test.Http
 				.WithRequestBody(changeToGet ? "" : "foo!");
 		}
 
-		[Test]
-		public void can_detect_circular_redirects() {
-			HttpTest
-				.RespondWith("", 301, new { Location = "/redir1" })
-				.RespondWith("", 301, new { Location = "/redir2" })
-				.RespondWith("", 301, new { Location = "/redir1" });
-
-			var ex = Assert.ThrowsAsync<FlurlHttpException>(() => "http://start.com".GetAsync());
-			StringAssert.Contains("Circular redirect", ex.Message);
-		}
-
 		[TestCase(null)] // test the default (10)
 		[TestCase(5)]
 		public async Task can_limit_redirects(int? max) {
@@ -149,6 +138,18 @@ namespace Flurl.Test.Http
 			HttpTest.ShouldHaveCalled("http://start.com/redir*").Times(count);
 			HttpTest.ShouldHaveCalled("http://start.com/redir" + count);
 			HttpTest.ShouldNotHaveCalled("http://start.com/redir" + (count + 1));
+		}
+
+		[Test]
+		public async Task can_limit_circular_redirects() {
+			// similar to above test but for the (maybe more common?) case of circular redirects
+			HttpTest.ForCallsTo("*/1").RespondWith("", 301, new { Location = "/2" });
+			HttpTest.ForCallsTo("*/2").RespondWith("", 301, new { Location = "/1" });
+
+			var resp = await "http://start.com/1".GetAsync();
+			// default max auto-redirects is 10, so should have redirected to 5 each, plus the original hit to /1
+			HttpTest.ShouldHaveCalled("http://start.com/1").Times(6);
+			HttpTest.ShouldHaveCalled("http://start.com/2").Times(5);
 		}
 
 		[Test]
