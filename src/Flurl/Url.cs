@@ -1,4 +1,4 @@
-﻿using Flurl.Util;
+using Flurl.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +23,8 @@ namespace Flurl
 		private int? _port;
 		private bool _leadingSlash;
 		private bool _trailingSlash;
+		private bool _trailingQmark;
+		private bool _trailingHash;
 
 		#region public properties
 		/// <summary>
@@ -126,7 +128,7 @@ namespace Flurl
 		}
 
 		/// <summary>
-		/// True if URL does not start with a non-empty scheme. i.e. true for "https://www.site.com", false for "//www.site.com".
+		/// True if URL does not start with a non-empty scheme. i.e. false for "https://www.site.com", true for "//www.site.com".
 		/// </summary>
 		public bool IsRelative => string.IsNullOrEmpty(Scheme);
 
@@ -158,22 +160,26 @@ namespace Flurl
 		/// <summary>
 		/// Parses a URL string into a Flurl.Url object.
 		/// </summary>
-		public static Url Parse(string url) {
-			return new Url(url);
-		}
+		public static Url Parse(string url) => new Url(url).ParseInternal();
 
-		private Url EnsureParsed() {
-			if (!_parsed)
-				ParseInternal();
-			return this;
-		}
+		private Url EnsureParsed() => _parsed ? this : ParseInternal();
 
-		private void ParseInternal(Uri uri = null) {
+		private Url ParseInternal(Uri uri = null) {
 			_parsed = true;
 
 			uri = uri ?? new Uri(_originalString ?? "", UriKind.RelativeOrAbsolute);
 
-			if (uri.IsAbsoluteUri) {
+			if (uri.OriginalString.OrdinalStartsWith("//")) {
+				ParseInternal(new Uri("http:" + uri.OriginalString));
+				_scheme = "";
+			}
+			else if (uri.OriginalString.OrdinalStartsWith("/")) {
+				ParseInternal(new Uri("http://temp.com" + uri.OriginalString));
+				_scheme = "";
+				_host = "";
+				_leadingSlash = true;
+			}
+			else if (uri.IsAbsoluteUri) {
 				_scheme = uri.Scheme;
 				_userInfo = uri.UserInfo;
 				_host = uri.Host;
@@ -186,6 +192,8 @@ namespace Flurl
 
 				_leadingSlash = uri.OriginalString.OrdinalStartsWith(Root + "/", ignoreCase: true);
 				_trailingSlash = _pathSegments.Any() && uri.AbsolutePath.OrdinalEndsWith("/");
+				_trailingQmark = uri.Query == "?";
+				_trailingHash = uri.Fragment == "#";
 
 				// more quirk fixes
 				var hasAuthority = uri.OriginalString.OrdinalStartsWith($"{Scheme}://", ignoreCase: true);
@@ -203,22 +211,14 @@ namespace Flurl
 				}
 			}
 			// if it's relative, System.Uri refuses to parse any of it. these hacks will force the matter
-			else if (uri.OriginalString.OrdinalStartsWith("//")) {
-				ParseInternal(new Uri("http:" + uri.OriginalString));
-				_scheme = "";
-			}
-			else if (uri.OriginalString.OrdinalStartsWith("/")) {
-				ParseInternal(new Uri("http://temp.com" + uri.OriginalString));
-				_scheme = "";
-				_host = "";
-				_leadingSlash = true;
-			}
 			else {
 				ParseInternal(new Uri("http://temp.com/" + uri.OriginalString));
 				_scheme = "";
 				_host = "";
 				_leadingSlash = false;
 			}
+
+			return this;
 		}
 
 		/// <summary>
@@ -508,9 +508,9 @@ namespace Flurl
 			return string.Concat(
 				Root,
 				encodeSpaceAsPlus ? Path.Replace("%20", "+") : Path,
-				QueryParams.Any() ? "?" : "",
+				_trailingQmark || QueryParams.Any() ? "?" : "",
 				QueryParams.ToString(encodeSpaceAsPlus),
-				Fragment?.Length > 0 ? "#" : "",
+				_trailingHash || Fragment?.Length > 0 ? "#" : "",
 				Fragment).Trim();
 		}
 

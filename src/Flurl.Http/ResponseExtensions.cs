@@ -18,10 +18,9 @@ namespace Flurl.Http
 		/// <example>x = await url.PostAsync(data).ReceiveJson&lt;T&gt;()</example>
 		/// <exception cref="FlurlHttpException">Condition.</exception>
 		public static async Task<T> ReceiveJson<T>(this Task<IFlurlResponse> response) {
-			using (var resp = await response.ConfigureAwait(false)) {
-				if (resp == null) return default;
-				return await resp.GetJsonAsync<T>().ConfigureAwait(false);
-			}
+			using var resp = await response.ConfigureAwait(false);
+			if (resp == null) return default;
+			return await resp.GetJsonAsync<T>().ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -30,10 +29,9 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is the response body as a string.</returns>
 		/// <example>s = await url.PostAsync(data).ReceiveString()</example>
 		public static async Task<string> ReceiveString(this Task<IFlurlResponse> response) {
-			using (var resp = await response.ConfigureAwait(false)) {
-				if (resp == null) return null;
-				return await resp.GetStringAsync().ConfigureAwait(false);
-			}
+			using var resp = await response.ConfigureAwait(false);
+			if (resp == null) return null;
+			return await resp.GetStringAsync().ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -61,10 +59,9 @@ namespace Flurl.Http
 		/// <returns>A Task whose result is the response body as a byte array.</returns>
 		/// <example>bytes = await url.PostAsync(data).ReceiveBytes()</example>
 		public static async Task<byte[]> ReceiveBytes(this Task<IFlurlResponse> response) {
-			using (var resp = await response.ConfigureAwait(false)) {
-				if (resp == null) return null;
-				return await resp.GetBytesAsync().ConfigureAwait(false);
-			}
+			using var resp = await response.ConfigureAwait(false);
+			if (resp == null) return null;
+			return await resp.GetBytesAsync().ConfigureAwait(false);
 		}
 	}
 }

@@ -243,8 +243,6 @@ namespace Flurl.Http
 			if (call.Redirect.Follow != true)
 				return null;
 
-			CheckForCircularRedirects(call);
-
 			var redir = new FlurlRequest(call.Redirect.Url) {
 				Client = Client,
 				_redirectedFrom = call,
@@ -330,15 +328,6 @@ namespace Flurl.Http
 				ChangeVerbToGetOn(call.Response.StatusCode, call.Request.Verb);
 
 			return redir;
-		}
-
-		private void CheckForCircularRedirects(FlurlCall call, HashSet<string> visited = null) {
-			if (call == null) return;
-			visited = visited ?? new HashSet<string>();
-			if (visited.Contains(call.Request.Url))
-				throw new FlurlHttpException(call, "Circular redirects detected.", null);
-			visited.Add(call.Request.Url);
-			CheckForCircularRedirects(call.RedirectedFrom, visited);
 		}
 
 		internal static async Task<IFlurlResponse> HandleExceptionAsync(FlurlCall call, Exception ex, CancellationToken token) {
