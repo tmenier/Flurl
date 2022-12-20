@@ -191,7 +191,7 @@ namespace Flurl.Http
 			if (ct?.CharSet != null)
 				ct.CharSet = ct.CharSet.StripQuotes();
 
-			_capturedBody = await ResponseMessage.Content.ReadAsStringAsync();
+			_capturedBody = await ResponseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
 			_streamRead = true;
 			return (string)_capturedBody;
 		}
