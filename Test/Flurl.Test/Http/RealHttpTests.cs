@@ -264,19 +264,47 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_allow_real_http_in_test() {
-			using (var test = new HttpTest()) {
-				test.RespondWith("foo");
-				test.ForCallsTo("*httpbin*").AllowRealHttp();
+			using var test = new HttpTest();
+			test.RespondWith("foo");
+			test.ForCallsTo("*httpbin*").AllowRealHttp();
 
-				Assert.AreEqual("foo", await "https://www.google.com".GetStringAsync());
-				Assert.AreNotEqual("foo", await "https://httpbin.org/get".GetStringAsync());
-				Assert.AreEqual("bar", (await "https://httpbin.org/get?x=bar".GetJsonAsync<HttpBinResponse>()).args["x"]);
-				Assert.AreEqual("foo", await "https://www.microsoft.com".GetStringAsync());
+			Assert.AreEqual("foo", await "https://www.google.com".GetStringAsync());
+			Assert.AreNotEqual("foo", await "https://httpbin.org/get".GetStringAsync());
+			Assert.AreEqual("bar", (await "https://httpbin.org/get?x=bar".GetJsonAsync<HttpBinResponse>()).args["x"]);
+			Assert.AreEqual("foo", await "https://www.microsoft.com".GetStringAsync());
 
-				// real calls still get logged
-				Assert.AreEqual(4, test.CallLog.Count);
-				test.ShouldHaveCalled("https://httpbin*").Times(2);
+			// real calls still get logged
+			Assert.AreEqual(4, test.CallLog.Count);
+			test.ShouldHaveCalled("https://httpbin*").Times(2);
+		}
+
+		class RecordingHandler : DelegatingHandler
+		{
+			public int Hits { get; private set; }
+
+			protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
+				Hits++;
+				return base.SendAsync(request, cancellationToken);
 			}
+		}
+
+		[Test] // #683
+		public async Task configured_client_used_when_real_http_allowed() {
+			var rh = new RecordingHandler();
+			var hc = new HttpClient();
+			var fc = new FlurlClient(hc);
+
+			using var test = new HttpTest();
+			test.RespondWith("fake");
+			test.ForCallsTo("*httpbin*").AllowRealHttp();
+
+			Assert.AreNotEqual("fake", fc.Request("https://httpbin.org/get").GetStringAsync());
+
+			// the call got logged
+			test.ShouldHaveCalled("https://httpbin*");
+
+			// but the inner handler got hit
+			Assert.AreEqual(1, rh.Hits);
 		}
 
 		[Test]
