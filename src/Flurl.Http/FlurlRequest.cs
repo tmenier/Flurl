@@ -32,6 +32,11 @@ namespace Flurl.Http
 		Url Url { get; set; }
 
 		/// <summary>
+		/// The body content of this request.
+		/// </summary>
+		HttpContent Content { get; set; }
+
+		/// <summary>
 		/// Gets Name/Value pairs parsed from the Cookie request header.
 		/// </summary>
 		IEnumerable<(string Name, string Value)> Cookies { get; }
@@ -42,6 +47,11 @@ namespace Flurl.Http
 		/// request header, and any Set-Cookie headers received in the response will be written to the CookieJar.
 		/// </summary>
 		CookieJar CookieJar { get; set; }
+
+		/// <summary>
+		/// The FlurlCall that received a 3xx response and automatically triggered this request.
+		/// </summary>
+		FlurlCall RedirectedFrom { get; set; }
 
 		/// <summary>
 		/// Asynchronously sends the HTTP request. Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
@@ -60,7 +70,6 @@ namespace Flurl.Http
 		private FlurlHttpSettings _settings;
 		private IFlurlClient _client;
 		private Url _url;
-		private FlurlCall _redirectedFrom;
 		private CookieJar _jar;
 
 		/// <summary>
@@ -128,10 +137,11 @@ namespace Flurl.Http
 			}
 		}
 
-		private void ResetDefaultSettings() {
-			if (_settings != null)
-				_settings.Defaults = Client?.Settings;
-		}
+		/// <inheritdoc />
+		public HttpContent Content { get; set; }
+
+		/// <inheritdoc />
+		public FlurlCall RedirectedFrom { get; set; }
 
 		/// <inheritdoc />
 		public INameValueList<string> Headers { get; } = new NameValueList<string>(false); // header names are case-insensitive https://stackoverflow.com/a/5259004/62600
@@ -157,200 +167,16 @@ namespace Flurl.Http
 		}
 
 		/// <inheritdoc />
-		public async Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+		public Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
 			_client = Client; // "freeze" the client at this point to avoid excessive calls to FlurlClientFactory.Get (#374)
 			Verb = verb;
-
-			var request = new HttpRequestMessage(verb, Url) { Content = content };
-			SyncHeaders(request);
-			var call = new FlurlCall {
-				Request = this,
-				RedirectedFrom = _redirectedFrom,
-				HttpRequestMessage = request
-			};
-			request.SetFlurlCall(call);
-
-			await RaiseEventAsync(Settings.BeforeCall, Settings.BeforeCallAsync, call).ConfigureAwait(false);
-
-			// in case URL or headers were modified in the handler above
-			request.RequestUri = Url.ToUri();
-			SyncHeaders(request);
-
-			call.StartedUtc = DateTime.UtcNow;
-			var ct = GetCancellationTokenWithTimeout(cancellationToken, out var cts);
-
-			try {
-				var response = await Client.HttpClient.SendAsync(request, completionOption, ct).ConfigureAwait(false);
-				call.HttpResponseMessage = response;
-				call.HttpResponseMessage.RequestMessage = request;
-				call.Response = new FlurlResponse(call.HttpResponseMessage, CookieJar);
-
-				if (call.Succeeded) {
-					var redirResponse = await ProcessRedirectAsync(call, completionOption, cancellationToken).ConfigureAwait(false);
-					return redirResponse ?? call.Response;
-				}
-				else
-					throw new FlurlHttpException(call, null);
-			}
-			catch (Exception ex) {
-				return await HandleExceptionAsync(call, ex, cancellationToken).ConfigureAwait(false);
-			}
-			finally {
-				request.Dispose();
-				cts?.Dispose();
-				call.EndedUtc = DateTime.UtcNow;
-				await RaiseEventAsync(Settings.AfterCall, Settings.AfterCallAsync, call).ConfigureAwait(false);
-			}
+			Content = content;
+			return _client.SendAsync(this, completionOption, cancellationToken);
 		}
 
-		private void SyncHeaders(HttpRequestMessage request) {
-			// copy any client-level (default) headers to this request
-			foreach (var header in Client.Headers.Where(h => !this.Headers.Contains(h.Name)).ToList())
-				this.Headers.Add(header.Name, header.Value);
-
-			// copy headers from FlurlRequest to HttpRequestMessage
-			foreach (var header in Headers)
-				request.SetHeader(header.Name, header.Value.Trim(), false);
-
-			// copy headers from HttpContent to FlurlRequest
-			if (request.Content != null) {
-				foreach (var header in request.Content.Headers)
-					Headers.AddOrReplace(header.Key, string.Join(",", header.Value));
-			}
-		}
-
-		private CancellationToken GetCancellationTokenWithTimeout(CancellationToken original, out CancellationTokenSource timeoutTokenSource) {
-			timeoutTokenSource = null;
-			if (Settings.Timeout.HasValue) {
-				timeoutTokenSource = CancellationTokenSource.CreateLinkedTokenSource(original);
-				timeoutTokenSource.CancelAfter(Settings.Timeout.Value);
-				return timeoutTokenSource.Token;
-			}
-			else {
-				return original;
-			}
-		}
-
-		private async Task<IFlurlResponse> ProcessRedirectAsync(FlurlCall call, HttpCompletionOption completionOption, CancellationToken cancellationToken) {
-			if (Settings.Redirects.Enabled)
-				call.Redirect = GetRedirect(call);
-
-			if (call.Redirect == null)
-				return null;
-
-			await RaiseEventAsync(Settings.OnRedirect, Settings.OnRedirectAsync, call).ConfigureAwait(false);
-
-			if (call.Redirect.Follow != true)
-				return null;
-
-			var redir = new FlurlRequest(call.Redirect.Url) {
-				Client = Client,
-				_redirectedFrom = call,
-				Settings = { Defaults = Settings }
-			};
-
-			if (CookieJar != null)
-				redir.CookieJar = CookieJar;
-
-			var changeToGet = call.Redirect.ChangeVerbToGet;
-
-			redir.WithHeaders(Headers.Where(h =>
-				h.Name.OrdinalEquals("Cookie", true) ? false : // never blindly forward Cookie header; CookieJar should be used to ensure rules are enforced
-				h.Name.OrdinalEquals("Authorization", true) ? Settings.Redirects.ForwardAuthorizationHeader :
-				h.Name.OrdinalEquals("Transfer-Encoding", true) ? Settings.Redirects.ForwardHeaders && !changeToGet :
-				Settings.Redirects.ForwardHeaders));
-
-			var ct = GetCancellationTokenWithTimeout(cancellationToken, out var cts);
-			try {
-				return await redir.SendAsync(
-					changeToGet ? HttpMethod.Get : call.HttpRequestMessage.Method,
-					changeToGet ? null : call.HttpRequestMessage.Content,
-					completionOption,
-					ct).ConfigureAwait(false);
-			}
-			finally {
-				cts?.Dispose();
-			}
-		}
-
-		// partially lifted from https://github.com/dotnet/runtime/blob/master/src/libraries/System.Net.Http/src/System/Net/Http/SocketsHttpHandler/RedirectHandler.cs
-		private FlurlRedirect GetRedirect(FlurlCall call) {
-			if (call.Response.StatusCode < 300 || call.Response.StatusCode > 399)
-				return null;
-
-			if (!call.Response.Headers.TryGetFirst("Location", out var location))
-				return null;
-
-			var redir = new FlurlRedirect();
-
-			if (Url.IsValid(location))
-				redir.Url = new Url(location);
-			else if (location.OrdinalStartsWith("//"))
-				redir.Url = new Url(this.Url.Scheme + ":" + location);
-			else if (location.OrdinalStartsWith("/"))
-				redir.Url = Url.Combine(this.Url.Root, location);
-			else
-				redir.Url = Url.Combine(this.Url.Root, this.Url.Path, location);
-
-			// Per https://tools.ietf.org/html/rfc7231#section-7.1.2, a redirect location without a
-			// fragment should inherit the fragment from the original URI.
-			if (string.IsNullOrEmpty(redir.Url.Fragment))
-				redir.Url.Fragment = this.Url.Fragment;
-
-			redir.Count = 1 + (call.RedirectedFrom?.Redirect?.Count ?? 0);
-
-			var isSecureToInsecure = (this.Url.IsSecureScheme && !redir.Url.IsSecureScheme);
-
-			redir.Follow =
-				new[] { 301, 302, 303, 307, 308 }.Contains(call.Response.StatusCode) &&
-				redir.Count <= Settings.Redirects.MaxAutoRedirects &&
-				(Settings.Redirects.AllowSecureToInsecure || !isSecureToInsecure);
-
-			bool ChangeVerbToGetOn(int statusCode, HttpMethod verb) {
-				switch (statusCode) {
-					// 301 and 302 are a bit ambiguous. The spec says to preserve the verb
-					// but most browsers rewrite it to GET. HttpClient stack changes it if
-					// only it's a POST, presumably since that's a browser-friendly verb.
-					// Seems odd, but sticking with that is probably the safest bet.
-					// https://github.com/dotnet/runtime/blob/master/src/libraries/System.Net.Http/src/System/Net/Http/SocketsHttpHandler/RedirectHandler.cs#L140
-					case 301:
-					case 302:
-						return verb == HttpMethod.Post;
-					case 303:
-						return true;
-					default: // 307 & 308 mainly
-						return false;
-				}
-			}
-
-			redir.ChangeVerbToGet =
-				redir.Follow &&
-				ChangeVerbToGetOn(call.Response.StatusCode, call.Request.Verb);
-
-			return redir;
-		}
-
-		internal static async Task<IFlurlResponse> HandleExceptionAsync(FlurlCall call, Exception ex, CancellationToken token) {
-			call.Exception = ex;
-			await RaiseEventAsync(call.Request.Settings.OnError, call.Request.Settings.OnErrorAsync, call).ConfigureAwait(false);
-
-			if (call.ExceptionHandled)
-				return call.Response;
-
-			if (ex is OperationCanceledException && !token.IsCancellationRequested)
-				throw new FlurlHttpTimeoutException(call, ex);
-
-			if (ex is FlurlHttpException)
-				throw ex;
-
-			throw new FlurlHttpException(call, ex);
-		}
-
-		private static Task RaiseEventAsync(Action<FlurlCall> syncHandler, Func<FlurlCall, Task> asyncHandler, FlurlCall call) {
-			syncHandler?.Invoke(call);
-			if (asyncHandler != null)
-				return asyncHandler(call);
-			return Task.FromResult(0);
+		private void ResetDefaultSettings() {
+			if (_settings != null)
+				_settings.Defaults = Client?.Settings;
 		}
 	}
 }

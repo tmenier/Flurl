@@ -156,8 +156,7 @@ namespace Flurl.Http
 				_serializer = null;
 				_capturedBody = await ResponseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
 				_streamRead = true;
-				call.Exception = new FlurlParsingException(call, "JSON", ex);
-				await FlurlRequest.HandleExceptionAsync(call, call.Exception, CancellationToken.None).ConfigureAwait(false);
+				await FlurlClient.HandleExceptionAsync(call, new FlurlParsingException(call, "JSON", ex), CancellationToken.None).ConfigureAwait(false);
 				return default;
 			}
 			finally {
