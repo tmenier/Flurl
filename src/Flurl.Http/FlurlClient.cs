@@ -104,10 +104,10 @@ namespace Flurl.Http
 		public INameValueList<string> Headers { get; } = new NameValueList<string>(false); // header names are case-insensitive https://stackoverflow.com/a/5259004/62600
 
 		/// <inheritdoc />
-		public HttpClient HttpClient => HttpTest.Current?.HttpClient ?? _injectedClient ?? _httpClient.Value;
+		public HttpClient HttpClient => _injectedClient ?? _httpClient.Value;
 
 		/// <inheritdoc />
-		public HttpMessageHandler HttpMessageHandler => HttpTest.Current?.HttpMessageHandler ?? _httpMessageHandler?.Value;
+		public HttpMessageHandler HttpMessageHandler => _httpMessageHandler?.Value;
 
 		/// <inheritdoc />
 		public IFlurlRequest Request(params object[] urlSegments) => new FlurlRequest(BaseUrl, urlSegments) { Client = this };
@@ -127,7 +127,6 @@ namespace Flurl.Http
 				Request = request,
 				HttpRequestMessage = reqMsg
 			};
-			reqMsg.SetFlurlCall(call);
 
 			await RaiseEventAsync(settings.BeforeCall, settings.BeforeCallAsync, call).ConfigureAwait(false);
 
@@ -138,11 +137,15 @@ namespace Flurl.Http
 			call.StartedUtc = DateTime.UtcNow;
 			var ct = GetCancellationTokenWithTimeout(cancellationToken, settings.Timeout, out var cts);
 
+			HttpTest.Current?.LogCall(call);
+
 			try {
-				var response = await HttpClient.SendAsync(reqMsg, completionOption, ct).ConfigureAwait(false);
-				call.HttpResponseMessage = response;
+				call.HttpResponseMessage =
+					HttpTest.Current?.FindSetup(call)?.GetNextResponse() ??
+					await HttpClient.SendAsync(reqMsg, completionOption, ct).ConfigureAwait(false);
+
 				call.HttpResponseMessage.RequestMessage = reqMsg;
-				call.Response = new FlurlResponse(call.HttpResponseMessage, request.CookieJar);
+				call.Response = new FlurlResponse(call, request.CookieJar);
 
 				if (call.Succeeded) {
 					var redirResponse = await ProcessRedirectAsync(call, completionOption, cancellationToken).ConfigureAwait(false);

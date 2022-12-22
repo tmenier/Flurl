@@ -69,6 +69,7 @@ namespace Flurl.Http
 	/// <inheritdoc />
 	public class FlurlResponse : IFlurlResponse
 	{
+		private readonly FlurlCall _call;
 		private readonly Lazy<IReadOnlyNameValueList<string>> _headers;
 		private readonly Lazy<IReadOnlyList<FlurlCookie>> _cookies;
 		private object _capturedBody = null;
@@ -82,7 +83,7 @@ namespace Flurl.Http
 		public IReadOnlyList<FlurlCookie> Cookies => _cookies.Value;
 
 		/// <inheritdoc />
-		public HttpResponseMessage ResponseMessage { get; }
+		public HttpResponseMessage ResponseMessage => _call.HttpResponseMessage;
 
 		/// <inheritdoc />
 		public int StatusCode => (int)ResponseMessage.StatusCode;
@@ -90,8 +91,8 @@ namespace Flurl.Http
 		/// <summary>
 		/// Creates a new FlurlResponse that wraps the give HttpResponseMessage.
 		/// </summary>
-		public FlurlResponse(HttpResponseMessage resp, CookieJar cookieJar = null) {
-			ResponseMessage = resp;
+		public FlurlResponse(FlurlCall call, CookieJar cookieJar = null) {
+			_call = call;
 			_headers = new Lazy<IReadOnlyNameValueList<string>>(LoadHeaders);
 			_cookies = new Lazy<IReadOnlyList<FlurlCookie>>(LoadCookies);
 			LoadCookieJar(cookieJar);
@@ -134,8 +135,7 @@ namespace Flurl.Http
 				if (_capturedBody is T body) return body;
 			}
 
-			var call = ResponseMessage.RequestMessage.GetFlurlCall();
-			_serializer ??= call.Request.Settings.JsonSerializer;
+			_serializer ??= _call.Request.Settings.JsonSerializer;
 
 			try {
 				if (_streamRead) {
@@ -156,7 +156,7 @@ namespace Flurl.Http
 				_serializer = null;
 				_capturedBody = await ResponseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
 				_streamRead = true;
-				await FlurlClient.HandleExceptionAsync(call, new FlurlParsingException(call, "JSON", ex), CancellationToken.None).ConfigureAwait(false);
+				await FlurlClient.HandleExceptionAsync(_call, new FlurlParsingException(_call, "JSON", ex), CancellationToken.None).ConfigureAwait(false);
 				return default;
 			}
 			finally {

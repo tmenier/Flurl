@@ -280,6 +280,8 @@ namespace Flurl.Test.Http
 
 		class RecordingHandler : DelegatingHandler
 		{
+			public RecordingHandler() : base(new HttpClientHandler()) { }
+
 			public int Hits { get; private set; }
 
 			protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
@@ -291,14 +293,15 @@ namespace Flurl.Test.Http
 		[Test] // #683
 		public async Task configured_client_used_when_real_http_allowed() {
 			var rh = new RecordingHandler();
-			var hc = new HttpClient();
+			var hc = new HttpClient(rh);
 			var fc = new FlurlClient(hc);
 
 			using var test = new HttpTest();
 			test.RespondWith("fake");
 			test.ForCallsTo("*httpbin*").AllowRealHttp();
 
-			Assert.AreNotEqual("fake", fc.Request("https://httpbin.org/get").GetStringAsync());
+			var resp = await fc.Request("https://httpbin.org/get").GetStringAsync();
+			Assert.AreNotEqual("fake", resp);
 
 			// the call got logged
 			test.ShouldHaveCalled("https://httpbin*");

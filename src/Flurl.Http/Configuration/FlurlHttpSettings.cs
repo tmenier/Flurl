@@ -228,18 +228,4 @@ namespace Flurl.Http.Configuration
 			Redirects.MaxAutoRedirects = 10;
 		}
 	}
-
-	/// <summary>
-	/// Settings overrides within the context of an HttpTest
-	/// </summary>
-	public class TestFlurlHttpSettings : ClientFlurlHttpSettings
-	{
-		/// <summary>
-		/// Resets all test settings to their Flurl.Http-defined default values.
-		/// </summary>
-		public override void ResetDefaults() {
-			base.ResetDefaults();
-			HttpClientFactory = new TestHttpClientFactory();
-		}
-	}
 }
