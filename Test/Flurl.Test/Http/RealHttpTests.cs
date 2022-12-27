@@ -7,7 +7,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
-using Flurl.Http.Configuration;
 using Flurl.Http.Testing;
 using NUnit.Framework;
 
@@ -19,15 +18,6 @@ namespace Flurl.Test.Http
 	[TestFixture, Parallelizable]
 	public class RealHttpTests
 	{
-		public class HttpBinResponse
-		{
-			public Dictionary<string, JsonElement> json { get; set; }
-			public Dictionary<string, string> args { get; set; }
-			public Dictionary<string, string> form { get; set; }
-			public Dictionary<string, string> cookies { get; set; }
-			public Dictionary<string, string> files { get; set; }
-		}
-
 		[TestCase("gzip", "gzipped")]
 		[TestCase("deflate", "deflated"), Ignore("#474")]
 		public async Task decompresses_automatically(string encoding, string jsonKey) {
@@ -235,30 +225,29 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task test_settings_override_client_settings() {
-			var cli1 = new FlurlClient();
-			cli1.Settings.HttpClientFactory = new DefaultHttpClientFactory();
-			var h = cli1.HttpClient; // force (lazy) instantiation
+			// control case
+			using (var test1 = new HttpTest()) {
+				test1.AllowRealHttp();
 
-			using (var test = new HttpTest()) {
-				test.Settings.Redirects.Enabled = false;
+				var s = await "http://httpbingo.org/redirect-to?url=http%3A%2F%2Fexample.com"
+					.WithHeader("x", "1")
+					.GetStringAsync();
 
-				test.RespondWith("foo!");
-				var s = await cli1.Request("http://www.google.com")
+				test1.ShouldHaveMadeACall().Times(2);
+				test1.ShouldHaveCalled("http://example.com*");
+			}
+
+			// this time disable redirects at the test level
+			using (var test2 = new HttpTest()) {
+				test2.AllowRealHttp();
+				test2.Settings.Redirects.Enabled = false;
+
+				var s = await "http://httpbingo.org/redirect-to?url=http%3A%2F%2Fexample.com"
 					.WithAutoRedirect(true) // test says redirects are off, and test should always win
 					.GetStringAsync();
-				Assert.AreEqual("foo!", s);
-				Assert.IsFalse(cli1.Settings.Redirects.Enabled);
 
-				var cli2 = new FlurlClient();
-				cli2.Settings.HttpClientFactory = new DefaultHttpClientFactory();
-				h = cli2.HttpClient;
-
-				test.RespondWith("foo 2!");
-				s = await cli2.Request("http://www.google.com")
-					.WithAutoRedirect(true) // test says redirects are off, and test should always win
-					.GetStringAsync();
-				Assert.AreEqual("foo 2!", s);
-				Assert.IsFalse(cli2.Settings.Redirects.Enabled);
+				test2.ShouldHaveMadeACall().Times(1);
+				test2.ShouldNotHaveCalled("http://example.com*");
 			}
 		}
 
@@ -278,21 +267,9 @@ namespace Flurl.Test.Http
 			test.ShouldHaveCalled("https://httpbin*").Times(2);
 		}
 
-		class RecordingHandler : DelegatingHandler
-		{
-			public RecordingHandler() : base(new HttpClientHandler()) { }
-
-			public int Hits { get; private set; }
-
-			protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
-				Hits++;
-				return base.SendAsync(request, cancellationToken);
-			}
-		}
-
 		[Test] // #683
 		public async Task configured_client_used_when_real_http_allowed() {
-			var rh = new RecordingHandler();
+			var rh = new MyCustomMessageHandler();
 			var hc = new HttpClient(rh);
 			var fc = new FlurlClient(hc);
 
@@ -395,5 +372,26 @@ namespace Flurl.Test.Http
 			Assert.AreEqual(1, jar.Count);
 		}
 		#endregion
+
+		class HttpBinResponse
+		{
+			public Dictionary<string, JsonElement> json { get; set; }
+			public Dictionary<string, string> args { get; set; }
+			public Dictionary<string, string> form { get; set; }
+			public Dictionary<string, string> cookies { get; set; }
+			public Dictionary<string, string> files { get; set; }
+		}
+
+		class MyCustomMessageHandler : DelegatingHandler
+		{
+			public MyCustomMessageHandler() : base(new HttpClientHandler()) { }
+
+			public int Hits { get; private set; }
+
+			protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
+				Hits++;
+				return base.SendAsync(request, cancellationToken);
+			}
+		}
 	}
 }

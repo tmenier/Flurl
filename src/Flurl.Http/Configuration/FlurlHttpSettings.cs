@@ -170,25 +170,9 @@ namespace Flurl.Http.Configuration
 	}
 
 	/// <summary>
-	/// Client-level settings for Flurl.Http
-	/// </summary>
-	public class ClientFlurlHttpSettings : FlurlHttpSettings
-	{
-		/// <summary>
-		/// Gets or sets a factory used to create the HttpClient and HttpMessageHandler used for HTTP calls.
-		/// Whenever possible, custom factory implementations should inherit from DefaultHttpClientFactory,
-		/// only override the method(s) needed, call the base method, and modify the result.
-		/// </summary>
-		public IHttpClientFactory HttpClientFactory {
-			get => Get<IHttpClientFactory>();
-			set => Set(value);
-		}
-	}
-
-	/// <summary>
 	/// Global default settings for Flurl.Http
 	/// </summary>
-	public class GlobalFlurlHttpSettings : ClientFlurlHttpSettings
+	public class GlobalFlurlHttpSettings : FlurlHttpSettings
 	{
 		internal GlobalFlurlHttpSettings() {
 			ResetDefaults();
@@ -220,7 +204,6 @@ namespace Flurl.Http.Configuration
 			JsonSerializer = new DefaultJsonSerializer();
 			UrlEncodedSerializer = new DefaultUrlEncodedSerializer();
 			FlurlClientFactory = new DefaultFlurlClientFactory();
-			HttpClientFactory = new DefaultHttpClientFactory();
 			Redirects.Enabled = true;
 			Redirects.AllowSecureToInsecure = false;
 			Redirects.ForwardHeaders = false;

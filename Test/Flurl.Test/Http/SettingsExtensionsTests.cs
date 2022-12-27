@@ -123,46 +123,42 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_allow_specific_http_status() {
-			using (var test = new HttpTest()) {
-				test.RespondWith("Nothing to see here", 404);
-				var sc = GetSettingsContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
-				await GetRequest(sc).DeleteAsync(); // no exception = pass
-			}
+			using var test = new HttpTest();
+			test.RespondWith("Nothing to see here", 404);
+			var sc = GetSettingsContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
+			await GetRequest(sc).DeleteAsync(); // no exception = pass
 		}
 
 		[Test]
 		public async Task allow_specific_http_status_also_allows_2xx() {
-			using (var test = new HttpTest()) {
-				test.RespondWith("I'm just an innocent 2xx, I should never fail!", 201);
-				var sc = GetSettingsContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
-				await GetRequest(sc).GetAsync(); // no exception = pass
-			}
+			using var test = new HttpTest();
+			test.RespondWith("I'm just an innocent 2xx, I should never fail!", 201);
+			var sc = GetSettingsContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
+			await GetRequest(sc).GetAsync(); // no exception = pass
 		}
 
 		[Test]
 		public void can_clear_non_success_status() {
-			using (var test = new HttpTest()) {
-				test.RespondWith("I'm a teapot", 418);
-				// allow 4xx
-				var sc = GetSettingsContainer().AllowHttpStatus("4xx");
-				// but then disallow it
-				sc.Settings.AllowedHttpStatusRange = null;
-				Assert.ThrowsAsync<FlurlHttpException>(async () => await GetRequest(sc).GetAsync());
-			}
+			using var test = new HttpTest();
+			test.RespondWith("I'm a teapot", 418);
+			// allow 4xx
+			var sc = GetSettingsContainer().AllowHttpStatus("4xx");
+			// but then disallow it
+			sc.Settings.AllowedHttpStatusRange = null;
+			Assert.ThrowsAsync<FlurlHttpException>(async () => await GetRequest(sc).GetAsync());
 		}
 
 		[Test]
 		public async Task can_allow_any_http_status() {
-			using (var test = new HttpTest()) {
-				test.RespondWith("epic fail", 500);
-				try {
-					var sc = GetSettingsContainer().AllowAnyHttpStatus();
-					var result = await GetRequest(sc).GetAsync();
-					Assert.AreEqual(500, result.StatusCode);
-				}
-				catch (Exception) {
-					Assert.Fail("Exception should not have been thrown.");
-				}
+			using var test = new HttpTest();
+			test.RespondWith("epic fail", 500);
+			try {
+				var sc = GetSettingsContainer().AllowAnyHttpStatus();
+				var result = await GetRequest(sc).GetAsync();
+				Assert.AreEqual(500, result.StatusCode);
+			}
+			catch (Exception) {
+				Assert.Fail("Exception should not have been thrown.");
 			}
 		}
 	}

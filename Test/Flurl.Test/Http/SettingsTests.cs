@@ -202,9 +202,8 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void can_provide_custom_client_factory() {
-			FlurlHttp.GlobalSettings.HttpClientFactory = new SomeCustomHttpClientFactory();
-			Assert.IsInstanceOf<SomeCustomHttpClient>(GetRequest().Client.HttpClient);
-			Assert.IsInstanceOf<SomeCustomMessageHandler>(GetRequest().Client.HttpMessageHandler);
+			FlurlHttp.GlobalSettings.FlurlClientFactory = new MyCustomClientFactory();
+			Assert.IsInstanceOf<MyCustomHttpClient>(GetRequest().Client.HttpClient);
 		}
 
 		[Test]
@@ -258,8 +257,6 @@ namespace Flurl.Test.Http
 			public string Serialize(object obj) => "foo";
 			public T Deserialize<T>(string s) => default;
 			public T Deserialize<T>(Stream stream) => default;
-			public dynamic Deserialize(string s) => default;
-			public dynamic Deserialize(Stream stream) => default;
 		}
 	}
 
@@ -270,14 +267,6 @@ namespace Flurl.Test.Http
 
 		protected override FlurlHttpSettings GetSettings() => _client.Value.Settings;
 		protected override IFlurlRequest GetRequest() => _client.Value.Request("http://api.com");
-
-		[Test]
-		public void can_provide_custom_client_factory() {
-			var cli = new FlurlClient();
-			cli.Settings.HttpClientFactory = new SomeCustomHttpClientFactory();
-			Assert.IsInstanceOf<SomeCustomHttpClient>(cli.HttpClient);
-			Assert.IsInstanceOf<SomeCustomMessageHandler>(cli.HttpMessageHandler);
-		}
 	}
 
 	[TestFixture, Parallelizable]
@@ -326,12 +315,10 @@ namespace Flurl.Test.Http
 		}
 	}
 
-	public class SomeCustomHttpClientFactory : IHttpClientFactory
+	class MyCustomClientFactory : DefaultFlurlClientFactory
 	{
-		public HttpClient CreateHttpClient(HttpMessageHandler handler) => new SomeCustomHttpClient();
-		public HttpMessageHandler CreateMessageHandler() => new SomeCustomMessageHandler();
+		public override HttpClient CreateHttpClient(HttpMessageHandler handler) => new MyCustomHttpClient();
 	}
 
-	public class SomeCustomHttpClient : HttpClient { }
-	public class SomeCustomMessageHandler : HttpClientHandler { }
+	class MyCustomHttpClient : HttpClient { }
 }
