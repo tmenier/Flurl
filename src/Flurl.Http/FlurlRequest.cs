@@ -67,9 +67,7 @@ namespace Flurl.Http
 	/// <inheritdoc />
 	public class FlurlRequest : IFlurlRequest
 	{
-		private FlurlHttpSettings _settings;
 		private IFlurlClient _client;
-		private Url _url;
 		private CookieJar _jar;
 
 		/// <summary>
@@ -77,51 +75,37 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="url">The URL to call with this FlurlRequest instance.</param>
 		public FlurlRequest(Url url = null) {
-			_url = url;
+			Url = url;
+		}
+
+		/// <summary>
+		/// Used internally by FlurlClient.Request
+		/// </summary>
+		internal FlurlRequest(IFlurlClient client, params object[] urlSegments) : this(client?.BaseUrl, urlSegments) {
+			Client = client;
 		}
 
 		/// <summary>
 		/// Used internally by FlurlClient.Request and CookieSession.Request
 		/// </summary>
-		internal FlurlRequest(string baseUrl, object[] urlSegments) {
+		internal FlurlRequest(string baseUrl, params object[] urlSegments) {
 			var parts = new List<string>(urlSegments.Select(s => s.ToInvariantString()));
 			if (!Url.IsValid(parts.FirstOrDefault()) && !string.IsNullOrEmpty(baseUrl))
 				parts.Insert(0, baseUrl);
 
-			if (!parts.Any())
-				throw new ArgumentException("Cannot create a Request. BaseUrl is not defined and no segments were passed.");
-			if (!Url.IsValid(parts[0]))
-				throw new ArgumentException("Cannot create a Request. Neither BaseUrl nor the first segment passed is a valid URL.");
-
-			_url = Url.Combine(parts.ToArray());
-		}
-
-		/// <summary>
-		/// Gets or sets the FlurlHttpSettings used by this request.
-		/// </summary>
-		public FlurlHttpSettings Settings {
-			get {
-				if (_settings == null) {
-					_settings = new FlurlHttpSettings();
-					ResetDefaultSettings();
-				}
-				return _settings;
-			}
-			set {
-				_settings = value;
-				ResetDefaultSettings();
-			}
+			if (parts.Any())
+				Url = Url.Combine(parts.ToArray());
 		}
 
 		/// <inheritdoc />
+		public FlurlHttpSettings Settings { get; } = new FlurlHttpSettings();
+
+		/// <inheritdoc />
 		public IFlurlClient Client {
-			get =>
-				(_client != null) ? _client :
-				(Url != null) ? FlurlHttp.GlobalSettings.FlurlClientFactory.Get(Url) :
-				null;
+			get => _client;
 			set {
 				_client = value;
-				ResetDefaultSettings();
+				Settings.Defaults = _client?.Settings;
 			}
 		}
 
@@ -129,13 +113,7 @@ namespace Flurl.Http
 		public HttpMethod Verb { get; set; }
 
 		/// <inheritdoc />
-		public Url Url {
-			get => _url;
-			set {
-				_url = value;
-				ResetDefaultSettings();
-			}
-		}
+		public Url Url { get; set; }
 
 		/// <inheritdoc />
 		public HttpContent Content { get; set; }
@@ -153,30 +131,28 @@ namespace Flurl.Http
 		/// <inheritdoc />
 		public CookieJar CookieJar {
 			get => _jar;
-			set {
-				_jar = value;
-				if (_jar != null) {
-					this.WithCookies(
-						from c in CookieJar
-						where c.ShouldSendTo(this.Url, out _)
-						// sort by longest path, then earliest creation time, per #2: https://tools.ietf.org/html/rfc6265#section-5.4
-						orderby (c.Path ?? c.OriginUrl.Path).Length descending, c.DateReceived
-						select (c.Name, c.Value));
-				}
-			}
+			set => ApplyCookieJar(value);
 		}
 
 		/// <inheritdoc />
 		public Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
-			_client = Client; // "freeze" the client at this point to avoid excessive calls to FlurlClientFactory.Get (#374)
 			Verb = verb;
 			Content = content;
-			return _client.SendAsync(this, completionOption, cancellationToken);
+			Client ??= FlurlHttp.GlobalSettings.FlurlClientFactory.Get(Url);
+			return Client.SendAsync(this, completionOption, cancellationToken);
 		}
 
-		private void ResetDefaultSettings() {
-			if (_settings != null)
-				_settings.Defaults = Client?.Settings;
+		private void ApplyCookieJar(CookieJar jar) {
+			_jar = jar;
+			if (jar == null)
+				return;
+
+			this.WithCookies(
+				from c in CookieJar
+				where c.ShouldSendTo(this.Url, out _)
+				// sort by longest path, then earliest creation time, per #2: https://tools.ietf.org/html/rfc6265#section-5.4
+				orderby (c.Path ?? c.OriginUrl.Path).Length descending, c.DateReceived
+				select (c.Name, c.Value));
 		}
 	}
 }

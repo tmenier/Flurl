@@ -201,9 +201,15 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public void can_provide_custom_client_factory() {
+		public async Task can_provide_custom_client_factory() {
 			FlurlHttp.GlobalSettings.FlurlClientFactory = new MyCustomClientFactory();
-			Assert.IsInstanceOf<MyCustomHttpClient>(GetRequest().Client.HttpClient);
+			var req = GetRequest();
+
+			// client not assigned until request is sent
+			using var test = new HttpTest();
+			await req.GetAsync();
+
+			Assert.IsInstanceOf<MyCustomHttpClient>(req.Client.HttpClient);
 		}
 
 		[Test]
@@ -213,10 +219,17 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public void can_configure_client_from_FlurlHttp_object() {
+		public async Task can_configure_client_from_FlurlHttp_object() {
 			FlurlHttp.ConfigureClient("http://host1.com/foo", cli => cli.Settings.Redirects.Enabled = false);
-			Assert.IsFalse(new FlurlRequest("http://host1.com/bar").Client.Settings.Redirects.Enabled); // different URL but same host, so should use same client
-			Assert.IsTrue(new FlurlRequest("http://host2.com").Client.Settings.Redirects.Enabled);
+			var req1 = new FlurlRequest("http://host1.com/bar"); // different URL but same host, should use above client
+			var req2 = new FlurlRequest("http://host2.com"); // different host, should use new client
+
+			// client not assigned until request is sent
+			using var test = new HttpTest();
+			await Task.WhenAll(req1.GetAsync(), req2.GetAsync());
+
+			Assert.IsFalse(req1.Client.Settings.Redirects.Enabled);
+			Assert.IsTrue(req2.Client.Settings.Redirects.Enabled);
 		}
 	}
 
@@ -276,35 +289,6 @@ namespace Flurl.Test.Http
 
 		protected override FlurlHttpSettings GetSettings() => _req.Value.Settings;
 		protected override IFlurlRequest GetRequest() => _req.Value;
-
-		[Test, NonParallelizable] // #239
-		public void request_default_settings_change_when_client_changes() {
-			FlurlHttp.ConfigureClient("http://test.com", cli => cli.Settings.Redirects.Enabled = false);
-			var req = new FlurlRequest("http://test.com");
-			var cli1 = req.Client;
-			Assert.IsFalse(req.Settings.Redirects.Enabled, "pre-configured client should provide defaults to new request");
-
-			req.Url = "http://test.com/foo";
-			Assert.AreSame(cli1, req.Client, "new URL with same host should hold onto same client");
-			Assert.IsFalse(req.Settings.Redirects.Enabled);
-
-			req.Url = "http://test2.com";
-			Assert.AreNotSame(cli1, req.Client, "new host should trigger new client");
-			Assert.IsTrue(req.Settings.Redirects.Enabled);
-
-			FlurlHttp.ConfigureClient("http://test2.com", cli => cli.Settings.Redirects.Enabled = false);
-			Assert.IsFalse(req.Settings.Redirects.Enabled, "changing client settings should be reflected in request");
-
-			req.Settings = new FlurlHttpSettings();
-			Assert.IsFalse(req.Settings.Redirects.Enabled, "entirely new settings object should still inherit current client settings");
-
-			req.Client = new FlurlClient();
-			Assert.IsTrue(req.Settings.Redirects.Enabled, "entirely new client should provide new defaults");
-
-			req.Url = "http://test.com";
-			Assert.AreNotSame(cli1, req.Client, "client was explicitly set on request, so it shouldn't change even if the URL changes");
-			Assert.IsTrue(req.Settings.Redirects.Enabled);
-		}
 
 		[Test]
 		public void request_gets_global_settings_when_no_client() {

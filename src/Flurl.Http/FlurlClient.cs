@@ -77,7 +77,7 @@ namespace Flurl.Http
 		public string BaseUrl { get; set; }
 
 		/// <inheritdoc />
-		public FlurlHttpSettings Settings { get; set; } = new FlurlHttpSettings();
+		public FlurlHttpSettings Settings { get; } = new FlurlHttpSettings();
 
 		/// <inheritdoc />
 		public INameValueList<string> Headers { get; } = new NameValueList<string>(false); // header names are case-insensitive https://stackoverflow.com/a/5259004/62600
@@ -86,10 +86,17 @@ namespace Flurl.Http
 		public HttpClient HttpClient { get; }
 
 		/// <inheritdoc />
-		public IFlurlRequest Request(params object[] urlSegments) => new FlurlRequest(BaseUrl, urlSegments) { Client = this };
+		public IFlurlRequest Request(params object[] urlSegments) => new FlurlRequest(this, urlSegments);
 
 		/// <inheritdoc />
 		public async Task<IFlurlResponse> SendAsync(IFlurlRequest request, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+			if (request == null)
+				throw new ArgumentNullException(nameof(request));
+			if (request.Url == null)
+				throw new ArgumentException("Cannot send Request. Url property was not set.");
+			if (!Url.IsValid(request.Url))
+				throw new ArgumentException($"Cannot send Request. {request.Url} is a not a valid URL.");
+
 			var settings = request.Settings;
 			var reqMsg = new HttpRequestMessage(request.Verb, request.Url) { Content = request.Content };
 
@@ -167,8 +174,8 @@ namespace Flurl.Http
 
 			var changeToGet = call.Redirect.ChangeVerbToGet;
 
-			var redir = new FlurlRequest(call.Redirect.Url) {
-				Client = this,
+			var redir = new FlurlRequest(this) {
+				Url = call.Redirect.Url,
 				Verb = changeToGet ? HttpMethod.Get : call.HttpRequestMessage.Method,
 				Content = changeToGet ? null : call.Request.Content,
 				RedirectedFrom = call,

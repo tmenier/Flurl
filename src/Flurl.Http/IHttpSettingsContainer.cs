@@ -13,7 +13,7 @@ namespace Flurl.Http
 	    /// <summary>
 	    /// Gets the FlurlHttpSettings object used by this client or request.
 	    /// </summary>
-	    FlurlHttpSettings Settings { get; set; }
+	    FlurlHttpSettings Settings { get; }
 
 		/// <summary>
 		/// Collection of headers sent on this request or all requests using this client.
