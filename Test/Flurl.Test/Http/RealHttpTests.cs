@@ -40,6 +40,7 @@ namespace Flurl.Test.Http
 		[TestCase("https://httpbin.org/response-headers", "attachment", null, "response-headers")]
 		public async Task can_download_file(string url, string contentDisposition, string suppliedFilename, string expectedFilename) {
 			var folder = Path.Combine(Path.GetTempPath(), $"flurl-test-{Guid.NewGuid()}"); // random so parallel tests don't trip over each other
+			Directory.CreateDirectory(folder);
 
 			try {
 				var path = await url.SetQueryParam("Content-Disposition", contentDisposition).DownloadFileAsync(folder, suppliedFilename);
