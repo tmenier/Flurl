@@ -83,7 +83,7 @@ namespace Flurl.Test.Http
 					Custom1 = "foo",
 					Custom2 = "bar"
 				})
-				.ConfigureRequest(settings => {
+				.WithSettings(settings => {
 					settings.Redirects.ForwardAuthorizationHeader = fwdAuth;
 					settings.Redirects.ForwardHeaders = fwdOther;
 				})

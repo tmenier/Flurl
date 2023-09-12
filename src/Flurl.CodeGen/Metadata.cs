@@ -106,7 +106,7 @@ namespace Flurl.CodeGen
 				.AddArg("cookieJar", "CookieJar", "The created CookieJar, which can be reused in subsequent requests.", isOut: true);
 
 			// settings extensions
-			yield return Create("ConfigureRequest", "Creates a new FlurlRequest and allows changing its Settings inline.")
+			yield return Create("WithSettings", "Creates a new FlurlRequest and allows changing its Settings inline.")
 				.AddArg("action", "Action<FlurlHttpSettings>", "A delegate defining the Settings changes.");
 			yield return Create("WithTimeout", "Creates a new FlurlRequest and sets the request timeout.")
 				.AddArg("timespan", "TimeSpan", "Time to wait before the request times out.");

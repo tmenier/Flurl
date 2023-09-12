@@ -394,7 +394,7 @@ namespace Flurl.Test.Http
 	        var exceptionCaught = false;
 
 	        var resp = await "http://api.com"
-		        .ConfigureRequest(c => c.OnError = call => {
+		        .WithSettings(c => c.OnError = call => {
 			        exceptionCaught = true;
 			        var ex = call.Exception as TaskCanceledException;
 			        Assert.NotNull(ex);
