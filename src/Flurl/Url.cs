@@ -680,16 +680,18 @@ namespace Flurl
 		/// <param name="url">The string to check</param>
 		/// <returns>true if the string is a well-formed absolute URL</returns>
 		public static bool IsValid(string url) {
-			if (url is null)
+			if (string.IsNullOrWhiteSpace(url) || url.Trim().StartsWith("/"))
 				return false;
 
-			if (!Uri.TryCreate(url, UriKind.Absolute, out var result))
-				return false;
+			// this method is known to returning false negatives in some cases, only trust it if true
+			// https://github.com/dotnet/runtime/issues/72632
+			if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
+				return true;
 
-			//Non-Ascii characters combined with URI reserved characters make IsWellFormedUriString return false
-			//even though url is correct https://stackoverflow.com/a/62411610/2380881
-			//IsWellFormedUriString is only needed to check if there is no path and query in url
-			return !string.IsNullOrEmpty(result?.PathAndQuery) || Uri.IsWellFormedUriString(url, UriKind.Absolute);
+			// work-around for above (#462)
+			return
+				Uri.TryCreate(url, UriKind.Absolute, out var uri) &&
+				!string.IsNullOrEmpty(uri?.PathAndQuery);
 		}
 
 		#endregion

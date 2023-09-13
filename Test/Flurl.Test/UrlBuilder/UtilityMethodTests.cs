@@ -74,10 +74,17 @@ namespace Flurl.Test.UrlBuilder
 		[TestCase("blah", false)]
 		[TestCase("http:/www.mysite.com", false)]
 		[TestCase("www.mysite.com", false)]
-		[TestCase("https://example.com/%C3%A5%2A", true)]
-		[TestCase("https://example.com/%E0%B8%95%E0%B8%B1%2A", true)]
-		[TestCase("https://example.com:999/api/path.cgi?u=uname&p=P%C3%B3%5E78", true)]
-		[TestCase("https://example.com:999/api/path.cgi?u=uname&p=P%C378", true)]
+		[TestCase("/path", false)]
+		[TestCase("//path", false)]
+
+		// cases derived from #462
+		[TestCase("http://myhost.com/%26", true)]
+		[TestCase("http://myhost.com/%C3%A9", true)]
+		[TestCase("http://myhost.com/%26%C3%A9", true)]
+		[TestCase("http://www.example.com?q=® ts", true)]
+		[TestCase("http://www.example.com?q=®ts", true)]
+		[TestCase("http://www.example.com?q=%C2%AE%20ts", true)]
+		[TestCase("http://www.example.com?q=%C2%AEts", true)]
 		public void IsValid_works(string s, bool isValid) {
 			Assert.AreEqual(isValid, Url.IsValid(s));
 		}
