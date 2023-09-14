@@ -22,14 +22,14 @@ namespace Flurl.Test.Http
 		public async Task can_set_http_version() {
 			Assert.AreEqual("1.1", GetSettings().HttpVersion); // default
 
-			GetSettings().HttpVersion = "2.0";
+			using var test = new HttpTest();
 
+			GetSettings().HttpVersion = "2.0";
 			var req = GetRequest();
 			Assert.AreEqual("2.0", req.Settings.HttpVersion);
 
-			using var test = new HttpTest();
 			Version versionUsed = null;
-			await GetRequest()
+			await req
 				.BeforeCall(c => versionUsed = c.HttpRequestMessage.Version)
 				.GetAsync();
 
