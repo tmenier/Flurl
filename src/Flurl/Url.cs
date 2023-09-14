@@ -679,20 +679,13 @@ namespace Flurl
 		/// </summary>
 		/// <param name="url">The string to check</param>
 		/// <returns>true if the string is a well-formed absolute URL</returns>
-		public static bool IsValid(string url) {
-			if (string.IsNullOrWhiteSpace(url) || url.Trim().StartsWith("/"))
-				return false;
-
-			// this method is known to returning false negatives in some cases, only trust it if true
+		public static bool IsValid(string url) =>
+			!string.IsNullOrWhiteSpace(url) &&
+			// TryCreate will succeed for URLs starting with "//". We want to require a scheme to be considered "absolute".
+			!url.Trim().StartsWith("/") &&
+			// Don't be tempted to use IsWellFormedUriString - it's known to return false positives on some platforms:
 			// https://github.com/dotnet/runtime/issues/72632
-			if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
-				return true;
-
-			// work-around for above (#462)
-			return
-				Uri.TryCreate(url, UriKind.Absolute, out var uri) &&
-				!string.IsNullOrEmpty(uri?.PathAndQuery);
-		}
+			Uri.TryCreate(url, UriKind.Absolute, out _);
 
 		#endregion
 	}
