@@ -24,6 +24,7 @@ namespace Flurl.Http.Configuration
 			Redirects = new RedirectSettings(this);
 			ResetDefaults();
 		}
+
 		/// <summary>
 		/// Gets or sets the default values to fall back on when values are not explicitly set on this instance.
 		/// </summary>
@@ -41,7 +42,15 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a pattern representing a range of HTTP status codes which (in addtion to 2xx) will NOT result in Flurl.Http throwing an Exception.
+		/// Gets or sets the HTTP version to be used. Default is "1.1".
+		/// </summary>
+		public string HttpVersion {
+			get => Get<Version>()?.ToString();
+			set => Set(Version.TryParse(value, out var v) ? v : throw new ArgumentException("Invalid HTTP version: " + value));
+		}
+
+		/// <summary>
+		/// Gets or sets a pattern representing a range of HTTP status codes which (in addition to 2xx) will NOT result in Flurl.Http throwing an Exception.
 		/// Examples: "3xx", "100,300,600", "100-299,6xx", "*" (allow everything)
 		/// 2xx will never throw regardless of this setting.
 		/// </summary>
@@ -183,7 +192,7 @@ namespace Flurl.Http.Configuration
 		/// </summary>
 		public override FlurlHttpSettings Defaults {
 			get => null;
-			set => throw new Exception("Global settings cannot be backed by any higher-level defauts.");
+			set => throw new Exception("Global settings cannot be backed by any higher-level defaults.");
 		}
 
 		/// <summary>
@@ -201,6 +210,7 @@ namespace Flurl.Http.Configuration
 		public override void ResetDefaults() {
 			base.ResetDefaults();
 			Timeout = TimeSpan.FromSeconds(100); // same as HttpClient
+			HttpVersion = "1.1";
 			JsonSerializer = new DefaultJsonSerializer();
 			UrlEncodedSerializer = new DefaultUrlEncodedSerializer();
 			FlurlClientFactory = new DefaultFlurlClientFactory();

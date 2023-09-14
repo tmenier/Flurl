@@ -98,7 +98,10 @@ namespace Flurl.Http
 				throw new ArgumentException($"Cannot send Request. {request.Url} is a not a valid URL.");
 
 			var settings = request.Settings;
-			var reqMsg = new HttpRequestMessage(request.Verb, request.Url) { Content = request.Content };
+			var reqMsg = new HttpRequestMessage(request.Verb, request.Url) {
+				Content = request.Content,
+				Version = Version.Parse(settings.HttpVersion)
+			};
 
 			SyncHeaders(request, reqMsg);
 			var call = new FlurlCall {

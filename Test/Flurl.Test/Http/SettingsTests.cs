@@ -19,88 +19,111 @@ namespace Flurl.Test.Http
 		protected abstract IFlurlRequest GetRequest();
 
 		[Test]
+		public async Task can_set_http_version() {
+			Assert.AreEqual("1.1", GetSettings().HttpVersion); // default
+
+			GetSettings().HttpVersion = "2.0";
+
+			var req = GetRequest();
+			Assert.AreEqual("2.0", req.Settings.HttpVersion);
+
+			using var test = new HttpTest();
+			Version versionUsed = null;
+			await GetRequest()
+				.BeforeCall(c => versionUsed = c.HttpRequestMessage.Version)
+				.GetAsync();
+
+			Assert.AreEqual("2.0", versionUsed.ToString());
+		}
+
+		[Test]
+		public void cannot_set_invalid_http_version() {
+			Assert.Throws<ArgumentException>(() => GetSettings().HttpVersion = "foo");
+		}
+
+		[Test]
 		public async Task can_allow_non_success_status() {
-			using (var test = new HttpTest()) {
-				GetSettings().AllowedHttpStatusRange = "4xx";
-				test.RespondWith("I'm a teapot", 418);
-				try {
-					var result = await GetRequest().GetAsync();
-					Assert.AreEqual(418, result.StatusCode);
-				}
-				catch (Exception) {
-					Assert.Fail("Exception should not have been thrown.");
-				}
+			using var test = new HttpTest();
+
+			GetSettings().AllowedHttpStatusRange = "4xx";
+			test.RespondWith("I'm a teapot", 418);
+			try {
+				var result = await GetRequest().GetAsync();
+				Assert.AreEqual(418, result.StatusCode);
+			}
+			catch (Exception) {
+				Assert.Fail("Exception should not have been thrown.");
 			}
 		}
 
 		[Test]
 		public async Task can_set_pre_callback() {
 			var callbackCalled = false;
-			using (var test = new HttpTest()) {
-				test.RespondWith("ok");
-				GetSettings().BeforeCall = call => {
-					Assert.Null(call.Response); // verifies that callback is running before HTTP call is made
-					callbackCalled = true;
-				};
-				Assert.IsFalse(callbackCalled);
-				await GetRequest().GetAsync();
-				Assert.IsTrue(callbackCalled);
-			}
+			using var test = new HttpTest();
+
+			test.RespondWith("ok");
+			GetSettings().BeforeCall = call => {
+				Assert.Null(call.Response); // verifies that callback is running before HTTP call is made
+				callbackCalled = true;
+			};
+			Assert.IsFalse(callbackCalled);
+			await GetRequest().GetAsync();
+			Assert.IsTrue(callbackCalled);
 		}
 
 		[Test]
 		public async Task can_set_post_callback() {
 			var callbackCalled = false;
-			using (var test = new HttpTest()) {
-				test.RespondWith("ok");
-				GetSettings().AfterCall = call => {
-					Assert.NotNull(call.Response); // verifies that callback is running after HTTP call is made
-					callbackCalled = true;
-				};
-				Assert.IsFalse(callbackCalled);
-				await GetRequest().GetAsync();
-				Assert.IsTrue(callbackCalled);
-			}
+			using var test = new HttpTest();
+
+			test.RespondWith("ok");
+			GetSettings().AfterCall = call => {
+				Assert.NotNull(call.Response); // verifies that callback is running after HTTP call is made
+				callbackCalled = true;
+			};
+			Assert.IsFalse(callbackCalled);
+			await GetRequest().GetAsync();
+			Assert.IsTrue(callbackCalled);
 		}
 
 		[TestCase(true)]
 		[TestCase(false)]
 		public async Task can_set_error_callback(bool markExceptionHandled) {
 			var callbackCalled = false;
-			using (var test = new HttpTest()) {
-				test.RespondWith("server error", 500);
-				GetSettings().OnError = call => {
-					Assert.NotNull(call.Response); // verifies that callback is running after HTTP call is made
-					callbackCalled = true;
-					call.ExceptionHandled = markExceptionHandled;
-				};
-				Assert.IsFalse(callbackCalled);
-				try {
-					await GetRequest().GetAsync();
-					Assert.IsTrue(callbackCalled, "OnError was never called");
-					Assert.IsTrue(markExceptionHandled, "ExceptionHandled was marked false in callback, but exception was not propagated.");
-				}
-				catch (FlurlHttpException) {
-					Assert.IsTrue(callbackCalled, "OnError was never called");
-					Assert.IsFalse(markExceptionHandled, "ExceptionHandled was marked true in callback, but exception was propagated.");
-				}
+			using var test = new HttpTest();
+
+			test.RespondWith("server error", 500);
+			GetSettings().OnError = call => {
+				Assert.NotNull(call.Response); // verifies that callback is running after HTTP call is made
+				callbackCalled = true;
+				call.ExceptionHandled = markExceptionHandled;
+			};
+			Assert.IsFalse(callbackCalled);
+			try {
+				await GetRequest().GetAsync();
+				Assert.IsTrue(callbackCalled, "OnError was never called");
+				Assert.IsTrue(markExceptionHandled, "ExceptionHandled was marked false in callback, but exception was not propagated.");
+			}
+			catch (FlurlHttpException) {
+				Assert.IsTrue(callbackCalled, "OnError was never called");
+				Assert.IsFalse(markExceptionHandled, "ExceptionHandled was marked true in callback, but exception was propagated.");
 			}
 		}
 
 		[Test]
 		public async Task can_disable_exception_behavior() {
-			using (var test = new HttpTest()) {
-				GetSettings().OnError = call => {
-					call.ExceptionHandled = true;
-				};
-				test.RespondWith("server error", 500);
-				try {
-					var result = await GetRequest().GetAsync();
-					Assert.AreEqual(500, result.StatusCode);
-				}
-				catch (FlurlHttpException) {
-					Assert.Fail("Flurl should not have thrown exception.");
-				}
+			using var test = new HttpTest();
+
+			GetSettings().OnError = call => {
+				call.ExceptionHandled = true;
+			};
+			test.RespondWith("server error", 500);
+			try {
+				var result = await GetRequest().GetAsync();
+				Assert.AreEqual(500, result.StatusCode);
+			}
+			catch (FlurlHttpException) {
+				Assert.Fail("Flurl should not have thrown exception.");
 			}
 		}
 
@@ -126,17 +149,17 @@ namespace Flurl.Test.Http
 
 		[Test] // #256
 		public async Task explicit_content_type_header_is_not_overridden() {
-			using (var test = new HttpTest()) {
-				// PostJsonAsync will normally set Content-Type to application/json, but it shouldn't touch it if it was set explicitly.
-				await "https://api.com"
-					.WithHeader("content-type", "application/json-patch+json; utf-8")
-					.WithHeader("CONTENT-LENGTH", 10) // header names are case-insensitive
-					.PostJsonAsync(new { foo = "bar" });
+			using var test = new HttpTest();
 
-				var h = test.CallLog[0].HttpRequestMessage.Content.Headers;
-				Assert.AreEqual(new[] { "application/json-patch+json; utf-8" }, h.GetValues("Content-Type"));
-				Assert.AreEqual(new[] { "10" }, h.GetValues("Content-Length"));
-			}
+			// PostJsonAsync will normally set Content-Type to application/json, but it shouldn't touch it if it was set explicitly.
+			await "https://api.com"
+				.WithHeader("content-type", "application/json-patch+json; utf-8")
+				.WithHeader("CONTENT-LENGTH", 10) // header names are case-insensitive
+				.PostJsonAsync(new { foo = "bar" });
+
+			var h = test.CallLog[0].HttpRequestMessage.Content.Headers;
+			Assert.AreEqual(new[] { "application/json-patch+json; utf-8" }, h.GetValues("Content-Type"));
+			Assert.AreEqual(new[] { "10" }, h.GetValues("Content-Length"));
 		}
 	}
 
@@ -252,17 +275,17 @@ namespace Flurl.Test.Http
 			var ser1 = new FakeSerializer();
 			var ser2 = new FakeSerializer();
 
-			using (var test = new HttpTest()) {
-				var cli = new FlurlClient();
-				cli.Settings.JsonSerializer = ser1;
-				Assert.AreSame(ser1, cli.Settings.JsonSerializer);
+			using var test = new HttpTest();
 
-				var req = new FlurlRequest { Client = cli };
-				Assert.AreSame(ser1, req.Settings.JsonSerializer);
+			var cli = new FlurlClient();
+			cli.Settings.JsonSerializer = ser1;
+			Assert.AreSame(ser1, cli.Settings.JsonSerializer);
 
-				req.Settings.JsonSerializer = ser2;
-				Assert.AreSame(ser2, req.Settings.JsonSerializer);
-			}
+			var req = new FlurlRequest { Client = cli };
+			Assert.AreSame(ser1, req.Settings.JsonSerializer);
+
+			req.Settings.JsonSerializer = ser2;
+			Assert.AreSame(ser2, req.Settings.JsonSerializer);
 		}
 
 		private class FakeSerializer : ISerializer
