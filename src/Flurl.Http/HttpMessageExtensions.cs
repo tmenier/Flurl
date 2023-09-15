@@ -35,23 +35,6 @@ namespace Flurl.Http
 			new HttpMessage(response).SetHeader(name, value, createContentIfNecessary);
 		}
 
-		/// <summary>
-		/// Associate a FlurlCall object with this request
-		/// </summary>
-		internal static void SetFlurlCall(this HttpRequestMessage request, FlurlCall call) {
-			if (request?.Properties != null)
-				request.Properties["FlurlHttpCall"] = call;
-		}
-
-		/// <summary>
-		/// Get the FlurlCall associated with this request, if any.
-		/// </summary>
-		internal static FlurlCall GetFlurlCall(this HttpRequestMessage request) {
-			if (request?.Properties != null && request.Properties.TryGetValue("FlurlHttpCall", out var obj) && obj is FlurlCall call)
-				return call;
-			return null;
-		}
-
 		private static void SetHeader(this HttpMessage msg, string name, object value, bool createContentIfNecessary) {
 			switch (name.ToLower()) {
 				// https://docs.microsoft.com/en-us/dotnet/api/system.net.http.headers.httpcontentheaders

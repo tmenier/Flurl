@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
-using Flurl.Http.Configuration;
 using Flurl.Http.Testing;
 using NUnit.Framework;
 
@@ -30,8 +30,8 @@ namespace Flurl.Test.Http
 		}
 
 		[TestCase("https://httpbin.org/image/jpeg", null, "my-image.jpg", "my-image.jpg")]
-		// should use last path segment url-decoded (foo?bar:ding), then replace illegal path characters with _
-		[TestCase("https://httpbin.org/anything/foo%3Fbar%3Ading", null, null, "foo_bar_ding")]
+		// should use last path segment url-decoded (foo/bar), then replace illegal filename characters with _ ('/' and '\0' are only illegal chars in *nix)
+		[TestCase("https://httpbin.org/anything/foo%2Fbar", null, null, "foo_bar")]
 		// should use filename from content-disposition excluding any leading/trailing quotes
 		[TestCase("https://httpbin.org/response-headers", "attachment; filename=\"myfile.txt\"", null, "myfile.txt")]
 		// should prefer filename* over filename, per https://tools.ietf.org/html/rfc6266#section-4.3
@@ -40,6 +40,7 @@ namespace Flurl.Test.Http
 		[TestCase("https://httpbin.org/response-headers", "attachment", null, "response-headers")]
 		public async Task can_download_file(string url, string contentDisposition, string suppliedFilename, string expectedFilename) {
 			var folder = Path.Combine(Path.GetTempPath(), $"flurl-test-{Guid.NewGuid()}"); // random so parallel tests don't trip over each other
+			Directory.CreateDirectory(folder);
 
 			try {
 				var path = await url.SetQueryParam("Content-Disposition", contentDisposition).DownloadFileAsync(folder, suppliedFilename);
@@ -54,9 +55,9 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_post_and_receive_json() {
-			var result = await "https://httpbin.org/post".PostJsonAsync(new { a = 1, b = 2 }).ReceiveJson();
-			Assert.AreEqual(result.json.a, 1);
-			Assert.AreEqual(result.json.b, 2);
+			var result = await "https://httpbin.org/post".PostJsonAsync(new { a = 1, b = 2 }).ReceiveJson<HttpBinResponse>();
+			Assert.AreEqual(1, result.json["a"].GetInt32());
+			Assert.AreEqual(2, result.json["b"].GetInt32());
 		}
 
 		[Test]
@@ -115,12 +116,12 @@ namespace Flurl.Test.Http
 							// content.Headers.ContentLength = 735;
 						})
 						//.ReceiveString();
-						.ReceiveJson();
-					Assert.AreEqual("1", resp.form.a);
-					Assert.AreEqual("2", resp.form.b);
-					Assert.AreEqual("hello!", resp.form.DataField);
-					Assert.AreEqual("file contents 1", resp.files.File1);
-					Assert.AreEqual("file contents 2", resp.files.File2);
+						.ReceiveJson<HttpBinResponse>();
+					Assert.AreEqual("1", resp.form["a"]);
+					Assert.AreEqual("2", resp.form["b"]);
+					Assert.AreEqual("hello!", resp.form["DataField"]);
+					Assert.AreEqual("file contents 1", resp.files["File1"]);
+					Assert.AreEqual("file contents 2", resp.files["File2"]);
 				}
 			}
 			finally {
@@ -133,12 +134,12 @@ namespace Flurl.Test.Http
 			var handlerCalled = false;
 
 			try {
-				await "https://httpbin.org/status/500".ConfigureRequest(c => {
+				await "https://httpbin.org/status/500".WithSettings(c => {
 					c.OnError = call => {
 						call.ExceptionHandled = true;
 						handlerCalled = true;
 					};
-				}).GetJsonAsync();
+				}).GetAsync();
 				Assert.IsTrue(handlerCalled, "error handler should have been called.");
 			}
 			catch (FlurlHttpException) {
@@ -151,12 +152,12 @@ namespace Flurl.Test.Http
 			Exception ex = null;
 
 			try {
-				await "http://httpbin.org/image/jpeg".ConfigureRequest(c => {
+				await "http://httpbin.org/image/jpeg".WithSettings(c => {
 					c.OnError = call => {
 						ex = call.Exception;
 						call.ExceptionHandled = true;
 					};
-				}).GetJsonAsync();
+				}).GetJsonAsync<object>();
 				Assert.IsNotNull(ex, "error handler should have been called.");
 				Assert.IsInstanceOf<FlurlParsingException>(ex);
 			}
@@ -191,7 +192,7 @@ namespace Flurl.Test.Http
 		public void can_cancel_request() {
 			var cts = new CancellationTokenSource();
 			var ex = Assert.ThrowsAsync<FlurlHttpException>(async () => {
-				var task = "https://httpbin.org/delay/5".GetAsync(cts.Token);
+				var task = "https://httpbin.org/delay/5".GetAsync(cancellationToken: cts.Token);
 				cts.Cancel();
 				await task;
 			});
@@ -205,7 +206,7 @@ namespace Flurl.Test.Http
 			var ex = Assert.ThrowsAsync<FlurlHttpException>(async () => {
 				var task = "https://httpbin.org/delay/5"
 					.WithTimeout(TimeSpan.FromMilliseconds(50))
-					.GetAsync(cts.Token);
+					.GetAsync(cancellationToken: cts.Token);
 				cts.Cancel();
 				await task;
 			});
@@ -217,84 +218,74 @@ namespace Flurl.Test.Http
 			ex = Assert.ThrowsAsync<FlurlHttpTimeoutException>(async () => {
 				await "https://httpbin.org/delay/5"
 					.WithTimeout(TimeSpan.FromMilliseconds(50))
-					.GetAsync(cts.Token);
+					.GetAsync(cancellationToken: cts.Token);
 			});
 			Assert.That(ex.InnerException is OperationCanceledException);
 			Assert.IsFalse(cts.Token.IsCancellationRequested);
 		}
 
-		[Test, Ignore("failing on AppVeyor, holding up bugfix release")]
-		public async Task connection_lease_timeout_doesnt_disrupt_calls() {
-			// testing this quickly is tricky. HttpClient will be replaced by a new instance after 1 timeout and disposed
-			// after another, so the timeout period (typically minutes in real-world scenarios) needs to be long enough
-			// that we don't dispose before the response from google is received. 1 second seems to work.
-			var cli = new FlurlClient("http://www.google.com");
-			cli.Settings.ConnectionLeaseTimeout = TimeSpan.FromMilliseconds(1000);
-
-			var httpClients = new List<HttpClient>();
-			var tasks = new List<Task>();
-
-			// ping google for about 2.5 seconds
-			for (var i = 0; i < 25; i++) {
-				if (!httpClients.Contains(cli.HttpClient))
-					httpClients.Add(cli.HttpClient);
-				tasks.Add(cli.Request().HeadAsync());
-				await Task.Delay(100);
-			}
-			await Task.WhenAll(tasks); // failed HTTP status, etc, would throw here and fail the test.
-
-			Assert.AreEqual(3, httpClients.Count);
-
-			// only the first one should be disposed, which isn't particularly simple to check
-			Assert.ThrowsAsync<ObjectDisposedException>(() => httpClients[0].GetAsync("http://www.google.com"));
-			await httpClients[1].GetAsync("http://www.google.com");
-			await httpClients[2].GetAsync("http://www.google.com");
-		}
-
 		[Test]
 		public async Task test_settings_override_client_settings() {
-			var cli1 = new FlurlClient();
-			cli1.Settings.HttpClientFactory = new DefaultHttpClientFactory();
-			var h = cli1.HttpClient; // force (lazy) instantiation
+			// control case
+			using (var test1 = new HttpTest()) {
+				test1.AllowRealHttp();
 
-			using (var test = new HttpTest()) {
-				test.Settings.Redirects.Enabled = false;
+				var s = await "http://httpbingo.org/redirect-to?url=http%3A%2F%2Fexample.com"
+					.WithHeader("x", "1")
+					.GetStringAsync();
 
-				test.RespondWith("foo!");
-				var s = await cli1.Request("http://www.google.com")
+				test1.ShouldHaveMadeACall().Times(2);
+				test1.ShouldHaveCalled("http://example.com*");
+			}
+
+			// this time disable redirects at the test level
+			using (var test2 = new HttpTest()) {
+				test2.AllowRealHttp();
+				test2.Settings.Redirects.Enabled = false;
+
+				var s = await "http://httpbingo.org/redirect-to?url=http%3A%2F%2Fexample.com"
 					.WithAutoRedirect(true) // test says redirects are off, and test should always win
 					.GetStringAsync();
-				Assert.AreEqual("foo!", s);
-				Assert.IsFalse(cli1.Settings.Redirects.Enabled);
 
-				var cli2 = new FlurlClient();
-				cli2.Settings.HttpClientFactory = new DefaultHttpClientFactory();
-				h = cli2.HttpClient;
-
-				test.RespondWith("foo 2!");
-				s = await cli2.Request("http://www.google.com")
-					.WithAutoRedirect(true) // test says redirects are off, and test should always win
-					.GetStringAsync();
-				Assert.AreEqual("foo 2!", s);
-				Assert.IsFalse(cli2.Settings.Redirects.Enabled);
+				test2.ShouldHaveMadeACall().Times(1);
+				test2.ShouldNotHaveCalled("http://example.com*");
 			}
 		}
 
 		[Test]
 		public async Task can_allow_real_http_in_test() {
-			using (var test = new HttpTest()) {
-				test.RespondWith("foo");
-				test.ForCallsTo("*httpbin*").AllowRealHttp();
+			using var test = new HttpTest();
+			test.RespondWith("foo");
+			test.ForCallsTo("*httpbin*").AllowRealHttp();
 
-				Assert.AreEqual("foo", await "https://www.google.com".GetStringAsync());
-				Assert.AreNotEqual("foo", await "https://httpbin.org/get".GetStringAsync());
-				Assert.AreEqual("bar", (await "https://httpbin.org/get?x=bar".GetJsonAsync()).args.x);
-				Assert.AreEqual("foo", await "https://www.microsoft.com".GetStringAsync());
+			Assert.AreEqual("foo", await "https://www.google.com".GetStringAsync());
+			Assert.AreNotEqual("foo", await "https://httpbin.org/get".GetStringAsync());
+			Assert.AreEqual("bar", (await "https://httpbin.org/get?x=bar".GetJsonAsync<HttpBinResponse>()).args["x"]);
+			Assert.AreEqual("foo", await "https://www.microsoft.com".GetStringAsync());
 
-				// real calls still get logged
-				Assert.AreEqual(4, test.CallLog.Count);
-				test.ShouldHaveCalled("https://httpbin*").Times(2);
-			}
+			// real calls still get logged
+			Assert.AreEqual(4, test.CallLog.Count);
+			test.ShouldHaveCalled("https://httpbin*").Times(2);
+		}
+
+		[Test] // #683
+		public async Task configured_client_used_when_real_http_allowed() {
+			var rh = new MyCustomMessageHandler();
+			var hc = new HttpClient(rh);
+			var fc = new FlurlClient(hc);
+
+			using var test = new HttpTest();
+			test.RespondWith("fake");
+			test.ForCallsTo("*httpbin*").AllowRealHttp();
+
+			var resp = await fc.Request("https://httpbin.org/get").GetStringAsync();
+			Assert.AreNotEqual("fake", resp);
+
+			// the call got logged
+			test.ShouldHaveCalled("https://httpbin*");
+
+			// but the inner handler got hit
+			Assert.AreEqual(1, rh.Hits);
 		}
 
 		[Test]
@@ -302,7 +293,7 @@ namespace Flurl.Test.Http
 			// Flurl was auto-creating an empty HttpContent object in order to forward content-level headers,
 			// and on .NET Framework a GET with a non-null HttpContent throws an exceptions (#583)
 			var calls = new List<FlurlCall>();
-			var resp = await "http://httpbingo.org/redirect-to?url=http%3A%2F%2Fexample.com%2F".ConfigureRequest(c => {
+			var resp = await "http://httpbingo.org/redirect-to?url=http%3A%2F%2Fexample.com%2F".WithSettings(c => {
 				c.Redirects.ForwardHeaders = true;
 				c.BeforeCall = call => calls.Add(call);
 			}).PostUrlEncodedAsync("test=test");
@@ -324,10 +315,10 @@ namespace Flurl.Test.Http
 
 			var s = await req.GetStringAsync();
 
-			var resp = await req.WithAutoRedirect(false).GetJsonAsync();
+			var resp = await req.WithAutoRedirect(false).GetJsonAsync<HttpBinResponse>();
 			// httpbin returns json representation of cookies that were sent
-			Assert.AreEqual("1", resp.cookies.x);
-			Assert.AreEqual("2", resp.cookies.y);
+			Assert.AreEqual("1", resp.cookies["x"]);
+			Assert.AreEqual("2", resp.cookies["y"]);
 		}
 
 		[Test]
@@ -352,8 +343,8 @@ namespace Flurl.Test.Http
 		public async Task can_set_cookies_before_setting_url() {
 			var req = new FlurlRequest().WithCookie("z", "999");
 			req.Url = "https://httpbin.org/cookies";
-			var resp = await req.GetJsonAsync();
-			Assert.AreEqual("999", resp.cookies.z);
+			var resp = await req.GetJsonAsync<HttpBinResponse>();
+			Assert.AreEqual("999", resp.cookies["z"]);
 		}
 
 		[Test]
@@ -363,21 +354,45 @@ namespace Flurl.Test.Http
 			var req1 = cli.Request("https://httpbin.org/cookies").WithCookie("x", "123");
 			var req2 = cli.Request("https://httpbin.org/cookies").WithCookie("x", "abc");
 
-			var resp2 = await req2.GetJsonAsync();
-			var resp1 = await req1.GetJsonAsync();
+			var resp2 = await req2.GetJsonAsync<HttpBinResponse>();
+			var resp1 = await req1.GetJsonAsync<HttpBinResponse>();
 
-			Assert.AreEqual("123", resp1.cookies.x);
-			Assert.AreEqual("abc", resp2.cookies.x);
+			Assert.AreEqual("123", resp1.cookies["x"]);
+			Assert.AreEqual("abc", resp2.cookies["x"]);
 		}
 
 		[Test]
 		public async Task can_receive_cookie_from_redirect_response_and_add_it_to_jar() {
 			// use httpbingo instead of httpbin because of redirect issue https://github.com/postmanlabs/httpbin/issues/617
-			var resp = await "https://httpbingo.org/redirect-to".SetQueryParam("url", "/cookies/set?x=foo").WithCookies(out var jar).GetJsonAsync();
+			var resp = await "https://httpbingo.org/redirect-to"
+				.SetQueryParam("url", "/cookies/set?x=foo")
+				.WithCookies(out var jar)
+				.GetJsonAsync<Dictionary<string, string>>();
 
-			Assert.AreEqual("foo", resp.x);
+			Assert.AreEqual("foo", resp["x"]);
 			Assert.AreEqual(1, jar.Count);
 		}
 		#endregion
+
+		class HttpBinResponse
+		{
+			public Dictionary<string, JsonElement> json { get; set; }
+			public Dictionary<string, string> args { get; set; }
+			public Dictionary<string, string> form { get; set; }
+			public Dictionary<string, string> cookies { get; set; }
+			public Dictionary<string, string> files { get; set; }
+		}
+
+		class MyCustomMessageHandler : DelegatingHandler
+		{
+			public MyCustomMessageHandler() : base(new HttpClientHandler()) { }
+
+			public int Hits { get; private set; }
+
+			protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
+				Hits++;
+				return base.SendAsync(request, cancellationToken);
+			}
+		}
 	}
 }

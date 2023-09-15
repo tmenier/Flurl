@@ -25,23 +25,27 @@ namespace Flurl.Http.Testing
 		/// Constructs a new instance of HttpTestSetup.
 		/// </summary>
 		/// <param name="settings">FlurlHttpSettings used in fake calls.</param>
-		protected HttpTestSetup(TestFlurlHttpSettings settings) {
+		protected HttpTestSetup(FlurlHttpSettings settings) {
 			Settings = settings;
 		}
 
 		/// <summary>
 		/// The FlurlHttpSettings used in fake calls.
 		/// </summary>
-		public TestFlurlHttpSettings Settings { get; }
-
-		internal bool FakeRequest => !_allowRealHttp;
+		public FlurlHttpSettings Settings { get; }
 
 		internal HttpResponseMessage GetNextResponse() {
-			if (!_responses.Any())
+			if (_allowRealHttp)
 				return null;
 
 			// atomically get the next response in the list, or the last one if we're past the end
-			return _responses[Math.Min(Interlocked.Increment(ref _respIndex), _responses.Count) - 1]();
+			if (_responses.Any())
+				return _responses[Math.Min(Interlocked.Increment(ref _respIndex), _responses.Count) - 1]();
+
+			return new HttpResponseMessage {
+				StatusCode = HttpStatusCode.OK,
+				Content = new StringContent("")
+			};
 		}
 
 		/// <summary>
@@ -54,7 +58,6 @@ namespace Flurl.Http.Testing
 		/// <param name="replaceUnderscoreWithHyphen">If true, underscores in property names of headers will be replaced by hyphens. Default is true.</param>
 		/// <returns>The current HttpTest object (so more responses can be chained).</returns>
 		public HttpTestSetup RespondWith(string body, int status = 200, object headers = null, object cookies = null, bool replaceUnderscoreWithHyphen = true) {
-			if (body == null) throw new ArgumentNullException(nameof(body));
 			return RespondWith(() => new CapturedStringContent(body), status, headers, cookies, replaceUnderscoreWithHyphen);
 		}
 

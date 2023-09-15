@@ -17,21 +17,15 @@ namespace Flurl.Http.Testing
 	{
 		private readonly ConcurrentQueue<FlurlCall> _calls = new ConcurrentQueue<FlurlCall>();
 		private readonly List<FilteredHttpTestSetup> _filteredSetups = new List<FilteredHttpTestSetup>();
-		private readonly Lazy<HttpClient> _httpClient;
-		private readonly Lazy<HttpMessageHandler> _httpMessageHandler;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="HttpTest"/> class.
 		/// </summary>
 		/// <exception cref="Exception">A delegate callback throws an exception.</exception>
-		public HttpTest() : base(new TestFlurlHttpSettings()) {
-			_httpClient = new Lazy<HttpClient>(() => Settings.HttpClientFactory.CreateHttpClient(HttpMessageHandler));
-			_httpMessageHandler = new Lazy<HttpMessageHandler>(() => Settings.HttpClientFactory.CreateMessageHandler());
+		public HttpTest() : base(new FlurlHttpSettings()) {
 		    SetCurrentTest(this);
 	    }
 
-		internal HttpClient HttpClient => _httpClient.Value;
-		internal HttpMessageHandler HttpMessageHandler => _httpMessageHandler.Value;
 		internal void LogCall(FlurlCall call) => _calls.Enqueue(call);
 
 		/// <summary>
@@ -49,7 +43,7 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		/// <param name="action">Action defining the settings changes.</param>
 		/// <returns>This HttpTest</returns>
-		public HttpTest Configure(Action<TestFlurlHttpSettings> action) {
+		public HttpTest Configure(Action<FlurlHttpSettings> action) {
 			action(Settings);
 			return this;
 		}

@@ -67,31 +67,6 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task can_receive_json_dynamic() {
-			HttpTest.RespondWithJson(new { id = 1, name = "Frank" });
-
-			var data = await "http://some-api.com".PostJsonAsync(new { a = 1, b = 2 }).ReceiveJson();
-
-			Assert.AreEqual(1, data.id);
-			Assert.AreEqual("Frank", data.name);				
-		}
-
-		[Test]
-		public async Task can_receive_json_dynamic_list() {
-			HttpTest.RespondWithJson(new[] {
-				new { id = 1, name = "Frank" },
-				new { id = 2, name = "Claire" }
-			});
-
-			var data = await "http://some-api.com".PostJsonAsync(new { a = 1, b = 2 }).ReceiveJsonList();
-
-			Assert.AreEqual(1, data[0].id);
-			Assert.AreEqual("Frank", data[0].name);
-			Assert.AreEqual(2, data[1].id);
-			Assert.AreEqual("Claire", data[1].name);
-		}
-
-		[Test]
 		public async Task can_receive_string() {
 			HttpTest.RespondWith("good job");
 

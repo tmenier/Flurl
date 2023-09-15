@@ -44,6 +44,19 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("", await lastCall.Response.GetStringAsync());
 		}
 
+		[Test] // #606
+		public async Task null_response_setup_returns_empty_response() {
+			HttpTest
+				.RespondWith(status: 200)
+				.RespondWith((string)null, status: 200)
+				.RespondWith(() => null, status: 200);
+
+			for (var i = 0; i < 3; i++) {
+				var s = await "https://api.com".GetStringAsync();
+				Assert.AreEqual("", s);
+			}
+		}
+
 		[Test]
 		public async Task can_setup_multiple_responses() {
 			HttpTest
@@ -381,7 +394,7 @@ namespace Flurl.Test.Http
 	        var exceptionCaught = false;
 
 	        var resp = await "http://api.com"
-		        .ConfigureRequest(c => c.OnError = call => {
+		        .WithSettings(c => c.OnError = call => {
 			        exceptionCaught = true;
 			        var ex = call.Exception as TaskCanceledException;
 			        Assert.NotNull(ex);
@@ -399,7 +412,7 @@ namespace Flurl.Test.Http
 			HttpTest.RespondWith(headers: new { h1 = "foo" });
 
 			var resp = await "http://www.api.com".GetAsync();
-			Assert.AreEqual(("h1", "foo"), resp.Headers.Single());
+			Assert.AreEqual("foo", resp.Headers.FirstOrDefault("h1"));
 		}
 
 		[Test]
@@ -414,12 +427,12 @@ namespace Flurl.Test.Http
 		// https://github.com/tmenier/Flurl/issues/175
 		[Test]
 		public async Task can_deserialize_default_response_more_than_once() {
-			var resp = await "http://www.api.com".GetJsonAsync();
+			var resp = await "http://www.api.com".GetJsonAsync<object>();
 			Assert.IsNull(resp);
 			// bug: couldn't deserialize here due to reading stream twice
-			resp = await "http://www.api.com".GetJsonAsync();
+			resp = await "http://www.api.com".GetJsonAsync<object>();
 			Assert.IsNull(resp);
-			resp = await "http://www.api.com".GetJsonAsync();
+			resp = await "http://www.api.com".GetJsonAsync<object>();
 			Assert.IsNull(resp);
 		}
 
@@ -522,6 +535,15 @@ namespace Flurl.Test.Http
 					test.ShouldHaveMadeACall().Times(10);
 				}
 			}
+		}
+
+		// #721
+		[TestCase("https://api.com/foo?", "https://api.com/foo?")]
+		[TestCase("https://api.com/foo?", "https://api.com/foo")]
+		public async Task can_assert_url_ending_with_question_mark(string actual, string expected) {
+			using var httpTest = new HttpTest();
+			await actual.GetAsync();
+			httpTest.ShouldHaveCalled(expected);
 		}
 	}
 }

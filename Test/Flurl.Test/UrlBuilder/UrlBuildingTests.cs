@@ -103,6 +103,7 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual("https://api.com?x=1", url.ToString());
 		}
 
+#if NET
 		[Test] // #632
 		public void can_set_query_params_to_enums_cast_to_ints() {
 			var enumValues = new[] { FileMode.Append, FileMode.Create };
@@ -116,6 +117,7 @@ namespace Flurl.Test.UrlBuilder
 			// url = "http://www.mysite.com/more".SetQueryParam("Filter", intValues);
 			// Assert.AreEqual("http://www.mysite.com/more?Filter=6&Filter=2", url.ToString());
 		}
+#endif
 
 		[Test] // #672
 		public void can_set_query_params_using_object_with_ienumerable() {
@@ -318,14 +320,12 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual(expected, url.ToString());
 		}
 
-#if !NETCOREAPP1_1
 		[Test]
 		public void url_ToString_uses_invariant_culture() {
 			Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("es-ES");
 			var url = "http://www.mysite.com".SetQueryParam("x", 1.1);
 			Assert.AreEqual("http://www.mysite.com?x=1.1", url.ToString());
 		}
-#endif
 
 		[Test]
 		public void can_reset_to_root() {
@@ -496,7 +496,7 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual("http://mysite.com/foo?x=1&y=2", url2.ToString());
 		}
 
-		#region writable properties
+#region writable properties
 		[Test]
 		public void can_write_scheme() {
 			var url = new Url("https://api.com/foo");
@@ -633,7 +633,7 @@ namespace Flurl.Test.UrlBuilder
 			url.Fragment = "";
 			Assert.AreEqual("https://api.com/", url.ToString());
 		}
-		#endregion
+#endregion
 
 		[Test]
 		public void can_build_url_from_uri() {

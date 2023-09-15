@@ -43,7 +43,7 @@ namespace Flurl.Test.Http
 		    HttpTest.RespondWith("{ \"invalid JSON!");
 
 		    try {
-			    await "http://myapi.com".GetJsonAsync();
+			    await "http://myapi.com".GetJsonAsync<object>();
 			    Assert.Fail("should have failed to parse response.");
 		    }
 		    catch (FlurlParsingException ex) {
@@ -52,7 +52,7 @@ namespace Flurl.Test.Http
 			    Assert.AreEqual("{ \"invalid JSON!", await ex.GetResponseStringAsync());
 			    Assert.AreEqual("{ \"invalid JSON!", await ex.Call.Response.GetStringAsync());
 				// will differ if you're using a different serializer (which you probably aren't):
-				Assert.IsInstanceOf<Newtonsoft.Json.JsonReaderException>(ex.InnerException);
+				Assert.IsInstanceOf<System.Text.Json.JsonException>(ex.InnerException);
 		    }
 		}
 

@@ -18,19 +18,19 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_get_json() {
-			HttpTest.RespondWithJson(new TestData { id = 1, name = "Frank" });
+			HttpTest.RespondWithJson(new { id = 1, name = "Frank" });
 
 			var data = await "http://some-api.com".GetJsonAsync<TestData>();
 
-			Assert.AreEqual(1, data.id);
-			Assert.AreEqual("Frank", data.name);
+			Assert.AreEqual(1, data.Id);
+			Assert.AreEqual("Frank", data.Name);
 		}
 
 		[Test]
 		public async Task can_get_response_then_deserialize() {
 			// FlurlResponse was introduced in 3.0. I don't think we need to go crazy with new tests, because existing
 			// methods like FlurlRequest.GetJson, ReceiveJson, etc all go through FlurlResponse now.
-			HttpTest.RespondWithJson(new TestData { id = 1, name = "Frank" }, 234, new { my_header = "hi" }, null, true);
+			HttpTest.RespondWithJson(new { id = 1, name = "Frank" }, 234, new { my_header = "hi" }, null, true);
 
 			var resp = await "http://some-api.com".GetAsync();
 			Assert.AreEqual(234, resp.StatusCode);
@@ -38,33 +38,8 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("hi", headerVal);
 
 			var data = await resp.GetJsonAsync<TestData>();
-			Assert.AreEqual(1, data.id);
-			Assert.AreEqual("Frank", data.name);
-		}
-
-		[Test]
-		public async Task can_get_json_dynamic() {
-			HttpTest.RespondWithJson(new { id = 1, name = "Frank" });
-
-			var data = await "http://some-api.com".GetJsonAsync();
-
-			Assert.AreEqual(1, data.id);
-			Assert.AreEqual("Frank", data.name);
-		}
-
-		[Test]
-		public async Task can_get_json_dynamic_list() {
-			HttpTest.RespondWithJson(new[] {
-				new { id = 1, name = "Frank" },
-				new { id = 2, name = "Claire" }
-			});
-
-			var data = await "http://some-api.com".GetJsonListAsync();
-
-			Assert.AreEqual(1, data[0].id);
-			Assert.AreEqual("Frank", data[0].name);
-			Assert.AreEqual(2, data[1].id);
-			Assert.AreEqual("Claire", data[1].name);
+			Assert.AreEqual(1, data.Id);
+			Assert.AreEqual("Frank", data.Name);
 		}
 
 		[Test]
@@ -74,20 +49,6 @@ namespace Flurl.Test.Http
 			var data = await "http://some-api.com".GetStringAsync();
 
 			Assert.AreEqual("good job", data);
-		}
-
-		[Test] // #606
-		public async Task get_string_is_empty_for_null_content() {
-			HttpTest.RespondWith(status: 200);
-
-			var s = await "https://api.com".GetStringAsync();
-			Assert.AreEqual("", s);
-
-			// also works the long way
-			var resp = await "https://api.com".PostAsync();
-			Assert.IsNull(resp.ResponseMessage.Content);
-			s = await resp.GetStringAsync();
-			Assert.AreEqual("", s);
 		}
 
 		[Test]
@@ -128,7 +89,7 @@ namespace Flurl.Test.Http
 
 		[TestCase(false)]
 		[TestCase(true)]
-		public async Task can_get_error_json_typed(bool useShortcut) {
+		public async Task can_get_error_json(bool useShortcut) {
 			HttpTest.RespondWithJson(new { code = 999, message = "our server crashed" }, 500);
 
 			try {
@@ -139,26 +100,8 @@ namespace Flurl.Test.Http
 					await ex.GetResponseJsonAsync<TestError>() :
 					await ex.Call.Response.GetJsonAsync<TestError>();
 				Assert.IsNotNull(error);
-				Assert.AreEqual(999, error.code);
-				Assert.AreEqual("our server crashed", error.message);
-			}
-		}
-
-		[TestCase(false)]
-		[TestCase(true)]
-		public async Task can_get_error_json_untyped(bool useShortcut) {
-			HttpTest.RespondWithJson(new { code = 999, message = "our server crashed" }, 500);
-
-			try {
-				await "http://api.com".GetStringAsync();
-			}
-			catch (FlurlHttpException ex) {
-				var error = useShortcut ? // error is a dynamic this time
-					await ex.GetResponseJsonAsync() :
-					await ex.Call.Response.GetJsonAsync();
-				Assert.IsNotNull(error);
-				Assert.AreEqual(999, error.code);
-				Assert.AreEqual("our server crashed", error.message);
+				Assert.AreEqual(999, error.Code);
+				Assert.AreEqual("our server crashed", error.Message);
 			}
 		}
 
@@ -166,7 +109,7 @@ namespace Flurl.Test.Http
         public async Task can_get_null_json_when_timeout_and_exception_handled() {
             HttpTest.SimulateTimeout();
             var data = await "http://api.com"
-                .ConfigureRequest(c => c.OnError = call => call.ExceptionHandled = true)
+                .WithSettings(c => c.OnError = call => call.ExceptionHandled = true)
                 .GetJsonAsync<TestData>();
             Assert.IsNull(data);
         }
@@ -197,67 +140,70 @@ namespace Flurl.Test.Http
 
 		[Test] // #571
 		public async Task can_deserialize_after_callback_reads_string() {
-			HttpTest.RespondWithJson(new TestData { id = 123, name = "foo" });
+			HttpTest.RespondWithJson(new { id = 123, name = "foo" });
 			string logMe = null;
 			var result = await new FlurlRequest("http://api.com")
 				.AfterCall( async call => logMe = await call.Response.GetStringAsync())
 				.GetJsonAsync<TestData>();
 
 			Assert.IsNotNull(result);
-			Assert.AreEqual(123, result.id);
-			Assert.AreEqual("foo", result.name);
+			Assert.AreEqual(123, result.Id);
+			Assert.AreEqual("foo", result.Name);
 			Assert.AreEqual("{\"id\":123,\"name\":\"foo\"}", logMe);
 		}
 
 		[Test] // #571 (opposite of previous test and probably less common)
 		public async Task can_read_string_after_callback_deserializes() {
-			HttpTest.RespondWithJson(new TestData { id = 123, name = "foo" });
+			HttpTest.RespondWithJson(new { id = 123, name = "foo" });
 			TestData logMe = null;
 			var result = await new FlurlRequest("http://api.com")
 				.AfterCall(async call => logMe = await call.Response.GetJsonAsync<TestData>())
 				.GetStringAsync();
 
-			Assert.AreEqual("{\"id\":123,\"name\":\"foo\"}", result);
+			Assert.AreEqual("{\"Id\":123,\"Name\":\"foo\"}", result);
 			Assert.IsNotNull(logMe);
-			Assert.AreEqual(123, logMe.id);
-			Assert.AreEqual("foo", logMe.name);
+			Assert.AreEqual(123, logMe.Id);
+			Assert.AreEqual("foo", logMe.Name);
 		}
 
 		[Test] // #571
 		public async Task can_deserialize_as_different_type_than_callback() {
-			HttpTest.RespondWithJson(new TestData2 { id = 123, somethingElse = "bar" });
+			HttpTest.RespondWithJson(new { id = 123, somethingElse = "bar" });
 			TestData logMe = null;
 			var result = await new FlurlRequest("http://api.com")
 				.AfterCall(async call => logMe = await call.Response.GetJsonAsync<TestData>())
 				.GetJsonAsync<TestData2>();
 
 			Assert.IsNotNull(result);
-			Assert.AreEqual(123, result.id);
+			Assert.AreEqual(123, result.Id);
 			// This doesn't work because we deserialized to TestData first, which doesn't have somethingElse, so that value is lost.
 			//Assert.AreEqual("bar", result.somethingElse);
-			Assert.IsNull(result.somethingElse);
+			Assert.IsNull(result.SomethingElse);
 
 			Assert.IsNotNull(logMe);
-			Assert.AreEqual(123, logMe.id);
-			Assert.IsNull(logMe.name);
+			Assert.AreEqual(123, logMe.Id);
+			Assert.IsNull(logMe.Name);
 		}
+
+		// Most tests above intentionally respond with camelCase JSON properties, while the C# models
+		// use TitleCase, to verify case-insensitive default deserialization (#719)
 
 		private class TestData
 		{
-			public int id { get; set; }
-			public string name { get; set; }
+			public int Id { get; set; }
+			public string Name { get; set; }
 		}
 
 		private class TestData2
 		{
-			public int id { get; set; }
-			public string somethingElse { get; set; }
+			public int Id { get; set; }
+			public string SomethingElse { get; set; }
 		}
 
 		private class TestError
 		{
-			public int code { get; set; }
-			public string message { get; set; }
+			public int Code { get; set; }
+			public string Message { get; set; }
 		}
 	}
 }

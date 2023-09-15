@@ -123,46 +123,42 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_allow_specific_http_status() {
-			using (var test = new HttpTest()) {
-				test.RespondWith("Nothing to see here", 404);
-				var sc = GetSettingsContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
-				await GetRequest(sc).DeleteAsync(); // no exception = pass
-			}
+			using var test = new HttpTest();
+			test.RespondWith("Nothing to see here", 404);
+			var sc = GetSettingsContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
+			await GetRequest(sc).DeleteAsync(); // no exception = pass
 		}
 
 		[Test]
 		public async Task allow_specific_http_status_also_allows_2xx() {
-			using (var test = new HttpTest()) {
-				test.RespondWith("I'm just an innocent 2xx, I should never fail!", 201);
-				var sc = GetSettingsContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
-				await GetRequest(sc).GetAsync(); // no exception = pass
-			}
+			using var test = new HttpTest();
+			test.RespondWith("I'm just an innocent 2xx, I should never fail!", 201);
+			var sc = GetSettingsContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
+			await GetRequest(sc).GetAsync(); // no exception = pass
 		}
 
 		[Test]
 		public void can_clear_non_success_status() {
-			using (var test = new HttpTest()) {
-				test.RespondWith("I'm a teapot", 418);
-				// allow 4xx
-				var sc = GetSettingsContainer().AllowHttpStatus("4xx");
-				// but then disallow it
-				sc.Settings.AllowedHttpStatusRange = null;
-				Assert.ThrowsAsync<FlurlHttpException>(async () => await GetRequest(sc).GetAsync());
-			}
+			using var test = new HttpTest();
+			test.RespondWith("I'm a teapot", 418);
+			// allow 4xx
+			var sc = GetSettingsContainer().AllowHttpStatus("4xx");
+			// but then disallow it
+			sc.Settings.AllowedHttpStatusRange = null;
+			Assert.ThrowsAsync<FlurlHttpException>(async () => await GetRequest(sc).GetAsync());
 		}
 
 		[Test]
 		public async Task can_allow_any_http_status() {
-			using (var test = new HttpTest()) {
-				test.RespondWith("epic fail", 500);
-				try {
-					var sc = GetSettingsContainer().AllowAnyHttpStatus();
-					var result = await GetRequest(sc).GetAsync();
-					Assert.AreEqual(500, result.StatusCode);
-				}
-				catch (Exception) {
-					Assert.Fail("Exception should not have been thrown.");
-				}
+			using var test = new HttpTest();
+			test.RespondWith("epic fail", 500);
+			try {
+				var sc = GetSettingsContainer().AllowAnyHttpStatus();
+				var result = await GetRequest(sc).GetAsync();
+				Assert.AreEqual(500, result.StatusCode);
+			}
+			catch (Exception) {
+				Assert.Fail("Exception should not have been thrown.");
 			}
 		}
 	}
@@ -187,19 +183,6 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public void WithClient_shares_client_but_not_Url() {
-			var cli = new FlurlClient().WithHeader("myheader", "123");
-			var req1 = "http://www.api.com/for-req1".WithClient(cli);
-			var req2 = "http://www.api.com/for-req2".WithClient(cli);
-			var req3 = "http://www.api.com/for-req3".WithClient(cli);
-
-			CollectionAssert.AreEquivalent(req1.Headers, req2.Headers);
-			CollectionAssert.AreEquivalent(req1.Headers, req3.Headers);
-			var urls = new[] { req1, req2, req3 }.Select(c => c.Url.ToString());
-			CollectionAssert.AllItemsAreUnique(urls);
-		}
-
-		[Test]
 		public void can_use_uri_with_WithUrl() {
 			var uri = new System.Uri("http://www.mysite.com/foo?x=1");
 			var req = new FlurlClient().Request(uri);
@@ -211,10 +194,9 @@ namespace Flurl.Test.Http
 			using (var test = new HttpTest()) {
 				var cli = new FlurlClient().Configure(s => s.AllowedHttpStatusRange = "*");
 				test.RespondWith("epic fail", 500);
-				Assert.ThrowsAsync<FlurlHttpException>(async () => await "http://www.api.com"
-					.ConfigureRequest(c => c.AllowedHttpStatusRange = "2xx")
-					.WithClient(cli) // client-level settings shouldn't win
-					.GetAsync());
+				var req = "http://www.api.com".WithSettings(c => c.AllowedHttpStatusRange = "2xx");
+				req.Client = cli; // client-level settings shouldn't win
+				Assert.ThrowsAsync<FlurlHttpException>(async () => await req.GetAsync());
 			}
 		}
 	}

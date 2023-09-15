@@ -1,7 +1,6 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30413.136
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32516.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flurl", "src\Flurl\Flurl.csproj", "{117B6C6E-53F9-45AE-9439-F4FB7E21B116}"
 EndProject
@@ -12,10 +11,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{86A5ACB4-F3B3-4395-A5D5-924C9F35F628}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flurl.Test", "Test\Flurl.Test\Flurl.Test.csproj", "{DF68EB0E-9566-4577-B709-291520383F8D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PackageTesters", "PackageTesters", "{9A136878-A43E-4154-9B5E-EDAF27E8628D}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PackageTester.Shared", "PackageTesters\PackageTester.Shared\PackageTester.Shared.shproj", "{D4717AA7-5549-4BAD-81C5-406844A12990}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{B6BF9238-4541-4E1F-955E-C95F1C2A1F46}"
 	ProjectSection(SolutionItems) = preProject
@@ -29,16 +24,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{B6BF9238
 		Build\test.sh = Build\test.sh
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTester.net461", "PackageTesters\PackageTester.net461\PackageTester.net461.csproj", "{1C17F6CB-6AD2-488A-9747-DE0EDD6F401D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTester.netcore2", "PackageTesters\PackageTester.netcore2\PackageTester.netcore2.csproj", "{7D891924-DC5A-4EBD-945E-29F3765BF08F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flurl.CodeGen", "src\Flurl.CodeGen\Flurl.CodeGen.csproj", "{BE943E04-705F-42B1-BF95-A0642D9CA51D}"
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		PackageTesters\PackageTester.Shared\PackageTester.Shared.projitems*{d4717aa7-5549-4bad-81c5-406844a12990}*SharedItemsImports = 13
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -56,14 +44,6 @@ Global
 		{DF68EB0E-9566-4577-B709-291520383F8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF68EB0E-9566-4577-B709-291520383F8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF68EB0E-9566-4577-B709-291520383F8D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1C17F6CB-6AD2-488A-9747-DE0EDD6F401D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1C17F6CB-6AD2-488A-9747-DE0EDD6F401D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1C17F6CB-6AD2-488A-9747-DE0EDD6F401D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1C17F6CB-6AD2-488A-9747-DE0EDD6F401D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7D891924-DC5A-4EBD-945E-29F3765BF08F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7D891924-DC5A-4EBD-945E-29F3765BF08F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7D891924-DC5A-4EBD-945E-29F3765BF08F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7D891924-DC5A-4EBD-945E-29F3765BF08F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BE943E04-705F-42B1-BF95-A0642D9CA51D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BE943E04-705F-42B1-BF95-A0642D9CA51D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE943E04-705F-42B1-BF95-A0642D9CA51D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -76,9 +56,6 @@ Global
 		{117B6C6E-53F9-45AE-9439-F4FB7E21B116} = {B82E8094-AFA9-466E-9E60-473B7B89AFE2}
 		{D7AC6172-73DD-468D-955A-3562F2BE303B} = {B82E8094-AFA9-466E-9E60-473B7B89AFE2}
 		{DF68EB0E-9566-4577-B709-291520383F8D} = {86A5ACB4-F3B3-4395-A5D5-924C9F35F628}
-		{D4717AA7-5549-4BAD-81C5-406844A12990} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
-		{1C17F6CB-6AD2-488A-9747-DE0EDD6F401D} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
-		{7D891924-DC5A-4EBD-945E-29F3765BF08F} = {9A136878-A43E-4154-9B5E-EDAF27E8628D}
 		{BE943E04-705F-42B1-BF95-A0642D9CA51D} = {B82E8094-AFA9-466E-9E60-473B7B89AFE2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

@@ -119,7 +119,7 @@ namespace Flurl.CodeGen
 
 			// cookie extensions
 			yield return Create("WithCookie", "Creates a new FlurlRequest and adds a name-value pair to its Cookie header. " +
-											  "To automatically maintain a cookie \"session\", consider using a CookieJar or CookieSession instead.")
+			                                  "To automatically maintain a cookie \"session\", consider using a CookieJar or CookieSession instead.")
 				.AddArg("name", "string", "The cookie name.")
 				.AddArg("value", "object", "The cookie value.");
 			yield return Create("WithCookies", "Creates a new FlurlRequest and adds name-value pairs to its Cookie header based on property names/values of the provided object, or keys/values if object is a dictionary. " +
@@ -131,7 +131,7 @@ namespace Flurl.CodeGen
 				.AddArg("cookieJar", "CookieJar", "The created CookieJar, which can be reused in subsequent requests.", isOut: true);
 
 			// settings extensions
-			yield return Create("ConfigureRequest", "Creates a new FlurlRequest and allows changing its Settings inline.")
+			yield return Create("WithSettings", "Creates a new FlurlRequest and allows changing its Settings inline.")
 				.AddArg("action", "Action<FlurlHttpSettings>", "A delegate defining the Settings changes.");
 			yield return Create("WithTimeout", "Creates a new FlurlRequest and sets the request timeout.")
 				.AddArg("timespan", "TimeSpan", "Time to wait before the request times out.");
@@ -144,40 +144,38 @@ namespace Flurl.CodeGen
 			yield return Create("AllowAnyHttpStatus", "Creates a new FlurlRequest and configures it to allow any returned HTTP status without throwing a FlurlHttpException.");
 			yield return Create("WithAutoRedirect", "Creates a new FlurlRequest and configures whether redirects are automatically followed.")
 				.AddArg("enabled", "bool", "true if Flurl should automatically send a new request to the redirect URL, false if it should not.");
-
-			yield return Create("WithClient", "Creates a new FlurlRequest and configures it to use the given IFlurlClient.")
-				.AddArg("client", "IFlurlClient", "The IFlurlClient to use to send the request.");
-
-			// a couple oddballs that don't really belong here but here we are
-
-			yield return new ExtensionMethod("DownloadFileAsync", "Creates a new FlurlRequest and asynchronously downloads a file.")
-				.Returns("Task<string>", "A Task whose result is the local path of the downloaded file.")
-				.Extends(extendedArg)
-				.AddArg("localFolderPath", "string", "Path of local folder where file is to be downloaded.")
-				.AddArg("localFileName", "string", "Name of local file. If not specified, the source filename (last segment of the URL) is used.", "null")
-				.AddArg("bufferSize", "int", "Buffer size in bytes. Default is 4096.", "4096")
-				.AddArg("cancellationToken", "CancellationToken", "The token to monitor for cancellation requests.", "default(CancellationToken)");
-
-			yield return new ExtensionMethod("PostMultipartAsync", "Creates a FlurlRequest and sends an asynchronous multipart/form-data POST request.")
-				.Returns("Task<IFlurlResponse>", "A Task whose result is the received IFlurlResponse.")
-				.Extends(extendedArg)
-				.AddArg("buildContent", "Action<CapturedMultipartContent>", "A delegate for building the content parts.")
-				.AddArg("cancellationToken", "CancellationToken", "The token to monitor for cancellation requests.", "default(CancellationToken)");
 		}
 
 		/// <summary>
 		/// HTTP-calling methods for all valid verb/content type combinations (PutStringAsync, PatchJsonAsync, etc),
 		/// with generic and non-generic overloads.
 		/// </summary>
-		public static IEnumerable<HttpExtensionMethod> GetHttpCallingExtensions(MethodArg extendedArg) {
-			return
-				from verb in new[] { null, "Get", "Post", "Head", "Put", "Delete", "Patch", "Options" }
-				from reqType in new[] { null, "Json", "String", "UrlEncoded" }
-				from respType in new[] { null, "Json", "JsonList", "String", "Stream", "Bytes" }
-				where IsSupportedCombo(verb, reqType, respType, extendedArg.Type)
-				from isGeneric in new[] { true, false }
-				where !isGeneric || AllowDeserializeToGeneric(respType)
-				select new HttpExtensionMethod(verb, isGeneric, reqType, respType) { ExtendedTypeArg = extendedArg };
+		public static IEnumerable<HttpExtensionMethod> GetHttpCallingExtensions(MethodArg extendedArg) =>
+			from verb in new[] { null, "Get", "Post", "Head", "Put", "Delete", "Patch", "Options" }
+			from reqType in new[] { null, "Json", "String", "UrlEncoded" }
+			from respType in new[] { null, "Json", "String", "Stream", "Bytes" }
+			where IsSupportedCombo(verb, reqType, respType, extendedArg.Type)
+			let isGenenric = (respType == "Json")
+			select new HttpExtensionMethod(verb, isGenenric, reqType, respType) { ExtendedTypeArg = extendedArg };
+
+		public static IEnumerable<ExtensionMethod> GetMiscAsyncExtensions(MethodArg extendedArg) {
+			// a couple oddballs
+
+			yield return new ExtensionMethod("DownloadFileAsync", "Creates a new FlurlRequest and asynchronously downloads a file.")
+				.Extends(extendedArg)
+				.Returns("Task<string>", "A Task whose result is the local path of the downloaded file.")
+				.AddArg("localFolderPath", "string", "Path of local folder where file is to be downloaded.")
+				.AddArg("localFileName", "string", "Name of local file. If not specified, the source filename (last segment of the URL) is used.", "null")
+				.AddArg("bufferSize", "int", "Buffer size in bytes. Default is 4096.", "4096")
+				.AddArg("completionOption", "HttpCompletionOption", "The HttpCompletionOption used in the request. Optional.", "HttpCompletionOption.ResponseHeadersRead")
+				.AddArg("cancellationToken", "CancellationToken", "The token to monitor for cancellation requests.", "default");
+
+			yield return new ExtensionMethod("PostMultipartAsync", "Creates a FlurlRequest and sends an asynchronous multipart/form-data POST request.")
+				.Extends(extendedArg)
+				.Returns("Task<IFlurlResponse>", "A Task whose result is the received IFlurlResponse.")
+				.AddArg("buildContent", "Action<CapturedMultipartContent>", "A delegate for building the content parts.")
+				.AddArg("completionOption", "HttpCompletionOption", "The HttpCompletionOption used in the request. Optional.", "HttpCompletionOption.ResponseContentRead")
+				.AddArg("cancellationToken", "CancellationToken", "The token to monitor for cancellation requests.", "default");
 		}
 
 		private static bool IsSupportedCombo(string verb, string reqType, string respType, string extensionType) {
@@ -194,15 +192,6 @@ namespace Flurl.CodeGen
 					return reqType != null || extensionType != "IFlurlRequest";
 				default: // Get, Head, Delete, Options
 					return reqType == null;
-			}
-		}
-
-		private static bool AllowDeserializeToGeneric(string deserializeType) {
-			switch (deserializeType) {
-				case "Json":
-					return true;
-				default:
-					return false;
 			}
 		}
 	}

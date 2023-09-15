@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -46,22 +45,6 @@ namespace Flurl.Http
 		Task<T> GetJsonAsync<T>();
 
 		/// <summary>
-		/// Deserializes JSON-formatted HTTP response body to a dynamic object.
-		/// </summary>
-		/// <returns>A Task whose result is a dynamic object containing data in the response body.</returns>
-		/// <example>d = await url.PostAsync(data).GetJson()</example>
-		/// <exception cref="FlurlHttpException">Condition.</exception>
-		Task<dynamic> GetJsonAsync();
-
-		/// <summary>
-		/// Deserializes JSON-formatted HTTP response body to a list of dynamic objects.
-		/// </summary>
-		/// <returns>A Task whose result is a list of dynamic objects containing data in the response body.</returns>
-		/// <example>d = await url.PostAsync(data).GetJsonList()</example>
-		/// <exception cref="FlurlHttpException">Condition.</exception>
-		Task<IList<dynamic>> GetJsonListAsync();
-
-		/// <summary>
 		/// Returns HTTP response body as a string.
 		/// </summary>
 		/// <returns>A Task whose result is the response body as a string.</returns>
@@ -86,6 +69,7 @@ namespace Flurl.Http
 	/// <inheritdoc />
 	public class FlurlResponse : IFlurlResponse
 	{
+		private readonly FlurlCall _call;
 		private readonly Lazy<IReadOnlyNameValueList<string>> _headers;
 		private readonly Lazy<IReadOnlyList<FlurlCookie>> _cookies;
 		private object _capturedBody = null;
@@ -99,7 +83,7 @@ namespace Flurl.Http
 		public IReadOnlyList<FlurlCookie> Cookies => _cookies.Value;
 
 		/// <inheritdoc />
-		public HttpResponseMessage ResponseMessage { get; }
+		public HttpResponseMessage ResponseMessage => _call.HttpResponseMessage;
 
 		/// <inheritdoc />
 		public int StatusCode => (int)ResponseMessage.StatusCode;
@@ -107,8 +91,8 @@ namespace Flurl.Http
 		/// <summary>
 		/// Creates a new FlurlResponse that wraps the give HttpResponseMessage.
 		/// </summary>
-		public FlurlResponse(HttpResponseMessage resp, CookieJar cookieJar = null) {
-			ResponseMessage = resp;
+		public FlurlResponse(FlurlCall call, CookieJar cookieJar = null) {
+			_call = call;
 			_headers = new Lazy<IReadOnlyNameValueList<string>>(LoadHeaders);
 			_cookies = new Lazy<IReadOnlyList<FlurlCookie>>(LoadCookies);
 			LoadCookieJar(cookieJar);
@@ -151,8 +135,7 @@ namespace Flurl.Http
 				if (_capturedBody is T body) return body;
 			}
 
-			var call = ResponseMessage.RequestMessage.GetFlurlCall();
-			_serializer = _serializer ?? call.Request.Settings.JsonSerializer;
+			_serializer ??= _call.Request.Settings.JsonSerializer;
 
 			try {
 				if (_streamRead) {
@@ -164,8 +147,8 @@ namespace Flurl.Http
 					_capturedBody = _serializer.Deserialize<T>(s);
 				}
 				else {
-					using (var stream = await ResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false))
-						_capturedBody = _serializer.Deserialize<T>(stream);
+					using var stream = await ResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
+					_capturedBody = _serializer.Deserialize<T>(stream);
 				}
 				return (T)_capturedBody;
 			}
@@ -173,25 +156,12 @@ namespace Flurl.Http
 				_serializer = null;
 				_capturedBody = await ResponseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
 				_streamRead = true;
-				call.Exception = new FlurlParsingException(call, "JSON", ex);
-				await FlurlRequest.HandleExceptionAsync(call, call.Exception, CancellationToken.None).ConfigureAwait(false);
+				await FlurlClient.HandleExceptionAsync(_call, new FlurlParsingException(_call, "JSON", ex), CancellationToken.None).ConfigureAwait(false);
 				return default;
 			}
 			finally {
 				_streamRead = true;
 			}
-		}
-
-		/// <inheritdoc />
-		public async Task<dynamic> GetJsonAsync() {
-			dynamic d = await GetJsonAsync<ExpandoObject>().ConfigureAwait(false);
-			return d;
-		}
-
-		/// <inheritdoc />
-		public async Task<IList<dynamic>> GetJsonListAsync() {
-			dynamic[] d = await GetJsonAsync<ExpandoObject[]>().ConfigureAwait(false);
-			return d;
 		}
 
 		/// <inheritdoc />
@@ -220,7 +190,7 @@ namespace Flurl.Http
 			if (ct?.CharSet != null)
 				ct.CharSet = ct.CharSet.StripQuotes();
 
-			_capturedBody = await ResponseMessage.Content.ReadAsStringAsync();
+			_capturedBody = await ResponseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
 			_streamRead = true;
 			return (string)_capturedBody;
 		}

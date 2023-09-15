@@ -11,9 +11,9 @@ namespace Flurl.Http
 	public interface IHttpSettingsContainer
 	{
 	    /// <summary>
-	    /// Gets or sets the FlurlHttpSettings object used by this client or request.
+	    /// Gets the FlurlHttpSettings object used by this client or request.
 	    /// </summary>
-	    FlurlHttpSettings Settings { get; set; }
+	    FlurlHttpSettings Settings { get; }
 
 		/// <summary>
 		/// Collection of headers sent on this request or all requests using this client.

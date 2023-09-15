@@ -31,11 +31,6 @@ namespace Flurl.Http
 		public IFlurlResponse Response { get; set; }
 
 		/// <summary>
-		/// The FlurlCall that received a 3xx response and automatically triggered this call.
-		/// </summary>
-		public FlurlCall RedirectedFrom { get; set; }
-
-		/// <summary>
 		/// If this call has a 3xx response and Location header, contains information about how to handle the redirect.
 		/// Otherwise null.
 		/// </summary>
