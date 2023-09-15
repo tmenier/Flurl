@@ -199,7 +199,7 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual("http://www.mysite.com?1=x&2=y", url.ToString());
 		}
 
-		[Test, Ignore("tricky to do while maintaining param order. deferring until append param w/o overwriting is fully supported.")]
+		[Test]
 		public void can_set_query_params_from_kv_pairs() {
 			var url = "http://foo.com".SetQueryParams(new[] {
 				new { key = "x", value = 1 },

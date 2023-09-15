@@ -372,8 +372,13 @@ namespace Flurl
 			if (values is string s)
 				return SetQueryParam(s);
 
-			foreach (var kv in values.ToKeyValuePairs())
-				SetQueryParam(kv.Key, kv.Value, nullValueHandling);
+			var visited = new HashSet<string>();
+			foreach (var kv in values.ToKeyValuePairs()) {
+				if (visited.Add(kv.Key))
+					SetQueryParam(kv.Key, kv.Value, nullValueHandling); // overwrite existing key(s)
+				else
+					AppendQueryParam(kv.Key, kv.Value, nullValueHandling); // unless they're in this same collection (#370)
+			}
 
 			return this;
 		}
