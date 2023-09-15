@@ -125,6 +125,72 @@ namespace Flurl
 		}
 		
 		/// <summary>
+		/// Creates a new Url object from the string and adds a parameter to the query.
+		/// </summary>
+		/// <param name="url">This URL.</param>
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+		/// <returns>A new Flurl.Url object.</returns>
+		public static Url AppendQueryParam(this string url, string name, object value, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			return new Url(url).AppendQueryParam(name, value, nullValueHandling);
+		}
+		
+		/// <summary>
+		/// Creates a new Url object from the string and adds a parameter to the query.
+		/// </summary>
+		/// <param name="url">This URL.</param>
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
+		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded. Defaults to false.</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing).</param>
+		/// <returns>A new Flurl.Url object.</returns>
+		public static Url AppendQueryParam(this string url, string name, string value, bool isEncoded = false, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			return new Url(url).AppendQueryParam(name, value, isEncoded, nullValueHandling);
+		}
+		
+		/// <summary>
+		/// Creates a new Url object from the string and adds a parameter without a value to the query.
+		/// </summary>
+		/// <param name="url">This URL.</param>
+		/// <param name="name">Name of query parameter</param>
+		/// <returns>A new Flurl.Url object.</returns>
+		public static Url AppendQueryParam(this string url, string name) {
+			return new Url(url).AppendQueryParam(name);
+		}
+		
+		/// <summary>
+		/// Creates a new Url object from the string, parses values object into name/value pairs, and adds them to the query, overwriting any that already exist.
+		/// </summary>
+		/// <param name="url">This URL.</param>
+		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+		/// <returns>A new Flurl.Url object.</returns>
+		public static Url AppendQueryParam(this string url, object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			return new Url(url).AppendQueryParam(values, nullValueHandling);
+		}
+		
+		/// <summary>
+		/// Creates a new Url object from the string and adds multiple parameters without values to the query.
+		/// </summary>
+		/// <param name="url">This URL.</param>
+		/// <param name="names">Names of query parameters.</param>
+		/// <returns>A new Flurl.Url object.</returns>
+		public static Url AppendQueryParam(this string url, IEnumerable<string> names) {
+			return new Url(url).AppendQueryParam(names);
+		}
+		
+		/// <summary>
+		/// Creates a new Url object from the string and adds multiple parameters without values to the query.
+		/// </summary>
+		/// <param name="url">This URL.</param>
+		/// <param name="names">Names of query parameters</param>
+		/// <returns>A new Flurl.Url object.</returns>
+		public static Url AppendQueryParam(this string url, params string[] names) {
+			return new Url(url).AppendQueryParam(names);
+		}
+		
+		/// <summary>
 		/// Creates a new Url object from the string and removes a name/value pair from the query by name.
 		/// </summary>
 		/// <param name="url">This URL.</param>
@@ -304,6 +370,72 @@ namespace Flurl
 		/// <returns>A new Flurl.Url object.</returns>
 		public static Url SetQueryParams(this Uri uri, params string[] names) {
 			return new Url(uri).SetQueryParams(names);
+		}
+		
+		/// <summary>
+		/// Creates a new Url object from the string and adds a parameter to the query.
+		/// </summary>
+		/// <param name="uri">This System.Uri.</param>
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+		/// <returns>A new Flurl.Url object.</returns>
+		public static Url AppendQueryParam(this Uri uri, string name, object value, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			return new Url(uri).AppendQueryParam(name, value, nullValueHandling);
+		}
+		
+		/// <summary>
+		/// Creates a new Url object from the string and adds a parameter to the query.
+		/// </summary>
+		/// <param name="uri">This System.Uri.</param>
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
+		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded. Defaults to false.</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing).</param>
+		/// <returns>A new Flurl.Url object.</returns>
+		public static Url AppendQueryParam(this Uri uri, string name, string value, bool isEncoded = false, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			return new Url(uri).AppendQueryParam(name, value, isEncoded, nullValueHandling);
+		}
+		
+		/// <summary>
+		/// Creates a new Url object from the string and adds a parameter without a value to the query.
+		/// </summary>
+		/// <param name="uri">This System.Uri.</param>
+		/// <param name="name">Name of query parameter</param>
+		/// <returns>A new Flurl.Url object.</returns>
+		public static Url AppendQueryParam(this Uri uri, string name) {
+			return new Url(uri).AppendQueryParam(name);
+		}
+		
+		/// <summary>
+		/// Creates a new Url object from the string, parses values object into name/value pairs, and adds them to the query, overwriting any that already exist.
+		/// </summary>
+		/// <param name="uri">This System.Uri.</param>
+		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+		/// <returns>A new Flurl.Url object.</returns>
+		public static Url AppendQueryParam(this Uri uri, object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			return new Url(uri).AppendQueryParam(values, nullValueHandling);
+		}
+		
+		/// <summary>
+		/// Creates a new Url object from the string and adds multiple parameters without values to the query.
+		/// </summary>
+		/// <param name="uri">This System.Uri.</param>
+		/// <param name="names">Names of query parameters.</param>
+		/// <returns>A new Flurl.Url object.</returns>
+		public static Url AppendQueryParam(this Uri uri, IEnumerable<string> names) {
+			return new Url(uri).AppendQueryParam(names);
+		}
+		
+		/// <summary>
+		/// Creates a new Url object from the string and adds multiple parameters without values to the query.
+		/// </summary>
+		/// <param name="uri">This System.Uri.</param>
+		/// <param name="names">Names of query parameters</param>
+		/// <returns>A new Flurl.Url object.</returns>
+		public static Url AppendQueryParam(this Uri uri, params string[] names) {
+			return new Url(uri).AppendQueryParam(names);
 		}
 		
 		/// <summary>
