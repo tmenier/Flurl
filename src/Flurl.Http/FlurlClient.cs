@@ -139,7 +139,6 @@ namespace Flurl.Http
 				return await HandleExceptionAsync(call, ex, cancellationToken).ConfigureAwait(false);
 			}
 			finally {
-				reqMsg.Dispose();
 				cts?.Dispose();
 				call.EndedUtc = DateTime.UtcNow;
 				await RaiseEventAsync(settings.AfterCall, settings.AfterCallAsync, call).ConfigureAwait(false);
