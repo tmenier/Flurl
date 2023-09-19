@@ -147,16 +147,21 @@ namespace Flurl.Http
 
 		private void SyncHeaders(IFlurlRequest req, HttpRequestMessage reqMsg) {
 			// copy any client-level (default) headers to FlurlRequest
-			foreach (var header in this.Headers.Where(h => !req.Headers.Contains(h.Name)).ToList())
-				req.Headers.Add(header.Name, header.Value);
+			foreach (var header in this.Headers.ToList()) {
+				if (!req.Headers.Contains(header.Name))
+					req.Headers.Add(header.Name, header.Value);
+			}
 
 			// copy headers from FlurlRequest to HttpRequestMessage
 			foreach (var header in req.Headers)
 				reqMsg.SetHeader(header.Name, header.Value.Trim(), false);
 
+			if (reqMsg.Content == null)
+				return;
+
 			// copy headers from HttpContent to FlurlRequest
-			if (reqMsg.Content != null) {
-				foreach (var header in reqMsg.Content.Headers)
+			foreach (var header in reqMsg.Content.Headers.ToList()) {
+				if (!req.Headers.Contains(header.Key))
 					req.Headers.AddOrReplace(header.Key, string.Join(",", header.Value));
 			}
 		}
