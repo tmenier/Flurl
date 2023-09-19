@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Flurl.Util;
 
@@ -76,6 +77,42 @@ namespace Flurl.Http
 			_dict.Clear();
 			return this;
 		}
+
+		/// <summary>
+		/// Writes this CookieJar to a TextWriter. Useful for persisting to a file.
+		/// </summary>
+		public void WriteTo(TextWriter writer) {
+			foreach (var cookie in _dict.Values)
+				cookie.WriteTo(writer);
+		}
+
+		/// <summary>
+		/// Instantiates a CookieJar that was previously persisted using WriteTo.
+		/// </summary>
+		public static CookieJar LoadFrom(TextReader reader) {
+			if (reader == null) return null;
+			var jar = new CookieJar();
+			while (reader.Peek() >= 0) {
+				var cookie = FlurlCookie.LoadFrom(reader);
+				if (cookie != null)
+					jar.AddOrReplace(cookie);
+			}
+			return jar;
+		}
+
+		/// <summary>
+		/// Returns a string representing this CookieJar.
+		/// </summary>
+		public override string ToString() {
+			var writer = new StringWriter();
+			WriteTo(writer);
+			return writer.ToString();
+		}
+
+		/// <summary>
+		/// Instantiates a CookieJar that was previously persisted using ToString.
+		/// </summary>
+		public static CookieJar LoadFromString(string s) => LoadFrom(new StringReader(s));
 
 		/// <inheritdoc/>
 		public IEnumerator<FlurlCookie> GetEnumerator() => _dict.Values.GetEnumerator();

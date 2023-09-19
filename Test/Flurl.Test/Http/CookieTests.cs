@@ -87,6 +87,50 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public void can_build_response_header() {
+			// simple
+			var cookie1 = new FlurlCookie("x", "foo");
+			Assert.AreEqual("x=foo", CookieCutter.BuildResponseHeader(cookie1));
+
+			// complex
+			var cookie = new FlurlCookie("y", "bar") {
+				Domain = "cookie.org",
+				Expires = new DateTimeOffset(2025, 12, 31, 1, 23, 45, TimeSpan.Zero),
+				HttpOnly = true,
+				MaxAge = 10,
+				Path = "/a/b",
+				Secure = true,
+				SameSite = SameSite.Lax
+			};
+			var headerVal = CookieCutter.BuildResponseHeader(cookie);
+			Assert.AreEqual("y=bar; Domain=cookie.org; Expires=Wed, 31 Dec 2025 01:23:45 GMT; HttpOnly; Max-Age=10; Path=/a/b; Secure; SameSite=Lax", headerVal);
+		}
+
+		[Test]
+		public void can_perist_and_load_jar() {
+			var jar1 = new CookieJar()
+				.AddOrReplace("x", "foo", "https://site1.com", DateTimeOffset.UtcNow)
+				.AddOrReplace("y", "bar", "https://site2.com", DateTimeOffset.UtcNow.AddMinutes(-10));
+
+			var s1 = jar1.ToString();
+
+			var jar2 = CookieJar.LoadFromString(s1);
+			Assert.AreEqual(jar1.Count, jar2.Count);
+
+			var cookies1 = jar1.ToArray();
+			var cookies2 = jar2.ToArray();
+
+			for (var i = 0; i < 2; i++) {
+				Assert.AreEqual(cookies1[i].Name, cookies2[i].Name);
+				Assert.AreEqual(cookies1[i].Value, cookies2[i].Value);
+				Assert.AreEqual(cookies1[i].OriginUrl, cookies2[i].OriginUrl);
+			}
+
+			var s2 = jar2.ToString();
+			Assert.AreEqual(s1, s2);
+		}
+
+		[Test]
 		public async Task can_do_cookie_session() {
 			HttpTest
 				.RespondWith("hi", cookies: new { x = "foo", y = "bar" })
@@ -114,7 +158,7 @@ namespace Flurl.Test.Http
 		[Test]
 		public void can_parse_set_cookie_header() {
 			var start = DateTimeOffset.UtcNow;
-			var cookie = CookieCutter.ParseResponseHeader("https://www.cookies.com/a/b", "x=foo  ; DoMaIn=cookies.com  ;     path=/  ; MAX-AGE=999 ; expires= ;  secure ;HTTPONLY ;samesite=none");
+			var cookie = CookieCutter.ParseResponseHeader("x=foo  ; DoMaIn=cookies.com  ;     path=/  ; MAX-AGE=999 ; expires= ;  secure ;HTTPONLY ;samesite=none", "https://www.cookies.com/a/b");
 			Assert.AreEqual("https://www.cookies.com/a/b", cookie.OriginUrl.ToString());
 			Assert.AreEqual("x", cookie.Name);
 			Assert.AreEqual("foo", cookie.Value);
@@ -130,7 +174,7 @@ namespace Flurl.Test.Http
 
 			// simpler case
 			start = DateTimeOffset.UtcNow;
-			cookie = CookieCutter.ParseResponseHeader("https://www.cookies.com/a/b", "y=bar");
+			cookie = CookieCutter.ParseResponseHeader("y=bar", "https://www.cookies.com/a/b");
 			Assert.AreEqual("https://www.cookies.com/a/b", cookie.OriginUrl.ToString());
 			Assert.AreEqual("y", cookie.Name);
 			Assert.AreEqual("bar", cookie.Value);
@@ -164,7 +208,7 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void unquotes_cookie_value() {
-			var cookie = CookieCutter.ParseResponseHeader("https://cookies.com", "x=\"hello there\"" );
+			var cookie = CookieCutter.ParseResponseHeader("x=\"hello there\"", "https://cookies.com");
 			Assert.AreEqual("hello there", cookie.Value);
 		}
 

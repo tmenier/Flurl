@@ -19,7 +19,7 @@ namespace Flurl.Http
 		public static IFlurlRequest WithCookie(this IFlurlRequest request, string name, object value) {
 			var cookies = new NameValueList<string>(request.Cookies, true); // cookie names are case-sensitive https://stackoverflow.com/a/11312272/62600
 			cookies.AddOrReplace(name, value.ToInvariantString());
-			return request.WithHeader("Cookie", CookieCutter.ToRequestHeader(cookies));
+			return request.WithHeader("Cookie", CookieCutter.BuildRequestHeader(cookies));
 		}
 
 		/// <summary>
@@ -40,7 +40,7 @@ namespace Flurl.Http
 				foreach (var kv in group.Skip(1))
 					cookies.Add(kv.Key, kv.Value.ToInvariantString());
 			}
-			return request.WithHeader("Cookie", CookieCutter.ToRequestHeader(cookies));
+			return request.WithHeader("Cookie", CookieCutter.BuildRequestHeader(cookies));
 		}
 
 		/// <summary>
