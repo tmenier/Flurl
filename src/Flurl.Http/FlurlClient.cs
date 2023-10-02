@@ -70,7 +70,13 @@ namespace Flurl.Http
 		/// <param name="baseUrl">The base URL associated with this client.</param>
 		public FlurlClient(HttpClient httpClient, string baseUrl = null) {
 			HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-			BaseUrl = baseUrl ?? HttpClient.BaseAddress?.ToString();
+			BaseUrl = baseUrl ?? httpClient.BaseAddress?.ToString();
+			foreach (var header in httpClient.DefaultRequestHeaders.SelectMany(h => h.Value, (kv, v) => (kv.Key, v)))
+				Headers.Add(header);
+
+			Settings.Timeout = httpClient.Timeout;
+			// Timeout can be overridden per request, so don't constrain it by the underlying HttpClient
+			httpClient.Timeout = Timeout.InfiniteTimeSpan;
 		}
 
 		/// <inheritdoc />
