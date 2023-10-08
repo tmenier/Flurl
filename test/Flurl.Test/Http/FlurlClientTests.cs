@@ -106,9 +106,9 @@ namespace Flurl.Test.Http
 			};
 			var cli = new FlurlClient(hc);
 
-			Assert.AreEqual("http://api.com/", cli.HttpClient.BaseAddress.ToString());
-			Assert.AreEqual(123, cli.HttpClient.Timeout.TotalSeconds);
+			Assert.AreSame(hc, cli.HttpClient);
 			Assert.AreEqual("http://api.com/", cli.BaseUrl);
+			Assert.AreEqual(123, cli.Settings.Timeout?.TotalSeconds);
 		}
 
 		[Test] // #334
