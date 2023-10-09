@@ -1,4 +1,5 @@
 ﻿using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Flurl.Http;
 using NUnit.Framework;
@@ -73,6 +74,15 @@ namespace Flurl.Test.Http
 			var data = await "http://some-api.com".PostJsonAsync(new { a = 1, b = 2 }).ReceiveString();
 
 			Assert.AreEqual("good job", data);
+		}
+
+		[Test] // #740
+		public async Task doesnt_add_space_in_content_type_header() {
+			var req = new FlurlRequest("https://fake.com");
+			await req.WithHeader("Content-Type", "application/octet-stream;some=b").PostStringAsync("hello");
+
+			Assert.IsTrue(req.Headers.TryGetFirst("Content-Type", out var val));
+			Assert.AreEqual("application/octet-stream;some=b", val);
 		}
 
 		private class TestData

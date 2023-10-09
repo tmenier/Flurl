@@ -372,8 +372,13 @@ namespace Flurl
 			if (values is string s)
 				return SetQueryParam(s);
 
-			foreach (var kv in values.ToKeyValuePairs())
-				SetQueryParam(kv.Key, kv.Value, nullValueHandling);
+			var visited = new HashSet<string>();
+			foreach (var kv in values.ToKeyValuePairs()) {
+				if (visited.Add(kv.Key))
+					SetQueryParam(kv.Key, kv.Value, nullValueHandling); // overwrite existing key(s)
+				else
+					AppendQueryParam(kv.Key, kv.Value, nullValueHandling); // unless they're in this same collection (#370)
+			}
 
 			return this;
 		}
@@ -399,6 +404,83 @@ namespace Flurl
 		/// <param name="names">Names of query parameters</param>
 		/// <returns>The Url object with the query parameter added.</returns>
 		public Url SetQueryParams(params string[] names) => SetQueryParams(names as IEnumerable<string>);
+
+		/// <summary>
+		/// Adds a parameter to the query.
+		/// </summary>
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		public Url AppendQueryParam(string name, object value, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			QueryParams.Add(name, value, false, nullValueHandling);
+			return this;
+		}
+
+		/// <summary>
+		/// Adds a parameter to the query.
+		/// </summary>
+		/// <param name="name">Name of query parameter</param>
+		/// <param name="value">Value of query parameter</param>
+		/// <param name="isEncoded">Set to true to indicate the value is already URL-encoded</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null" />.</exception>
+		public Url AppendQueryParam(string name, string value, bool isEncoded = false, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			QueryParams.Add(name, value, isEncoded, nullValueHandling);
+			return this;
+		}
+
+		/// <summary>
+		/// Adds a parameter without a value to the query.
+		/// </summary>
+		/// <param name="name">Name of query parameter</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		public Url AppendQueryParam(string name) {
+			QueryParams.Add(name, null, false, NullValueHandling.NameOnly);
+			return this;
+		}
+
+		/// <summary>
+		/// Parses values (usually an anonymous object or dictionary) into name/value pairs and adds them to the query.
+		/// </summary>
+		/// <param name="values">Typically an anonymous object, ie: new { x = 1, y = 2 }</param>
+		/// <param name="nullValueHandling">Indicates how to handle null values. Defaults to Remove (any existing)</param>
+		/// <returns>The Url object with the query parameters added</returns>
+		public Url AppendQueryParam(object values, NullValueHandling nullValueHandling = NullValueHandling.Remove) {
+			if (values == null)
+				return this;
+
+			if (values is string s)
+				return AppendQueryParam(s);
+
+			foreach (var kv in values.ToKeyValuePairs())
+				AppendQueryParam(kv.Key, kv.Value, nullValueHandling);
+
+			return this;
+		}
+
+		/// <summary>
+		/// Adds multiple parameters without values to the query.
+		/// </summary>
+		/// <param name="names">Names of query parameters.</param>
+		/// <returns>The Url object with the query parameter added</returns>
+		public Url AppendQueryParam(IEnumerable<string> names) {
+			if (names == null)
+				return this;
+
+			foreach (var name in names.Where(n => !string.IsNullOrEmpty(n)))
+				AppendQueryParam(name);
+
+			return this;
+		}
+
+		/// <summary>
+		/// Adds multiple parameters without values to the query.
+		/// </summary>
+		/// <param name="names">Names of query parameters</param>
+		/// <returns>The Url object with the query parameter added.</returns>
+		public Url AppendQueryParam(params string[] names) => SetQueryParams(names as IEnumerable<string>);
 
 		/// <summary>
 		/// Removes a name/value pair from the query by name.
@@ -679,7 +761,14 @@ namespace Flurl
 		/// </summary>
 		/// <param name="url">The string to check</param>
 		/// <returns>true if the string is a well-formed absolute URL</returns>
-		public static bool IsValid(string url) => url != null && Uri.IsWellFormedUriString(url, UriKind.Absolute);
+		public static bool IsValid(string url) =>
+			!string.IsNullOrWhiteSpace(url) &&
+			// TryCreate will succeed for URLs starting with "//". We want to require a scheme to be considered "absolute".
+			!url.Trim().StartsWith("/") &&
+			// Don't be tempted to use IsWellFormedUriString - it's known to return false positives on some platforms:
+			// https://github.com/dotnet/runtime/issues/72632
+			Uri.TryCreate(url, UriKind.Absolute, out _);
+
 		#endregion
 	}
 }

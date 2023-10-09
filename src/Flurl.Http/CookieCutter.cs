@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Flurl.Util;
 
 namespace Flurl.Http
@@ -25,23 +26,24 @@ namespace Flurl.Http
 		/// <summary>
 		/// Parses a Set-Cookie response header to a FlurlCookie.
 		/// </summary>
-		/// <param name="url">The URL that sent the response.</param>
 		/// <param name="headerValue">Value of the Set-Cookie header.</param>
+		/// <param name="url">The URL that sent the response.</param>
+		/// <param name="dateReceived">Date/time that original Set-Cookie header was received. Defaults to current date/time. Important for Max-Age to be enforced correctly.</param>
 		/// <returns></returns>
-		public static FlurlCookie ParseResponseHeader(string url, string headerValue) {
+		public static FlurlCookie ParseResponseHeader(string headerValue, string url, DateTimeOffset? dateReceived = null) {
 			if (string.IsNullOrEmpty(headerValue)) return null;
 
 			FlurlCookie cookie = null;
 			foreach (var pair in GetPairs(headerValue)) {
 				if (cookie == null)
-					cookie = new FlurlCookie(pair.Name, pair.Value.Trim('"'), url, DateTimeOffset.UtcNow);
+					cookie = new FlurlCookie(pair.Name, pair.Value.Trim('"'), url, dateReceived ?? DateTimeOffset.UtcNow);
 
 				// ordinal string compare is both safest and fastest
 				// https://docs.microsoft.com/en-us/dotnet/standard/base-types/best-practices-strings#recommendations-for-string-usage
 				else if (pair.Name.OrdinalEquals("Expires", true))
-					cookie.Expires = DateTimeOffset.TryParse(pair.Value, out var d) ? d : (DateTimeOffset?)null;
+					cookie.Expires = DateTimeOffset.TryParse(pair.Value, out var d) ? d : null;
 				else if (pair.Name.OrdinalEquals("Max-Age", true))
-					cookie.MaxAge = int.TryParse(pair.Value, out var i) ? i : (int?)null;
+					cookie.MaxAge = int.TryParse(pair.Value, out var i) ? i : null;
 				else if (pair.Name.OrdinalEquals("Domain", true))
 					cookie.Domain = pair.Value;
 				else if (pair.Name.OrdinalEquals("Path", true))
@@ -51,7 +53,7 @@ namespace Flurl.Http
 				else if (pair.Name.OrdinalEquals("Secure", true))
 					cookie.Secure = true;
 				else if (pair.Name.OrdinalEquals("SameSite", true))
-					cookie.SameSite = Enum.TryParse<SameSite>(pair.Value, true, out var val) ? val : (SameSite?)null;
+					cookie.SameSite = Enum.TryParse<SameSite>(pair.Value, true, out var val) ? val : null;
 			}
 			return cookie;
 		}
@@ -68,11 +70,31 @@ namespace Flurl.Http
 		/// Creates a Cookie request header value from a list of cookie name-value pairs.
 		/// </summary>
 		/// <returns>A header value if cookie values are present, otherwise null.</returns>
-		public static string ToRequestHeader(IEnumerable<(string Name, string Value)> cookies) {
+		public static string BuildRequestHeader(IEnumerable<(string Name, string Value)> cookies) {
 			if (cookies?.Any() != true) return null;
 
 			return string.Join("; ", cookies.Select(c =>
 				$"{c.Name}={c.Value}"));
+		}
+
+		/// <summary>
+		/// Creates a Set-Cookie response header value from a FlurlCookie.
+		/// </summary>
+		/// <returns>A header value if cookie is non-null, otherwise null.</returns>
+		public static string BuildResponseHeader(FlurlCookie cookie) {
+			if (cookie == null) return null;
+
+			StringBuilder result = new StringBuilder();
+			result.Append($"{cookie.Name}={cookie.Value}");
+			if (cookie.Domain != null) result.Append($"; Domain={cookie.Domain}");
+			if (cookie.Expires != null) result.Append($"; Expires={cookie.Expires:r}");
+			if (cookie.HttpOnly) result.Append("; HttpOnly");
+			if (cookie.MaxAge != null) result.Append($"; Max-Age={cookie.MaxAge}");
+			if (cookie.Path != null) result.Append($"; Path={cookie.Path}");
+			if (cookie.Secure) result.Append("; Secure");
+			if (cookie.SameSite != null) result.Append($"; SameSite={cookie.SameSite}");
+
+			return result.ToString();
 		}
 
 		/// <summary>

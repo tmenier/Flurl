@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Net.Http;
+using System.Net;
 
 namespace Flurl.Http.Configuration
 {
@@ -52,6 +54,43 @@ namespace Flurl.Http.Configuration
 					kv.Value.Dispose();
 			}
 			_clients.Clear();
+		}
+
+		/// <summary>
+		/// Override in custom factory to customize the creation of HttpClient used in all Flurl HTTP calls
+		/// (except when one is passed explicitly to the FlurlClient constructor). In order not to lose
+		/// Flurl.Http functionality, it is recommended to call base.CreateClient and customize the result.
+		/// </summary>
+		public virtual HttpClient CreateHttpClient(HttpMessageHandler handler) {
+			return new HttpClient(handler) {
+				// Timeouts handled per request via FlurlHttpSettings.Timeout
+				Timeout = System.Threading.Timeout.InfiniteTimeSpan
+			};
+		}
+
+		/// <summary>
+		/// Override in custom factory to customize the creation of the top-level HttpMessageHandler used in all
+		/// Flurl HTTP calls (except when an HttpClient is passed explicitly to the FlurlClient constructor).
+		/// In order not to lose Flurl.Http functionality, it is recommended to call base.CreateMessageHandler, and
+		/// either customize the returned HttpClientHandler, or set it as the InnerHandler of a DelegatingHandler.
+		/// </summary>
+		public virtual HttpMessageHandler CreateMessageHandler() {
+			var httpClientHandler = new HttpClientHandler();
+
+			// flurl has its own mechanisms for managing cookies and redirects
+
+			try { httpClientHandler.UseCookies = false; }
+			catch (PlatformNotSupportedException) { } // look out for WASM platforms (#543)
+
+			if (httpClientHandler.SupportsRedirectConfiguration)
+				httpClientHandler.AllowAutoRedirect = false;
+
+			if (httpClientHandler.SupportsAutomaticDecompression) {
+				// #266
+				// deflate not working? see #474
+				httpClientHandler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+			}
+			return httpClientHandler;
 		}
 	}
 }

@@ -33,9 +33,9 @@ namespace Flurl.Http
 		/// Creates a new IFlurlRequest with this session's CookieJar that can be further built and sent fluently.
 		/// </summary>
 		/// <param name="urlSegments">The URL or URL segments for the request.</param>
-		public IFlurlRequest Request(params object[] urlSegments) =>
-			_client?.Request(urlSegments).WithCookies(Cookies) ??
-			new FlurlRequest(_baseUrl, urlSegments).WithCookies(Cookies);
+		public IFlurlRequest Request(params object[] urlSegments) => (_client == null) ?
+			new FlurlRequest(_baseUrl, urlSegments).WithCookies(Cookies) :
+			new FlurlRequest(_client, urlSegments).WithCookies(Cookies);
 
 		/// <summary>
 		/// Not necessary to call. IDisposable is implemented mainly for the syntactic sugar of using statements.

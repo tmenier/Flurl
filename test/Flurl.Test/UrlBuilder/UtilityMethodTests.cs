@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -74,6 +74,17 @@ namespace Flurl.Test.UrlBuilder
 		[TestCase("blah", false)]
 		[TestCase("http:/www.mysite.com", false)]
 		[TestCase("www.mysite.com", false)]
+		[TestCase("/path", false)]
+		[TestCase("//path", false)]
+
+		// cases derived from #462
+		[TestCase("http://myhost.com/%26", true)]
+		[TestCase("http://myhost.com/%C3%A9", true)]
+		[TestCase("http://myhost.com/%26%C3%A9", true)]
+		[TestCase("http://www.example.com?q=® ts", true)]
+		[TestCase("http://www.example.com?q=®ts", true)]
+		[TestCase("http://www.example.com?q=%C2%AE%20ts", true)]
+		[TestCase("http://www.example.com?q=%C2%AEts", true)]
 		public void IsValid_works(string s, bool isValid) {
 			Assert.AreEqual(isValid, Url.IsValid(s));
 		}

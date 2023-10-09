@@ -26,15 +26,15 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("done!", resp);
 			HttpTest.ShouldHaveMadeACall().Times(5);
 			HttpTest.ShouldHaveCalled("http://start.com").WithVerb(HttpMethod.Post).WithRequestBody("foo!")
-				.With(call => call.RedirectedFrom == null);
+				.With(call => call.Request.RedirectedFrom == null);
 			HttpTest.ShouldHaveCalled("http://redir.com/foo").WithVerb(HttpMethod.Get).WithRequestBody("")
-				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://start.com");
+				.With(call => call.Request.RedirectedFrom.Request.Url.ToString() == "http://start.com");
 			HttpTest.ShouldHaveCalled("http://redir.com/redir2").WithVerb(HttpMethod.Get).WithRequestBody("")
-				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://redir.com/foo");
+				.With(call => call.Request.RedirectedFrom.Request.Url.ToString() == "http://redir.com/foo");
 			HttpTest.ShouldHaveCalled("http://redir.com/redir2/redir3?x=1&y=2#foo").WithVerb(HttpMethod.Get).WithRequestBody("")
-				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://redir.com/redir2");
+				.With(call => call.Request.RedirectedFrom.Request.Url.ToString() == "http://redir.com/redir2");
 			HttpTest.ShouldHaveCalled("http://otherredir.com/bar/?a=b#foo").WithVerb(HttpMethod.Get).WithRequestBody("")
-				.With(call => call.RedirectedFrom.Request.Url.ToString() == "http://redir.com/redir2/redir3?x=1&y=2#foo");
+				.With(call => call.Request.RedirectedFrom.Request.Url.ToString() == "http://redir.com/redir2/redir3?x=1&y=2#foo");
 		}
 
 		[Test]
@@ -83,7 +83,7 @@ namespace Flurl.Test.Http
 					Custom1 = "foo",
 					Custom2 = "bar"
 				})
-				.ConfigureRequest(settings => {
+				.WithSettings(settings => {
 					settings.Redirects.ForwardAuthorizationHeader = fwdAuth;
 					settings.Redirects.ForwardHeaders = fwdOther;
 				})

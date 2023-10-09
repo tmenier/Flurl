@@ -10,7 +10,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flurl.Http", "src\Flurl.Htt
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{86A5ACB4-F3B3-4395-A5D5-924C9F35F628}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flurl.Test", "Test\Flurl.Test\Flurl.Test.csproj", "{DF68EB0E-9566-4577-B709-291520383F8D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flurl.Test", "test\Flurl.Test\Flurl.Test.csproj", "{DF68EB0E-9566-4577-B709-291520383F8D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{B6BF9238-4541-4E1F-955E-C95F1C2A1F46}"
 	ProjectSection(SolutionItems) = preProject

@@ -17,7 +17,7 @@ namespace Flurl.Http
 		/// <param name="client">The IFlurlClient.</param>
 		/// <param name="action">Action defining the settings changes.</param>
 		/// <returns>The IFlurlClient with the modified Settings</returns>
-		public static IFlurlClient Configure(this IFlurlClient client, Action<ClientFlurlHttpSettings> action) {
+		public static IFlurlClient Configure(this IFlurlClient client, Action<FlurlHttpSettings> action) {
 			action(client.Settings);
 			return client;
 		}
@@ -28,7 +28,7 @@ namespace Flurl.Http
 		/// <param name="request">The IFlurlRequest.</param>
 		/// <param name="action">Action defining the settings changes.</param>
 		/// <returns>The IFlurlRequest with the modified Settings</returns>
-		public static IFlurlRequest ConfigureRequest(this IFlurlRequest request, Action<FlurlHttpSettings> action) {
+		public static IFlurlRequest WithSettings(this IFlurlRequest request, Action<FlurlHttpSettings> action) {
 			action(request.Settings);
 			return request;
 		}

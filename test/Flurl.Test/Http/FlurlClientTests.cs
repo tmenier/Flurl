@@ -1,8 +1,10 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 using Flurl.Http;
+using Flurl.Http.Testing;
 using NUnit.Framework;
 
 namespace Flurl.Test.Http
@@ -69,33 +71,31 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public void cannot_create_request_without_base_url_or_segments() {
+		public void cannot_send_invalid_request() {
 			var cli = new FlurlClient();
-			Assert.Throws<ArgumentException>(() => {
-				var req = cli.Request();
-			});
+			Assert.ThrowsAsync<ArgumentNullException>(() => cli.SendAsync(null));
+			Assert.ThrowsAsync<ArgumentException>(() => cli.SendAsync(new FlurlRequest()));
+			Assert.ThrowsAsync<ArgumentException>(() => cli.SendAsync(new FlurlRequest("/relative/url")));
 		}
 
 		[Test]
-		public void cannot_create_request_without_base_url_or_segments_comprising_full_url() {
-			var cli = new FlurlClient();
-			Assert.Throws<ArgumentException>(() => {
-				var req = cli.Request("foo", "bar");
-			});
-		}
+		public async Task default_factory_doesnt_reuse_disposed_clients() {
+			var req1 = "http://api.com".WithHeader("foo", "1");
+			var req2 = "http://api.com".WithHeader("foo", "2");
+			var req3 = "http://api.com".WithHeader("foo", "3");
+			
+			// client not assigned until request is sent
+			using var test = new HttpTest();
+			await req1.GetAsync();
+			await req2.GetAsync();
+			req1.Client.Dispose();
+			await req3.GetAsync();
 
-		[Test]
-		public void default_factory_doesnt_reuse_disposed_clients() {
-			var cli1 = "http://api.com".WithHeader("foo", "1").Client;
-			var cli2 = "http://api.com".WithHeader("foo", "2").Client;
-			cli1.Dispose();
-			var cli3 = "http://api.com".WithHeader("foo", "3").Client;
-
-			Assert.AreEqual(cli1, cli2);
-			Assert.IsTrue(cli1.IsDisposed);
-			Assert.IsTrue(cli2.IsDisposed);
-			Assert.AreNotEqual(cli1, cli3);
-			Assert.IsFalse(cli3.IsDisposed);
+			Assert.AreEqual(req1.Client, req2.Client);
+			Assert.IsTrue(req1.Client.IsDisposed);
+			Assert.IsTrue(req2.Client.IsDisposed);
+			Assert.AreNotEqual(req1.Client, req3.Client);
+			Assert.IsFalse(req3.Client.IsDisposed);
 		}
 
 		[Test]
@@ -106,9 +106,9 @@ namespace Flurl.Test.Http
 			};
 			var cli = new FlurlClient(hc);
 
-			Assert.AreEqual("http://api.com/", cli.HttpClient.BaseAddress.ToString());
-			Assert.AreEqual(123, cli.HttpClient.Timeout.TotalSeconds);
+			Assert.AreSame(hc, cli.HttpClient);
 			Assert.AreEqual("http://api.com/", cli.BaseUrl);
+			Assert.AreEqual(123, cli.Settings.Timeout?.TotalSeconds);
 		}
 
 		[Test] // #334

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Runtime.CompilerServices;
 
 namespace Flurl.Http
@@ -144,6 +146,46 @@ namespace Flurl.Http
 			if (path.Length == 0) path = "/";
 			return $"{domain}{path}:{Name}";
 		}
+
+		/// <summary>
+		/// Writes this cookie to a TextWriter. Useful for persisting to a file.
+		/// </summary>
+		public void WriteTo(TextWriter writer) {
+			writer.WriteLine(DateReceived.ToString("s"));
+			writer.WriteLine(OriginUrl);
+			writer.WriteLine(CookieCutter.BuildResponseHeader(this));
+		}
+
+		/// <summary>
+		/// Instantiates a FlurlCookie that was previously persisted using WriteTo.
+		/// </summary>
+		public static FlurlCookie LoadFrom(TextReader reader) {
+			if (!DateTimeOffset.TryParse(reader?.ReadLine(), null, DateTimeStyles.AssumeUniversal, out var received))
+				return null;
+
+			var url = reader.ReadLine();
+			if (string.IsNullOrEmpty(url)) return null;
+
+			var headerVal = reader.ReadLine();
+			if (string.IsNullOrEmpty(headerVal)) return null;
+
+			return CookieCutter.ParseResponseHeader(headerVal, url, received);
+		}
+
+		/// <summary>
+		/// Returns a string representing this FlurlCookie.
+		/// </summary>
+		public override string ToString() {
+			var writer = new StringWriter();
+			WriteTo(writer);
+			return writer.ToString();
+		}
+
+		/// <summary>
+		/// Instantiates a FlurlCookie that was previously persisted using ToString.
+		/// </summary>
+		public static FlurlCookie LoadFromString(string s) => LoadFrom(new StringReader(s));
+
 
 		/// <summary>
 		/// Makes this cookie immutable. Call when added to a jar.

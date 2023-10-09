@@ -61,6 +61,18 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual("http://www.mysite.com/more?x=1&y=2&y=4&y=6&z=3&abc&xyz&foo=&=bar", url.ToString());
 		}
 
+		[Test]
+		public void can_append_query_params() {
+			var url = "http://www.mysite.com/more"
+				.AppendQueryParam("x", 1)
+				.AppendQueryParam("x", new[] { "2", "4", "6" })
+				.AppendQueryParam("x", 3)
+				.AppendQueryParam("x")
+				.AppendQueryParam("x", "");
+
+			Assert.AreEqual("http://www.mysite.com/more?x=1&x=2&x=4&x=6&x=3&x&x=", url.ToString());
+		}
+
 		// #641 (oddly, passing the params object ("" or null) via another TestCase arg didn't repro the bug in the null case)
 		[TestCase("http://www.mysite.com/more")]
 		[TestCase("http://www.mysite.com/more?x=1")]
@@ -78,6 +90,16 @@ namespace Flurl.Test.UrlBuilder
 			var query = new { x, y };
 			var url = new Url("https://api.com");
 			url.SetQueryParams(query);
+			Assert.AreEqual("https://api.com?x=1", url.ToString());
+		}
+
+		[Test] // #669
+		public void can_append_query_params_using_objects_with_nullable_types() {
+			int? x = 1;
+			int? y = null;
+			var query = new { x, y };
+			var url = new Url("https://api.com");
+			url.AppendQueryParam(query);
 			Assert.AreEqual("https://api.com?x=1", url.ToString());
 		}
 
@@ -101,6 +123,13 @@ namespace Flurl.Test.UrlBuilder
 		public void can_set_query_params_using_object_with_ienumerable() {
 			var model = new ModelWithIEnumerable { Values = Enumerable.Range(1, 3).ToArray() };
 			var url = "https://api.com".SetQueryParams(model);
+			Assert.AreEqual("https://api.com?Values=1&Values=2&Values=3", url.ToString());
+		}
+
+		[Test] // #672
+		public void can_append_query_params_using_object_with_ienumerable() {
+			var model = new ModelWithIEnumerable { Values = Enumerable.Range(1, 3).ToArray() };
+			var url = "https://api.com".AppendQueryParam(model);
 			Assert.AreEqual("https://api.com?Values=1&Values=2&Values=3", url.ToString());
 		}
 
@@ -170,7 +199,7 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual("http://www.mysite.com?1=x&2=y", url.ToString());
 		}
 
-		[Test, Ignore("tricky to do while maintaining param order. deferring until append param w/o overwriting is fully supported.")]
+		[Test]
 		public void can_set_query_params_from_kv_pairs() {
 			var url = "http://foo.com".SetQueryParams(new[] {
 				new { key = "x", value = 1 },

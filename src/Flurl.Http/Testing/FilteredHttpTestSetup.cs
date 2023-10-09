@@ -19,7 +19,7 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		/// <param name="settings">FlurlHttpSettings used in fake calls.</param>
 		/// <param name="urlPatterns">URL(s) or URL pattern(s) that this HttpTestSetup applies to. Can contain * wildcard.</param>
-		public FilteredHttpTestSetup(TestFlurlHttpSettings settings, params string[] urlPatterns) : base(settings) {
+		public FilteredHttpTestSetup(FlurlHttpSettings settings, params string[] urlPatterns) : base(settings) {
 			if (urlPatterns.Any())
 				With(call => urlPatterns.Any(p => Util.MatchesUrlPattern(call.Request.Url, p)));
 		}

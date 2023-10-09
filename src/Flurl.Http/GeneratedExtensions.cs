@@ -648,8 +648,8 @@ namespace Flurl.Http
 		/// <param name="url">This Flurl.Url.</param>
 		/// <param name="action">A delegate defining the Settings changes.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest ConfigureRequest(this Url url, Action<FlurlHttpSettings> action) {
-			return new FlurlRequest(url).ConfigureRequest(action);
+		public static IFlurlRequest WithSettings(this Url url, Action<FlurlHttpSettings> action) {
+			return new FlurlRequest(url).WithSettings(action);
 		}
 		
 		/// <summary>
@@ -1087,8 +1087,8 @@ namespace Flurl.Http
 		/// <param name="url">This URL.</param>
 		/// <param name="action">A delegate defining the Settings changes.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest ConfigureRequest(this string url, Action<FlurlHttpSettings> action) {
-			return new FlurlRequest(url).ConfigureRequest(action);
+		public static IFlurlRequest WithSettings(this string url, Action<FlurlHttpSettings> action) {
+			return new FlurlRequest(url).WithSettings(action);
 		}
 		
 		/// <summary>
@@ -1526,8 +1526,8 @@ namespace Flurl.Http
 		/// <param name="uri">This System.Uri.</param>
 		/// <param name="action">A delegate defining the Settings changes.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest ConfigureRequest(this Uri uri, Action<FlurlHttpSettings> action) {
-			return new FlurlRequest(uri).ConfigureRequest(action);
+		public static IFlurlRequest WithSettings(this Uri uri, Action<FlurlHttpSettings> action) {
+			return new FlurlRequest(uri).WithSettings(action);
 		}
 		
 		/// <summary>
