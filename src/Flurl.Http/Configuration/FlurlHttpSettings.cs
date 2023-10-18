@@ -173,8 +173,8 @@ namespace Flurl.Http.Configuration
 		internal T Get<T>([CallerMemberName]string propName = null) {
 			IEnumerable<FlurlHttpSettings> prioritize() {
 				yield return HttpTest.Current?.Settings;
-				yield return this;
-				yield return Parent;
+				for (var settings = this; settings != null; settings = settings.Parent)
+					yield return settings;
 				yield return Defaults;
 			}
 
