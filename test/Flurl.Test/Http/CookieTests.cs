@@ -107,7 +107,7 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public void can_perist_and_load_jar() {
+		public void can_persist_and_load_jar() {
 			var jar1 = new CookieJar()
 				.AddOrReplace("x", "foo", "https://site1.com", DateTimeOffset.UtcNow)
 				.AddOrReplace("y", "bar", "https://site2.com", DateTimeOffset.UtcNow.AddMinutes(-10));

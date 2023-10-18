@@ -98,14 +98,14 @@ namespace Flurl.Http
 		}
 
 		/// <inheritdoc />
-		public FlurlHttpSettings Settings { get; } = new FlurlHttpSettings();
+		public FlurlHttpSettings Settings { get; } = new();
 
 		/// <inheritdoc />
 		public IFlurlClient Client {
 			get => _client;
 			set {
 				_client = value;
-				Settings.Defaults = _client?.Settings;
+				Settings.Parent = _client?.Settings;
 			}
 		}
 
@@ -138,7 +138,7 @@ namespace Flurl.Http
 		public Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
 			Verb = verb;
 			Content = content;
-			Client ??= FlurlHttp.GlobalSettings.FlurlClientFactory.Get(Url);
+			Client ??= FlurlHttp.GetClientForRequest(this);
 			return Client.SendAsync(this, completionOption, cancellationToken);
 		}
 

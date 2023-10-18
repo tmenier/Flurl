@@ -13,6 +13,7 @@ namespace Flurl.Http.Testing
 	/// </summary>
 	public class HttpCallAssertion
 	{
+		private readonly HttpTest _test;
 		private readonly bool _negate;
 		private readonly IList<string> _expectedConditions = new List<string>();
 
@@ -21,10 +22,11 @@ namespace Flurl.Http.Testing
 		/// <summary>
 		/// Constructs a new instance of HttpCallAssertion.
 		/// </summary>
-		/// <param name="loggedCalls">Set of calls (usually from HttpTest.CallLog) to assert against.</param>
+		/// <param name="test">The HttpTest containing calls being asserted.</param>
 		/// <param name="negate">If true, assertions pass when calls matching criteria were NOT made.</param>
-		public HttpCallAssertion(IEnumerable<FlurlCall> loggedCalls, bool negate = false) {
-			_calls = loggedCalls.ToList();
+		public HttpCallAssertion(HttpTest test, bool negate = false) {
+			_test = test;
+			_calls = test.CallLog.ToList();
 			_negate = negate;
 		}
 
@@ -99,7 +101,7 @@ namespace Flurl.Http.Testing
 		/// Asserts whether calls were made containing given JSON-encoded request body. body may contain * wildcard.
 		/// </summary>
 		public HttpCallAssertion WithRequestJson(object body) {
-			var serializedBody = FlurlHttp.GlobalSettings.JsonSerializer.Serialize(body);
+			var serializedBody = _test.Settings.JsonSerializer.Serialize(body);
 			return WithRequestBody(serializedBody);
 		}
 
@@ -107,7 +109,7 @@ namespace Flurl.Http.Testing
 		/// Asserts whether calls were made containing given URL-encoded request body. body may contain * wildcard.
 		/// </summary>
 		public HttpCallAssertion WithRequestUrlEncoded(object body) {
-			var serializedBody = FlurlHttp.GlobalSettings.UrlEncodedSerializer.Serialize(body);
+			var serializedBody = _test.Settings.UrlEncodedSerializer.Serialize(body);
 			return WithRequestBody(serializedBody);
 		}
 		#endregion

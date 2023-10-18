@@ -192,7 +192,7 @@ namespace Flurl.Test.Http
 		[Test]
 		public void can_override_settings_fluently() {
 			using (var test = new HttpTest()) {
-				var cli = new FlurlClient().Configure(s => s.AllowedHttpStatusRange = "*");
+				var cli = new FlurlClient().WithSettings(s => s.AllowedHttpStatusRange = "*");
 				test.RespondWith("epic fail", 500);
 				var req = "http://www.api.com".WithSettings(c => c.AllowedHttpStatusRange = "2xx");
 				req.Client = cli; // client-level settings shouldn't win
