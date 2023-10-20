@@ -59,7 +59,7 @@ namespace Flurl.Test.Http
 #endif
 			if (supported) {
 				Console.WriteLine($"{shh.FullName} Found in {typeof(HttpClientHandler).Assembly.FullName}");
-				supported = (bool)shh.GetProperty("IsSupported").GetValue(Activator.CreateInstance(shh));
+				supported = shh.GetProperty("IsSupported")?.GetValue(Activator.CreateInstance(shh)) as bool? == true;
 				Console.WriteLine($"IsSupported = {supported}");
 			}
 
