@@ -52,10 +52,15 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void inner_hanlder_is_SocketsHttpHandler_when_supported() {
-			var supported = typeof(HttpClientHandler).Assembly.DefinedTypes.Any(t => t.Name == "SocketsHttpHandler");
+			var shh = typeof(HttpClientHandler).Assembly.DefinedTypes.FirstOrDefault(t => t.Name == "SocketsHttpHandler");
+			var supported = (shh != null);
 #if NET
 			Assert.IsTrue(supported, "SocketsHttpHandler should be defined"); // sanity check (tests the test, basically)
 #endif
+			if (supported) {
+				Console.WriteLine($"{shh.FullName} Found in {typeof(HttpClientHandler).Assembly.FullName}");
+			}
+
 			HttpMessageHandler handler = null;
 			new FlurlClientBuilder()
 				.ConfigureInnerHandler(h => handler = h)
