@@ -52,24 +52,15 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void inner_hanlder_is_SocketsHttpHandler_when_supported() {
-			var shh = typeof(HttpClientHandler).Assembly.DefinedTypes.FirstOrDefault(t => t.Name == "SocketsHttpHandler");
-			var supported = (shh != null);
-#if NET
-			Assert.IsTrue(supported, "SocketsHttpHandler should be defined"); // sanity check (tests the test, basically)
-#endif
-			if (supported) {
-				Console.WriteLine($"{shh.FullName} Found in {typeof(HttpClientHandler).Assembly.FullName}");
-				supported = shh.GetProperty("IsSupported")?.GetValue(Activator.CreateInstance(shh)) as bool? == true;
-				Console.WriteLine($"IsSupported = {supported}");
-			}
-
 			HttpMessageHandler handler = null;
 			new FlurlClientBuilder()
 				.ConfigureInnerHandler(h => handler = h)
 				.Build();
-
-			var expected = supported ? "SocketsHttpHandler" : "HttpClientHandler";
-			Assert.AreEqual(expected, handler?.GetType().Name);
+#if NET
+			Assert.IsInstanceOf<SocketsHttpHandler>(handler);
+#else
+			Assert.IsInstanceOf<HttpClientHandler>(handler);
+#endif
 		}
 
 		class BlockingHandler : DelegatingHandler
