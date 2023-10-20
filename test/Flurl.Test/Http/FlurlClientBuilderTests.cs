@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -50,6 +48,21 @@ namespace Flurl.Test.Http
 			var cli = builder.AddMiddleware(() => new BlockingHandler("blocked by flurl!")).Build();
 			var resp = await cli.Request("https://www.google.com").GetStringAsync();
 			Assert.AreEqual("blocked by flurl!", resp);
+		}
+
+		[Test]
+		public void inner_hanlder_is_SocketsHttpHandler_when_supported() {
+			var supported = typeof(HttpClientHandler).Assembly.DefinedTypes.Any(t => t.Name == "SocketsHttpHandler");
+#if NET
+			Assert.IsTrue(supported, "SocketsHttpHandler should be defined"); // sanity check (tests the test, basically)
+#endif
+			HttpMessageHandler handler = null;
+			new FlurlClientBuilder()
+				.ConfigureInnerHandler(h => handler = h)
+				.Build();
+
+			var expected = supported ? "SocketsHttpHandler" : "HttpClientHandler";
+			Assert.AreEqual(expected, handler?.GetType().Name);
 		}
 
 		class BlockingHandler : DelegatingHandler

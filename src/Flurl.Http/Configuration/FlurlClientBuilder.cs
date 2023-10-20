@@ -23,7 +23,11 @@ namespace Flurl.Http.Configuration
 		/// <summary>
 		/// Configure the inner-most HttpMessageHandler associated with this IFlurlClient.
 		/// </summary>
+#if NETCOREAPP2_1_OR_GREATER
+		IFlurlClientBuilder ConfigureInnerHandler(Action<SocketsHttpHandler> configAction);
+#else
 		IFlurlClientBuilder ConfigureInnerHandler(Action<HttpClientHandler> configAction);
+#endif
 
 		/// <summary>
 		/// Add a provided DelegatingHandler to the IFlurlClient.
@@ -44,9 +48,13 @@ namespace Flurl.Http.Configuration
 		private readonly IFlurlClientFactory _factory;
 		private readonly string _baseUrl;
 		private readonly List<Func<DelegatingHandler>> _addMiddleware = new();
-		private readonly List<Action<HttpClient>> _configClient = new();
-		private readonly List<Action<HttpClientHandler>> _configHandler = new();
 		private readonly List<Action<FlurlHttpSettings>> _configSettings = new();
+		private readonly List<Action<HttpClient>> _configClient = new();
+#if NETCOREAPP2_1_OR_GREATER
+		private readonly HandlerBuilder<SocketsHttpHandler> _handlerBuilder = new();
+#else
+		private readonly HandlerBuilder<HttpClientHandler> _handlerBuilder = new();
+#endif
 
 		/// <summary>
 		/// Creates a new FlurlClientBuilder.
@@ -80,24 +88,20 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <inheritdoc />
+#if NETCOREAPP2_1_OR_GREATER
+		public IFlurlClientBuilder ConfigureInnerHandler(Action<SocketsHttpHandler> configAction) {
+#else
 		public IFlurlClientBuilder ConfigureInnerHandler(Action<HttpClientHandler> configAction) {
-			_configHandler.Add(configAction);
+#endif
+			_handlerBuilder.Configs.Add(configAction);
 			return this;
 		}
 
 		/// <inheritdoc />
 		public IFlurlClient Build() {
-			var innerHandler = _factory.CreateInnerHandler();
-			foreach (var config in _configHandler) {
-				if (innerHandler is HttpClientHandler hch)
-					config(hch);
-				else
-					throw new Exception("ConfigureInnerHandler can only be used when IFlurlClientFactory.CreateInnerHandler returns an instance of HttpClientFactory.");
-			}
+			var outerHandler = _handlerBuilder.Build(_factory);
 
-			HttpMessageHandler outerHandler = innerHandler;
-			foreach (var createMW in Enumerable.Reverse(_addMiddleware)) {
-				var middleware = createMW();
+			foreach (var middleware in Enumerable.Reverse(_addMiddleware).Select(create => create())) {
 				middleware.InnerHandler = outerHandler;
 				outerHandler = middleware;
 			}
@@ -107,11 +111,27 @@ namespace Flurl.Http.Configuration
 				config(httpCli);
 
 			var flurlCli = new FlurlClient(httpCli, _baseUrl);
-			foreach (var config in _configSettings) {
+			foreach (var config in _configSettings)
 				config(flurlCli.Settings);
-			}
 
 			return flurlCli;
+		}
+
+		// helper class to keep those compiler switches from getting too messy
+		private class HandlerBuilder<T> where T : HttpMessageHandler
+		{
+			public List<Action<T>> Configs { get; } = new();
+
+			public HttpMessageHandler Build(IFlurlClientFactory fac) {
+				var handler = fac.CreateInnerHandler();
+				foreach (var config in Configs) {
+					if (handler is T h)
+						config(h);
+					else
+						throw new Exception($"ConfigureInnerHandler expected an instance of {typeof(T).Name} but received an instance of {handler.GetType().Name}.");
+				}
+				return handler;
+			}
 		}
 	}
 }
