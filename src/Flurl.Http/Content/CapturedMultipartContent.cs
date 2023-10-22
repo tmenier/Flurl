@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using Flurl.Http.Configuration;
 using Flurl.Util;
 
@@ -16,7 +14,7 @@ namespace Flurl.Http.Content
 	public class CapturedMultipartContent : MultipartContent
 	{
 		private readonly FlurlHttpSettings _settings;
-		private readonly List<HttpContent> _capturedParts = new List<HttpContent>();
+		private readonly List<HttpContent> _capturedParts = new();
 
 		/// <summary>
 		/// Gets an array of HttpContent objects that make up the parts of the multipart request.
@@ -26,18 +24,18 @@ namespace Flurl.Http.Content
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CapturedMultipartContent"/> class.
 		/// </summary>
-		/// <param name="settings">The FlurlHttpSettings used to serialize each content part. (Defaults to FlurlHttp.GlobalSettings.)</param>
-		public CapturedMultipartContent(FlurlHttpSettings settings = null) : base("form-data") {
-			_settings = settings ?? FlurlHttp.GlobalSettings;
+		/// <param name="settings">The FlurlHttpSettings used to serialize each content part.</param>
+		public CapturedMultipartContent(FlurlHttpSettings settings) : base("form-data") {
+			_settings = settings;
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CapturedMultipartContent"/> class.
 		/// </summary>
 		/// <param name="subtype">The subtype of the multipart content.</param>
-		/// <param name="settings">The FlurlHttpSettings used to serialize each content part. (Defaults to FlurlHttp.GlobalSettings.)</param>
-		public CapturedMultipartContent(string subtype, FlurlHttpSettings settings = null) : base(subtype) {
-			_settings = settings ?? FlurlHttp.GlobalSettings;
+		/// <param name="settings">The FlurlHttpSettings used to serialize each content part.</param>
+		public CapturedMultipartContent(string subtype, FlurlHttpSettings settings) : base(subtype) {
+			_settings = settings;
 		}
 
 		/// <summary>
@@ -45,9 +43,9 @@ namespace Flurl.Http.Content
 		/// </summary>
 		/// <param name="subtype">The subtype of the multipart content.</param>
 		/// <param name="boundary">The boundary string for the multipart content.</param>
-		/// <param name="settings">The FlurlHttpSettings used to serialize each content part. (Defaults to FlurlHttp.GlobalSettings.)</param>
-		public CapturedMultipartContent(string subtype, string boundary, FlurlHttpSettings settings = null) : base(subtype, boundary) {
-			_settings = settings ?? FlurlHttp.GlobalSettings;
+		/// <param name="settings">The FlurlHttpSettings used to serialize each content part.</param>
+		public CapturedMultipartContent(string subtype, string boundary, FlurlHttpSettings settings) : base(subtype, boundary) {
+			_settings = settings;
 		}
 
 		/// <summary>

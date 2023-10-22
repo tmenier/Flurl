@@ -439,7 +439,7 @@ namespace Flurl.Test.Http
 		[Test]
 		public void can_configure_settings_for_test() {
 			Assert.IsTrue(new FlurlRequest().Settings.Redirects.Enabled);
-			using (new HttpTest().Configure(settings => settings.Redirects.Enabled = false)) {
+			using (new HttpTest().WithSettings(settings => settings.Redirects.Enabled = false)) {
 				Assert.IsFalse(new FlurlRequest().Settings.Redirects.Enabled);
 			}
 			// test disposed, should revert back to global settings

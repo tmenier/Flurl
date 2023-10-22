@@ -4,37 +4,46 @@ using Flurl.Http.Configuration;
 namespace Flurl.Http
 {
 	/// <summary>
-	/// A static container for global configuration settings affecting Flurl.Http behavior.
+	/// A static object for configuring Flurl for "clientless" usage. Provides a default IFlurlClientCache instance primarily
+	/// for clientless support, but can be used directly, as an alternative to a DI-managed singleton cache.
 	/// </summary>
 	public static class FlurlHttp
 	{
-		private static readonly object _configLock = new object();
-
-		private static Lazy<GlobalFlurlHttpSettings> _settings =
-			new Lazy<GlobalFlurlHttpSettings>(() => new GlobalFlurlHttpSettings());
+		private static Func<IFlurlRequest, string> _cachingStrategy = BuildClientNameByHost;
 
 		/// <summary>
-		/// Globally configured Flurl.Http settings. Should normally be written to by calling FlurlHttp.Configure once application at startup.
+		/// A global collection of cached IFlurlClient instances.
 		/// </summary>
-		public static GlobalFlurlHttpSettings GlobalSettings => _settings.Value;
+		public static IFlurlClientCache Clients { get; } = new FlurlClientCache();
 
 		/// <summary>
-		/// Provides thread-safe access to Flurl.Http's global configuration settings. Should only be called once at application startup.
+		/// Gets a builder for configuring the IFlurlClient that would be selected for calling the given URL when the clientless pattern is used.
+		/// Note that if you've overridden the caching strategy to vary clients by request properties other than Url, you should instead use
+		/// FlurlHttp.Clients.Add(name) to ensure you are configuring the correct client.
 		/// </summary>
-		/// <param name="configAction">the action to perform against the GlobalSettings.</param>
-		public static void Configure(Action<GlobalFlurlHttpSettings> configAction) {
-			lock (_configLock) {
-				configAction(GlobalSettings);
-			}
-		}
+		public static IFlurlClientBuilder ConfigureClientForUrl(string url) => Clients.Add(_cachingStrategy(new FlurlRequest(url)));
 
 		/// <summary>
-		/// Provides thread-safe access to a specific IFlurlClient, typically to configure settings and default headers.
-		/// The URL is used to find the client, but keep in mind that the same client will be used in all calls to the same host by default.
+		/// Gets or creates the IFlurlClient that would be selected for sending the given IFlurlRequest when the clientless pattern is used.
 		/// </summary>
-		/// <param name="url">the URL used to find the IFlurlClient.</param>
-		/// <param name="configAction">the action to perform against the IFlurlClient.</param>
-		public static void ConfigureClient(string url, Action<IFlurlClient> configAction) => 
-			GlobalSettings.FlurlClientFactory.ConfigureClient(url, configAction);
+		public static IFlurlClient GetClientForRequest(IFlurlRequest req) => Clients.Get(_cachingStrategy(req));
+
+		/// <summary>
+		/// Sets a global caching strategy for getting or creating an IFlurlClient instance when the clientless pattern is used, e.g. url.GetAsync.
+		/// </summary>
+		/// <param name="buildClientName">A delegate that returns a cache key used to store and retrieve a client instance based on properties of the request.</param>
+		public static void UseClientCachingStrategy(Func<IFlurlRequest, string> buildClientName) => _cachingStrategy = buildClientName;
+
+		/// <summary>
+		/// Sets a global caching strategy of one IFlurlClient per scheme/host/port combination when the clientless pattern is used,
+		/// e.g. url.GetAsync. This is the default strategy, so you shouldn't need to call this except to revert a previous call to
+		/// UseClientCachingStrategy, which would be rare.
+		/// </summary>
+		public static void UseClientPerHostStrategy() => _cachingStrategy = BuildClientNameByHost;
+
+		/// <summary>
+		/// Builds a cache key consisting of URL scheme, host, and port. This is the default client caching strategy.
+		/// </summary>
+		public static string BuildClientNameByHost(IFlurlRequest req) => $"{req.Url.Scheme}|{req.Url.Host}|{req.Url.Port}";
 	}
 }

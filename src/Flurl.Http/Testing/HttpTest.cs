@@ -15,8 +15,8 @@ namespace Flurl.Http.Testing
 	[Serializable]
 	public class HttpTest : HttpTestSetup, IDisposable
 	{
-		private readonly ConcurrentQueue<FlurlCall> _calls = new ConcurrentQueue<FlurlCall>();
-		private readonly List<FilteredHttpTestSetup> _filteredSetups = new List<FilteredHttpTestSetup>();
+		private readonly ConcurrentQueue<FlurlCall> _calls = new();
+		private readonly List<FilteredHttpTestSetup> _filteredSetups = new();
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="HttpTest"/> class.
@@ -43,7 +43,7 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		/// <param name="action">Action defining the settings changes.</param>
 		/// <returns>This HttpTest</returns>
-		public HttpTest Configure(Action<FlurlHttpSettings> action) {
+		public HttpTest WithSettings(Action<FlurlHttpSettings> action) {
 			action(Settings);
 			return this;
 		}
@@ -66,7 +66,7 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		/// <param name="urlPattern">URL that should have been called. Can include * wildcard character.</param>
 		public HttpCallAssertion ShouldHaveCalled(string urlPattern) {
-			return new HttpCallAssertion(CallLog).WithUrlPattern(urlPattern);
+			return new HttpCallAssertion(this).WithUrlPattern(urlPattern);
 		}
 
 		/// <summary>
@@ -74,21 +74,21 @@ namespace Flurl.Http.Testing
 		/// </summary>
 		/// <param name="urlPattern">URL that should not have been called. Can include * wildcard character.</param>
 		public void ShouldNotHaveCalled(string urlPattern) {
-			new HttpCallAssertion(CallLog, true).WithUrlPattern(urlPattern);
+			new HttpCallAssertion(this, true).WithUrlPattern(urlPattern);
 		}
 
 		/// <summary>
 		/// Asserts whether any HTTP call was made, throwing HttpCallAssertException if none were.
 		/// </summary>
 		public HttpCallAssertion ShouldHaveMadeACall() {
-			return new HttpCallAssertion(CallLog).WithUrlPattern("*");
+			return new HttpCallAssertion(this).WithUrlPattern("*");
 		}
 
 		/// <summary>
 		/// Asserts whether no HTTP calls were made, throwing HttpCallAssertException if any were.
 		/// </summary>
 		public void ShouldNotHaveMadeACall() {
-			new HttpCallAssertion(CallLog, true).WithUrlPattern("*");
+			new HttpCallAssertion(this, true).WithUrlPattern("*");
 		}
 
 		/// <summary>

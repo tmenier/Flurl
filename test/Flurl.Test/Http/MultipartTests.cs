@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Flurl.Http;
+using Flurl.Http.Configuration;
 using Flurl.Http.Content;
 using Flurl.Http.Testing;
 using NUnit.Framework;
@@ -17,7 +18,7 @@ namespace Flurl.Test.Http
     {
 	    [Test]
 		public async Task can_build_and_send_multipart_content() {
-			var content = new CapturedMultipartContent()
+			var content = new CapturedMultipartContent(new FlurlHttpSettings())
 				.AddString("string", "foo")
 				.AddString("string2", "bar", "text/blah")
 				.AddStringParts(new { part1 = 1, part2 = 2, part3 = (string)null }) // part3 should be excluded
@@ -67,7 +68,7 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void must_provide_required_args_to_builder() {
-			var content = new CapturedMultipartContent();
+			var content = new CapturedMultipartContent(new FlurlHttpSettings());
 			Assert.Throws<ArgumentNullException>(() => content.AddStringParts(null));
 			Assert.Throws<ArgumentNullException>(() => content.AddString("other", null));
 			Assert.Throws<ArgumentException>(() => content.AddString(null, "hello!"));

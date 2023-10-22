@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -14,8 +14,7 @@ namespace Flurl.Http
 	/// </summary>
 	public interface IFlurlClient : IHttpSettingsContainer, IDisposable {
 		/// <summary>
-		/// Gets the HttpClient to be used in subsequent HTTP calls. Creation (when necessary) is delegated
-		/// to FlurlHttp.FlurlClientFactory. Reused for the life of the FlurlClient.
+		/// Gets the HttpClient that this IFlurlClient wraps.
 		/// </summary>
 		HttpClient HttpClient { get; }
 
@@ -51,15 +50,16 @@ namespace Flurl.Http
 	/// </summary>
 	public class FlurlClient : IFlurlClient
 	{
-		/// <summary>
-		/// Initializes a new instance of <see cref="FlurlClient"/>.
-		/// </summary>
-		/// <param name="baseUrl">The base URL associated with this client.</param>
-		public FlurlClient(string baseUrl = null) :
-			this(FlurlHttp.GlobalSettings.FlurlClientFactory.CreateHttpClient(), baseUrl) { }
+		private static readonly Lazy<IFlurlClientFactory> _defaultFactory = new(() => new DefaultFlurlClientFactory());
 
 		/// <summary>
-		/// Initializes a new instance of <see cref="FlurlClient"/>, wrapping an existing HttpClient.
+		/// Creates a new instance of <see cref="FlurlClient"/>.
+		/// </summary>
+		/// <param name="baseUrl">The base URL associated with this client.</param>
+		public FlurlClient(string baseUrl = null) : this(_defaultFactory.Value.CreateHttpClient(), baseUrl) { }
+
+		/// <summary>
+		/// Creates a new instance of <see cref="FlurlClient"/>, wrapping an existing HttpClient.
 		/// Generally, you should let Flurl create and manage HttpClient instances for you, but you might, for
 		/// example, have an HttpClient instance that was created by a 3rd-party library and you want to use
 		/// Flurl to build and send calls with it. Be aware that if the HttpClient has an underlying
@@ -83,7 +83,7 @@ namespace Flurl.Http
 		public string BaseUrl { get; set; }
 
 		/// <inheritdoc />
-		public FlurlHttpSettings Settings { get; } = new FlurlHttpSettings();
+		public FlurlHttpSettings Settings { get; } = new();
 
 		/// <inheritdoc />
 		public INameValueList<string> Headers { get; } = new NameValueList<string>(false); // header names are case-insensitive https://stackoverflow.com/a/5259004/62600
@@ -192,7 +192,7 @@ namespace Flurl.Http
 				Verb = changeToGet ? HttpMethod.Get : call.HttpRequestMessage.Method,
 				Content = changeToGet ? null : call.Request.Content,
 				RedirectedFrom = call,
-				Settings = { Defaults = settings }
+				Settings = { Parent = settings }
 			};
 
 			if (call.Request.CookieJar != null)
