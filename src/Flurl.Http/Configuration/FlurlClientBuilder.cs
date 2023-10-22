@@ -13,20 +13,20 @@ namespace Flurl.Http.Configuration
 		/// <summary>
 		/// Configure the IFlurlClient's Settings.
 		/// </summary>
-		IFlurlClientBuilder WithSettings(Action<FlurlHttpSettings> configAction);
+		IFlurlClientBuilder WithSettings(Action<FlurlHttpSettings> configure);
 
 		/// <summary>
 		/// Configure the HttpClient wrapped by this IFlurlClient.
 		/// </summary>
-		IFlurlClientBuilder ConfigureHttpClient(Action<HttpClient> configAction);
+		IFlurlClientBuilder ConfigureHttpClient(Action<HttpClient> configure);
 
 		/// <summary>
 		/// Configure the inner-most HttpMessageHandler associated with this IFlurlClient.
 		/// </summary>
 #if NETCOREAPP2_1_OR_GREATER
-		IFlurlClientBuilder ConfigureInnerHandler(Action<SocketsHttpHandler> configAction);
+		IFlurlClientBuilder ConfigureInnerHandler(Action<SocketsHttpHandler> configure);
 #else
-		IFlurlClientBuilder ConfigureInnerHandler(Action<HttpClientHandler> configAction);
+		IFlurlClientBuilder ConfigureInnerHandler(Action<HttpClientHandler> configure);
 #endif
 
 		/// <summary>
@@ -70,8 +70,8 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <inheritdoc />
-		public IFlurlClientBuilder WithSettings(Action<FlurlHttpSettings> configAction) {
-			_configSettings.Add(configAction);
+		public IFlurlClientBuilder WithSettings(Action<FlurlHttpSettings> configure) {
+			_configSettings.Add(configure);
 			return this;
 		}
 
@@ -82,18 +82,18 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <inheritdoc />
-		public IFlurlClientBuilder ConfigureHttpClient(Action<HttpClient> configAction) {
-			_configClient.Add(configAction);
+		public IFlurlClientBuilder ConfigureHttpClient(Action<HttpClient> configure) {
+			_configClient.Add(configure);
 			return this;
 		}
 
 		/// <inheritdoc />
 #if NETCOREAPP2_1_OR_GREATER
-		public IFlurlClientBuilder ConfigureInnerHandler(Action<SocketsHttpHandler> configAction) {
+		public IFlurlClientBuilder ConfigureInnerHandler(Action<SocketsHttpHandler> configure) {
 #else
-		public IFlurlClientBuilder ConfigureInnerHandler(Action<HttpClientHandler> configAction) {
+		public IFlurlClientBuilder ConfigureInnerHandler(Action<HttpClientHandler> configure) {
 #endif
-			_handlerBuilder.Configs.Add(configAction);
+			_handlerBuilder.Configs.Add(configure);
 			return this;
 		}
 
