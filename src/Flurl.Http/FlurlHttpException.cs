@@ -106,4 +106,15 @@ namespace Flurl.Http
 			return msg + ((call == null) ? "." : $": {call}");
 		}
 	}
+
+	/// <summary>
+	/// An exception that is thrown when Flurl.Http has been misconfigured.
+	/// </summary>
+	public class FlurlConfigurationException : Exception
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FlurlConfigurationException"/> class.
+		/// </summary>
+		public FlurlConfigurationException(string message) : base(message) { }
+	}
 }

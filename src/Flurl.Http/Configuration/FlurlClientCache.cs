@@ -45,7 +45,6 @@ namespace Flurl.Http.Configuration
 	/// </summary>
 	public class FlurlClientCache : IFlurlClientCache {
 		private readonly ConcurrentDictionary<string, Lazy<IFlurlClient>> _clients = new();
-		private readonly IFlurlClientFactory _factory = new DefaultFlurlClientFactory();
 		private Action<IFlurlClientBuilder> _configureAll;
 
 		/// <inheritdoc />
@@ -53,7 +52,7 @@ namespace Flurl.Http.Configuration
 			if (_clients.ContainsKey(name))
 				throw new ArgumentException($"A client named '{name}' was already registered with this factory. AddClient should be called just once per client at startup.");
 
-			var builder = new FlurlClientBuilder(_factory, baseUrl);
+			var builder = new FlurlClientBuilder(baseUrl);
 			_clients[name] = CreateLazyInstance(builder);
 			return builder;
 		}
@@ -63,7 +62,7 @@ namespace Flurl.Http.Configuration
 			if (name == null)
 				throw new ArgumentNullException(nameof(name));
 
-			Lazy<IFlurlClient> Create() => CreateLazyInstance(new FlurlClientBuilder(_factory, null));
+			Lazy<IFlurlClient> Create() => CreateLazyInstance(new FlurlClientBuilder());
 			return _clients.AddOrUpdate(name, _ => Create(), (_, existing) => existing.Value.IsDisposed ? Create() : existing).Value;
 		}
 
