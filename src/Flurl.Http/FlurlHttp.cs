@@ -26,10 +26,7 @@ namespace Flurl.Http
 		/// <summary>
 		/// Gets or creates the IFlurlClient that would be selected for sending the given IFlurlRequest when the clientless pattern is used.
 		/// </summary>
-		public static IFlurlClient GetClientForRequest(IFlurlRequest req) {
-			throw new Exception("here");
-			//return Clients.Get(_cachingStrategy(req));
-		}
+		public static IFlurlClient GetClientForRequest(IFlurlRequest req) => Clients.Get(_cachingStrategy(req));
 
 		/// <summary>
 		/// Sets a global caching strategy for getting or creating an IFlurlClient instance when the clientless pattern is used, e.g. url.GetAsync.
