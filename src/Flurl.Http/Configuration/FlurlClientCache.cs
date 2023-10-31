@@ -9,35 +9,59 @@ namespace Flurl.Http.Configuration
 	public interface IFlurlClientCache
 	{
 		/// <summary>
-		/// Adds and returns a new IFlurlClient. Call once per client at startup to register and configure a named client.
+		/// Adds a new IFlurlClient to this cache. Call once per client at startup to register and configure a named client.
 		/// </summary>
 		/// <param name="name">Name of the IFlurlClient. Serves as a cache key. Subsequent calls to Get will return this client.</param>
 		/// <param name="baseUrl">Optional. The base URL associated with the new client.</param>
-		/// <returns></returns>
+		/// <returns>A builder to further configure the new client.</returns>
 		IFlurlClientBuilder Add(string name, string baseUrl = null);
 
 		/// <summary>
 		/// Gets a named IFlurlClient, creating one if it doesn't exist or has been disposed.
 		/// </summary>
 		/// <param name="name">The client name.</param>
-		/// <returns></returns>
+		/// <returns>The cached IFlurlClient.</returns>
 		IFlurlClient Get(string name);
 
 		/// <summary>
 		/// Configuration logic that gets executed for every new IFlurlClient added this case. Good place for things like default
 		/// settings. Executes before client-specific builder logic.
 		/// </summary>
+		/// <returns>This IFlurlCache.</returns>
 		IFlurlClientCache ConfigureAll(Action<IFlurlClientBuilder> configure);
 
 		/// <summary>
 		/// Removes a named client from this cache.
 		/// </summary>
-		void Remove(string name);
+		/// <returns>This IFlurlCache.</returns>
+		IFlurlClientCache Remove(string name);
 
 		/// <summary>
 		/// Disposes and removes all cached IFlurlClient instances.
 		/// </summary>
-		void Clear();
+		/// <returns>This IFlurlCache.</returns>
+		IFlurlClientCache Clear();
+	}
+
+	/// <summary>
+	/// Extension methods on IFlurlClientCache.
+	/// </summary>
+	public static class IFlurlClientCacheExtensions
+	{
+		/// <summary>
+		/// Adds a new IFlurlClient to this cache. Call once per client at startup to register and configure a named client.
+		/// Allows configuring via a nested lambda, rather than returning a builder, so multiple Add calls can be fluently chained.
+		/// </summary>
+		/// <param name="cache">This IFlurlCache</param>
+		/// <param name="name">Name of the IFlurlClient. Serves as a cache key. Subsequent calls to Get will return this client.</param>
+		/// <param name="baseUrl">The base URL associated with the new client.</param>
+		/// <param name="configure">Configure the builder associated with the added client.</param>
+		/// <returns>This IFlurlCache.</returns>
+		public static IFlurlClientCache Add(this IFlurlClientCache cache, string name, string baseUrl, Action<IFlurlClientBuilder> configure) {
+			var builder = cache.Add(name, baseUrl);
+			configure?.Invoke(builder);
+			return cache;
+		}
 	}
 
 	/// <summary>
@@ -78,16 +102,18 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <inheritdoc />
-		public void Remove(string name) {
+		public IFlurlClientCache Remove(string name) {
 			if (_clients.TryRemove(name, out var cli) && cli.IsValueCreated && !cli.Value.IsDisposed)
 				cli.Value.Dispose();
+			return this;
 		}
 
 		/// <inheritdoc />
-		public void Clear() {
+		public IFlurlClientCache Clear() {
 			// Remove takes care of disposing too, which is why we don't simply call _clients.Clear
 			foreach (var key in _clients.Keys)
 				Remove(key);
+			return this;
 		}
 	}
 }
