@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Flurl.Http;
 using Flurl.Http.Configuration;
 using NUnit.Framework;
 
@@ -26,6 +23,24 @@ namespace Flurl.Test.Http
 			Assert.AreEqual("https://api.google.com", goog.BaseUrl);
 			Assert.AreEqual(234, goog.Settings.Timeout.Value.TotalSeconds);
 			Assert.AreSame(goog, cache.Get("google"), "should reuse same-named clients.");
+		}
+
+		[Test]
+		public void can_get_or_add_client() {
+			var cache = new FlurlClientCache();
+			IFlurlClient firstCli = null;
+			var configCalls = 0;
+
+			for (var i = 0; i < 10; i++) {
+				var cli = cache.GetOrAdd("foo", "https://api.com", _ => configCalls++);
+				if (i == 0)
+					firstCli = cli;
+				else
+					Assert.AreSame(firstCli, cli);
+			}
+
+			Assert.AreEqual("https://api.com", firstCli.BaseUrl);
+			Assert.AreEqual(1, configCalls);
 		}
 
 		[Test]

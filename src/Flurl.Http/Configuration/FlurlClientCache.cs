@@ -24,6 +24,15 @@ namespace Flurl.Http.Configuration
 		IFlurlClient Get(string name);
 
 		/// <summary>
+		/// Gets a named IFlurlClient, creating and configuring one if it doesn't exist or has been disposed.
+		/// </summary>
+		/// <param name="name">The client name.</param>
+		/// <param name="baseUrl">The base URL associated with the new client, if it doesn't exist.</param>
+		/// <param name="configure">Configure the builder associated with the new client, if it doesn't exist.</param>
+		/// <returns>The cached IFlurlClient.</returns>
+		IFlurlClient GetOrAdd(string name, string baseUrl = null, Action<IFlurlClientBuilder> configure = null);
+
+		/// <summary>
 		/// Configuration logic that gets executed for every new IFlurlClient added this case. Good place for things like default
 		/// settings. Executes before client-specific builder logic.
 		/// </summary>
@@ -73,26 +82,37 @@ namespace Flurl.Http.Configuration
 
 		/// <inheritdoc />
 		public IFlurlClientBuilder Add(string name, string baseUrl = null) {
-			if (_clients.ContainsKey(name))
-				throw new ArgumentException($"A client named '{name}' was already registered with this factory. AddClient should be called just once per client at startup.");
+			if (name == null)
+				throw new ArgumentNullException(nameof(name));
 
 			var builder = new FlurlClientBuilder(baseUrl);
-			_clients[name] = CreateLazyInstance(builder);
+			Lazy<IFlurlClient> Create() {
+				_configureAll?.Invoke(builder);
+				return new Lazy<IFlurlClient>(builder.Build);
+			}
+
+			if (!_clients.TryAdd(name, Create()))
+				throw new ArgumentException($"A client named '{name}' was already registered with this factory. Add should be called just once per client at startup.");
+
 			return builder;
 		}
 
 		/// <inheritdoc />
-		public virtual IFlurlClient Get(string name) {
+		public virtual IFlurlClient Get(string name) => GetOrAdd(name);
+
+		/// <inheritdoc />
+		public IFlurlClient GetOrAdd(string name, string baseUrl = null, Action<IFlurlClientBuilder> configure = null) {
 			if (name == null)
 				throw new ArgumentNullException(nameof(name));
 
-			Lazy<IFlurlClient> Create() => CreateLazyInstance(new FlurlClientBuilder());
-			return _clients.AddOrUpdate(name, _ => Create(), (_, existing) => existing.Value.IsDisposed ? Create() : existing).Value;
-		}
+			var builder = new FlurlClientBuilder(baseUrl);
+			Lazy<IFlurlClient> Create() {
+				_configureAll?.Invoke(builder);
+				configure?.Invoke(builder);
+				return new Lazy<IFlurlClient>(builder.Build);
+			}
 
-		private Lazy<IFlurlClient> CreateLazyInstance(FlurlClientBuilder builder) {
-			_configureAll?.Invoke(builder);
-			return new Lazy<IFlurlClient>(builder.Build);
+			return _clients.AddOrUpdate(name, _ => Create(), (_, existing) => existing.Value.IsDisposed ? Create() : existing).Value;
 		}
 
 		/// <inheritdoc />
