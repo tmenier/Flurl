@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Flurl.Http.Configuration;
@@ -9,22 +10,23 @@ using NUnit.Framework;
 namespace Flurl.Test.Http
 {
 	/// <summary>
-	/// FlurlHttpSettings are available at the test, client, and request level. This abstract class
-	/// allows the same tests to be run against settings at all 4 levels.
+	/// A Settings collection is available on IFlurlRequest, IFlurlClient, IFlurlBuilder, and HttpTest.
+	/// This abstract class allows the same tests to be run against all 4.
 	/// </summary>
-	public abstract class SettingsTestsBase
+	public abstract class SettingsTestsBase<T> where T : ISettingsContainer
 	{
-		protected abstract FlurlHttpSettings GetSettings();
-		protected abstract IFlurlRequest GetRequest();
+		protected abstract T CreateContainer();
+		protected abstract IFlurlRequest GetRequest(T container);
 
 		[Test]
 		public async Task can_set_http_version() {
-			Assert.AreEqual("1.1", GetSettings().HttpVersion); // default
-
 			using var test = new HttpTest();
 
-			GetSettings().HttpVersion = "2.0";
-			var req = GetRequest();
+			var c = CreateContainer();
+			Assert.AreEqual("1.1", c.Settings.HttpVersion); // default
+
+			c.Settings.HttpVersion = "2.0";
+			var req = GetRequest(c);
 			Assert.AreEqual("2.0", req.Settings.HttpVersion);
 
 			Version versionUsed = null;
@@ -37,17 +39,18 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void cannot_set_invalid_http_version() {
-			Assert.Throws<ArgumentException>(() => GetSettings().HttpVersion = "foo");
+			Assert.Throws<ArgumentException>(() => CreateContainer().Settings.HttpVersion = "foo");
 		}
 
 		[Test]
 		public async Task can_allow_non_success_status() {
 			using var test = new HttpTest();
 
-			GetSettings().AllowedHttpStatusRange = "4xx";
+			var c = CreateContainer();
+			c.Settings.AllowedHttpStatusRange = "4xx";
 			test.RespondWith("I'm a teapot", 418);
 			try {
-				var result = await GetRequest().GetAsync();
+				var result = await GetRequest(c).GetAsync();
 				Assert.AreEqual(418, result.StatusCode);
 			}
 			catch (Exception) {
@@ -61,12 +64,13 @@ namespace Flurl.Test.Http
 			using var test = new HttpTest();
 
 			test.RespondWith("ok");
-			GetSettings().BeforeCall = call => {
+			var c = CreateContainer();
+			c.Settings.BeforeCall = call => {
 				Assert.Null(call.Response); // verifies that callback is running before HTTP call is made
 				callbackCalled = true;
 			};
 			Assert.IsFalse(callbackCalled);
-			await GetRequest().GetAsync();
+			await GetRequest(c).GetAsync();
 			Assert.IsTrue(callbackCalled);
 		}
 
@@ -76,12 +80,13 @@ namespace Flurl.Test.Http
 			using var test = new HttpTest();
 
 			test.RespondWith("ok");
-			GetSettings().AfterCall = call => {
+			var c = CreateContainer();
+			c.Settings.AfterCall = call => {
 				Assert.NotNull(call.Response); // verifies that callback is running after HTTP call is made
 				callbackCalled = true;
 			};
 			Assert.IsFalse(callbackCalled);
-			await GetRequest().GetAsync();
+			await GetRequest(c).GetAsync();
 			Assert.IsTrue(callbackCalled);
 		}
 
@@ -92,14 +97,15 @@ namespace Flurl.Test.Http
 			using var test = new HttpTest();
 
 			test.RespondWith("server error", 500);
-			GetSettings().OnError = call => {
+			var c = CreateContainer();
+			c.Settings.OnError = call => {
 				Assert.NotNull(call.Response); // verifies that callback is running after HTTP call is made
 				callbackCalled = true;
 				call.ExceptionHandled = markExceptionHandled;
 			};
 			Assert.IsFalse(callbackCalled);
 			try {
-				await GetRequest().GetAsync();
+				await GetRequest(c).GetAsync();
 				Assert.IsTrue(callbackCalled, "OnError was never called");
 				Assert.IsTrue(markExceptionHandled, "ExceptionHandled was marked false in callback, but exception was not propagated.");
 			}
@@ -113,12 +119,13 @@ namespace Flurl.Test.Http
 		public async Task can_disable_exception_behavior() {
 			using var test = new HttpTest();
 
-			GetSettings().OnError = call => {
+			var c = CreateContainer();
+			c.Settings.OnError = call => {
 				call.ExceptionHandled = true;
 			};
 			test.RespondWith("server error", 500);
 			try {
-				var result = await GetRequest().GetAsync();
+				var result = await GetRequest(c).GetAsync();
 				Assert.AreEqual(500, result.StatusCode);
 			}
 			catch (FlurlHttpException) {
@@ -128,22 +135,27 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public void can_reset_defaults() {
-			GetSettings().JsonSerializer = null;
-			GetSettings().Redirects.Enabled = false;
-			GetSettings().BeforeCall = (call) => Console.WriteLine("Before!");
-			GetSettings().Redirects.MaxAutoRedirects = 5;
+			var c = CreateContainer();
 
-			Assert.IsNull(GetSettings().JsonSerializer);
-			Assert.IsFalse(GetSettings().Redirects.Enabled);
-			Assert.IsNotNull(GetSettings().BeforeCall);
-			Assert.AreEqual(5, GetSettings().Redirects.MaxAutoRedirects);
+			c.Settings.JsonSerializer = null;
+			c.Settings.Redirects.Enabled = false;
+			c.Settings.BeforeCall = (call) => Console.WriteLine("Before!");
+			c.Settings.Redirects.MaxAutoRedirects = 5;
 
-			GetSettings().ResetDefaults();
+			var req = GetRequest(c);
 
-			Assert.That(GetSettings().JsonSerializer is DefaultJsonSerializer);
-			Assert.IsTrue(GetSettings().Redirects.Enabled);
-			Assert.IsNull(GetSettings().BeforeCall);
-			Assert.AreEqual(10, GetSettings().Redirects.MaxAutoRedirects);
+			Assert.IsNull(req.Settings.JsonSerializer);
+			Assert.IsFalse(req.Settings.Redirects.Enabled);
+			Assert.IsNotNull(req.Settings.BeforeCall);
+			Assert.AreEqual(5, req.Settings.Redirects.MaxAutoRedirects);
+
+			c.Settings.ResetDefaults();
+			req = GetRequest(c);
+
+			Assert.That(req.Settings.JsonSerializer is DefaultJsonSerializer);
+			Assert.IsTrue(req.Settings.Redirects.Enabled);
+			Assert.IsNull(req.Settings.BeforeCall);
+			Assert.AreEqual(10, req.Settings.Redirects.MaxAutoRedirects);
 		}
 
 		[Test] // #256
@@ -160,21 +172,110 @@ namespace Flurl.Test.Http
 			Assert.AreEqual(new[] { "application/json-patch+json; utf-8" }, h.GetValues("Content-Type"));
 			Assert.AreEqual(new[] { "10" }, h.GetValues("Content-Length"));
 		}
+
+		[Test]
+		public void can_set_timeout() {
+			var c = CreateContainer().WithTimeout(TimeSpan.FromSeconds(15));
+			var req = GetRequest(c);
+			Assert.AreEqual(TimeSpan.FromSeconds(15), req.Settings.Timeout);
+		}
+
+		[Test]
+		public void can_set_timeout_in_seconds() {
+			var c = CreateContainer().WithTimeout(15);
+			var req = GetRequest(c);
+			Assert.AreEqual(req.Settings.Timeout, TimeSpan.FromSeconds(15));
+		}
+
+		[Test]
+		public async Task can_allow_specific_http_status() {
+			using var test = new HttpTest();
+			test.RespondWith("Nothing to see here", 404);
+			var c = CreateContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
+			await GetRequest(c).DeleteAsync(); // no exception = pass
+		}
+
+		[Test]
+		public async Task allow_specific_http_status_also_allows_2xx() {
+			using var test = new HttpTest();
+			test.RespondWith("I'm just an innocent 2xx, I should never fail!", 201);
+			var c = CreateContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
+			await GetRequest(c).GetAsync(); // no exception = pass
+		}
+
+		[Test]
+		public void can_clear_non_success_status() {
+			using var test = new HttpTest();
+			test.RespondWith("I'm a teapot", 418);
+			// allow 4xx
+			var c = CreateContainer().AllowHttpStatus("4xx");
+			// but then disallow it
+			c.Settings.AllowedHttpStatusRange = null;
+			Assert.ThrowsAsync<FlurlHttpException>(async () => await GetRequest(c).GetAsync());
+		}
+
+		[Test]
+		public async Task can_allow_any_http_status() {
+			using var test = new HttpTest();
+			test.RespondWith("epic fail", 500);
+			try {
+				var c = CreateContainer().AllowAnyHttpStatus();
+				var result = await GetRequest(c).GetAsync();
+				Assert.AreEqual(500, result.StatusCode);
+			}
+			catch (Exception) {
+				Assert.Fail("Exception should not have been thrown.");
+			}
+		}
 	}
 
 	[TestFixture]
-	public class HttpTestSettingsTests : SettingsTestsBase
+	public class RequestSettingsTests : SettingsTestsBase<IFlurlRequest>
 	{
-		private HttpTest _test;
+		protected override IFlurlRequest CreateContainer() => new FlurlRequest("http://api.com");
+		protected override IFlurlRequest GetRequest(IFlurlRequest req) => req;
 
-		[SetUp]
-		public void CreateTest() => _test = new HttpTest();
+		[Test]
+		public void request_gets_default_settings_when_no_client() {
+			var req = new FlurlRequest();
+			Assert.IsNull(req.Client);
+			Assert.IsNull(req.Url);
+			Assert.IsInstanceOf<DefaultJsonSerializer>(req.Settings.JsonSerializer);
+		}
+
+		[Test]
+		public void can_override_settings_fluently() {
+			using var test = new HttpTest();
+			var cli = new FlurlClient().WithSettings(s => s.AllowedHttpStatusRange = "*");
+			test.RespondWith("epic fail", 500);
+			var req = "http://www.api.com".WithSettings(c => c.AllowedHttpStatusRange = "2xx");
+			req.Client = cli; // client-level settings shouldn't win
+			Assert.ThrowsAsync<FlurlHttpException>(async () => await req.GetAsync());
+		}
+	}
+
+	[TestFixture]
+	public class ClientSettingsTests : SettingsTestsBase<IFlurlClient>
+	{
+		protected override IFlurlClient CreateContainer() => new FlurlClient();
+		protected override IFlurlRequest GetRequest(IFlurlClient cli) => cli.Request("http://api.com");
+	}
+
+	[TestFixture]
+	public class ClientBuilderSettingsTests : SettingsTestsBase<IFlurlClientBuilder>
+	{
+		protected override IFlurlClientBuilder CreateContainer() => new FlurlClientBuilder();
+		protected override IFlurlRequest GetRequest(IFlurlClientBuilder builder) => builder.Build().Request("http://api.com");
+	}
+
+	[TestFixture]
+	public class HttpTestSettingsTests : SettingsTestsBase<HttpTest>
+	{
+		protected override HttpTest CreateContainer() => HttpTest.Current ?? new HttpTest();
+		protected override IFlurlRequest GetRequest(HttpTest container) => new FlurlRequest("http://api.com");
 
 		[TearDown]
-		public void DisposeTest() => _test.Dispose();
-
-		protected override FlurlHttpSettings GetSettings() => HttpTest.Current.Settings;
-		protected override IFlurlRequest GetRequest() => new FlurlRequest("http://api.com");
+		public void DisposeTest() => HttpTest.Current?.Dispose();
 
 		[Test] // #246
 		public void test_settings_dont_override_request_settings_when_not_set_explicitily() {
@@ -199,32 +300,6 @@ namespace Flurl.Test.Http
 			public string Serialize(object obj) => "foo";
 			public T Deserialize<T>(string s) => default;
 			public T Deserialize<T>(Stream stream) => default;
-		}
-	}
-
-	[TestFixture]
-	public class ClientSettingsTests : SettingsTestsBase
-	{
-		private readonly Lazy<IFlurlClient> _client = new Lazy<IFlurlClient>(() => new FlurlClient());
-
-		protected override FlurlHttpSettings GetSettings() => _client.Value.Settings;
-		protected override IFlurlRequest GetRequest() => _client.Value.Request("http://api.com");
-	}
-
-	[TestFixture]
-	public class RequestSettingsTests : SettingsTestsBase
-	{
-		private readonly Lazy<IFlurlRequest> _req = new Lazy<IFlurlRequest>(() => new FlurlRequest("http://api.com"));
-
-		protected override FlurlHttpSettings GetSettings() => _req.Value.Settings;
-		protected override IFlurlRequest GetRequest() => _req.Value;
-
-		[Test]
-		public void request_gets_default_settings_when_no_client() {
-			var req = new FlurlRequest();
-			Assert.IsNull(req.Client);
-			Assert.IsNull(req.Url);
-			Assert.IsInstanceOf<DefaultJsonSerializer>(req.Settings.JsonSerializer);
 		}
 	}
 }

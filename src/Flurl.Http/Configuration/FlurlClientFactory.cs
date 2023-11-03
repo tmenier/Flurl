@@ -51,13 +51,6 @@ namespace Flurl.Http.Configuration
 		/// </summary>
 		public virtual HttpMessageHandler CreateInnerHandler() {
 			// Flurl has its own mechanisms for managing cookies and redirects, so we need to disable them in the inner handler.
-#if NETCOREAPP2_1_OR_GREATER
-			var handler = new SocketsHttpHandler {
-				UseCookies = false,
-				AllowAutoRedirect = false,
-				AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-			};
-#else
 			var handler = new HttpClientHandler();
 
 			if (handler.SupportsRedirectConfiguration)
@@ -70,8 +63,26 @@ namespace Flurl.Http.Configuration
 
 			try { handler.UseCookies = false; }
 			catch (PlatformNotSupportedException) { } // look out for WASM platforms (#543)
-#endif
+
 			return handler;
 		}
 	}
+
+#if NET
+	/// <summary>
+	/// An implementation of IFlurlClientFactory that uses SocketsHttpHandler on supported platforms.
+	/// </summary>
+	public class SocketsHandlerFlurlClientFactory : DefaultFlurlClientFactory
+	{
+		/// <summary>
+		/// Creates and configures a new SocketsHttpHandler as needed when a new IFlurlClient instance is created.
+		/// </summary>
+		public override HttpMessageHandler CreateInnerHandler() => new SocketsHttpHandler {
+			// Flurl has its own mechanisms for managing cookies and redirects, so we need to disable them in the inner handler.
+			UseCookies = false,
+			AllowAutoRedirect = false,
+			AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+		};
+	}
+#endif
 }

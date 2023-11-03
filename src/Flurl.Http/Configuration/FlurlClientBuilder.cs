@@ -2,31 +2,35 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.Versioning;
+using Flurl.Util;
 
 namespace Flurl.Http.Configuration
 {
 	/// <summary>
 	/// A builder for configuring IFlurlClient instances.
 	/// </summary>
-	public interface IFlurlClientBuilder
+	public interface IFlurlClientBuilder : ISettingsContainer, IHeadersContainer
 	{
-		/// <summary>
-		/// Configure the IFlurlClient's Settings.
-		/// </summary>
-		IFlurlClientBuilder WithSettings(Action<FlurlHttpSettings> configure);
-
 		/// <summary>
 		/// Configure the HttpClient wrapped by this IFlurlClient.
 		/// </summary>
 		IFlurlClientBuilder ConfigureHttpClient(Action<HttpClient> configure);
 
 		/// <summary>
-		/// Configure the inner-most HttpMessageHandler associated with this IFlurlClient.
+		/// Configure the inner-most HttpMessageHandler (an instance of HttpClientHandler) associated with this IFlurlClient.
 		/// </summary>
-#if NETCOREAPP2_1_OR_GREATER
-		IFlurlClientBuilder ConfigureInnerHandler(Action<SocketsHttpHandler> configure);
-#else
 		IFlurlClientBuilder ConfigureInnerHandler(Action<HttpClientHandler> configure);
+
+#if NET
+		/// <summary>
+		/// Configure a SocketsHttpHandler instead of HttpClientHandler as the inner-most HttpMessageHandler.
+		/// Note that HttpClientHandler has broader platform support and defers its work to SocketsHttpHandler
+		/// on supported platforms. It is recommended to explicitly use SocketsHttpHandler ONLY if you
+		/// need to directly configure its properties that aren't available on HttpClientHandler.
+		/// </summary>
+		[UnsupportedOSPlatform("browser")]
+		IFlurlClientBuilder UseSocketsHttpHandler(Action<SocketsHttpHandler> configure);
 #endif
 
 		/// <summary>
@@ -45,34 +49,24 @@ namespace Flurl.Http.Configuration
 	/// </summary>
 	public class FlurlClientBuilder : IFlurlClientBuilder
 	{
-		private readonly IFlurlClientFactory _factory;
+		private IFlurlClientFactory _factory = new DefaultFlurlClientFactory();
+
 		private readonly string _baseUrl;
 		private readonly List<Func<DelegatingHandler>> _addMiddleware = new();
-		private readonly List<Action<FlurlHttpSettings>> _configSettings = new();
-		private readonly List<Action<HttpClient>> _configClient = new();
-#if NETCOREAPP2_1_OR_GREATER
-		private readonly HandlerBuilder<SocketsHttpHandler> _handlerBuilder = new();
-#else
-		private readonly HandlerBuilder<HttpClientHandler> _handlerBuilder = new();
-#endif
-
-		/// <summary>
-		/// Creates a new FlurlClientBuilder.
-		/// </summary>
-		public FlurlClientBuilder(string baseUrl = null) : this(new DefaultFlurlClientFactory(),  baseUrl) { }
-
-		/// <summary>
-		/// Creates a new FlurlClientBuilder.
-		/// </summary>
-		internal FlurlClientBuilder(IFlurlClientFactory factory, string baseUrl) {
-			_factory = factory;
-			_baseUrl = baseUrl;
-		}
+		private readonly List<Action<HttpClient>> _clientConfigs = new();
+		private readonly List<Action<HttpMessageHandler>> _handlerConfigs = new();
 
 		/// <inheritdoc />
-		public IFlurlClientBuilder WithSettings(Action<FlurlHttpSettings> configure) {
-			_configSettings.Add(configure);
-			return this;
+		public FlurlHttpSettings Settings { get; } = new();
+
+		/// <inheritdoc />
+		public INameValueList<string> Headers { get; } = new NameValueList<string>(false); // header names are case-insensitive https://stackoverflow.com/a/5259004/62600
+
+		/// <summary>
+		/// Creates a new FlurlClientBuilder.
+		/// </summary>
+		public FlurlClientBuilder(string baseUrl = null) {
+			_baseUrl = baseUrl;
 		}
 
 		/// <inheritdoc />
@@ -83,23 +77,42 @@ namespace Flurl.Http.Configuration
 
 		/// <inheritdoc />
 		public IFlurlClientBuilder ConfigureHttpClient(Action<HttpClient> configure) {
-			_configClient.Add(configure);
+			_clientConfigs.Add(configure);
 			return this;
 		}
 
 		/// <inheritdoc />
-#if NETCOREAPP2_1_OR_GREATER
-		public IFlurlClientBuilder ConfigureInnerHandler(Action<SocketsHttpHandler> configure) {
-#else
 		public IFlurlClientBuilder ConfigureInnerHandler(Action<HttpClientHandler> configure) {
+#if NET
+			if (_factory is SocketsHandlerFlurlClientFactory && _handlerConfigs.Any())
+				throw new FlurlConfigurationException("ConfigureInnerHandler and UseSocketsHttpHandler cannot be used together. The former configures and instance of HttpClientHandler and would be ignored when switching to SocketsHttpHandler.");
 #endif
-			_handlerBuilder.Configs.Add(configure);
+			_handlerConfigs.Add(h => configure(h as HttpClientHandler));
 			return this;
 		}
+
+#if NET
+		/// <inheritdoc />
+		public IFlurlClientBuilder UseSocketsHttpHandler(Action<SocketsHttpHandler> configure) {
+			if (!SocketsHttpHandler.IsSupported)
+				throw new PlatformNotSupportedException("SocketsHttpHandler is not supported on one or more target platforms.");
+
+			if (_factory is DefaultFlurlClientFactory && _handlerConfigs.Any())
+				throw new FlurlConfigurationException("ConfigureInnerHandler and UseSocketsHttpHandler cannot be used together. The former configures and instance of HttpClientHandler and would be ignored when switching to SocketsHttpHandler.");
+
+			if (!(_factory is SocketsHandlerFlurlClientFactory))
+				_factory = new SocketsHandlerFlurlClientFactory();
+
+			_handlerConfigs.Add(h => configure(h as SocketsHttpHandler));
+			return this;
+		}
+#endif
 
 		/// <inheritdoc />
 		public IFlurlClient Build() {
-			var outerHandler = _handlerBuilder.Build(_factory);
+			var outerHandler = _factory.CreateInnerHandler();
+			foreach (var config in _handlerConfigs)
+				config(outerHandler);
 
 			foreach (var middleware in Enumerable.Reverse(_addMiddleware).Select(create => create())) {
 				middleware.InnerHandler = outerHandler;
@@ -107,31 +120,10 @@ namespace Flurl.Http.Configuration
 			}
 
 			var httpCli = _factory.CreateHttpClient(outerHandler);
-			foreach (var config in _configClient)
+			foreach (var config in _clientConfigs)
 				config(httpCli);
 
-			var flurlCli = new FlurlClient(httpCli, _baseUrl);
-			foreach (var config in _configSettings)
-				config(flurlCli.Settings);
-
-			return flurlCli;
-		}
-
-		// helper class to keep those compiler switches from getting too messy
-		private class HandlerBuilder<T> where T : HttpMessageHandler
-		{
-			public List<Action<T>> Configs { get; } = new();
-
-			public HttpMessageHandler Build(IFlurlClientFactory fac) {
-				var handler = fac.CreateInnerHandler();
-				foreach (var config in Configs) {
-					if (handler is T h)
-						config(h);
-					else
-						throw new Exception($"ConfigureInnerHandler expected an instance of {typeof(T).Name} but received an instance of {handler.GetType().Name}.");
-				}
-				return handler;
-			}
+			return new FlurlClient(httpCli, _baseUrl, Settings, Headers);
 		}
 	}
 }

@@ -71,6 +71,13 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		public void can_create_request_with_Uri() {
+			var uri = new System.Uri("http://www.mysite.com/foo?x=1");
+			var req = new FlurlClient().Request(uri);
+			Assert.AreEqual(uri.ToString(), req.Url.ToString());
+		}
+
+		[Test]
 		public void cannot_send_invalid_request() {
 			var cli = new FlurlClient();
 			Assert.ThrowsAsync<ArgumentNullException>(() => cli.SendAsync(null));

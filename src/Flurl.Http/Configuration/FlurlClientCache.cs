@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Flurl.Http.Configuration
 {
@@ -9,52 +10,88 @@ namespace Flurl.Http.Configuration
 	public interface IFlurlClientCache
 	{
 		/// <summary>
-		/// Adds and returns a new IFlurlClient. Call once per client at startup to register and configure a named client.
+		/// Adds a new IFlurlClient to this cache. Call once per client at startup to register and configure a named client.
 		/// </summary>
 		/// <param name="name">Name of the IFlurlClient. Serves as a cache key. Subsequent calls to Get will return this client.</param>
 		/// <param name="baseUrl">Optional. The base URL associated with the new client.</param>
-		/// <returns></returns>
+		/// <returns>A builder to further configure the new client.</returns>
 		IFlurlClientBuilder Add(string name, string baseUrl = null);
 
 		/// <summary>
-		/// Gets a named IFlurlClient, creating one if it doesn't exist or has been disposed.
+		/// Gets a preconfigured named IFlurlClient.
 		/// </summary>
 		/// <param name="name">The client name.</param>
-		/// <returns></returns>
+		/// <returns>The cached IFlurlClient.</returns>
 		IFlurlClient Get(string name);
 
 		/// <summary>
-		/// Configuration logic that gets executed for every new IFlurlClient added this case. Good place for things like default
-		/// settings. Executes before client-specific builder logic.
+		/// Gets a named IFlurlClient, creating and (optionally) configuring one if it doesn't exist or has been disposed.
 		/// </summary>
-		IFlurlClientCache ConfigureAll(Action<IFlurlClientBuilder> configure);
+		/// <param name="name">The client name.</param>
+		/// <param name="baseUrl">The base URL associated with the new client, if it doesn't exist.</param>
+		/// <param name="configure">Configure the builder associated with the new client, if it doesn't exist.</param>
+		/// <returns>The cached IFlurlClient.</returns>
+		IFlurlClient GetOrAdd(string name, string baseUrl = null, Action<IFlurlClientBuilder> configure = null);
+
+		/// <summary>
+		/// Adds initialization logic that gets executed for every new IFlurlClient added this cache.
+		/// Good place for things like default settings. Executes before client-specific builder logic.
+		/// Call at startup (or whenever the cache is first created); clients already cached will NOT have this logic applied.
+		/// </summary>
+		/// <returns>This IFlurlCache.</returns>
+		IFlurlClientCache WithDefaults(Action<IFlurlClientBuilder> configure);
 
 		/// <summary>
 		/// Removes a named client from this cache.
 		/// </summary>
-		void Remove(string name);
+		/// <returns>This IFlurlCache.</returns>
+		IFlurlClientCache Remove(string name);
 
 		/// <summary>
 		/// Disposes and removes all cached IFlurlClient instances.
 		/// </summary>
-		void Clear();
+		/// <returns>This IFlurlCache.</returns>
+		IFlurlClientCache Clear();
+	}
+
+	/// <summary>
+	/// Extension methods on IFlurlClientCache.
+	/// </summary>
+	public static class IFlurlClientCacheExtensions
+	{
+		/// <summary>
+		/// Adds a new IFlurlClient to this cache. Call once per client at startup to register and configure a named client.
+		/// Allows configuring via a nested lambda, rather than returning a builder, so multiple Add calls can be fluently chained.
+		/// </summary>
+		/// <param name="cache">This IFlurlCache</param>
+		/// <param name="name">Name of the IFlurlClient. Serves as a cache key. Subsequent calls to Get will return this client.</param>
+		/// <param name="baseUrl">The base URL associated with the new client.</param>
+		/// <param name="configure">Configure the builder associated with the added client.</param>
+		/// <returns>This IFlurlCache.</returns>
+		public static IFlurlClientCache Add(this IFlurlClientCache cache, string name, string baseUrl, Action<IFlurlClientBuilder> configure) {
+			var builder = cache.Add(name, baseUrl);
+			configure?.Invoke(builder);
+			return cache;
+		}
 	}
 
 	/// <summary>
 	/// Default implementation of IFlurlClientCache.
 	/// </summary>
-	public class FlurlClientCache : IFlurlClientCache {
+	public class FlurlClientCache : IFlurlClientCache
+	{
 		private readonly ConcurrentDictionary<string, Lazy<IFlurlClient>> _clients = new();
-		private readonly IFlurlClientFactory _factory = new DefaultFlurlClientFactory();
-		private Action<IFlurlClientBuilder> _configureAll;
+		private readonly List<Action<IFlurlClientBuilder>> _defaultConfigs = new();
 
 		/// <inheritdoc />
 		public IFlurlClientBuilder Add(string name, string baseUrl = null) {
-			if (_clients.ContainsKey(name))
-				throw new ArgumentException($"A client named '{name}' was already registered with this factory. AddClient should be called just once per client at startup.");
+			if (name == null)
+				throw new ArgumentNullException(nameof(name));
 
-			var builder = new FlurlClientBuilder(_factory, baseUrl);
-			_clients[name] = CreateLazyInstance(builder);
+			var builder = CreateBuilder(baseUrl);
+			if (!_clients.TryAdd(name, new Lazy<IFlurlClient>(builder.Build)))
+				throw new ArgumentException($"A client named '{name}' was already registered. Add should be called just once per client at startup.");
+
 			return builder;
 		}
 
@@ -63,32 +100,56 @@ namespace Flurl.Http.Configuration
 			if (name == null)
 				throw new ArgumentNullException(nameof(name));
 
-			Lazy<IFlurlClient> Create() => CreateLazyInstance(new FlurlClientBuilder(_factory, null));
-			return _clients.AddOrUpdate(name, _ => Create(), (_, existing) => existing.Value.IsDisposed ? Create() : existing).Value;
-		}
+			if (!_clients.TryGetValue(name, out var cli))
+				throw new ArgumentException($"A client named '{name}' was not found. Either preconfigure the client using Add (typically at startup), or use GetOrAdd to add/configure one on demand when needed.");
 
-		private Lazy<IFlurlClient> CreateLazyInstance(FlurlClientBuilder builder) {
-			_configureAll?.Invoke(builder);
-			return new Lazy<IFlurlClient>(builder.Build);
+			if (cli.Value.IsDisposed)
+				throw new Exception($"A client named '{name}' was not found but has been disposed and cannot be reused.");
+
+			return cli.Value;
 		}
 
 		/// <inheritdoc />
-		public IFlurlClientCache ConfigureAll(Action<IFlurlClientBuilder> configure) {
-			_configureAll = configure;
+		public IFlurlClient GetOrAdd(string name, string baseUrl = null, Action<IFlurlClientBuilder> configure = null) {
+			if (name == null)
+				throw new ArgumentNullException(nameof(name));
+
+			Lazy<IFlurlClient> Create() {
+				var builder = CreateBuilder(baseUrl);
+				configure?.Invoke(builder);
+				return new Lazy<IFlurlClient>(builder.Build);
+			}
+
+			return _clients.AddOrUpdate(name, _ => Create(), (_, existing) => existing.Value.IsDisposed ? Create() : existing).Value;
+		}
+
+		/// <inheritdoc />
+		public IFlurlClientCache WithDefaults(Action<IFlurlClientBuilder> configure) {
+			if (configure != null)
+				_defaultConfigs.Add(configure);
 			return this;
 		}
 
 		/// <inheritdoc />
-		public void Remove(string name) {
+		public IFlurlClientCache Remove(string name) {
 			if (_clients.TryRemove(name, out var cli) && cli.IsValueCreated && !cli.Value.IsDisposed)
 				cli.Value.Dispose();
+			return this;
 		}
 
 		/// <inheritdoc />
-		public void Clear() {
+		public IFlurlClientCache Clear() {
 			// Remove takes care of disposing too, which is why we don't simply call _clients.Clear
 			foreach (var key in _clients.Keys)
 				Remove(key);
+			return this;
+		}
+
+		private IFlurlClientBuilder CreateBuilder(string baseUrl) {
+			var builder = new FlurlClientBuilder(baseUrl);
+			foreach (var config in _defaultConfigs)
+				config(builder);
+			return builder;
 		}
 	}
 }

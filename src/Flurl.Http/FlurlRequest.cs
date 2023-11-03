@@ -13,7 +13,7 @@ namespace Flurl.Http
 	/// Represents an HTTP request. Can be created explicitly via new FlurlRequest(), fluently via Url.Request(),
 	/// or implicitly when a call is made via methods like Url.GetAsync().
 	/// </summary>
-	public interface IFlurlRequest : IHttpSettingsContainer
+	public interface IFlurlRequest : ISettingsContainer, IHeadersContainer
 	{
 		/// <summary>
 		/// Gets or sets the IFlurlClient to use when sending the request.
@@ -106,6 +106,7 @@ namespace Flurl.Http
 			set {
 				_client = value;
 				Settings.Parent = _client?.Settings;
+				SyncHeaders(_client, this);
 			}
 		}
 
@@ -140,6 +141,15 @@ namespace Flurl.Http
 			Content = content;
 			Client ??= FlurlHttp.GetClientForRequest(this);
 			return Client.SendAsync(this, completionOption, cancellationToken);
+		}
+
+		internal static void SyncHeaders(IFlurlClient client, IFlurlRequest request) {
+			if (client == null || request == null) return;
+
+			foreach (var header in client.Headers.ToList()) {
+				if (!request.Headers.Contains(header.Name))
+					request.Headers.Add(header.Name, header.Value);
+			}
 		}
 
 		private void ApplyCookieJar(CookieJar jar) {

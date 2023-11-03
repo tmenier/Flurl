@@ -13,13 +13,6 @@ namespace Flurl.Test.Http
 	public class FlurlClientBuilderTests
 	{
 		[Test]
-		public void can_configure_settings() {
-			var builder = new FlurlClientBuilder();
-			var cli = builder.WithSettings(s => s.HttpVersion = "3.0").Build();
-			Assert.AreEqual("3.0", cli.Settings.HttpVersion);
-		}
-
-		[Test]
 		public void can_configure_HttpClient() {
 			var builder = new FlurlClientBuilder();
 			var cli = builder.ConfigureHttpClient(c => c.BaseAddress = new Uri("https://flurl.dev/docs/fluent-http")).Build();
@@ -51,17 +44,36 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public void inner_hanlder_is_SocketsHttpHandler_when_supported() {
+		public void uses_HttpClientHandler_by_default() {
 			HttpMessageHandler handler = null;
 			new FlurlClientBuilder()
 				.ConfigureInnerHandler(h => handler = h)
 				.Build();
-#if NET
-			Assert.IsInstanceOf<SocketsHttpHandler>(handler);
-#else
 			Assert.IsInstanceOf<HttpClientHandler>(handler);
-#endif
 		}
+
+#if NET
+		[Test]
+		public void can_use_SocketsHttpHandler() {
+			HttpMessageHandler handler = null;
+			new FlurlClientBuilder()
+				.UseSocketsHttpHandler(h => handler = h)
+				.Build();
+			Assert.IsInstanceOf<SocketsHttpHandler>(handler);
+		}
+
+		[Test]
+		public void cannot_mix_handler_types() {
+			Assert.Throws<FlurlConfigurationException>(() => new FlurlClientBuilder()
+				.ConfigureInnerHandler(_ => { })
+				.UseSocketsHttpHandler(_ => { }));
+
+			// reverse
+			Assert.Throws<FlurlConfigurationException>(() => new FlurlClientBuilder()
+				.UseSocketsHttpHandler(_ => { })
+				.ConfigureInnerHandler(_ => { }));
+		}
+#endif
 
 		class BlockingHandler : DelegatingHandler
 		{
