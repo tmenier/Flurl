@@ -62,16 +62,16 @@ namespace Flurl.Test.Http
 		}
 		
 		[Test]
-		public void can_configure_all() {
+		public void can_configure_defaults() {
 			var cache = new FlurlClientCache()
-				.ConfigureAll(b => b.WithSettings(s => s.Timeout = TimeSpan.FromSeconds(123)));
+				.WithDefaults(b => b.Settings.Timeout = TimeSpan.FromSeconds(123));
 
 			var cli1 = cache.GetOrAdd("foo");
 
 			cache.Add("bar").WithSettings(s => {
 				s.Timeout = TimeSpan.FromSeconds(456);
 			});
-			cache.ConfigureAll(b => b.WithSettings(s => {
+			cache.WithDefaults(b => b.WithSettings(s => {
 				s.Timeout = TimeSpan.FromSeconds(789);
 			}));
 

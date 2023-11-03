@@ -34,11 +34,12 @@ namespace Flurl.Http.Configuration
 		IFlurlClient GetOrAdd(string name, string baseUrl = null, Action<IFlurlClientBuilder> configure = null);
 
 		/// <summary>
-		/// Configuration logic that gets executed for every new IFlurlClient added this case. Good place for things like default
-		/// settings. Executes before client-specific builder logic.
+		/// Adds initialization logic that gets executed for every new IFlurlClient added this cache.
+		/// Good place for things like default settings. Executes before client-specific builder logic.
+		/// Call at startup (or whenever the cache is first created); clients already cached will NOT have this logic applied.
 		/// </summary>
 		/// <returns>This IFlurlCache.</returns>
-		IFlurlClientCache ConfigureAll(Action<IFlurlClientBuilder> configure);
+		IFlurlClientCache WithDefaults(Action<IFlurlClientBuilder> configure);
 
 		/// <summary>
 		/// Removes a named client from this cache.
@@ -80,7 +81,7 @@ namespace Flurl.Http.Configuration
 	public class FlurlClientCache : IFlurlClientCache
 	{
 		private readonly ConcurrentDictionary<string, Lazy<IFlurlClient>> _clients = new();
-		private readonly List<Action<IFlurlClientBuilder>> _configureAll = new();
+		private readonly List<Action<IFlurlClientBuilder>> _defaultConfigs = new();
 
 		/// <inheritdoc />
 		public IFlurlClientBuilder Add(string name, string baseUrl = null) {
@@ -123,9 +124,9 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <inheritdoc />
-		public IFlurlClientCache ConfigureAll(Action<IFlurlClientBuilder> configure) {
+		public IFlurlClientCache WithDefaults(Action<IFlurlClientBuilder> configure) {
 			if (configure != null)
-				_configureAll.Add(configure);
+				_defaultConfigs.Add(configure);
 			return this;
 		}
 
@@ -146,7 +147,7 @@ namespace Flurl.Http.Configuration
 
 		private IFlurlClientBuilder CreateBuilder(string baseUrl) {
 			var builder = new FlurlClientBuilder(baseUrl);
-			foreach (var config in _configureAll)
+			foreach (var config in _defaultConfigs)
 				config(builder);
 			return builder;
 		}
