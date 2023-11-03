@@ -16,7 +16,7 @@ namespace Flurl.Http.Testing
 	/// </summary>
 	public abstract class HttpTestSetup
 	{
-		private readonly List<Func<HttpResponseMessage>> _responses = new List<Func<HttpResponseMessage>>();
+		private readonly List<Func<HttpResponseMessage>> _responses = new();
 
 		private int _respIndex = 0;
 		private bool _allowRealHttp = false;

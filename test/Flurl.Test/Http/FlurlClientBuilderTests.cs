@@ -13,13 +13,6 @@ namespace Flurl.Test.Http
 	public class FlurlClientBuilderTests
 	{
 		[Test]
-		public void can_configure_settings() {
-			var builder = new FlurlClientBuilder();
-			var cli = builder.WithSettings(s => s.HttpVersion = "3.0").Build();
-			Assert.AreEqual("3.0", cli.Settings.HttpVersion);
-		}
-
-		[Test]
 		public void can_configure_HttpClient() {
 			var builder = new FlurlClientBuilder();
 			var cli = builder.ConfigureHttpClient(c => c.BaseAddress = new Uri("https://flurl.dev/docs/fluent-http")).Build();

@@ -12,7 +12,7 @@ namespace Flurl.Http
 	/// <summary>
 	/// Interface defining FlurlClient's contract (useful for mocking and DI)
 	/// </summary>
-	public interface IFlurlClient : IHttpSettingsContainer, IDisposable {
+	public interface IFlurlClient : ISettingsContainer, IHeadersContainer, IDisposable {
 		/// <summary>
 		/// Gets the HttpClient that this IFlurlClient wraps.
 		/// </summary>
@@ -67,26 +67,32 @@ namespace Flurl.Http
 		/// Flurl's re-implementation of those features may not work properly.
 		/// </summary>
 		/// <param name="httpClient">The instantiated HttpClient instance.</param>
-		/// <param name="baseUrl">The base URL associated with this client.</param>
-		public FlurlClient(HttpClient httpClient, string baseUrl = null) {
+		/// <param name="baseUrl">Optional. The base URL associated with this client.</param>
+		/// <param name="settings">Optional. A pre-initialized collection of settings.</param>
+		/// <param name="headers">Optional. A pre-initialized collection of default request headers.</param>
+		public FlurlClient(HttpClient httpClient, string baseUrl = null, FlurlHttpSettings settings = null, INameValueList<string> headers = null) {
 			HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 			BaseUrl = baseUrl ?? httpClient.BaseAddress?.ToString();
-			foreach (var header in httpClient.DefaultRequestHeaders.SelectMany(h => h.Value, (kv, v) => (kv.Key, v)))
-				Headers.Add(header);
 
-			Settings.Timeout = httpClient.Timeout;
+			Settings = settings ?? new FlurlHttpSettings { Timeout = httpClient.Timeout };
 			// Timeout can be overridden per request, so don't constrain it by the underlying HttpClient
 			httpClient.Timeout = Timeout.InfiniteTimeSpan;
+
+			Headers = headers ?? new NameValueList<string>(false); // header names are case-insensitive https://stackoverflow.com/a/5259004/62600
+			foreach (var header in httpClient.DefaultRequestHeaders.SelectMany(h => h.Value, (kv, v) => (kv.Key, v))) {
+				if (!Headers.Contains(header.Key))
+					Headers.Add(header);
+			}
 		}
 
 		/// <inheritdoc />
 		public string BaseUrl { get; set; }
 
 		/// <inheritdoc />
-		public FlurlHttpSettings Settings { get; } = new();
+		public FlurlHttpSettings Settings { get; }
 
 		/// <inheritdoc />
-		public INameValueList<string> Headers { get; } = new NameValueList<string>(false); // header names are case-insensitive https://stackoverflow.com/a/5259004/62600
+		public INameValueList<string> Headers { get; }
 
 		/// <inheritdoc />
 		public HttpClient HttpClient { get; }
@@ -153,10 +159,7 @@ namespace Flurl.Http
 
 		private void SyncHeaders(IFlurlRequest req, HttpRequestMessage reqMsg) {
 			// copy any client-level (default) headers to FlurlRequest
-			foreach (var header in this.Headers.ToList()) {
-				if (!req.Headers.Contains(header.Name))
-					req.Headers.Add(header.Name, header.Value);
-			}
+			FlurlRequest.SyncHeaders(this, req);
 
 			// copy headers from FlurlRequest to HttpRequestMessage
 			foreach (var header in req.Headers)

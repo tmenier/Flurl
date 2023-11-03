@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net.Http;
 using Flurl.Http.Configuration;
 
 namespace Flurl.Http.Testing
@@ -13,7 +12,7 @@ namespace Flurl.Http.Testing
 	/// queue, call log, and assertion helpers for use in Arrange/Act/Assert style tests.
 	/// </summary>
 	[Serializable]
-	public class HttpTest : HttpTestSetup, IDisposable
+	public class HttpTest : HttpTestSetup, ISettingsContainer, IDisposable
 	{
 		private readonly ConcurrentQueue<FlurlCall> _calls = new();
 		private readonly List<FilteredHttpTestSetup> _filteredSetups = new();
@@ -37,16 +36,6 @@ namespace Flurl.Http.Testing
 		/// List of all (fake) HTTP calls made since this HttpTest was created.
 		/// </summary>
 		public IReadOnlyList<FlurlCall> CallLog => new ReadOnlyCollection<FlurlCall>(_calls.ToList());
-
-		/// <summary>
-		/// Change FlurlHttpSettings for the scope of this HttpTest.
-		/// </summary>
-		/// <param name="action">Action defining the settings changes.</param>
-		/// <returns>This HttpTest</returns>
-		public HttpTest WithSettings(Action<FlurlHttpSettings> action) {
-			action(Settings);
-			return this;
-		}
 
 		/// <summary>
 		/// Fluently creates and returns a new request-specific test setup. 

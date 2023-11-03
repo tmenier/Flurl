@@ -3,19 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.Versioning;
+using Flurl.Util;
 
 namespace Flurl.Http.Configuration
 {
 	/// <summary>
 	/// A builder for configuring IFlurlClient instances.
 	/// </summary>
-	public interface IFlurlClientBuilder
+	public interface IFlurlClientBuilder : ISettingsContainer, IHeadersContainer
 	{
-		/// <summary>
-		/// Configure the IFlurlClient's Settings.
-		/// </summary>
-		IFlurlClientBuilder WithSettings(Action<FlurlHttpSettings> configure);
-
 		/// <summary>
 		/// Configure the HttpClient wrapped by this IFlurlClient.
 		/// </summary>
@@ -57,21 +53,20 @@ namespace Flurl.Http.Configuration
 
 		private readonly string _baseUrl;
 		private readonly List<Func<DelegatingHandler>> _addMiddleware = new();
-		private readonly List<Action<FlurlHttpSettings>> _settingsConfigs = new();
 		private readonly List<Action<HttpClient>> _clientConfigs = new();
 		private readonly List<Action<HttpMessageHandler>> _handlerConfigs = new();
+
+		/// <inheritdoc />
+		public FlurlHttpSettings Settings { get; } = new();
+
+		/// <inheritdoc />
+		public INameValueList<string> Headers { get; } = new NameValueList<string>(false); // header names are case-insensitive https://stackoverflow.com/a/5259004/62600
 
 		/// <summary>
 		/// Creates a new FlurlClientBuilder.
 		/// </summary>
 		public FlurlClientBuilder(string baseUrl = null) {
 			_baseUrl = baseUrl;
-		}
-
-		/// <inheritdoc />
-		public IFlurlClientBuilder WithSettings(Action<FlurlHttpSettings> configure) {
-			_settingsConfigs.Add(configure);
-			return this;
 		}
 
 		/// <inheritdoc />
@@ -128,11 +123,7 @@ namespace Flurl.Http.Configuration
 			foreach (var config in _clientConfigs)
 				config(httpCli);
 
-			var flurlCli = new FlurlClient(httpCli, _baseUrl);
-			foreach (var config in _settingsConfigs)
-				config(flurlCli.Settings);
-
-			return flurlCli;
+			return new FlurlClient(httpCli, _baseUrl, Settings, Headers);
 		}
 	}
 }
