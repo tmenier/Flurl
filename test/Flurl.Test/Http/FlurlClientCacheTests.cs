@@ -44,14 +44,14 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public void can_get_unconfigured_client() {
+		public void can_get_or_add_unconfigured_client() {
 			var cache = new FlurlClientCache();
-			var cli = cache.Get("foo");
+			var cli = cache.GetOrAdd("foo");
+
 			Assert.IsNull(cli.BaseUrl);
 			Assert.AreEqual(100, cli.Settings.Timeout.Value.TotalSeconds);
-
-			Assert.AreSame(cli, cache.Get("foo"), "should reuse same-named clients.");
-			Assert.AreNotSame(cli, cache.Get("bar"), "different-named clients should be different instances.");
+			Assert.AreSame(cli, cache.GetOrAdd("foo"), "should reuse same-named clients.");
+			Assert.AreNotSame(cli, cache.GetOrAdd("bar"), "different-named clients should be different instances.");
 		}
 
 		[Test]
@@ -66,7 +66,7 @@ namespace Flurl.Test.Http
 			var cache = new FlurlClientCache()
 				.ConfigureAll(b => b.WithSettings(s => s.Timeout = TimeSpan.FromSeconds(123)));
 
-			var cli1 = cache.Get("foo");
+			var cli1 = cache.GetOrAdd("foo");
 
 			cache.Add("bar").WithSettings(s => {
 				s.Timeout = TimeSpan.FromSeconds(456);
@@ -75,8 +75,8 @@ namespace Flurl.Test.Http
 				s.Timeout = TimeSpan.FromSeconds(789);
 			}));
 
-			var cli2 = cache.Get("bar");
-			var cli3 = cache.Get("buzz");
+			var cli2 = cache.GetOrAdd("bar");
+			var cli3 = cache.GetOrAdd("buzz");
 
 			Assert.AreEqual(123, cli1.Settings.Timeout.Value.TotalSeconds, "fetched the client before changing the defaults, so original should stick");
 			Assert.AreEqual(456, cli2.Settings.Timeout.Value.TotalSeconds, "client-specific settings should always win, even if defaults were changed after");
@@ -92,7 +92,9 @@ namespace Flurl.Test.Http
 			var cli1 = cache.Get("foo");
 			var cli2 = cache.Get("foo");
 			cache.Remove("foo");
-			var cli3 = cache.Get("foo");
+
+			Assert.Throws<ArgumentException>(() => cache.Get("foo"));
+			var cli3 = cache.GetOrAdd("foo");
 
 			Assert.AreSame(cli1, cli2);
 			Assert.AreNotSame(cli1, cli3);

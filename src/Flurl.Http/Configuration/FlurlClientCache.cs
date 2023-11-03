@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Flurl.Http.Configuration
 {
@@ -17,14 +18,14 @@ namespace Flurl.Http.Configuration
 		IFlurlClientBuilder Add(string name, string baseUrl = null);
 
 		/// <summary>
-		/// Gets a named IFlurlClient, creating one if it doesn't exist or has been disposed.
+		/// Gets a preconfigured named IFlurlClient.
 		/// </summary>
 		/// <param name="name">The client name.</param>
 		/// <returns>The cached IFlurlClient.</returns>
 		IFlurlClient Get(string name);
 
 		/// <summary>
-		/// Gets a named IFlurlClient, creating and configuring one if it doesn't exist or has been disposed.
+		/// Gets a named IFlurlClient, creating and (optionally) configuring one if it doesn't exist or has been disposed.
 		/// </summary>
 		/// <param name="name">The client name.</param>
 		/// <param name="baseUrl">The base URL associated with the new client, if it doesn't exist.</param>
@@ -76,38 +77,44 @@ namespace Flurl.Http.Configuration
 	/// <summary>
 	/// Default implementation of IFlurlClientCache.
 	/// </summary>
-	public class FlurlClientCache : IFlurlClientCache {
+	public class FlurlClientCache : IFlurlClientCache
+	{
 		private readonly ConcurrentDictionary<string, Lazy<IFlurlClient>> _clients = new();
-		private Action<IFlurlClientBuilder> _configureAll;
+		private readonly List<Action<IFlurlClientBuilder>> _configureAll = new();
 
 		/// <inheritdoc />
 		public IFlurlClientBuilder Add(string name, string baseUrl = null) {
 			if (name == null)
 				throw new ArgumentNullException(nameof(name));
 
-			var builder = new FlurlClientBuilder(baseUrl);
-			Lazy<IFlurlClient> Create() {
-				_configureAll?.Invoke(builder);
-				return new Lazy<IFlurlClient>(builder.Build);
-			}
-
-			if (!_clients.TryAdd(name, Create()))
-				throw new ArgumentException($"A client named '{name}' was already registered with this factory. Add should be called just once per client at startup.");
+			var builder = CreateBuilder(baseUrl);
+			if (!_clients.TryAdd(name, new Lazy<IFlurlClient>(builder.Build)))
+				throw new ArgumentException($"A client named '{name}' was already registered. Add should be called just once per client at startup.");
 
 			return builder;
 		}
 
 		/// <inheritdoc />
-		public virtual IFlurlClient Get(string name) => GetOrAdd(name);
+		public virtual IFlurlClient Get(string name) {
+			if (name == null)
+				throw new ArgumentNullException(nameof(name));
+
+			if (!_clients.TryGetValue(name, out var cli))
+				throw new ArgumentException($"A client named '{name}' was not found. Either preconfigure the client using Add (typically at startup), or use GetOrAdd to add/configure one on demand when needed.");
+
+			if (cli.Value.IsDisposed)
+				throw new Exception($"A client named '{name}' was not found but has been disposed and cannot be reused.");
+
+			return cli.Value;
+		}
 
 		/// <inheritdoc />
 		public IFlurlClient GetOrAdd(string name, string baseUrl = null, Action<IFlurlClientBuilder> configure = null) {
 			if (name == null)
 				throw new ArgumentNullException(nameof(name));
 
-			var builder = new FlurlClientBuilder(baseUrl);
 			Lazy<IFlurlClient> Create() {
-				_configureAll?.Invoke(builder);
+				var builder = CreateBuilder(baseUrl);
 				configure?.Invoke(builder);
 				return new Lazy<IFlurlClient>(builder.Build);
 			}
@@ -117,7 +124,8 @@ namespace Flurl.Http.Configuration
 
 		/// <inheritdoc />
 		public IFlurlClientCache ConfigureAll(Action<IFlurlClientBuilder> configure) {
-			_configureAll = configure;
+			if (configure != null)
+				_configureAll.Add(configure);
 			return this;
 		}
 
@@ -134,6 +142,13 @@ namespace Flurl.Http.Configuration
 			foreach (var key in _clients.Keys)
 				Remove(key);
 			return this;
+		}
+
+		private IFlurlClientBuilder CreateBuilder(string baseUrl) {
+			var builder = new FlurlClientBuilder(baseUrl);
+			foreach (var config in _configureAll)
+				config(builder);
+			return builder;
 		}
 	}
 }
