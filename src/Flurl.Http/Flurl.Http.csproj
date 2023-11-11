@@ -3,7 +3,7 @@
     <TargetFrameworks>netstandard2.0;net461;net472</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>Flurl.Http</PackageId>
-    <Version>3.2.4</Version>
+    <Version>3.2.5</Version>
     <Authors>Todd Menier</Authors>
     <Description>A fluent, portable, testable HTTP client library.</Description>
     <PackageProjectUrl>https://flurl.dev</PackageProjectUrl>

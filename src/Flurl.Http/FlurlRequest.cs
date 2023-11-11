@@ -180,13 +180,14 @@ namespace Flurl.Http
 			var ct = GetCancellationTokenWithTimeout(cancellationToken, out var cts);
 
 			try {
+				var cloneContent = await content.CloneAsync().ConfigureAwait(false);
 				var response = await Client.HttpClient.SendAsync(request, completionOption, ct).ConfigureAwait(false);
 				call.HttpResponseMessage = response;
 				call.HttpResponseMessage.RequestMessage = request;
 				call.Response = new FlurlResponse(call.HttpResponseMessage, CookieJar);
 
 				if (call.Succeeded) {
-					var redirResponse = await ProcessRedirectAsync(call, cancellationToken, completionOption).ConfigureAwait(false);
+					var redirResponse = await ProcessRedirectAsync(call, cloneContent, cancellationToken, completionOption).ConfigureAwait(false);
 					return redirResponse ?? call.Response;
 				}
 				else
@@ -231,7 +232,7 @@ namespace Flurl.Http
 			}
 		}
 
-		private async Task<IFlurlResponse> ProcessRedirectAsync(FlurlCall call, CancellationToken cancellationToken, HttpCompletionOption completionOption) {
+		private async Task<IFlurlResponse> ProcessRedirectAsync(FlurlCall call, HttpContent content, CancellationToken cancellationToken, HttpCompletionOption completionOption) {
 			if (Settings.Redirects.Enabled)
 				call.Redirect = GetRedirect(call);
 
@@ -266,7 +267,7 @@ namespace Flurl.Http
 			try {
 				return await redir.SendAsync(
 					changeToGet ? HttpMethod.Get : call.HttpRequestMessage.Method,
-					changeToGet ? null : call.HttpRequestMessage.Content,
+					changeToGet ? null : content,
 					ct,
 					completionOption).ConfigureAwait(false);
 			}
