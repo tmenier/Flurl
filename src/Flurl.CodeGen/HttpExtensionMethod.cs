@@ -47,7 +47,8 @@ namespace Flurl.CodeGen
 		public string ResponseBodyType { get; }
 
 		public string TaskArg => ResponseBodyType switch {
-			"Json" => "T",
+			"Json" => IsGeneric ? "T" : "dynamic",
+			"JsonList" => "IList<dynamic>",
 			"String" => "string",
 			"Stream" => "Stream",
 			"Bytes" => "byte[]",
@@ -55,7 +56,8 @@ namespace Flurl.CodeGen
 		};
 
 		public string ReturnTypeDescription => ResponseBodyType switch {
-			"Json" => "the JSON response body deserialized to an object of type T",
+			"Json" => "the JSON response body deserialized to " + (IsGeneric ? "an object of type T" : "a dynamic"),
+			"JsonList" => "the JSON response body deserialized to a list of dynamics",
 			"String" => "the response body as a string",
 			"Stream" => "the response body as a Stream",
 			"Bytes" => "the response body as a byte array",
