@@ -1,7 +1,8 @@
 ﻿using System.IO;
+using Flurl.Http.Configuration;
 using Newtonsoft.Json;
 
-namespace Flurl.Http.Configuration
+namespace Flurl.Http.Newtonsoft
 {
 	/// <summary>
 	/// ISerializer implementation based on Newtonsoft.Json.

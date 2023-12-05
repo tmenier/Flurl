@@ -1,19 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461;net472</TargetFrameworks>
+    <TargetFrameworks>net6.0;netstandard2.0;net461</TargetFrameworks>
+    <LangVersion>9.0</LangVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageId>Flurl</PackageId>
-    <Version>4.0.0-pre4</Version>
+    <PackageId>Flurl.Http.Newtonsoft</PackageId>
+    <Version>0.9.0-pre1</Version>
     <Authors>Todd Menier</Authors>
-    <Description>A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.</Description>
+    <Description>A Newtonsoft-based JSON serializer for Flurl.Http 4.0 and above.</Description>
     <PackageProjectUrl>https://flurl.dev</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/tmenier/Flurl.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageTags>fluent url uri querystring builder</PackageTags>
+    <PackageTags>flurl http json</PackageTags>
     <PackageReleaseNotes>https://github.com/tmenier/Flurl/releases</PackageReleaseNotes>
-  	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -25,10 +26,12 @@
 
   <ItemGroup>
     <None Include="..\..\icon.png" Pack="true" PackagePath="\" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <ProjectReference Include="..\Flurl.Http\Flurl.Http.csproj" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 </Project>

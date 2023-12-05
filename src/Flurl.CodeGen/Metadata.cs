@@ -158,6 +158,13 @@ namespace Flurl.CodeGen
 			let isGenenric = (respType == "Json")
 			select new HttpExtensionMethod(verb, isGenenric, reqType, respType) { ExtendedTypeArg = extendedArg };
 
+		/// <summary>
+		/// Additional HTTP-calling methods that return dynamic or IList&lt;dynamic&gt;, supported only with Flurl.Http.Newtonsoft.
+		/// </summary>
+		public static IEnumerable<HttpExtensionMethod> GetDynamicReturningExtensions(MethodArg extendedArg) =>
+			from respType in new[] { "Json", "JsonList" }
+			select new HttpExtensionMethod("Get", false, null, respType) { ExtendedTypeArg = extendedArg };
+
 		public static IEnumerable<ExtensionMethod> GetMiscAsyncExtensions(MethodArg extendedArg) {
 			// a couple oddballs
 

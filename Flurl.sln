@@ -14,6 +14,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flurl.Test", "test\Flurl.Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flurl.CodeGen", "src\Flurl.CodeGen\Flurl.CodeGen.csproj", "{BE943E04-705F-42B1-BF95-A0642D9CA51D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flurl.Http.Newtonsoft", "src\Flurl.Http.Newtonsoft\Flurl.Http.Newtonsoft.csproj", "{BDF18B21-6B7B-4945-BB86-9CB8A8B1E93A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{BE943E04-705F-42B1-BF95-A0642D9CA51D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE943E04-705F-42B1-BF95-A0642D9CA51D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE943E04-705F-42B1-BF95-A0642D9CA51D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDF18B21-6B7B-4945-BB86-9CB8A8B1E93A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDF18B21-6B7B-4945-BB86-9CB8A8B1E93A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDF18B21-6B7B-4945-BB86-9CB8A8B1E93A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDF18B21-6B7B-4945-BB86-9CB8A8B1E93A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -45,6 +51,7 @@ Global
 		{D7AC6172-73DD-468D-955A-3562F2BE303B} = {B82E8094-AFA9-466E-9E60-473B7B89AFE2}
 		{DF68EB0E-9566-4577-B709-291520383F8D} = {86A5ACB4-F3B3-4395-A5D5-924C9F35F628}
 		{BE943E04-705F-42B1-BF95-A0642D9CA51D} = {B82E8094-AFA9-466E-9E60-473B7B89AFE2}
+		{BDF18B21-6B7B-4945-BB86-9CB8A8B1E93A} = {B82E8094-AFA9-466E-9E60-473B7B89AFE2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {61289482-AC5A-44E1-AEA1-76A3F3CCB6A4}
