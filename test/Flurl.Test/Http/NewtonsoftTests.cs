@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using Flurl.Http;
 using Flurl.Http.Newtonsoft;
@@ -19,29 +20,41 @@ namespace Flurl.Test.Http
 		protected override HttpTest CreateHttpTest() => base.CreateHttpTest()
 			.WithSettings(settings => settings.JsonSerializer = new NewtonsoftJsonSerializer());
 
-		[Test]
-		public async Task can_get_dynamic() {
+		[TestCaseSource(nameof(GetJson))]
+		public async Task can_get_dynamic(Task<dynamic> getJson) {
 			HttpTest.RespondWithJson(new { id = 1, name = "Frank" });
 
-			var data = await "http://some-api.com".GetJsonAsync();
+			var data = await getJson;
 
 			Assert.AreEqual(1, data.id);
 			Assert.AreEqual("Frank", data.name);
 		}
 
-		[Test]
-		public async Task can_get_dynamic_list() {
+		[TestCaseSource(nameof(GetJsonList))]
+		public async Task can_get_dynamic_list(Task<IList<dynamic>> getList) {
 			HttpTest.RespondWithJson(new[] {
 				new { id = 1, name = "Frank" },
 				new { id = 2, name = "Claire" }
 			});
 
-			var data = await "http://some-api.com".GetJsonListAsync();
+			var data = await getList;
 
 			Assert.AreEqual(1, data[0].id);
 			Assert.AreEqual("Frank", data[0].name);
 			Assert.AreEqual(2, data[1].id);
 			Assert.AreEqual("Claire", data[1].name);
+		}
+
+		private static IEnumerable<Task<dynamic>> GetJson() {
+			yield return "http://some-api.com".GetJsonAsync();
+			yield return new Url("http://some-api.com").GetJsonAsync();
+			yield return new Uri("http://some-api.com").GetJsonAsync();
+		}
+
+		private static IEnumerable<Task<IList<dynamic>>> GetJsonList() {
+			yield return "http://some-api.com".GetJsonListAsync();
+			yield return new Url("http://some-api.com").GetJsonListAsync();
+			yield return new Uri("http://some-api.com").GetJsonListAsync();
 		}
 	}
 
