@@ -111,8 +111,8 @@ jobs:
     - name: Draft Flurl.Http.Newtonsoft release
       env:
         CURRENT_TAG: ${{ steps.release_ver_flurl_newtonsoft.outputs.tag }}
-        NEXT_TAG: "Flurl.Http.${{ steps.csproj_ver_flurl_newtonsoft.outputs.version }}"
-        RELEASE_NAME: "Flurl.Http ${{ steps.csproj_ver_flurl_newtonsoft.outputs.version }}"
+        NEXT_TAG: "Flurl.Http.Newtonsoft.${{ steps.csproj_ver_flurl_newtonsoft.outputs.version }}"
+        RELEASE_NAME: "Flurl.Http.Newtonsoft ${{ steps.csproj_ver_flurl_newtonsoft.outputs.version }}"
       if: env.NEXT_TAG != env.CURRENT_TAG
       uses: ncipollo/release-action@v1
       with:
