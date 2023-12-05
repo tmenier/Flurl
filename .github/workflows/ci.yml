@@ -26,4 +26,4 @@ jobs:
       run: dotnet build -c Release --no-restore
 
     - name: Test
-      run: dotnet test --no-build -c Release /p:CollectCoverage=true /p:Threshold=80 /p:Include=\"[Flurl]*,[Flurl.Http]*\" /p:Exclude="[*]*.GeneratedExtensions"
+      run: dotnet test --no-build -c Release /p:CollectCoverage=true /p:Threshold=80 /p:Include=\"[Flurl]*,[Flurl.Http]*,[Flurl.Http.Newtonsoft]*\" /p:Exclude="[*]*.GeneratedExtensions"

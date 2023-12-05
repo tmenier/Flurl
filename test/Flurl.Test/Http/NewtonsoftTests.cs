@@ -43,6 +43,19 @@ namespace Flurl.Test.Http
 			Assert.AreEqual(2, data[1].id);
 			Assert.AreEqual("Claire", data[1].name);
 		}
+
+		[Test]
+		public async Task null_response_returns_null_dynamic() {
+			// a null IFlurlResponse is likely not even possible in real-world scenarios, but we have
+			// null checks that need to be tested in order to meet our coverage threshold for this lib.
+			Task<IFlurlResponse> resp = Task.FromResult<IFlurlResponse>(null);
+
+			var json = await resp.ReceiveJson();
+			Assert.IsNull(json);
+
+			var list = await resp.ReceiveJsonList();
+			Assert.IsNull(list);
+		}
 	}
 
 	[TestFixture, Parallelizable]
