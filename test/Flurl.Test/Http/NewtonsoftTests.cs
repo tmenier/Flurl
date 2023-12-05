@@ -1,8 +1,11 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using Flurl.Http;
 using Flurl.Http.Newtonsoft;
 using Flurl.Http.Testing;
 using System.Threading.Tasks;
+using Flurl.Http.Configuration;
+using Newtonsoft.Json;
 
 namespace Flurl.Test.Http
 {
@@ -43,7 +46,7 @@ namespace Flurl.Test.Http
 	}
 
 	[TestFixture, Parallelizable]
-	public class NewtonsofPostTests : PostTests
+	public class NewtonsoftPostTests : PostTests
 	{
 		protected override HttpTest CreateHttpTest() => base.CreateHttpTest()
 			.WithSettings(settings => settings.JsonSerializer = new NewtonsoftJsonSerializer());
@@ -72,5 +75,34 @@ namespace Flurl.Test.Http
 			Assert.AreEqual(2, data[1].id);
 			Assert.AreEqual("Claire", data[1].name);
 		}
+	}
+
+	[TestFixture, Parallelizable]
+	public class NewtonsoftConfigTests
+	{
+		[Test]
+		public void can_register_with_builder() {
+			var cache = new FlurlClientCache();
+			var cli = cache.GetOrAdd("foo", null, builder => builder.UseNewtonsoft(new JsonSerializerSettings { DateFormatString = "1234" }));
+
+			Assert.IsInstanceOf<NewtonsoftJsonSerializer>(cli.Settings.JsonSerializer);
+
+			var obj = new { Date = DateTime.Now };
+			var json = cli.Settings.JsonSerializer.Serialize(obj);
+			Assert.AreEqual("{\"Date\":\"1234\"}", json);
+		}
+
+		[Test]
+		public void can_register_with_cache() {
+			var cache = new FlurlClientCache().UseNewtonsoft(new JsonSerializerSettings { DateFormatString = "1234" });
+			var cli = cache.GetOrAdd("foo");
+
+			Assert.IsInstanceOf<NewtonsoftJsonSerializer>(cli.Settings.JsonSerializer);
+
+			var obj = new { Date = DateTime.Now };
+			var json = cli.Settings.JsonSerializer.Serialize(obj);
+			Assert.AreEqual("{\"Date\":\"1234\"}", json);
+		}
+
 	}
 }
