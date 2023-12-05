@@ -10,7 +10,6 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NUnit" Version="3.13.3" />
 	  
 	<!--careful - 4.4 and above don't support net461-->
@@ -19,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Flurl.Http.Newtonsoft\Flurl.Http.Newtonsoft.csproj" />
     <ProjectReference Include="..\..\src\Flurl.Http\Flurl.Http.csproj" />
   </ItemGroup>
 
