@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Flurl.Http.Configuration;
@@ -147,6 +148,18 @@ namespace Flurl.Test.Http
 	{
 		protected override IFlurlClient CreateContainer() => new FlurlClient();
 		protected override IFlurlRequest GetRequest(IFlurlClient cli) => cli.Request("http://api.com");
+
+		[Test]
+		public void can_copy_multi_value_header_from_HttpClient() {
+			var userAgent = "Mozilla/5.0 (X11; Linux i686; rv:109.0) Gecko/20100101 Firefox/120.0";
+			var httpClient = new HttpClient();
+			httpClient.DefaultRequestHeaders.Add("user-agent", userAgent);
+			httpClient.DefaultRequestHeaders.TryAddWithoutValidation("foo", new[] {"a", "b", "c"});
+			var flurlClient = new FlurlClient(httpClient);
+
+			Assert.AreEqual(userAgent, flurlClient.Headers[0].Value);
+			Assert.AreEqual("a,b,c", flurlClient.Headers[1].Value);
+		}
 	}
 
 	[TestFixture]

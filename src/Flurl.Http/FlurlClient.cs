@@ -7,6 +7,8 @@ using Flurl.Http.Configuration;
 using Flurl.Http.Testing;
 using Flurl.Util;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
+using System.Reflection;
 
 namespace Flurl.Http
 {
@@ -83,9 +85,31 @@ namespace Flurl.Http
 			EventHandlers = eventHandlers ?? new List<(FlurlEventType, IFlurlEventHandler)>();
 
 			Headers = headers ?? new NameValueList<string>(false); // header names are case-insensitive https://stackoverflow.com/a/5259004/62600
-			foreach (var header in httpClient.DefaultRequestHeaders.SelectMany(h => h.Value, (kv, v) => (kv.Key, v))) {
-				if (!Headers.Contains(header.Key))
+
+			foreach (var header in GetHeadersFromHttpClient(httpClient)) {
+				if (!Headers.Contains(header.Name))
 					Headers.Add(header);
+			}
+		}
+
+		// reflection is (relatively) expensive, so keep a cache of HttpRequestHeaders properties
+		// https://learn.microsoft.com/en-us/dotnet/api/system.net.http.headers.httprequestheaders?#properties
+		private static IDictionary<string, PropertyInfo> _reqHeaderProps =
+			typeof(HttpRequestHeaders).GetProperties().ToDictionary(p => p.Name.ToLower(), p => p);
+
+		private static IEnumerable<(string Name, string Value)> GetHeadersFromHttpClient(HttpClient httpClient) {
+			foreach (var h in httpClient.DefaultRequestHeaders) {
+				// MS isn't making this easy. In some cases, a header value will be split into multiple values, but when iterating the collection
+				// there's no way to know exactly how to piece them back together. The standard says multiple values should be comma-delimited,
+				// but with User-Agent they need to be space-delimited. ToString() on properties like UserAgent do this correctly though, so when spinning
+				// through the collection we'll try to match the header name to a property and ToString() it, otherwise we'll comma-delimit the values.
+				if (_reqHeaderProps.TryGetValue(h.Key.Replace("-", "").ToLower(), out var prop)) {
+					var val = prop.GetValue(httpClient.DefaultRequestHeaders).ToString();
+					yield return (h.Key, val);
+				}
+				else {
+					yield return (h.Key, string.Join(",", h.Value));
+				}
 			}
 		}
 
