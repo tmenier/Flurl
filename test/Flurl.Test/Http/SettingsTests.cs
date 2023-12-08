@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace Flurl.Test.Http
 {
 	/// <summary>
-	/// A Settings collection is available on IFlurlRequest, IFlurlClient, IFlurlBuilder, and HttpTest.
+	/// A Settings collection is available on IFlurlRequest, IFlurlClient, IFlurlClientBuilder, and HttpTest.
 	/// This abstract class allows the same tests to be run against all 4.
 	/// </summary>
 	public abstract class SettingsTestsBase<T> where T : ISettingsContainer
@@ -59,94 +59,17 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
-		public async Task can_set_pre_callback() {
-			var callbackCalled = false;
-			using var test = new HttpTest();
-
-			test.RespondWith("ok");
-			var c = CreateContainer();
-			c.Settings.BeforeCall = call => {
-				Assert.Null(call.Response); // verifies that callback is running before HTTP call is made
-				callbackCalled = true;
-			};
-			Assert.IsFalse(callbackCalled);
-			await GetRequest(c).GetAsync();
-			Assert.IsTrue(callbackCalled);
-		}
-
-		[Test]
-		public async Task can_set_post_callback() {
-			var callbackCalled = false;
-			using var test = new HttpTest();
-
-			test.RespondWith("ok");
-			var c = CreateContainer();
-			c.Settings.AfterCall = call => {
-				Assert.NotNull(call.Response); // verifies that callback is running after HTTP call is made
-				callbackCalled = true;
-			};
-			Assert.IsFalse(callbackCalled);
-			await GetRequest(c).GetAsync();
-			Assert.IsTrue(callbackCalled);
-		}
-
-		[TestCase(true)]
-		[TestCase(false)]
-		public async Task can_set_error_callback(bool markExceptionHandled) {
-			var callbackCalled = false;
-			using var test = new HttpTest();
-
-			test.RespondWith("server error", 500);
-			var c = CreateContainer();
-			c.Settings.OnError = call => {
-				Assert.NotNull(call.Response); // verifies that callback is running after HTTP call is made
-				callbackCalled = true;
-				call.ExceptionHandled = markExceptionHandled;
-			};
-			Assert.IsFalse(callbackCalled);
-			try {
-				await GetRequest(c).GetAsync();
-				Assert.IsTrue(callbackCalled, "OnError was never called");
-				Assert.IsTrue(markExceptionHandled, "ExceptionHandled was marked false in callback, but exception was not propagated.");
-			}
-			catch (FlurlHttpException) {
-				Assert.IsTrue(callbackCalled, "OnError was never called");
-				Assert.IsFalse(markExceptionHandled, "ExceptionHandled was marked true in callback, but exception was propagated.");
-			}
-		}
-
-		[Test]
-		public async Task can_disable_exception_behavior() {
-			using var test = new HttpTest();
-
-			var c = CreateContainer();
-			c.Settings.OnError = call => {
-				call.ExceptionHandled = true;
-			};
-			test.RespondWith("server error", 500);
-			try {
-				var result = await GetRequest(c).GetAsync();
-				Assert.AreEqual(500, result.StatusCode);
-			}
-			catch (FlurlHttpException) {
-				Assert.Fail("Flurl should not have thrown exception.");
-			}
-		}
-
-		[Test]
 		public void can_reset_defaults() {
 			var c = CreateContainer();
 
 			c.Settings.JsonSerializer = null;
 			c.Settings.Redirects.Enabled = false;
-			c.Settings.BeforeCall = (call) => Console.WriteLine("Before!");
 			c.Settings.Redirects.MaxAutoRedirects = 5;
 
 			var req = GetRequest(c);
 
 			Assert.IsNull(req.Settings.JsonSerializer);
 			Assert.IsFalse(req.Settings.Redirects.Enabled);
-			Assert.IsNotNull(req.Settings.BeforeCall);
 			Assert.AreEqual(5, req.Settings.Redirects.MaxAutoRedirects);
 
 			c.Settings.ResetDefaults();
@@ -154,7 +77,6 @@ namespace Flurl.Test.Http
 
 			Assert.That(req.Settings.JsonSerializer is DefaultJsonSerializer);
 			Assert.IsTrue(req.Settings.Redirects.Enabled);
-			Assert.IsNull(req.Settings.BeforeCall);
 			Assert.AreEqual(10, req.Settings.Redirects.MaxAutoRedirects);
 		}
 
@@ -191,7 +113,7 @@ namespace Flurl.Test.Http
 		public async Task can_allow_specific_http_status() {
 			using var test = new HttpTest();
 			test.RespondWith("Nothing to see here", 404);
-			var c = CreateContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
+			var c = CreateContainer().AllowHttpStatus(409, 404);
 			await GetRequest(c).DeleteAsync(); // no exception = pass
 		}
 
@@ -199,7 +121,7 @@ namespace Flurl.Test.Http
 		public async Task allow_specific_http_status_also_allows_2xx() {
 			using var test = new HttpTest();
 			test.RespondWith("I'm just an innocent 2xx, I should never fail!", 201);
-			var c = CreateContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
+			var c = CreateContainer().AllowHttpStatus(409, 404);
 			await GetRequest(c).GetAsync(); // no exception = pass
 		}
 

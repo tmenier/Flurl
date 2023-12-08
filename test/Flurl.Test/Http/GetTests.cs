@@ -105,14 +105,14 @@ namespace Flurl.Test.Http
 			}
 		}
 
-        [Test]
-        public async Task can_get_null_json_when_timeout_and_exception_handled() {
-            HttpTest.SimulateTimeout();
-            var data = await "http://api.com"
-                .WithSettings(c => c.OnError = call => call.ExceptionHandled = true)
-                .GetJsonAsync<TestData>();
-            Assert.IsNull(data);
-        }
+		[Test]
+		public async Task can_get_null_json_when_timeout_and_exception_handled() {
+			HttpTest.SimulateTimeout();
+			var data = await "http://api.com"
+				.OnError(call => call.ExceptionHandled = true)
+				.GetJsonAsync<TestData>();
+			Assert.IsNull(data);
+		}
 
 		// https://github.com/tmenier/Flurl/pull/76
 		// quotes around charset value is technically legal but there's a bug in .NET we want to avoid: https://github.com/dotnet/corefx/issues/5014

@@ -11,6 +11,11 @@ namespace Flurl.Http
 	public class FlurlCall
 	{
 		/// <summary>
+		/// The IFlurlClient used to make this call.
+		/// </summary>
+		public IFlurlClient Client { get; set; }
+
+		/// <summary>
 		/// The IFlurlRequest associated with this call.
 		/// </summary>
 		public IFlurlRequest Request { get; set; }
