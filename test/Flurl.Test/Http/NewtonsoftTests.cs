@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http;
 using NUnit.Framework;
 using Flurl.Http;
 using Flurl.Http.Newtonsoft;
@@ -6,6 +7,7 @@ using Flurl.Http.Testing;
 using System.Threading.Tasks;
 using Flurl.Http.Configuration;
 using Newtonsoft.Json;
+using NUnit.Framework.Constraints;
 
 namespace Flurl.Test.Http
 {
@@ -55,6 +57,14 @@ namespace Flurl.Test.Http
 
 			var list = await resp.ReceiveJsonList();
 			Assert.IsNull(list);
+
+			var ex = new FlurlHttpException(new FlurlCall {
+				Request = new FlurlRequest(),
+				HttpRequestMessage = new HttpRequestMessage(),
+				Response = null,
+			});
+			var err = await ex.GetResponseJsonAsync();
+			Assert.IsNull(err);
 		}
 
 		[TestCase(false)]
