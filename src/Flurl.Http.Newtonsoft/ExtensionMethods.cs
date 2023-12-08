@@ -13,7 +13,7 @@ namespace Flurl.Http.Newtonsoft
 	public static class ExtensionMethods
 	{
 		/// <summary>
-		/// Deserializes JSON-formatted HTTP response body to a dynamic object.
+		/// Deserializes a JSON-formatted HTTP response body to a dynamic object.
 		/// </summary>
 		/// <returns>A Task whose result is a dynamic object containing data in the response body.</returns>
 		public static async Task<dynamic> GetJsonAsync(this IFlurlResponse resp) {
@@ -22,7 +22,7 @@ namespace Flurl.Http.Newtonsoft
 		}
 
 		/// <summary>
-		/// Deserializes JSON-formatted HTTP response body to a list of dynamic objects.
+		/// Deserializes a JSON-formatted HTTP response body to a list of dynamic objects.
 		/// </summary>
 		/// <returns>A Task whose result is a list of dynamic objects containing data in the response body.</returns>
 		public static async Task<IList<dynamic>> GetJsonListAsync(this IFlurlResponse resp) {
@@ -31,7 +31,7 @@ namespace Flurl.Http.Newtonsoft
 		}
 
 		/// <summary>
-		/// Deserializes JSON-formatted HTTP response body to a dynamic object. Intended to chain off an async call.
+		/// Deserializes a JSON-formatted HTTP response body to a dynamic object. Intended to chain off an async call.
 		/// </summary>
 		/// <returns>A Task whose result is a dynamic object containing data in the response body.</returns>
 		public static async Task<dynamic> ReceiveJson(this Task<IFlurlResponse> response) {
@@ -41,7 +41,7 @@ namespace Flurl.Http.Newtonsoft
 		}
 
 		/// <summary>
-		/// Deserializes JSON-formatted HTTP response body to a list of dynamic objects. Intended to chain off an async call.
+		/// Deserializes a JSON-formatted HTTP response body to a list of dynamic objects. Intended to chain off an async call.
 		/// </summary>
 		/// <returns>A Task whose result is a list of dynamic objects containing data in the response body.</returns>
 		public static async Task<IList<dynamic>> ReceiveJsonList(this Task<IFlurlResponse> response) {
@@ -49,6 +49,13 @@ namespace Flurl.Http.Newtonsoft
 			if (resp == null) return null;
 			return await resp.GetJsonListAsync().ConfigureAwait(false);
 		}
+
+		/// <summary>
+		/// Deserializes a JSON-formatted error response body to a dynamic object.
+		/// </summary>
+		/// <returns>A Task whose result is a dynamic object containing data in the response body.</returns>
+		public static async Task<dynamic> GetResponseJsonAsync(this FlurlHttpException flurlException) =>
+			(flurlException.Call?.Response == null) ? null : await flurlException.Call.Response.GetJsonAsync().ConfigureAwait(false);
 
 		/// <summary>
 		/// Shortcut to use NewtonsoftJsonSerializer with this IFlurlClientBuilder.

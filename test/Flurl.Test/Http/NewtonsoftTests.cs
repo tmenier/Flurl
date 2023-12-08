@@ -56,6 +56,24 @@ namespace Flurl.Test.Http
 			var list = await resp.ReceiveJsonList();
 			Assert.IsNull(list);
 		}
+
+		[TestCase(false)]
+		[TestCase(true)]
+		public async Task can_get_error_json_untyped(bool useShortcut) {
+			HttpTest.RespondWithJson(new { code = 999, message = "our server crashed" }, 500);
+
+			try {
+				await "http://api.com".GetStringAsync();
+			}
+			catch (FlurlHttpException ex) {
+				var error = useShortcut ? // error is a dynamic this time
+					await ex.GetResponseJsonAsync() :
+					await ex.Call.Response.GetJsonAsync();
+				Assert.IsNotNull(error);
+				Assert.AreEqual(999, error.code);
+				Assert.AreEqual("our server crashed", error.message);
+			}
+		}
 	}
 
 	[TestFixture, Parallelizable]
