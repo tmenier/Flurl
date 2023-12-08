@@ -6,13 +6,14 @@ using System.Threading;
 using Flurl.Http.Configuration;
 using Flurl.Http.Testing;
 using Flurl.Util;
+using System.Collections.Generic;
 
 namespace Flurl.Http
 {
 	/// <summary>
 	/// Interface defining FlurlClient's contract (useful for mocking and DI)
 	/// </summary>
-	public interface IFlurlClient : ISettingsContainer, IHeadersContainer, IDisposable {
+	public interface IFlurlClient : ISettingsContainer, IHeadersContainer, IEventHandlerContainer, IDisposable {
 		/// <summary>
 		/// Gets the HttpClient that this IFlurlClient wraps.
 		/// </summary>
@@ -68,15 +69,18 @@ namespace Flurl.Http
 		/// </summary>
 		/// <param name="httpClient">The instantiated HttpClient instance.</param>
 		/// <param name="baseUrl">Optional. The base URL associated with this client.</param>
-		/// <param name="settings">Optional. A pre-initialized collection of settings.</param>
-		/// <param name="headers">Optional. A pre-initialized collection of default request headers.</param>
-		public FlurlClient(HttpClient httpClient, string baseUrl = null, FlurlHttpSettings settings = null, INameValueList<string> headers = null) {
+		public FlurlClient(HttpClient httpClient, string baseUrl = null) : this(httpClient, baseUrl, null, null, null) { }
+
+		// FlurlClientBuilder gets some special privileges
+		internal FlurlClient(HttpClient httpClient, string baseUrl, FlurlHttpSettings settings, INameValueList<string> headers, IList<(FlurlEventType, IFlurlEventHandler)> eventHandlers) {
 			HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 			BaseUrl = baseUrl ?? httpClient.BaseAddress?.ToString();
 
 			Settings = settings ?? new FlurlHttpSettings { Timeout = httpClient.Timeout };
 			// Timeout can be overridden per request, so don't constrain it by the underlying HttpClient
 			httpClient.Timeout = Timeout.InfiniteTimeSpan;
+
+			EventHandlers = eventHandlers ?? new List<(FlurlEventType, IFlurlEventHandler)>();
 
 			Headers = headers ?? new NameValueList<string>(false); // header names are case-insensitive https://stackoverflow.com/a/5259004/62600
 			foreach (var header in httpClient.DefaultRequestHeaders.SelectMany(h => h.Value, (kv, v) => (kv.Key, v))) {
@@ -90,6 +94,9 @@ namespace Flurl.Http
 
 		/// <inheritdoc />
 		public FlurlHttpSettings Settings { get; }
+
+		/// <inheritdoc />
+		public IList<(FlurlEventType, IFlurlEventHandler)> EventHandlers { get; }
 
 		/// <inheritdoc />
 		public INameValueList<string> Headers { get; }
@@ -117,11 +124,12 @@ namespace Flurl.Http
 
 			SyncHeaders(request, reqMsg);
 			var call = new FlurlCall {
+				Client = this,
 				Request = request,
 				HttpRequestMessage = reqMsg
 			};
 
-			await RaiseEventAsync(settings.BeforeCall, settings.BeforeCallAsync, call).ConfigureAwait(false);
+			await RaiseEventAsync(FlurlEventType.BeforeCall, call).ConfigureAwait(false);
 
 			// in case URL or headers were modified in the handler above
 			reqMsg.RequestUri = request.Url.ToUri();
@@ -153,7 +161,7 @@ namespace Flurl.Http
 			finally {
 				cts?.Dispose();
 				call.EndedUtc = DateTime.UtcNow;
-				await RaiseEventAsync(settings.AfterCall, settings.AfterCallAsync, call).ConfigureAwait(false);
+				await RaiseEventAsync(FlurlEventType.AfterCall, call).ConfigureAwait(false);
 			}
 		}
 
@@ -183,7 +191,7 @@ namespace Flurl.Http
 			if (call.Redirect == null)
 				return null;
 
-			await RaiseEventAsync(settings.OnRedirect, settings.OnRedirectAsync, call).ConfigureAwait(false);
+			await RaiseEventAsync(FlurlEventType.OnRedirect, call).ConfigureAwait(false);
 
 			if (call.Redirect.Follow != true)
 				return null;
@@ -197,6 +205,9 @@ namespace Flurl.Http
 				RedirectedFrom = call,
 				Settings = { Parent = settings }
 			};
+
+			foreach (var handler in call.Request.EventHandlers)
+				redir.EventHandlers.Add(handler);
 
 			if (call.Request.CookieJar != null)
 				redir.CookieJar = call.Request.CookieJar;
@@ -272,17 +283,25 @@ namespace Flurl.Http
 
 			return redir;
 		}
-		
-		private static Task RaiseEventAsync(Action<FlurlCall> syncHandler, Func<FlurlCall, Task> asyncHandler, FlurlCall call) {
-			syncHandler?.Invoke(call);
-			if (asyncHandler != null)
-				return asyncHandler(call);
-			return Task.FromResult(0);
+
+		internal static async Task RaiseEventAsync(FlurlEventType eventType, FlurlCall call) {
+			// client-level handlers first, then request-level
+			var handlers = call.Client.EventHandlers
+				.Concat(call.Request.EventHandlers)
+				.Where(h => h.EventType == eventType)
+				.Select(h => h.Handler)
+				.ToList();
+
+			foreach (var handler in handlers) {
+				// sync first, then async
+				handler.Handle(eventType, call);
+				await handler.HandleAsync(eventType, call);
+			}
 		}
 
 		internal static async Task<IFlurlResponse> HandleExceptionAsync(FlurlCall call, Exception ex, CancellationToken token) {
 			call.Exception = ex;
-			await RaiseEventAsync(call.Request.Settings.OnError, call.Request.Settings.OnErrorAsync, call).ConfigureAwait(false);
+			await RaiseEventAsync(FlurlEventType.OnError, call).ConfigureAwait(false);
 
 			if (call.ExceptionHandled)
 				return call.Response;

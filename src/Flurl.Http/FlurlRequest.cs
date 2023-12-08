@@ -13,7 +13,7 @@ namespace Flurl.Http
 	/// Represents an HTTP request. Can be created explicitly via new FlurlRequest(), fluently via Url.Request(),
 	/// or implicitly when a call is made via methods like Url.GetAsync().
 	/// </summary>
-	public interface IFlurlRequest : ISettingsContainer, IHeadersContainer
+	public interface IFlurlRequest : ISettingsContainer, IHeadersContainer, IEventHandlerContainer
 	{
 		/// <summary>
 		/// Gets or sets the IFlurlClient to use when sending the request.
@@ -99,6 +99,9 @@ namespace Flurl.Http
 
 		/// <inheritdoc />
 		public FlurlHttpSettings Settings { get; } = new();
+
+		/// <inheritdoc />
+		public IList<(FlurlEventType, IFlurlEventHandler)> EventHandlers { get; } = new List<(FlurlEventType, IFlurlEventHandler)>();
 
 		/// <inheritdoc />
 		public IFlurlClient Client {

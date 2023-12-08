@@ -144,6 +144,14 @@ namespace Flurl.CodeGen
 			yield return Create("AllowAnyHttpStatus", "Creates a new FlurlRequest and configures it to allow any returned HTTP status without throwing a FlurlHttpException.");
 			yield return Create("WithAutoRedirect", "Creates a new FlurlRequest and configures whether redirects are automatically followed.")
 				.AddArg("enabled", "bool", "true if Flurl should automatically send a new request to the redirect URL, false if it should not.");
+
+			// event handler extensions
+			foreach (var name in new[] { "BeforeCall", "AfterCall", "OnError", "OnRedirect" }) {
+				yield return Create(name, $"Creates a new FlurlRequest and adds a new {name} event handler.")
+					.AddArg("action", "Action<FlurlCall>", $"Action to perform when the {name} event is raised.");
+				yield return Create(name, $"Creates a new FlurlRequest and adds a new asynchronous {name} event handler.")
+					.AddArg("action", "Func<FlurlCall, Task>", $"Async action to perform when the {name} event is raised.");
+			}
 		}
 
 		/// <summary>

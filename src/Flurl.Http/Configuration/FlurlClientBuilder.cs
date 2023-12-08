@@ -10,7 +10,7 @@ namespace Flurl.Http.Configuration
 	/// <summary>
 	/// A builder for configuring IFlurlClient instances.
 	/// </summary>
-	public interface IFlurlClientBuilder : ISettingsContainer, IHeadersContainer
+	public interface IFlurlClientBuilder : ISettingsContainer, IHeadersContainer, IEventHandlerContainer
 	{
 		/// <summary>
 		/// Configure the HttpClient wrapped by this IFlurlClient.
@@ -58,6 +58,9 @@ namespace Flurl.Http.Configuration
 
 		/// <inheritdoc />
 		public FlurlHttpSettings Settings { get; } = new();
+
+		/// <inheritdoc />
+		public IList<(FlurlEventType, IFlurlEventHandler)> EventHandlers { get; } = new List<(FlurlEventType, IFlurlEventHandler)>();
 
 		/// <inheritdoc />
 		public INameValueList<string> Headers { get; } = new NameValueList<string>(false); // header names are case-insensitive https://stackoverflow.com/a/5259004/62600
@@ -123,7 +126,7 @@ namespace Flurl.Http.Configuration
 			foreach (var config in _clientConfigs)
 				config(httpCli);
 
-			return new FlurlClient(httpCli, _baseUrl, Settings, Headers);
+			return new FlurlClient(httpCli, _baseUrl, Settings, Headers, EventHandlers);
 		}
 	}
 }

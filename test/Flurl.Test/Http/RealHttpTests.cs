@@ -134,12 +134,12 @@ namespace Flurl.Test.Http
 			var handlerCalled = false;
 
 			try {
-				await "https://httpbin.org/status/500".WithSettings(c => {
-					c.OnError = call => {
+				await "https://httpbin.org/status/500"
+					.OnError(call => {
 						call.ExceptionHandled = true;
 						handlerCalled = true;
-					};
-				}).GetAsync();
+					})
+					.GetAsync();
 				Assert.IsTrue(handlerCalled, "error handler should have been called.");
 			}
 			catch (FlurlHttpException) {
@@ -152,12 +152,12 @@ namespace Flurl.Test.Http
 			Exception ex = null;
 
 			try {
-				await "http://httpbin.org/image/jpeg".WithSettings(c => {
-					c.OnError = call => {
+				await "http://httpbin.org/image/jpeg"
+					.OnError(call => {
 						ex = call.Exception;
 						call.ExceptionHandled = true;
-					};
-				}).GetJsonAsync<object>();
+					})
+					.GetJsonAsync<object>();
 				Assert.IsNotNull(ex, "error handler should have been called.");
 				Assert.IsInstanceOf<FlurlParsingException>(ex);
 			}
@@ -293,10 +293,10 @@ namespace Flurl.Test.Http
 			// Flurl was auto-creating an empty HttpContent object in order to forward content-level headers,
 			// and on .NET Framework a GET with a non-null HttpContent throws an exceptions (#583)
 			var calls = new List<FlurlCall>();
-			var resp = await "http://httpbingo.org/redirect-to?url=http%3A%2F%2Fexample.com%2F".WithSettings(c => {
-				c.Redirects.ForwardHeaders = true;
-				c.BeforeCall = call => calls.Add(call);
-			}).PostUrlEncodedAsync("test=test");
+			var resp = await "http://httpbingo.org/redirect-to?url=http%3A%2F%2Fexample.com%2F"
+				.WithSettings(c => c.Redirects.ForwardHeaders = true)
+				.BeforeCall(call => calls.Add(call))
+				.PostUrlEncodedAsync("test=test");
 
 			Assert.AreEqual(2, calls.Count);
 			Assert.AreEqual(HttpMethod.Post, calls[0].Request.Verb);

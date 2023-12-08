@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using Flurl.Http.Testing;
 
@@ -88,76 +87,6 @@ namespace Flurl.Http.Configuration
 		/// Gets object whose properties describe how Flurl.Http should handle redirect (3xx) responses.
 		/// </summary>
 		public RedirectSettings Redirects { get; }
-
-		/// <summary>
-		/// Gets or sets a callback that is invoked immediately before every HTTP request is sent.
-		/// </summary>
-		public Action<FlurlCall> BeforeCall {
-			get => Get<Action<FlurlCall>>();
-			set => Set(value);
-		}
-
-		/// <summary>
-		/// Gets or sets a callback that is invoked asynchronously immediately before every HTTP request is sent.
-		/// </summary>
-		public Func<FlurlCall, Task> BeforeCallAsync {
-			get => Get<Func<FlurlCall, Task>>();
-			set => Set(value);
-		}
-
-		/// <summary>
-		/// Gets or sets a callback that is invoked immediately after every HTTP response is received.
-		/// </summary>
-		public Action<FlurlCall> AfterCall {
-			get => Get<Action<FlurlCall>>();
-			set => Set(value);
-		}
-
-		/// <summary>
-		/// Gets or sets a callback that is invoked asynchronously immediately after every HTTP response is received.
-		/// </summary>
-		public Func<FlurlCall, Task> AfterCallAsync {
-			get => Get<Func<FlurlCall, Task>>();
-			set => Set(value);
-		}
-
-		/// <summary>
-		/// Gets or sets a callback that is invoked when an error occurs during any HTTP call, including when any non-success
-		/// HTTP status code is returned in the response. Response should be null-checked if used in the event handler.
-		/// </summary>
-		public Action<FlurlCall> OnError {
-			get => Get<Action<FlurlCall>>();
-			set => Set(value);
-		}
-
-		/// <summary>
-		/// Gets or sets a callback that is invoked asynchronously when an error occurs during any HTTP call, including when any non-success
-		/// HTTP status code is returned in the response. Response should be null-checked if used in the event handler.
-		/// </summary>
-		public Func<FlurlCall, Task> OnErrorAsync {
-			get => Get<Func<FlurlCall, Task>>();
-			set => Set(value);
-		}
-
-		/// <summary>
-		/// Gets or sets a callback that is invoked when any 3xx response with a Location header is received.
-		/// You can inspect/manipulate the call.Redirect object to determine what will happen next.
-		/// An auto-redirect will only happen if call.Redirect.Follow is true upon exiting the callback.
-		/// </summary>
-		public Action<FlurlCall> OnRedirect {
-			get => Get<Action<FlurlCall>>();
-			set => Set(value);
-		}
-
-		/// <summary>
-		/// Gets or sets a callback that is invoked asynchronously when any 3xx response with a Location header is received.
-		/// You can inspect/manipulate the call.Redirect object to determine what will happen next.
-		/// An auto-redirect will only happen if call.Redirect.Follow is true upon exiting the callback.
-		/// </summary>
-		public Func<FlurlCall, Task> OnRedirectAsync {
-			get => Get<Func<FlurlCall, Task>>();
-			set => Set(value);
-		}
 
 		/// <summary>
 		/// Resets all overridden settings to their default values. For example, on a FlurlRequest,

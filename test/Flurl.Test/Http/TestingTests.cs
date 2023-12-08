@@ -394,7 +394,7 @@ namespace Flurl.Test.Http
 	        var exceptionCaught = false;
 
 	        var resp = await "http://api.com"
-		        .WithSettings(c => c.OnError = call => {
+		        .OnError(call => {
 			        exceptionCaught = true;
 			        var ex = call.Exception as TaskCanceledException;
 			        Assert.NotNull(ex);
@@ -503,7 +503,7 @@ namespace Flurl.Test.Http
 			// virtually guaranteed without thread-safe collections backing ResponseQueue and CallLog,
 			// but without making the test unbearably slow.
 			var cli = new FlurlClient("http://api.com");
-			cli.Settings.BeforeCallAsync = call => Task.Delay(200);
+			cli.BeforeCall(call => Task.Delay(200));
 
 			for (var i = 0; i < 5; i++) {
 				using (var test = new HttpTest()) {
