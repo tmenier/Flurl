@@ -72,13 +72,13 @@ namespace Flurl.Http
 		}
 
 		/// <summary>
-		/// Adds an <see cref="HttpStatusCode" /> which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.
+		/// Adds one or more response status codes which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.
 		/// </summary>
 		/// <param name="obj">Object containing settings.</param>
-		/// <param name="statusCodes">Examples: HttpStatusCode.NotFound</param>
+		/// <param name="statusCodes">One or more response status codes that, when received, will not cause an exception to be thrown.</param>
 		/// <returns>This settings container.</returns>
-		public static T AllowHttpStatus<T>(this T obj, params HttpStatusCode[] statusCodes) where T : ISettingsContainer {
-			var pattern = string.Join(",", statusCodes.Select(c => (int)c));
+		public static T AllowHttpStatus<T>(this T obj, params int[] statusCodes) where T : ISettingsContainer {
+			var pattern = string.Join(",", statusCodes);
 			return AllowHttpStatus(obj, pattern);
 		}
 

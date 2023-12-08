@@ -113,7 +113,7 @@ namespace Flurl.Test.Http
 		public async Task can_allow_specific_http_status() {
 			using var test = new HttpTest();
 			test.RespondWith("Nothing to see here", 404);
-			var c = CreateContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
+			var c = CreateContainer().AllowHttpStatus(409, 404);
 			await GetRequest(c).DeleteAsync(); // no exception = pass
 		}
 
@@ -121,7 +121,7 @@ namespace Flurl.Test.Http
 		public async Task allow_specific_http_status_also_allows_2xx() {
 			using var test = new HttpTest();
 			test.RespondWith("I'm just an innocent 2xx, I should never fail!", 201);
-			var c = CreateContainer().AllowHttpStatus(HttpStatusCode.Conflict, HttpStatusCode.NotFound);
+			var c = CreateContainer().AllowHttpStatus(409, 404);
 			await GetRequest(c).GetAsync(); // no exception = pass
 		}
 

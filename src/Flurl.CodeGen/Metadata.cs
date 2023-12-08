@@ -139,8 +139,8 @@ namespace Flurl.CodeGen
 				.AddArg("seconds", "int", "Seconds to wait before the request times out.");
 			yield return Create("AllowHttpStatus", "Creates a new FlurlRequest and adds a pattern representing an HTTP status code or range of codes which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.")
 				.AddArg("pattern", "string", "Examples: \"3xx\", \"100,300,600\", \"100-299,6xx\"");
-			yield return Create("AllowHttpStatus", "Creates a new FlurlRequest and adds an HttpStatusCode which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.")
-				.AddArg("statusCodes", "params HttpStatusCode[]", "The HttpStatusCode(s) to allow.");
+			yield return Create("AllowHttpStatus", "Creates a new FlurlRequest and adds one or more response status codes which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.")
+				.AddArg("statusCodes", "params int[]", "One or more response status codes that, when received, will not cause an exception to be thrown.");
 			yield return Create("AllowAnyHttpStatus", "Creates a new FlurlRequest and configures it to allow any returned HTTP status without throwing a FlurlHttpException.");
 			yield return Create("WithAutoRedirect", "Creates a new FlurlRequest and configures whether redirects are automatically followed.")
 				.AddArg("enabled", "bool", "true if Flurl should automatically send a new request to the redirect URL, false if it should not.");

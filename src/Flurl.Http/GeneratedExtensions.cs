@@ -683,12 +683,12 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and adds an HttpStatusCode which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.
+		/// Creates a new FlurlRequest and adds one or more response status codes which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
-		/// <param name="statusCodes">The HttpStatusCode(s) to allow.</param>
+		/// <param name="statusCodes">One or more response status codes that, when received, will not cause an exception to be thrown.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest AllowHttpStatus(this Url url, params HttpStatusCode[] statusCodes) {
+		public static IFlurlRequest AllowHttpStatus(this Url url, params int[] statusCodes) {
 			return new FlurlRequest(url).AllowHttpStatus(statusCodes);
 		}
 		
@@ -1202,12 +1202,12 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and adds an HttpStatusCode which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.
+		/// Creates a new FlurlRequest and adds one or more response status codes which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.
 		/// </summary>
 		/// <param name="url">This URL.</param>
-		/// <param name="statusCodes">The HttpStatusCode(s) to allow.</param>
+		/// <param name="statusCodes">One or more response status codes that, when received, will not cause an exception to be thrown.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest AllowHttpStatus(this string url, params HttpStatusCode[] statusCodes) {
+		public static IFlurlRequest AllowHttpStatus(this string url, params int[] statusCodes) {
 			return new FlurlRequest(url).AllowHttpStatus(statusCodes);
 		}
 		
@@ -1721,12 +1721,12 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
-		/// Creates a new FlurlRequest and adds an HttpStatusCode which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.
+		/// Creates a new FlurlRequest and adds one or more response status codes which (in addition to 2xx) will NOT result in a FlurlHttpException being thrown.
 		/// </summary>
 		/// <param name="uri">This System.Uri.</param>
-		/// <param name="statusCodes">The HttpStatusCode(s) to allow.</param>
+		/// <param name="statusCodes">One or more response status codes that, when received, will not cause an exception to be thrown.</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest AllowHttpStatus(this Uri uri, params HttpStatusCode[] statusCodes) {
+		public static IFlurlRequest AllowHttpStatus(this Uri uri, params int[] statusCodes) {
 			return new FlurlRequest(uri).AllowHttpStatus(statusCodes);
 		}
 		
