@@ -14,8 +14,9 @@ namespace Flurl.Http.Configuration
 		/// </summary>
 		/// <param name="name">Name of the IFlurlClient. Serves as a cache key. Subsequent calls to Get will return this client.</param>
 		/// <param name="baseUrl">Optional. The base URL associated with the new client.</param>
-		/// <returns>A builder to further configure the new client.</returns>
-		IFlurlClientBuilder Add(string name, string baseUrl = null);
+		/// <param name="configure">Optional. Configure the builder associated with the added client.</param>
+		/// <returns>This IFlurlCache.</returns>
+		IFlurlClientCache Add(string name, string baseUrl = null, Action<IFlurlClientBuilder> configure = null);
 
 		/// <summary>
 		/// Gets a preconfigured named IFlurlClient.
@@ -55,27 +56,6 @@ namespace Flurl.Http.Configuration
 	}
 
 	/// <summary>
-	/// Extension methods on IFlurlClientCache.
-	/// </summary>
-	public static class IFlurlClientCacheExtensions
-	{
-		/// <summary>
-		/// Adds a new IFlurlClient to this cache. Call once per client at startup to register and configure a named client.
-		/// Allows configuring via a nested lambda, rather than returning a builder, so multiple Add calls can be fluently chained.
-		/// </summary>
-		/// <param name="cache">This IFlurlCache</param>
-		/// <param name="name">Name of the IFlurlClient. Serves as a cache key. Subsequent calls to Get will return this client.</param>
-		/// <param name="baseUrl">The base URL associated with the new client.</param>
-		/// <param name="configure">Configure the builder associated with the added client.</param>
-		/// <returns>This IFlurlCache.</returns>
-		public static IFlurlClientCache Add(this IFlurlClientCache cache, string name, string baseUrl, Action<IFlurlClientBuilder> configure) {
-			var builder = cache.Add(name, baseUrl);
-			configure?.Invoke(builder);
-			return cache;
-		}
-	}
-
-	/// <summary>
 	/// Default implementation of IFlurlClientCache.
 	/// </summary>
 	public class FlurlClientCache : IFlurlClientCache
@@ -84,7 +64,7 @@ namespace Flurl.Http.Configuration
 		private readonly List<Action<IFlurlClientBuilder>> _defaultConfigs = new();
 
 		/// <inheritdoc />
-		public IFlurlClientBuilder Add(string name, string baseUrl = null) {
+		public IFlurlClientCache Add(string name, string baseUrl = null, Action<IFlurlClientBuilder> configure = null) {
 			if (name == null)
 				throw new ArgumentNullException(nameof(name));
 
@@ -92,7 +72,8 @@ namespace Flurl.Http.Configuration
 			if (!_clients.TryAdd(name, new Lazy<IFlurlClient>(builder.Build)))
 				throw new ArgumentException($"A client named '{name}' was already registered. Add should be called just once per client at startup.");
 
-			return builder;
+			configure?.Invoke(builder);
+			return this;
 		}
 
 		/// <inheritdoc />

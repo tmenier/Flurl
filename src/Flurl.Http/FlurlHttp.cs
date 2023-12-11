@@ -21,7 +21,11 @@ namespace Flurl.Http
 		/// Note that if you've overridden the caching strategy to vary clients by request properties other than Url, you should instead use
 		/// FlurlHttp.Clients.Add(name) to ensure you are configuring the correct client.
 		/// </summary>
-		public static IFlurlClientBuilder ConfigureClientForUrl(string url) => Clients.Add(_cachingStrategy(new FlurlRequest(url)));
+		public static IFlurlClientBuilder ConfigureClientForUrl(string url) {
+			IFlurlClientBuilder builder = null;
+			Clients.Add(_cachingStrategy(new FlurlRequest(url)), null, b => builder = b);
+			return builder;
+		}
 
 		/// <summary>
 		/// Gets or creates the IFlurlClient that would be selected for sending the given IFlurlRequest when the clientless pattern is used.

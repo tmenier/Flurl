@@ -11,8 +11,10 @@ namespace Flurl.Test.Http
 		[Test]
 		public void can_add_and_get_client() {
 			var cache = new FlurlClientCache();
-			cache.Add("github", "https://api.github.com").WithSettings(s => s.Timeout = TimeSpan.FromSeconds(123));
-			cache.Add("google", "https://api.google.com").WithSettings(s => s.Timeout = TimeSpan.FromSeconds(234));
+			cache.Add("github", "https://api.github.com", builder =>
+				builder.WithSettings(s => s.Timeout = TimeSpan.FromSeconds(123)));
+			cache.Add("google", "https://api.google.com", builder =>
+				builder.WithSettings(s => s.Timeout = TimeSpan.FromSeconds(234)));
 
 			var gh = cache.Get("github");
 			Assert.AreEqual("https://api.github.com", gh.BaseUrl);
@@ -68,12 +70,9 @@ namespace Flurl.Test.Http
 
 			var cli1 = cache.GetOrAdd("foo");
 
-			cache.Add("bar").WithSettings(s => {
-				s.Timeout = TimeSpan.FromSeconds(456);
-			});
-			cache.WithDefaults(b => b.WithSettings(s => {
-				s.Timeout = TimeSpan.FromSeconds(789);
-			}));
+			cache
+				.Add("bar", null, builder => builder.WithSettings(s => s.Timeout = TimeSpan.FromSeconds(456)))
+				.WithDefaults(b => b.WithSettings(s => s.Timeout = TimeSpan.FromSeconds(789)));
 
 			var cli2 = cache.GetOrAdd("bar");
 			var cli3 = cache.GetOrAdd("buzz");
