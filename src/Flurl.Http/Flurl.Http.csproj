@@ -4,11 +4,13 @@
     <LangVersion>9.0</LangVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>Flurl.Http</PackageId>
-    <Version>4.0.0-pre7</Version>
+    <PackageVersion>4.0.0</PackageVersion>
     <Authors>Todd Menier</Authors>
-    <Description>A fluent, portable, testable HTTP client library.</Description>
+    <Description>4.0 contains breaking changes! See flurl.dev/upgrade</Description>
+    <Copyright>Copyright (c) Todd Menier 2023.</Copyright>
     <PackageProjectUrl>https://flurl.dev</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/tmenier/Flurl.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -25,8 +27,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Flurl\Flurl.csproj" />
     <None Include="..\..\icon.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <ProjectReference Include="..\Flurl\Flurl.csproj" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 
