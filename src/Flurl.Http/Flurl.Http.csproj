@@ -6,7 +6,7 @@
     <PackageId>Flurl.Http</PackageId>
     <Version>4.0.0</Version>
     <Authors>Todd Menier</Authors>
-    <Description>4.0 contains breaking changes! See flurl.dev/upgrade</Description>
+    <Description>A fluent, testable HTTP client library.</Description>
     <Copyright>Copyright (c) Todd Menier 2023.</Copyright>
     <PackageProjectUrl>https://flurl.dev</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
