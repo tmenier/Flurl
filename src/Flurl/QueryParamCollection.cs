@@ -55,7 +55,14 @@ namespace Flurl
 				return;
 			}
 
-			foreach (var val in SplitCollection(value).ToList()) {
+			if (value is IEnumerable en && !en.Cast<object>().Any() && !(en is string)) {
+				if(!_values.Contains($"{name}[0]"))
+					_values.Add($"{name}[0]", new QueryParamValue("", isEncoded));
+				return;
+			}
+
+			foreach (var val in SplitCollection(value).ToList())
+			{
 				if (val == null && nullValueHandling != NullValueHandling.NameOnly)
 					continue;
 				_values.Add(name, new QueryParamValue(val, isEncoded));
@@ -114,7 +121,7 @@ namespace Flurl
 				yield return null;
 			else if (value is string s)
 				yield return s;
-			else if (value is IEnumerable en) {
+			else if (value is IEnumerable en && (en.Cast<object>().Any() || en is string)) {
 				foreach (var item in en.Cast<object>().SelectMany(SplitCollection).ToList())
 					yield return item;
 			}

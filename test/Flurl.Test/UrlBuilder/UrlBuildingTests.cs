@@ -126,11 +126,32 @@ namespace Flurl.Test.UrlBuilder
 			Assert.AreEqual("https://api.com?Values=1&Values=2&Values=3", url.ToString());
 		}
 
+		[Test]
+		public void handle_set_query_params_with_empty_list() {
+			var model = new ModelWithIEnumerable { Values = new List<int>() };
+			var url = "https://api.com".SetQueryParams(model);
+			Assert.AreEqual("https://api.com?Values[0]=", url.ToString());
+		}
+
+		[Test]
+		public void handle_replace_set_query_params_with_empty_list() {
+			var model = new ModelWithIEnumerable { Values = new List<int>() };
+			var url = "https://api.com?Values=test".SetQueryParams(model);
+			Assert.AreEqual("https://api.com?Values[0]=", url.ToString());
+		}
+
 		[Test] // #672
 		public void can_append_query_params_using_object_with_ienumerable() {
 			var model = new ModelWithIEnumerable { Values = Enumerable.Range(1, 3).ToArray() };
 			var url = "https://api.com".AppendQueryParam(model);
 			Assert.AreEqual("https://api.com?Values=1&Values=2&Values=3", url.ToString());
+		}
+
+		[Test]
+		public void handle_append_query_param_with_empty_list() {
+			var model = new ModelWithIEnumerable { Values = new List<int>() };
+			var url = "https://api.com".AppendQueryParam(model);
+			Assert.AreEqual("https://api.com?Values[0]=", url.ToString());
 		}
 
 		class ModelWithIEnumerable
