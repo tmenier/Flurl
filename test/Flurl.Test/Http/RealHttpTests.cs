@@ -61,6 +61,19 @@ namespace Flurl.Test.Http
 		}
 
 		[Test]
+		[TestCase(HttpCompletionOption.ResponseHeadersRead)]
+		[TestCase(HttpCompletionOption.ResponseContentRead)]
+		public async Task can_get_json_with_http_completion_option_headers(HttpCompletionOption completionOption)
+		{
+			var result = await "https://httpbin.org"
+				.AppendPathSegment("gzip")
+				.WithHeader("Accept-encoding", "gzip")
+				.GetJsonAsync<Dictionary<string, object>>(completionOption);
+
+			Assert.AreEqual(true, ((JsonElement)result["gzipped"]).GetBoolean());
+		}
+
+		[Test]
 		public async Task can_get_stream() {
 			using (var stream = await "https://www.google.com".GetStreamAsync())
 			using (var ms = new MemoryStream()) {
