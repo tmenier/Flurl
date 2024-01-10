@@ -12,14 +12,12 @@ namespace Flurl.Test.Http
 
 		[SetUp]
 		public void SetUp() {
-			HttpTest = CreateHttpTest();
+			HttpTest = new HttpTest();
 		}
 
 		[TearDown]
 		public void TearTown() {
 			HttpTest.Dispose();
 		}
-
-		protected virtual HttpTest CreateHttpTest() => new HttpTest();
 	}
 }

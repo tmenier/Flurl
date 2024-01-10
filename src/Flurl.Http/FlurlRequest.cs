@@ -54,6 +54,12 @@ namespace Flurl.Http
 		FlurlCall RedirectedFrom { get; set; }
 
 		/// <summary>
+		/// If Client property is null, selects (or creates) a FlurlClient from the global FlurlHttp.Clients cache. Called
+		/// automatically just before a request is sent, so in most cases there is no need to call explicitly.
+		/// </summary>
+		IFlurlClient EnsureClient();
+
+		/// <summary>
 		/// Asynchronously sends the HTTP request. Mainly used to implement higher-level extension methods (GetJsonAsync, etc).
 		/// </summary>
 		/// <param name="verb">The HTTP method used to make the request.</param>
@@ -139,11 +145,13 @@ namespace Flurl.Http
 		}
 
 		/// <inheritdoc />
+		public IFlurlClient EnsureClient() => Client ??= FlurlHttp.GetClientForRequest(this);
+
+		/// <inheritdoc />
 		public Task<IFlurlResponse> SendAsync(HttpMethod verb, HttpContent content = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
 			Verb = verb;
 			Content = content;
-			Client ??= FlurlHttp.GetClientForRequest(this);
-			return Client.SendAsync(this, completionOption, cancellationToken);
+			return EnsureClient().SendAsync(this, completionOption, cancellationToken);
 		}
 
 		internal static void SyncHeaders(IFlurlClient client, IFlurlRequest request) {

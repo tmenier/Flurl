@@ -25,6 +25,7 @@ namespace Flurl.Http
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
 		public static Task<IFlurlResponse> SendJsonAsync(this IFlurlRequest request, HttpMethod verb, object body, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+			request.EnsureClient();
 			var content = new CapturedJsonContent(request.Settings.JsonSerializer.Serialize(body));
 			return request.SendAsync(verb, content, completionOption, cancellationToken);
 		}
@@ -39,6 +40,7 @@ namespace Flurl.Http
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
 		public static Task<IFlurlResponse> SendStringAsync(this IFlurlRequest request, HttpMethod verb, string body, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+			request.EnsureClient();
 			var content = new CapturedStringContent(body);
 			return request.SendAsync(verb, content, completionOption, cancellationToken);
 		}
@@ -53,6 +55,7 @@ namespace Flurl.Http
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
 		public static Task<IFlurlResponse> SendUrlEncodedAsync(this IFlurlRequest request, HttpMethod verb, object body, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+			request.EnsureClient();
 			var content = new CapturedUrlEncodedContent(request.Settings.UrlEncodedSerializer.Serialize(body));
 			return request.SendAsync(verb, content, completionOption, cancellationToken);
 		}
@@ -133,6 +136,7 @@ namespace Flurl.Http
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
 		public static Task<IFlurlResponse> PostJsonAsync(this IFlurlRequest request, object body, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+			request.EnsureClient();
 			var content = new CapturedJsonContent(request.Settings.JsonSerializer.Serialize(body));
 			return request.SendAsync(HttpMethod.Post, content, completionOption, cancellationToken);
 		}
@@ -146,6 +150,7 @@ namespace Flurl.Http
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
 		public static Task<IFlurlResponse> PostStringAsync(this IFlurlRequest request, string body, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+			request.EnsureClient();
 			var content = new CapturedStringContent(body);
 			return request.SendAsync(HttpMethod.Post, content, completionOption, cancellationToken);
 		}
@@ -159,6 +164,7 @@ namespace Flurl.Http
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
 		public static Task<IFlurlResponse> PostUrlEncodedAsync(this IFlurlRequest request, object body, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+			request.EnsureClient();
 			var content = new CapturedUrlEncodedContent(request.Settings.UrlEncodedSerializer.Serialize(body));
 			return request.SendAsync(HttpMethod.Post, content, completionOption, cancellationToken);
 		}
@@ -195,6 +201,7 @@ namespace Flurl.Http
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
 		public static Task<IFlurlResponse> PutJsonAsync(this IFlurlRequest request, object body, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+			request.EnsureClient();
 			var content = new CapturedJsonContent(request.Settings.JsonSerializer.Serialize(body));
 			return request.SendAsync(HttpMethod.Put, content, completionOption, cancellationToken);
 		}
@@ -208,6 +215,7 @@ namespace Flurl.Http
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
 		public static Task<IFlurlResponse> PutStringAsync(this IFlurlRequest request, string body, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+			request.EnsureClient();
 			var content = new CapturedStringContent(body);
 			return request.SendAsync(HttpMethod.Put, content, completionOption, cancellationToken);
 		}
@@ -244,6 +252,7 @@ namespace Flurl.Http
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
 		public static Task<IFlurlResponse> PatchJsonAsync(this IFlurlRequest request, object body, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+			request.EnsureClient();
 			var content = new CapturedJsonContent(request.Settings.JsonSerializer.Serialize(body));
 			return request.SendAsync(new HttpMethod("PATCH"), content, completionOption, cancellationToken);
 		}
@@ -257,6 +266,7 @@ namespace Flurl.Http
 		/// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
 		/// <returns>A Task whose result is the received IFlurlResponse.</returns>
 		public static Task<IFlurlResponse> PatchStringAsync(this IFlurlRequest request, string body, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead, CancellationToken cancellationToken = default) {
+			request.EnsureClient();
 			var content = new CapturedStringContent(body);
 			return request.SendAsync(new HttpMethod("PATCH"), content, completionOption, cancellationToken);
 		}

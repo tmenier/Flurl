@@ -6,7 +6,7 @@
     <Version>4.0.0</Version>
     <Authors>Todd Menier</Authors>
     <Description>A fluent, portable URL builder. To make HTTP calls off the fluent chain, check out Flurl.Http.</Description>
-    <Copyright>Copyright (c) Todd Menier 2023.</Copyright>
+    <Copyright>Copyright (c) Todd Menier 2024.</Copyright>
     <PackageProjectUrl>https://flurl.dev</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/tmenier/Flurl.git</RepositoryUrl>
