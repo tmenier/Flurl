@@ -178,6 +178,7 @@ namespace Flurl.CodeGen
 				args.Add("cancellationToken");
 
 				if (xm.RequestBodyType != null) {
+					writer.WriteLine("request.EnsureClient();"); // might need to serialize body, and client might provide custom serializer
 					writer.WriteLine("var content = new Captured@0Content(@1);",
 						xm.RequestBodyType,
 						xm.RequestBodyType == "String" ? "body" : $"request.Settings.{xm.RequestBodyType}Serializer.Serialize(body)");
