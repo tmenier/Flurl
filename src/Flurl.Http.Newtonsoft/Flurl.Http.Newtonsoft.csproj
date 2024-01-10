@@ -7,7 +7,7 @@
     <Version>0.9.0</Version>
     <Authors>Todd Menier</Authors>
     <Description>A Newtonsoft-based JSON serializer for Flurl.Http 4.0 and above.</Description>
-    <Copyright>Copyright (c) Todd Menier 2023.</Copyright>
+    <Copyright>Copyright (c) Todd Menier 2024.</Copyright>
     <PackageProjectUrl>https://flurl.dev</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/tmenier/Flurl.git</RepositoryUrl>
