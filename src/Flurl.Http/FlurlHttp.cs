@@ -48,6 +48,6 @@ namespace Flurl.Http
 		/// <summary>
 		/// Builds a cache key consisting of URL scheme, host, and port. This is the default client caching strategy.
 		/// </summary>
-		public static string BuildClientNameByHost(IFlurlRequest req) => $"{req.Url.Scheme}|{req.Url.Host}|{req.Url.Port}";
+		public static string BuildClientNameByHost(IFlurlRequest req) => $"{req.Url?.Scheme}|{req.Url?.Host}|{req.Url?.Port}";
 	}
 }
