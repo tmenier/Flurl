@@ -115,6 +115,7 @@ namespace Flurl.Http
 			set {
 				_client = value;
 				Settings.Parent = _client?.Settings;
+				SyncBaseUrl(_client, this);
 				SyncHeaders(_client, this);
 			}
 		}
@@ -161,6 +162,19 @@ namespace Flurl.Http
 				if (!request.Headers.Contains(header.Name))
 					request.Headers.Add(header.Name, header.Value);
 			}
+		}
+
+		/// <summary>
+		/// Prepends client.BaseUrl to this.Url, but only if this.Url isn't already a valid, absolute URL.
+		/// </summary>
+		private static void SyncBaseUrl(IFlurlClient client, IFlurlRequest request) {
+			if (string.IsNullOrEmpty(client?.BaseUrl))
+				return;
+
+			if (request.Url == null)
+				request.Url = client.BaseUrl;
+			else if (!Url.IsValid(request.Url))
+				request.Url = Url.Combine(client.BaseUrl, request.Url);
 		}
 
 		private void ApplyCookieJar(CookieJar jar) {

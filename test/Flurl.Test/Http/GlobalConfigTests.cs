@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Flurl.Http;
+using Flurl.Http.Testing;
 using NUnit.Framework;
 
 namespace Flurl.Test.Http
@@ -73,6 +74,24 @@ namespace Flurl.Test.Http
 			Assert.AreEqual(123, cli1.Settings.Timeout.Value.TotalSeconds);
 			Assert.AreEqual(123, cli2.Settings.Timeout.Value.TotalSeconds);
 			Assert.AreNotEqual(123, cli3.Settings.Timeout.Value.TotalSeconds);
+		}
+
+		[Test] // #803
+		public async Task can_prepend_global_base_url() {
+			FlurlHttp.Clients.WithDefaults(builder =>
+				builder.ConfigureHttpClient(cli => cli.BaseAddress = new Uri("https://api.com")));
+
+			using var test = new HttpTest();
+
+			await "".GetAsync();
+			await "/path/1".GetAsync();
+			await "path/2".GetAsync();
+			await "https://other.com/path/3".GetAsync();
+
+			test.ShouldHaveCalled("https://api.com/").Times(1);
+			test.ShouldHaveCalled("https://api.com/path/1").Times(1);
+			test.ShouldHaveCalled("https://api.com/path/2").Times(1);
+			test.ShouldHaveCalled("https://other.com/path/3").Times(1);
 		}
 	}
 }

@@ -35,6 +35,8 @@ namespace Flurl.Http.Configuration
 		/// Deserializes the specified stream to an object of type T.
 		/// </summary>
 		/// <param name="stream">The stream to deserialize.</param>
-		public T Deserialize<T>(Stream stream) => stream.Length == 0 ? default : JsonSerializer.Deserialize<T>(stream, _options);
+		public T Deserialize<T>(Stream stream) => stream.CanSeek && stream.Length == 0
+			? default
+			: JsonSerializer.Deserialize<T>(stream, _options);
 	}
 }
