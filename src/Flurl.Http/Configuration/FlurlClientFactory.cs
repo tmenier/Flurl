@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 
 namespace Flurl.Http.Configuration
 {
@@ -41,6 +42,14 @@ namespace Flurl.Http.Configuration
 	/// </summary>
 	public class DefaultFlurlClientFactory : IFlurlClientFactory
 	{
+		// cached Blazor/WASM check (#543, #823)
+		private readonly bool _isBrowser =
+#if NET
+			OperatingSystem.IsBrowser();
+#else
+			false;
+#endif
+
 		/// <inheritdoc />
 		public virtual HttpClient CreateHttpClient(HttpMessageHandler handler) {
 			return new HttpClient(handler);
@@ -61,8 +70,10 @@ namespace Flurl.Http.Configuration
 			if (handler.SupportsAutomaticDecompression)
 				handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
-			try { handler.UseCookies = false; }
-			catch (PlatformNotSupportedException) { } // look out for WASM platforms (#543)
+			if (!_isBrowser) {
+				try { handler.UseCookies = false; }
+				catch (PlatformNotSupportedException) { } // already checked for Blazor, but just in case any other surprises pop up
+			}
 
 			return handler;
 		}
