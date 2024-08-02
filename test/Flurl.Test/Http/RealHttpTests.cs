@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -19,14 +20,15 @@ namespace Flurl.Test.Http
 	public class RealHttpTests
 	{
 		[TestCase("gzip", "gzipped")]
-		[TestCase("deflate", "deflated"), Ignore("#474")]
+		//currently unable to test deflate against httpbin (#474)
+		//[TestCase("deflate", "deflated")]
 		public async Task decompresses_automatically(string encoding, string jsonKey) {
 			var result = await "https://httpbin.org"
 				.AppendPathSegment(encoding)
 				.WithHeader("Accept-encoding", encoding)
-				.GetJsonAsync<Dictionary<string, object>>();
+				.GetJsonAsync<JsonObject>();
 
-			Assert.AreEqual(true, result[jsonKey]);
+			Assert.AreEqual(true, (bool)result[jsonKey]);
 		}
 
 		[TestCase("https://httpbin.org/image/jpeg", null, "my-image.jpg", "my-image.jpg")]
