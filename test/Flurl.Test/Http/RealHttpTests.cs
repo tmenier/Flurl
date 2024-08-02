@@ -243,7 +243,7 @@ namespace Flurl.Test.Http
 			using (var test1 = new HttpTest()) {
 				test1.AllowRealHttp();
 
-				var s = await "http://httpbingo.org/redirect-to?url=http%3A%2F%2Fexample.com"
+				var s = await "http://httpbin.org/redirect-to?url=http%3A%2F%2Fexample.com"
 					.WithHeader("x", "1")
 					.GetStringAsync();
 
@@ -256,7 +256,7 @@ namespace Flurl.Test.Http
 				test2.AllowRealHttp();
 				test2.Settings.Redirects.Enabled = false;
 
-				var s = await "http://httpbingo.org/redirect-to?url=http%3A%2F%2Fexample.com"
+				var s = await "http://httpbin.org/redirect-to?url=http%3A%2F%2Fexample.com"
 					.WithAutoRedirect(true) // test says redirects are off, and test should always win
 					.GetStringAsync();
 
@@ -306,7 +306,7 @@ namespace Flurl.Test.Http
 			// Flurl was auto-creating an empty HttpContent object in order to forward content-level headers,
 			// and on .NET Framework a GET with a non-null HttpContent throws an exceptions (#583)
 			var calls = new List<FlurlCall>();
-			var resp = await "http://httpbingo.org/redirect-to?url=http%3A%2F%2Fexample.com%2F"
+			var resp = await "http://httpbin.org/redirect-to?url=http%3A%2F%2Fexample.com%2F"
 				.WithSettings(c => c.Redirects.ForwardHeaders = true)
 				.BeforeCall(call => calls.Add(call))
 				.PostUrlEncodedAsync("test=test");
@@ -376,13 +376,12 @@ namespace Flurl.Test.Http
 
 		[Test]
 		public async Task can_receive_cookie_from_redirect_response_and_add_it_to_jar() {
-			// use httpbingo instead of httpbin because of redirect issue https://github.com/postmanlabs/httpbin/issues/617
-			var resp = await "https://httpbingo.org/redirect-to"
+			var resp = await "https://httpbin.org/redirect-to"
 				.SetQueryParam("url", "/cookies/set?x=foo")
 				.WithCookies(out var jar)
-				.GetJsonAsync<Dictionary<string, string>>();
+				.GetJsonAsync<HttpBinResponse>();
 
-			Assert.AreEqual("foo", resp["x"]);
+			Assert.AreEqual("foo", resp.cookies["x"]);
 			Assert.AreEqual(1, jar.Count);
 		}
 		#endregion
