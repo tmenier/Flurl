@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace Flurl.Http.Content
+﻿namespace Flurl.Http.Content
 {
 	/// <summary>
 	/// Provides HTTP content based on a serialized JSON object, with the JSON string captured to a property

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Net;
 using Flurl.Http.Configuration;
 
 namespace Flurl.Http

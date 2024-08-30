@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Flurl
+﻿namespace Flurl
 {
 	/// <summary>
 	/// Describes how to handle null values in query parameters.

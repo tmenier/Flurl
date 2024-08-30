@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -39,7 +37,7 @@ namespace Flurl.Http.Testing
 
 			if (!paramVals.Any())
 				return false;
-			if (!(value is string) && value is IEnumerable en) {
+			if (value is not string && value is IEnumerable en) {
 				var values = en.Cast<object>().Select(o => o.ToInvariantString()).ToList();
 				return values.Intersect(paramVals).Count() == values.Count;
 			}

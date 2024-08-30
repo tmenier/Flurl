@@ -1,9 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Runtime.Versioning;
 using Flurl.Util;
+#if NET
+using System.Runtime.Versioning;
+#endif
 
 namespace Flurl.Http.Configuration
 {
@@ -42,6 +44,11 @@ namespace Flurl.Http.Configuration
 		/// Builds an instance of IFlurlClient based on configurations specified.
 		/// </summary>
 		IFlurlClient Build();
+
+		/// <summary>
+		/// Configure factory
+		/// </summary>
+		void WithFactory(Func<IFlurlClientFactory> create);
 	}
 
 	/// <summary>
@@ -71,6 +78,9 @@ namespace Flurl.Http.Configuration
 		public FlurlClientBuilder(string baseUrl = null) {
 			_baseUrl = baseUrl;
 		}
+
+		/// <inheritdoc />
+		public void WithFactory(Func<IFlurlClientFactory> create) => _factory = create();
 
 		/// <inheritdoc />
 		public IFlurlClientBuilder AddMiddleware(Func<DelegatingHandler> create) {
@@ -103,7 +113,7 @@ namespace Flurl.Http.Configuration
 			if (_factory is DefaultFlurlClientFactory && _handlerConfigs.Any())
 				throw new FlurlConfigurationException("ConfigureInnerHandler and UseSocketsHttpHandler cannot be used together. The former configures and instance of HttpClientHandler and would be ignored when switching to SocketsHttpHandler.");
 
-			if (!(_factory is SocketsHandlerFlurlClientFactory))
+			if (_factory is not SocketsHandlerFlurlClientFactory)
 				_factory = new SocketsHandlerFlurlClientFactory();
 
 			_handlerConfigs.Add(h => configure(h as SocketsHttpHandler));

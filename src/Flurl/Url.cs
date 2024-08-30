@@ -633,12 +633,12 @@ namespace Flurl
 		/// </summary>
 		/// <param name="obj">The object to compare to this instance.</param>
 		/// <returns></returns>
-		public override bool Equals(object obj) => obj is Url url && this.ToString().OrdinalEquals(url.ToString());
+		public override bool Equals(object obj) => obj is Url url && ToString().OrdinalEquals(url.ToString());
 
 		/// <summary>
 		/// Returns the hashcode for this Url.
 		/// </summary>
-		public override int GetHashCode() => this.ToString().GetHashCode();
+		public override int GetHashCode() => ToString().GetHashCode();
 		#endregion
 
 		#region static utility methods
