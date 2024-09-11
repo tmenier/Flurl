@@ -68,7 +68,7 @@ namespace Flurl.Http.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets object used to serialize and deserialize JSON. Default implementation uses Newtonsoft Json.NET.
+		/// Gets or sets object used to serialize and deserialize JSON. Default implementation uses System.Text.Json.
 		/// </summary>
 		public ISerializer JsonSerializer {
 			get => Get<ISerializer>();
