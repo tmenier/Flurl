@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Flurl.Http.Configuration
+﻿namespace Flurl.Http.Configuration
 {
 	/// <summary>
 	/// A set of properties that affect Flurl.Http behavior specific to auto-redirecting.

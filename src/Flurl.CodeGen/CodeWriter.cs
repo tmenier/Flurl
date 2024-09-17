@@ -18,7 +18,7 @@ namespace Flurl.CodeGen
         }
 
         /// <summary>
-        /// use @0, @1, @2, etc for tokens. ({0} would be a pain because you'd alway need to escape "{" and "}")
+        /// use @0, @1, @2, etc. for tokens. ({0} would be a pain because you'd always need to escape "{" and "}")
         /// </summary>
         public CodeWriter WriteLine(string line, params object[] args)
         {
@@ -30,7 +30,7 @@ namespace Flurl.CodeGen
                 line = line.Replace("@" + i, val);
             }
 
-            if (line == "}" || line == "{")
+            if (line is "}" or "{")
             {
                 _indent--;
             }
