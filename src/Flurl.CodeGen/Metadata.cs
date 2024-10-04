@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -144,6 +144,8 @@ namespace Flurl.CodeGen
 			yield return Create("AllowAnyHttpStatus", "Creates a new FlurlRequest and configures it to allow any returned HTTP status without throwing a FlurlHttpException.");
 			yield return Create("WithAutoRedirect", "Creates a new FlurlRequest and configures whether redirects are automatically followed.")
 				.AddArg("enabled", "bool", "true if Flurl should automatically send a new request to the redirect URL, false if it should not.");
+			yield return Create("WithOAuthTokenProvider", "Creates a new FlurlRequest and configures it to use the supplied OAuth token provider for the request's authentication header")
+				.AddArg("tokenProvider","IOAuthTokenProvider", "the token provider");
 
 			// event handler extensions
 			foreach (var name in new[] { "BeforeCall", "AfterCall", "OnError", "OnRedirect" }) {
