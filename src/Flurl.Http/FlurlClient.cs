@@ -159,6 +159,15 @@ namespace Flurl.Http
 			reqMsg.RequestUri = request.Url.ToUri();
 			SyncHeaders(request, reqMsg);
 
+			//if the settings and handlers didn't set the authorization header,
+            //resolve it with the configured provider
+            if (call.HttpRequestMessage.Headers.Authorization == null &&
+                settings.OAuthTokenProvider != null)
+            {
+                var scope = string.IsNullOrWhiteSpace(settings.OAuthTokenScope) ? string.Empty : settings.OAuthTokenScope;
+                call.HttpRequestMessage.Headers.Authorization = await settings.OAuthTokenProvider.GetAuthenticationHeader(scope);
+            }
+
 			call.StartedUtc = DateTime.UtcNow;
 			var ct = GetCancellationTokenWithTimeout(cancellationToken, settings.Timeout, out var cts);
 
