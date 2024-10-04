@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Flurl.Http.Authentication;
 using Flurl.Http.Configuration;
 using Flurl.Http.Content;
 
@@ -732,6 +733,16 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
+		/// Creates a new FlurlRequest and configures it to request an OAuth bearer token of the specified scope from the OAuth token provider
+		/// </summary>
+		/// <param name="url">This Flurl.Url.</param>
+		/// <param name="scope">The scope of the token</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithOAuthScope(this Url url, string scope) {
+			return new FlurlRequest(url).WithOAuthScope(scope);
+		}
+		
+		/// <summary>
 		/// Creates a new FlurlRequest and adds a new BeforeCall event handler.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
@@ -1261,6 +1272,16 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
+		/// Creates a new FlurlRequest and configures it to request an OAuth bearer token of the specified scope from the OAuth token provider
+		/// </summary>
+		/// <param name="url">This URL.</param>
+		/// <param name="scope">The scope of the token</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithOAuthScope(this string url, string scope) {
+			return new FlurlRequest(url).WithOAuthScope(scope);
+		}
+		
+		/// <summary>
 		/// Creates a new FlurlRequest and adds a new BeforeCall event handler.
 		/// </summary>
 		/// <param name="url">This URL.</param>
@@ -1787,6 +1808,16 @@ namespace Flurl.Http
 		/// <returns>A new IFlurlRequest.</returns>
 		public static IFlurlRequest WithOAuthTokenProvider(this Uri uri, IOAuthTokenProvider tokenProvider) {
 			return new FlurlRequest(uri).WithOAuthTokenProvider(tokenProvider);
+		}
+		
+		/// <summary>
+		/// Creates a new FlurlRequest and configures it to request an OAuth bearer token of the specified scope from the OAuth token provider
+		/// </summary>
+		/// <param name="uri">This System.Uri.</param>
+		/// <param name="scope">The scope of the token</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithOAuthScope(this Uri uri, string scope) {
+			return new FlurlRequest(uri).WithOAuthScope(scope);
 		}
 		
 		/// <summary>

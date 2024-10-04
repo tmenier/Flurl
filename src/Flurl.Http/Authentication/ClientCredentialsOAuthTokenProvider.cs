@@ -55,6 +55,7 @@ namespace Flurl.Http.Authentication
             { body["client_secret"] = _clientSecret; }
 
             var rawResponse = await _fc.Request("connect", "token")
+                                        .WithHeader("accept","application/json")
                                         .AllowAnyHttpStatus()
                                         .PostUrlEncodedAsync(body);
 

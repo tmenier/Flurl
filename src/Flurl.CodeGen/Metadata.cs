@@ -8,7 +8,7 @@ namespace Flurl.CodeGen
 	public static class Metadata
 	{
 		/// <summary>
-		/// Mirrors methods defined on Url. We'll auto-gen them for Uri and string. 
+		/// Mirrors methods defined on Url. We'll auto-gen them for Uri and string.
 		/// </summary>
 		public static IEnumerable<ExtensionMethod> GetUrlReturningExtensions(MethodArg extendedArg) {
 			ExtensionMethod Create(string name, string descrip) => new ExtensionMethod(name, descrip)
@@ -97,7 +97,7 @@ namespace Flurl.CodeGen
 		}
 
 		/// <summary>
-		/// Mirrors methods defined on IFlurlRequest and IFlurlClient. We'll auto-gen them for Url, Uri, and string. 
+		/// Mirrors methods defined on IFlurlRequest and IFlurlClient. We'll auto-gen them for Url, Uri, and string.
 		/// </summary>
 		public static IEnumerable<ExtensionMethod> GetRequestReturningExtensions(MethodArg extendedArg) {
 			ExtensionMethod Create(string name, string descrip) => new ExtensionMethod(name, descrip)
@@ -146,6 +146,8 @@ namespace Flurl.CodeGen
 				.AddArg("enabled", "bool", "true if Flurl should automatically send a new request to the redirect URL, false if it should not.");
 			yield return Create("WithOAuthTokenProvider", "Creates a new FlurlRequest and configures it to use the supplied OAuth token provider for the request's authentication header")
 				.AddArg("tokenProvider","IOAuthTokenProvider", "the token provider");
+			yield return Create("WithOAuthScope", "Creates a new FlurlRequest and configures it to request an OAuth bearer token of the specified scope from the OAuth token provider")
+				.AddArg("scope","string","The scope of the token");
 
 			// event handler extensions
 			foreach (var name in new[] { "BeforeCall", "AfterCall", "OnError", "OnRedirect" }) {

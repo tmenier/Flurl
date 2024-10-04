@@ -114,5 +114,16 @@ namespace Flurl.Http
 			obj.Settings.OAuthTokenProvider = tokenProvider;
 			return obj;
 		}
+
+		/// <summary>
+		/// Configures the OAuth scope to obtain from the configured OAuthTokenProvider
+		/// </summary>
+		/// <param name="obj">Object containing settings.</param>
+		/// <param name="scope">The scope of the token</param>
+		/// <returns></returns>
+		public static T WithOAuthScope<T>(this T obj, string scope) where T : ISettingsContainer {
+			obj.Settings.OAuthTokenScope = scope;
+			return obj;
+		}
 	}
 }
