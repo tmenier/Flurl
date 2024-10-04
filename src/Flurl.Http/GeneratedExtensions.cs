@@ -722,6 +722,16 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
+		/// Creates a new FlurlRequest and configures it to use the supplied OAuth token provider for the request's authentication header
+		/// </summary>
+		/// <param name="url">This Flurl.Url.</param>
+		/// <param name="tokenProvider">the token provider</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithOAuthTokenProvider(this Url url, IOAuthTokenProvider tokenProvider) {
+			return new FlurlRequest(url).WithOAuthTokenProvider(tokenProvider);
+		}
+		
+		/// <summary>
 		/// Creates a new FlurlRequest and adds a new BeforeCall event handler.
 		/// </summary>
 		/// <param name="url">This Flurl.Url.</param>
@@ -1241,6 +1251,16 @@ namespace Flurl.Http
 		}
 		
 		/// <summary>
+		/// Creates a new FlurlRequest and configures it to use the supplied OAuth token provider for the request's authentication header
+		/// </summary>
+		/// <param name="url">This URL.</param>
+		/// <param name="tokenProvider">the token provider</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithOAuthTokenProvider(this string url, IOAuthTokenProvider tokenProvider) {
+			return new FlurlRequest(url).WithOAuthTokenProvider(tokenProvider);
+		}
+		
+		/// <summary>
 		/// Creates a new FlurlRequest and adds a new BeforeCall event handler.
 		/// </summary>
 		/// <param name="url">This URL.</param>
@@ -1757,6 +1777,16 @@ namespace Flurl.Http
 		/// <returns>A new IFlurlRequest.</returns>
 		public static IFlurlRequest WithAutoRedirect(this Uri uri, bool enabled) {
 			return new FlurlRequest(uri).WithAutoRedirect(enabled);
+		}
+		
+		/// <summary>
+		/// Creates a new FlurlRequest and configures it to use the supplied OAuth token provider for the request's authentication header
+		/// </summary>
+		/// <param name="uri">This System.Uri.</param>
+		/// <param name="tokenProvider">the token provider</param>
+		/// <returns>A new IFlurlRequest.</returns>
+		public static IFlurlRequest WithOAuthTokenProvider(this Uri uri, IOAuthTokenProvider tokenProvider) {
+			return new FlurlRequest(uri).WithOAuthTokenProvider(tokenProvider);
 		}
 		
 		/// <summary>
