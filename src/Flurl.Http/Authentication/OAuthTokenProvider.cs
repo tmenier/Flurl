@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -56,7 +56,7 @@ namespace Flurl.Http.Authentication
             {
                 return new CacheEntry
                 {
-                    Token = new ExpirableToken("", now - TimeSpan.FromMinutes(1))
+                    Token = new ExpirableToken("", now)
                 };
             });
 
@@ -72,7 +72,12 @@ namespace Flurl.Http.Authentication
                     if (tokenIsValid == false)
                     {
                         var generatedToken = await GetToken(scope);
-                        entry.Token = new ExpirableToken(generatedToken.Value, generatedToken.Expiration - _earlyExpiration);
+
+                        //if we're configured to expire tokens early, adjust the expiration time
+                        if (_earlyExpiration > TimeSpan.Zero)
+                        { generatedToken = new ExpirableToken(generatedToken.Value, generatedToken.Expiration - _earlyExpiration); }
+
+                        entry.Token = generatedToken;
                         entry.AuthHeader = new AuthenticationHeaderValue(_scheme, entry.Token.Value);
                     }
                 }
