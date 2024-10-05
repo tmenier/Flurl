@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Flurl.Http.Authentication
 {
-    /// <summary>
-    /// An expirable token used in token-based authentication
-    /// </summary>
+	/// <summary>
+	/// An expirable token used in token-based authentication
+	/// </summary>
+	[ExcludeFromCodeCoverage]
     public sealed class ExpirableToken
     {
         /// <summary>
