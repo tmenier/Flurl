@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Flurl.Http.Authentication
 {
-    /// <summary>
-    /// The base class for OAuth token providers
-    /// </summary>
-    public abstract class OAuthTokenProvider : IOAuthTokenProvider
+	/// <summary>
+	/// The base class for OAuth token providers
+	/// </summary>
+	public abstract class OAuthTokenProvider : IOAuthTokenProvider
     {
         private class CacheEntry
         {
