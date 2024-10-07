@@ -5,22 +5,22 @@ using System.Threading.Tasks;
 
 namespace Flurl.Test.Http.Authentication
 {
+    internal class UnitTestTokenProvider : OAuthTokenProvider
+    {
+        private int _generationCount = 0;
+        public UnitTestTokenProvider() : base()
+        {
+        }
+
+        protected override Task<ExpirableToken> GetToken(string scope)
+        {
+            return Task.FromResult(new ExpirableToken((++_generationCount).ToString(), DateTimeOffset.Now.AddSeconds(1)));
+        }
+    }
+
     [TestFixture]
     public class OAuthTokenProviderTests
     {
-        internal class UnitTestTokenProvider : OAuthTokenProvider
-        {
-            private int _generationCount = 0;
-            public UnitTestTokenProvider() : base()
-            {
-            }
-
-            protected override Task<ExpirableToken> GetToken(string scope)
-            {
-                return Task.FromResult(new ExpirableToken((++_generationCount).ToString(), DateTimeOffset.Now.AddSeconds(1)));
-            }
-        }
-
         [Test]
         public async Task GetAuthenticationHeader_ReusesValidTokens()
         {
