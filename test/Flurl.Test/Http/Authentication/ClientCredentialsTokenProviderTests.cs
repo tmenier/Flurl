@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Flurl.Test.Http.Authentication
 {
-    [TestFixture]
+	[TestFixture]
     public class ClientCredentialsTokenProviderTests : HttpTestFixtureBase
     {
         [TestCase("secret")]
@@ -28,12 +28,12 @@ namespace Flurl.Test.Http.Authentication
 
             var provider = new ClientCredentialsTokenProvider("unitTestClient", clientSecret, cli);
 
-            var authHeader = await provider.GetAuthenticationHeader("scope");
+            var authHeader = await provider.GetAuthenticationHeader("unitTestScope");
 
             HttpTest.ShouldHaveCalled("https://flurl.dev/connect/token")
                     .WithVerb(HttpMethod.Post)
                     .WithContentType("application/x-www-form-urlencoded")
-                    .WithRequestBody($"client_id=clientId&scope=scope&grant_type=client_credentials{(string.IsNullOrWhiteSpace(clientSecret) ? "" : $"&client_secret={clientSecret}")}")
+                    .WithRequestBody($"client_id=unitTestClient&scope=unitTestScope&grant_type=client_credentials{(string.IsNullOrWhiteSpace(clientSecret) ? "" : $"&client_secret={clientSecret}")}")
                     .WithHeader("accept", "application/json")
                     .Times(1);
         }

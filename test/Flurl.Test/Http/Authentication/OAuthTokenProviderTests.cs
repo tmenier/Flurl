@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Flurl.Test.Http.Authentication
 {
-    internal class UnitTestTokenProvider : OAuthTokenProvider
+	internal class UnitTestTokenProvider : OAuthTokenProvider
     {
         private int _generationCount = 0;
         public UnitTestTokenProvider() : base()
