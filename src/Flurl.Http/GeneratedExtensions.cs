@@ -738,8 +738,8 @@ namespace Flurl.Http
 		/// <param name="url">This Flurl.Url.</param>
 		/// <param name="scope">The scope of the token</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithOAuthScope(this Url url, string scope) {
-			return new FlurlRequest(url).WithOAuthScope(scope);
+		public static IFlurlRequest WithOAuthTokenFromProvider(this Url url, string scope) {
+			return new FlurlRequest(url).WithOAuthTokenFromProvider(scope);
 		}
 		
 		/// <summary>
