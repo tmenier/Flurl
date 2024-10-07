@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 namespace Flurl.Http.Authentication
 {
     /// <summary>
-    ///
+    /// OAuth token provider that uses client credentials as an authentication mechanism
     /// </summary>
     public class ClientCredentialsTokenProvider : OAuthTokenProvider
     {
@@ -55,7 +54,7 @@ namespace Flurl.Http.Authentication
             { body["client_secret"] = _clientSecret; }
 
             var rawResponse = await _fc.Request("connect", "token")
-                                        .WithHeader("accept","application/json")
+                                        .WithHeader("accept", "application/json")
                                         .AllowAnyHttpStatus()
                                         .PostUrlEncodedAsync(body);
 
@@ -73,9 +72,6 @@ namespace Flurl.Http.Authentication
                 {
                     var response = await rawResponse.GetJsonAsync<JsonNode>();
                     errorMessage = response["error"].GetValue<string>();
-
-                    if (errorMessage == "invalid_scope")
-                    { errorMessage = $"{_clientId} is not allowed to utilize scope {scope}, or {scope} is not a valid scope. Verify the allowed scopes for {_clientId} and try again."; }
                 }
                 catch (Exception)
                 {
