@@ -167,7 +167,6 @@ namespace Flurl.Test.Http
                 var h = test.CallLog[0].Request.Headers;
                 Assert.True(h.TryGetFirst("authorization", out var authHeaderValue));
                 Assert.AreEqual("Bearer 1", authHeaderValue);
-
             }
             catch (Exception ex)
             {
