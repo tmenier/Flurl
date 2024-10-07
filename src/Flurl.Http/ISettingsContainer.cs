@@ -121,7 +121,7 @@ namespace Flurl.Http
 		/// <param name="obj">Object containing settings.</param>
 		/// <param name="scope">The scope of the token</param>
 		/// <returns></returns>
-		public static T WithOAuthScope<T>(this T obj, string scope) where T : ISettingsContainer {
+		public static T WithOAuthTokenFromProvider<T>(this T obj, string scope) where T : ISettingsContainer {
 			obj.Settings.OAuthTokenScope = scope;
 			return obj;
 		}

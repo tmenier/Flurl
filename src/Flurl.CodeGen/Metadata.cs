@@ -146,7 +146,7 @@ namespace Flurl.CodeGen
 				.AddArg("enabled", "bool", "true if Flurl should automatically send a new request to the redirect URL, false if it should not.");
 			yield return Create("WithOAuthTokenProvider", "Creates a new FlurlRequest and configures it to use the supplied OAuth token provider for the request's authentication header")
 				.AddArg("tokenProvider","IOAuthTokenProvider", "the token provider");
-			yield return Create("WithOAuthScope", "Creates a new FlurlRequest and configures it to request an OAuth bearer token of the specified scope from the OAuth token provider")
+			yield return Create("WithOAuthTokenFromProvider", "Creates a new FlurlRequest and configures it to request an OAuth bearer token of the specified scope from the OAuth token provider")
 				.AddArg("scope","string","The scope of the token");
 
 			// event handler extensions

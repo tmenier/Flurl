@@ -1816,8 +1816,8 @@ namespace Flurl.Http
 		/// <param name="uri">This System.Uri.</param>
 		/// <param name="scope">The scope of the token</param>
 		/// <returns>A new IFlurlRequest.</returns>
-		public static IFlurlRequest WithOAuthScope(this Uri uri, string scope) {
-			return new FlurlRequest(uri).WithOAuthScope(scope);
+		public static IFlurlRequest WithOAuthTokenFromProvider(this Uri uri, string scope) {
+			return new FlurlRequest(uri).WithOAuthTokenFromProvider(scope);
 		}
 		
 		/// <summary>
