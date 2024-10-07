@@ -168,7 +168,7 @@ namespace Flurl.Test.Http
                 Assert.True(h.TryGetFirst("authorization", out var authHeaderValue));
                 Assert.AreEqual("Bearer 1", authHeaderValue);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Assert.Fail("Exception should not have been thrown.");
             }
