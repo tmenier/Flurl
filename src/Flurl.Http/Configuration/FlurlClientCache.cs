@@ -85,7 +85,7 @@ namespace Flurl.Http.Configuration
 				throw new ArgumentException($"A client named '{name}' was not found. Either preconfigure the client using Add (typically at startup), or use GetOrAdd to add/configure one on demand when needed.");
 
 			if (cli.Value.IsDisposed)
-				throw new Exception($"A client named '{name}' was not found but has been disposed and cannot be reused.");
+				throw new Exception($"A client named '{name}' was found but has been disposed and cannot be reused.");
 
 			return cli.Value;
 		}
