@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Flurl.Http.Authentication;
 using Flurl.Http.Testing;
 
 namespace Flurl.Http.Configuration
@@ -82,6 +83,24 @@ namespace Flurl.Http.Configuration
 			get => Get<ISerializer>();
 			set => Set(value);
 		}
+
+		/// <summary>
+        /// Gets or sets the OAuth token provider
+        /// </summary>
+        public IOAuthTokenProvider OAuthTokenProvider
+        {
+            get => Get<IOAuthTokenProvider>();
+            set => Set(value);
+        }
+
+        /// <summary>
+        /// Gets or sets the OAuth scope to request from <see cref="OAuthTokenProvider"/>
+        /// </summary>
+        public string OAuthTokenScope
+        {
+            get => Get<string>();
+            set => Set(value);
+        }
 
 		/// <summary>
 		/// Gets object whose properties describe how Flurl.Http should handle redirect (3xx) responses.
