@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Sockets;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Flurl.Http.Testing;
@@ -544,6 +545,61 @@ namespace Flurl.Test.Http
 			using var httpTest = new HttpTest();
 			await actual.GetAsync();
 			httpTest.ShouldHaveCalled(expected);
+		}
+
+		[Test]
+		public async Task can_respond_with_request_body_http_content()
+		{
+			var httpTest = new HttpTest();
+			httpTest.RespondWith( (request) =>
+			{
+				var httpContent =  request.Content.ReadAsStringAsync().Result;
+				return new StringContent(httpContent);
+			});
+			var random = new Random();
+			var expected = random.Next().ToString();
+
+			var response = await "https://api.com/foo".PostStringAsync(expected);
+
+			var actual = await response.GetStringAsync();
+			Assert.AreEqual(expected, actual);
+		}
+
+		[Test]
+		public async Task can_respond_with_request_body_string()
+		{
+			var httpTest = new HttpTest();
+			httpTest.RespondWith( (request) =>
+			{
+				var httpContent =  request.Content.ReadAsStringAsync().Result;
+				return httpContent;
+			});
+			var random = new Random();
+			var expected = random.Next().ToString();
+
+			var response = await "https://api.com/foo".PostStringAsync(expected);
+
+			var actual = await response.GetStringAsync();
+			Assert.AreEqual(expected, actual);
+		}
+
+		[Test]
+		public async Task can_respond_with_request_body_json()
+		{
+			var httpTest = new HttpTest();
+			httpTest.RespondWithJson( (request) =>
+			{
+				var jsonString =  request.Content.ReadAsStringAsync().Result;
+				var json = JsonSerializer.Deserialize<int>(jsonString);
+				return json;
+			});
+			var random = new Random();
+			var expected = random.Next();
+
+			var response = await "https://api.com/foo".PostJsonAsync(expected);
+
+			var actual = await response.GetJsonAsync<int>();
+			Assert.AreEqual(expected, actual);
 		}
 	}
 }
