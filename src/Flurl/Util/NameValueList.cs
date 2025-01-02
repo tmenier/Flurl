@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Flurl.Util
@@ -96,11 +95,11 @@ namespace Flurl.Util
 		public void AddOrReplace(string name, TValue value) {
 			var i = 0;
 			var replaced = false;
-			while (i < this.Count) {
+			while (i < Count) {
 				if (!this[i].Name.OrdinalEquals(name, !_caseSensitiveNames))
 					i++;
 				else if (replaced)
-					this.RemoveAt(i);
+					RemoveAt(i);
 				else {
 					this[i] = (name, value);
 					replaced = true;
@@ -109,7 +108,7 @@ namespace Flurl.Util
 			}
 
 			if (!replaced)
-				this.Add(name, value);
+				Add(name, value);
 		}
 
 		/// <inheritdoc />

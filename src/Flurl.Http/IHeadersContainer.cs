@@ -48,7 +48,7 @@ namespace Flurl.Http
 			    return obj;
 
 			// underscore replacement only applies when object properties are parsed to kv pairs
-		    replaceUnderscoreWithHyphen = replaceUnderscoreWithHyphen && !(headers is string) && !(headers is IEnumerable);
+		    replaceUnderscoreWithHyphen = replaceUnderscoreWithHyphen && headers is not string && headers is not IEnumerable;
 
 		    foreach (var kv in headers.ToKeyValuePairs()) {
 			    var key = replaceUnderscoreWithHyphen ? kv.Key.Replace("_", "-") : kv.Key;

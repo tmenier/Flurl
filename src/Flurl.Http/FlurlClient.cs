@@ -253,7 +253,7 @@ namespace Flurl.Http
 
 		// partially lifted from https://github.com/dotnet/runtime/blob/master/src/libraries/System.Net.Http/src/System/Net/Http/SocketsHttpHandler/RedirectHandler.cs
 		private static FlurlRedirect GetRedirect(FlurlCall call) {
-			if (call.Response.StatusCode < 300 || call.Response.StatusCode > 399)
+			if (call.Response.StatusCode is < 300 or > 399)
 				return null;
 
 			if (!call.Response.Headers.TryGetFirst("Location", out var location))

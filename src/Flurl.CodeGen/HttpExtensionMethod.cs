@@ -40,7 +40,7 @@ namespace Flurl.CodeGen
 			" an asynchronous ",
 			(HttpVerb == null) ? "request." : $"{HttpVerb.ToUpperInvariant()} request.");
 
-		public bool HasRequestBody => (HttpVerb == "Post" || HttpVerb == "Put" || HttpVerb == "Patch" || HttpVerb == null);
+		public bool HasRequestBody => HttpVerb is "Post" or "Put" or "Patch" or null;
 
 		public string HttpVerb { get; }
 		public string RequestBodyType { get; }
