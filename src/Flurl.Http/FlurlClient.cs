@@ -166,7 +166,7 @@ namespace Flurl.Http
 
 			try {
 				call.HttpResponseMessage =
-					HttpTest.Current?.FindSetup(call)?.GetNextResponse() ??
+					HttpTest.Current?.FindSetup(call)?.GetNextResponse(call.Request) ??
 					await HttpClient.SendAsync(reqMsg, completionOption, ct).ConfigureAwait(false);
 
 				call.HttpResponseMessage.RequestMessage = reqMsg;
