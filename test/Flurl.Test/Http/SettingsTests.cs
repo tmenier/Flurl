@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Flurl.Http;
 using Flurl.Http.Configuration;
 using Flurl.Http.Testing;
+using Flurl.Test.Http.Authentication;
 using NUnit.Framework;
 
 namespace Flurl.Test.Http
@@ -149,6 +150,29 @@ namespace Flurl.Test.Http
 				Assert.Fail("Exception should not have been thrown.");
 			}
 		}
+
+		[Test]
+        public async Task set_oauthTokenProvider_sets_authenticationHeader_on_request()
+        {
+            using var test = new HttpTest();
+            test.RespondWith("OK", 200);
+
+            try
+            {
+                var c = CreateContainer();
+                c.Settings.OAuthTokenProvider = new UnitTestTokenProvider();
+
+                var result = await GetRequest(c).GetAsync();
+
+                var h = test.CallLog[0].Request.Headers;
+                Assert.True(h.TryGetFirst("authorization", out var authHeaderValue));
+                Assert.AreEqual("Bearer 1", authHeaderValue);
+            }
+            catch (Exception)
+            {
+                Assert.Fail("Exception should not have been thrown.");
+            }
+        }
 	}
 
 	[TestFixture]

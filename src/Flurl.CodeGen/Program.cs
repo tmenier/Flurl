@@ -55,6 +55,7 @@ namespace Flurl.CodeGen
 						.WriteLine("using System.Net.Http;")
 						.WriteLine("using System.Threading;")
 						.WriteLine("using System.Threading.Tasks;")
+						.WriteLine("using Flurl.Http.Authentication;")
 						.WriteLine("using Flurl.Http.Configuration;")
 						.WriteLine("using Flurl.Http.Content;")
 						.WriteLine("")

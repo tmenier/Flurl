@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Flurl.Http.Authentication;
 using Flurl.Http.Configuration;
 
 namespace Flurl.Http
@@ -100,6 +102,29 @@ namespace Flurl.Http
 		/// <returns>This settings container.</returns>
 		public static T WithAutoRedirect<T>(this T obj, bool enabled) where T : ISettingsContainer {
 			obj.Settings.Redirects.Enabled = enabled;
+			return obj;
+		}
+
+		/// <summary>
+		/// Configures the OAuth token provider which authenticates the request
+		/// </summary>
+		/// <param name="obj">Object containing settings.</param>
+		/// <param name="tokenProvider">The token provider</param>
+		/// <returns>this settings container.</returns>
+		public static T WithOAuthTokenProvider<T>(this T obj, IOAuthTokenProvider tokenProvider) where T : ISettingsContainer {
+			obj.Settings.OAuthTokenProvider = tokenProvider;
+			return obj;
+		}
+
+		/// <summary>
+		/// Configures the OAuth scope(s) to obtain from the configured OAuthTokenProvider
+		/// </summary>
+		/// <param name="obj">Object containing settings.</param>
+		/// <param name="scopes">The scope(s) of the token</param>
+		/// <returns></returns>
+		public static T WithOAuthTokenFromProvider<T>(this T obj, params string[] scopes) where T : ISettingsContainer {
+			var distinctScopes = new HashSet<string>(scopes ?? Array.Empty<string>());
+			obj.Settings.OAuthTokenScopes = distinctScopes;
 			return obj;
 		}
 	}
