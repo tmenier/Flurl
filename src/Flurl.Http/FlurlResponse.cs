@@ -72,9 +72,11 @@ namespace Flurl.Http
 		private readonly FlurlCall _call;
 		private readonly Lazy<IReadOnlyNameValueList<string>> _headers;
 		private readonly Lazy<IReadOnlyList<FlurlCookie>> _cookies;
-		private object _capturedBody = null;
-		private bool _streamRead = false;
-		private ISerializer _serializer = null;
+		private readonly Lazy<int> _statusCode;
+		private object _capturedBody;
+		private bool _streamRead;
+		private ISerializer _serializer;
+		private bool _disposed;
 
 		/// <inheritdoc />
 		public IReadOnlyNameValueList<string> Headers => _headers.Value;
@@ -86,50 +88,63 @@ namespace Flurl.Http
 		public HttpResponseMessage ResponseMessage => _call.HttpResponseMessage;
 
 		/// <inheritdoc />
-		public int StatusCode => (int)ResponseMessage.StatusCode;
+		public int StatusCode => _statusCode.Value;
 
 		/// <summary>
 		/// Creates a new FlurlResponse that wraps the give HttpResponseMessage.
 		/// </summary>
 		public FlurlResponse(FlurlCall call, CookieJar cookieJar = null) {
-			_call = call;
-			_headers = new Lazy<IReadOnlyNameValueList<string>>(LoadHeaders);
-			_cookies = new Lazy<IReadOnlyList<FlurlCookie>>(LoadCookies);
+			_call = call ?? throw new ArgumentNullException(nameof(call));
+			_headers = new Lazy<IReadOnlyNameValueList<string>>(LoadHeaders, LazyThreadSafetyMode.ExecutionAndPublication);
+			_cookies = new Lazy<IReadOnlyList<FlurlCookie>>(LoadCookies, LazyThreadSafetyMode.ExecutionAndPublication);
+			_statusCode = new Lazy<int>(() => (int)ResponseMessage.StatusCode, LazyThreadSafetyMode.ExecutionAndPublication);
 			LoadCookieJar(cookieJar);
 		}
 
 		private IReadOnlyNameValueList<string> LoadHeaders() {
 			var result = new NameValueList<string>(false);
+			var headers = ResponseMessage.Headers;
+			var contentHeaders = ResponseMessage.Content?.Headers;
 
-			foreach (var h in ResponseMessage.Headers)
-			foreach (var v in h.Value)
-				result.Add(h.Key, v);
+			if (headers != null) {
+				foreach (var h in headers) {
+					foreach (var v in h.Value) {
+						result.Add(h.Key, v);
+					}
+				}
+			}
 
-			if (ResponseMessage.Content?.Headers == null)
-				return result;
-
-			foreach (var h in ResponseMessage.Content.Headers)
-			foreach (var v in h.Value)
-				result.Add(h.Key, v);
+			if (contentHeaders != null) {
+				foreach (var h in contentHeaders) {
+					foreach (var v in h.Value) {
+						result.Add(h.Key, v);
+					}
+				}
+			}
 
 			return result;
 		}
 
 		private IReadOnlyList<FlurlCookie> LoadCookies() {
 			var url = ResponseMessage.RequestMessage.RequestUri.AbsoluteUri;
-			return ResponseMessage.Headers.TryGetValues("Set-Cookie", out var headerValues) ?
-				headerValues.Select(hv => CookieCutter.ParseResponseHeader(hv, url)).ToList() :
-				new List<FlurlCookie>();
+			if (!ResponseMessage.Headers.TryGetValues("Set-Cookie", out var headerValues)) {
+				return Array.Empty<FlurlCookie>();
+			}
+
+			return headerValues.Select(hv => CookieCutter.ParseResponseHeader(hv, url)).ToList();
 		}
 
 		private void LoadCookieJar(CookieJar jar) {
 			if (jar == null) return;
-			foreach (var cookie in Cookies)
+			foreach (var cookie in Cookies) {
 				jar.TryAddOrReplace(cookie, out _); // not added if cookie fails validation
+			}
 		}
 
 		/// <inheritdoc />
 		public async Task<T> GetJsonAsync<T>() {
+			ThrowIfDisposed();
+
 			if (_streamRead) {
 				if (_capturedBody == null) return default;
 				if (_capturedBody is T body) return body;
@@ -166,6 +181,8 @@ namespace Flurl.Http
 
 		/// <inheritdoc />
 		public async Task<string> GetStringAsync() {
+			ThrowIfDisposed();
+
 			if (_streamRead) {
 				return
 					(_capturedBody == null) ? null :
@@ -197,12 +214,15 @@ namespace Flurl.Http
 
 		/// <inheritdoc />
 		public Task<Stream> GetStreamAsync() {
+			ThrowIfDisposed();
 			_streamRead = true;
 			return ResponseMessage.Content.ReadAsStreamAsync();
 		}
 
 		/// <inheritdoc />
 		public async Task<byte[]> GetBytesAsync() {
+			ThrowIfDisposed();
+
 			if (_streamRead)
 				return _capturedBody as byte[];
 
@@ -211,9 +231,22 @@ namespace Flurl.Http
 			return (byte[])_capturedBody;
 		}
 
+		private void ThrowIfDisposed() {
+			if (_disposed) {
+				throw new ObjectDisposedException(nameof(FlurlResponse));
+			}
+		}
+
 		/// <summary>
 		/// Disposes the underlying HttpResponseMessage.
 		/// </summary>
-		public void Dispose() => ResponseMessage.Dispose();
+		public void Dispose() {
+			if (_disposed) return;
+
+			ResponseMessage.Dispose();
+			_capturedBody = null;
+			_serializer = null;
+			_disposed = true;
+		}
 	}
 }

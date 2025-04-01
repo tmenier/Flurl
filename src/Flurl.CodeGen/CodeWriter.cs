@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace Flurl.CodeGen
 {
@@ -11,23 +12,38 @@ namespace Flurl.CodeGen
         private readonly StreamWriter _sw;
         private int _indent;
         private bool _wrapping;
+        private readonly StringBuilder _sb = new StringBuilder();
 
         public CodeWriter(string filePath)
         {
+            if (string.IsNullOrEmpty(filePath))
+                throw new ArgumentNullException(nameof(filePath));
+
             _sw = new StreamWriter(File.OpenWrite(filePath));
         }
 
         /// <summary>
-        /// use @0, @1, @2, etc for tokens. ({0} would be a pain because you'd alway need to escape "{" and "}")
+        /// Writes a line with optional parameters. Use @0, @1, @2, etc for tokens.
         /// </summary>
         public CodeWriter WriteLine(string line, params object[] args)
         {
+            if (line == null)
+                throw new ArgumentNullException(nameof(line));
+
             line = line.Trim();
 
-            for (int i = 0; i < args.Length; i++)
+            if (args?.Length > 0)
             {
-                var val = (args[i] == null) ? "" : args[i].ToString();
-                line = line.Replace("@" + i, val);
+                _sb.Clear();
+                _sb.Append(line);
+                
+                for (int i = 0; i < args.Length; i++)
+                {
+                    var val = args[i]?.ToString() ?? string.Empty;
+                    _sb.Replace($"@{i}", val);
+                }
+                
+                line = _sb.ToString();
             }
 
             if (line == "}" || line == "{")
@@ -35,32 +51,40 @@ namespace Flurl.CodeGen
                 _indent--;
             }
 
-            _sw.Write(new String('\t', _indent));
+            _sw.Write(new string('\t', _indent));
             _sw.WriteLine(line);
 
-            if (line == "" || line.StartsWith("//") || line.EndsWith("]"))
+            UpdateIndentation(line);
+
+            return this;
+        }
+
+        private void UpdateIndentation(string line)
+        {
+            if (string.IsNullOrEmpty(line) || line.StartsWith("//") || line.EndsWith("]"))
             {
                 _wrapping = false;
+                return;
             }
-            else if (line.EndsWith(";") || line.EndsWith("}"))
+
+            if (line.EndsWith(";") || line.EndsWith("}"))
             {
                 if (_wrapping)
                     _indent--;
                 _wrapping = false;
+                return;
             }
-            else if (line.EndsWith("{"))
+
+            if (line.EndsWith("{"))
             {
                 _indent++;
                 _wrapping = false;
-            }
-            else
-            {
-                if (!_wrapping)
-                    _indent++;
-                _wrapping = true;
+                return;
             }
 
-            return this; // fluent!
+            if (!_wrapping)
+                _indent++;
+            _wrapping = true;
         }
 
         public CodeWriter WriteLine()
@@ -71,7 +95,8 @@ namespace Flurl.CodeGen
 
         public void Dispose()
         {
-            _sw.Dispose();
+            _sw?.Dispose();
+            _sb?.Clear();
         }
     }
 }

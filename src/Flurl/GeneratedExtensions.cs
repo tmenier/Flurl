@@ -505,5 +505,29 @@ namespace Flurl
 			return new Url(uri).ResetToRoot();
 		}
 		
+		/// <summary>
+		/// Swaps two path segments in the URL by their indices.
+		/// </summary>
+		/// <param name="url">This URL.</param>
+		/// <param name="index1">Index of the first segment to swap</param>
+		/// <param name="index2">Index of the second segment to swap</param>
+		/// <returns>A new Flurl.Url object.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when either index is out of range of the path segments.</exception>
+		public static Url SwapPathSegments(this string url, int index1, int index2) {
+			return new Url(url).SwapPathSegments(index1, index2);
+		}
+
+		/// <summary>
+		/// Swaps two path segments in the URL by their indices.
+		/// </summary>
+		/// <param name="uri">This System.Uri.</param>
+		/// <param name="index1">Index of the first segment to swap</param>
+		/// <param name="index2">Index of the second segment to swap</param>
+		/// <returns>A new Flurl.Url object.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when either index is out of range of the path segments.</exception>
+		public static Url SwapPathSegments(this Uri uri, int index1, int index2) {
+			return new Url(uri).SwapPathSegments(index1, index2);
+		}
+		
 	}
 }

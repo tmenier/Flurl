@@ -15,6 +15,10 @@ namespace Flurl.Util
 	/// </summary>
 	public static class CommonExtensions
 	{
+		private static readonly Regex QuoteStripRegex = new Regex("^\\s*['\"]+|['\"]+\\s*$", RegexOptions.Compiled);
+		private static readonly char[] AmpersandSeparator = new[] { '&' };
+		private static readonly char[] EqualsSeparator = new[] { '=' };
+
 		/// <summary>
 		/// Returns a key-value-pairs representation of the object.
 		/// For strings, URL query string format assumed and pairs are parsed from that.
@@ -68,11 +72,10 @@ namespace Flurl.Util
 		/// <param name="separator">The separator to split on.</param>
 		/// <returns>Array of at most 2 strings. (1 if separator is not found.)</returns>
 		public static string[] SplitOnFirstOccurence(this string s, string separator) {
-			// Needed because full PCL profile doesn't support Split(char[], int) (#119)
 			if (string.IsNullOrEmpty(s))
 				return new[] { s };
 
-			var i = s.IndexOf(separator);
+			var i = s.IndexOf(separator, StringComparison.Ordinal);
 			return (i == -1) ?
 				new[] { s } :
 				new[] { s.Substring(0, i), s.Substring(i + separator.Length) };
@@ -82,36 +85,37 @@ namespace Flurl.Util
 			if (string.IsNullOrEmpty(s))
 				return Enumerable.Empty<(string, object)>();
 
-			return
-				from p in s.Split('&')
-				let pair = p.SplitOnFirstOccurence("=")
-				let name = pair[0]
-				let value = (pair.Length == 1) ? null : pair[1]
-				select (name, (object)value);
+			return s.Split(AmpersandSeparator, StringSplitOptions.RemoveEmptyEntries)
+				   .Select(p => {
+					   var pair = p.SplitOnFirstOccurence("=");
+					   return (pair[0], (object)(pair.Length == 1 ? null : pair[1]));
+				   });
 		}
 
-		private static IEnumerable<(string Name, object Value)> ObjectToKV(object obj) =>
-			from prop in obj.GetType().GetProperties()
-			let getter = prop.GetGetMethod(false)
-			where getter != null
-			let val = getter.Invoke(obj, null)
-			select (prop.Name, GetDeclaredTypeValue(val, prop.PropertyType));
+		private static IEnumerable<(string Name, object Value)> ObjectToKV(object obj) {
+			var type = obj.GetType();
+			var properties = type.GetProperties();
+			
+			foreach (var prop in properties) {
+				var getter = prop.GetGetMethod(false);
+				if (getter == null) continue;
+				
+				var val = getter.Invoke(obj, null);
+				yield return (prop.Name, GetDeclaredTypeValue(val, prop.PropertyType));
+			}
+		}
 
 		internal static object GetDeclaredTypeValue(object value, Type declaredType) {
 			if (value == null || value.GetType() == declaredType)
 				return value;
 
-			// without this we had https://github.com/tmenier/Flurl/issues/669
-			// related: https://stackoverflow.com/q/3531318/62600
 			declaredType = Nullable.GetUnderlyingType(declaredType) ?? declaredType;
 
-			// added to deal with https://github.com/tmenier/Flurl/issues/632
-			// thx @j2jensen!
 			if (value is IEnumerable col
-			    && declaredType.IsGenericType
-			    && declaredType.GetGenericTypeDefinition() == typeof(IEnumerable<>)
-			    && !col.GetType().GetInterfaces().Contains(declaredType)
-			    && declaredType.IsInstanceOfType(col))
+				&& declaredType.IsGenericType
+				&& declaredType.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+				&& !col.GetType().GetInterfaces().Contains(declaredType)
+				&& declaredType.IsInstanceOfType(col))
 			{
 				var elementType = declaredType.GetGenericArguments()[0];
 				return col.Cast<object>().Select(element => Convert.ChangeType(element, elementType));
@@ -121,55 +125,69 @@ namespace Flurl.Util
 		}
 
 		private static IEnumerable<(string Key, object Value)> CollectionToKV(IEnumerable col) {
-			bool TryGetProp(object obj, string name, out object value) {
-				var prop = obj.GetType().GetProperty(name);
-				var field = obj.GetType().GetField(name);
-
-				if (prop != null) {
-					value = prop.GetValue(obj, null);
-					return true;
-				}
-				if (field != null) {
-					value = field.GetValue(obj);
-					return true;
-				}
-				value = null;
-				return false;
-			}
-
-			bool IsTuple2(object item, out object name, out object val) {
-				name = null;
-				val = null;
-				return
-					item.GetType().Name.OrdinalContains("Tuple") &&
-					TryGetProp(item, "Item1", out name) &&
-					TryGetProp(item, "Item2", out val) &&
-					!TryGetProp(item, "Item3", out _);
-			}
-
-			bool LooksLikeKV(object item, out object name, out object val) {
-				name = null;
-				val = null;
-				return
-					(TryGetProp(item, "Key", out name) || TryGetProp(item, "key", out name) || TryGetProp(item, "Name", out name) || TryGetProp(item, "name", out name)) &&
-					(TryGetProp(item, "Value", out val) || TryGetProp(item, "value", out val));
-			}
+			if (col == null) yield break;
 
 			foreach (var item in col) {
-				if (item == null)
-					continue;
-				if (!IsTuple2(item, out var name, out var val) && !LooksLikeKV(item, out name, out val))
+				if (item == null) continue;
+
+				if (IsTuple2(item, out var name, out var val) || LooksLikeKV(item, out name, out val)) {
+					if (name != null) {
+						yield return (name.ToInvariantString(), val);
+					}
+				} else {
 					yield return (item.ToInvariantString(), null);
-				else if (name != null)
-					yield return (name.ToInvariantString(), val);
+				}
 			}
+		}
+
+		private static bool IsTuple2(object item, out object name, out object val) {
+			name = null;
+			val = null;
+			
+			var type = item.GetType();
+			if (!type.Name.OrdinalContains("Tuple")) return false;
+
+			return TryGetProp(item, "Item1", out name) &&
+				   TryGetProp(item, "Item2", out val) &&
+				   !TryGetProp(item, "Item3", out _);
+		}
+
+		private static bool LooksLikeKV(object item, out object name, out object val) {
+			name = null;
+			val = null;
+			
+			return (TryGetProp(item, "Key", out name) || 
+				   TryGetProp(item, "key", out name) || 
+				   TryGetProp(item, "Name", out name) || 
+				   TryGetProp(item, "name", out name)) &&
+				   (TryGetProp(item, "Value", out val) || 
+					TryGetProp(item, "value", out val));
+		}
+
+		private static bool TryGetProp(object obj, string name, out object value) {
+			var type = obj.GetType();
+			var prop = type.GetProperty(name);
+			var field = type.GetField(name);
+
+			if (prop != null) {
+				value = prop.GetValue(obj, null);
+				return true;
+			}
+			if (field != null) {
+				value = field.GetValue(obj);
+				return true;
+			}
+			value = null;
+			return false;
 		}
 
 		/// <summary>
 		/// Merges the key/value pairs from d2 into d1, without overwriting those already set in d1.
 		/// </summary>
 		public static void Merge<TKey, TValue>(this IDictionary<TKey, TValue> d1, IDictionary<TKey, TValue> d2) {
-			foreach (var kv in d2.Where(x => !d1.ContainsKey(x.Key)).ToList()) {
+			if (d1 == null || d2 == null) return;
+			
+			foreach (var kv in d2.Where(x => !d1.ContainsKey(x.Key))) {
 				d1[kv.Key] = kv.Value;
 			}
 		}
@@ -177,18 +195,20 @@ namespace Flurl.Util
 		/// <summary>
 		/// Strips any single quotes or double quotes from the beginning and end of a string.
 		/// </summary>
-		public static string StripQuotes(this string s) => Regex.Replace(s, "^\\s*['\"]+|['\"]+\\s*$", "");
+		public static string StripQuotes(this string s) => 
+			string.IsNullOrEmpty(s) ? s : QuoteStripRegex.Replace(s, "");
 
 		/// <summary>
 		/// True if the given string is a valid IPv4 address.
 		/// </summary>
 		public static bool IsIP(this string s) {
-			// based on https://stackoverflow.com/a/29942932/62600
 			if (string.IsNullOrEmpty(s))
 				return false;
 
 			var parts = s.Split('.');
-			return parts.Length == 4 && parts.All(x => byte.TryParse(x, out _));
+			if (parts.Length != 4) return false;
+
+			return parts.All(x => byte.TryParse(x, out _));
 		}
 	}
 }

@@ -94,18 +94,26 @@ namespace Flurl.Http
 
 		// reflection is (relatively) expensive, so keep a cache of HttpRequestHeaders properties
 		// https://learn.microsoft.com/en-us/dotnet/api/system.net.http.headers.httprequestheaders?#properties
-		private static IDictionary<string, PropertyInfo> _reqHeaderProps =
-			typeof(HttpRequestHeaders).GetProperties().ToDictionary(p => p.Name.ToLower(), p => p);
+		private static readonly IDictionary<string, PropertyInfo> _reqHeaderProps = InitializeHeaderProperties();
+
+		private static IDictionary<string, PropertyInfo> InitializeHeaderProperties() {
+			var props = typeof(HttpRequestHeaders).GetProperties();
+			var dict = new Dictionary<string, PropertyInfo>(props.Length, StringComparer.OrdinalIgnoreCase);
+			foreach (var prop in props) {
+				dict[prop.Name.Replace("-", "")] = prop;
+			}
+			return dict;
+		}
 
 		private static IEnumerable<(string Name, string Value)> GetHeadersFromHttpClient(HttpClient httpClient) {
+			if (httpClient.DefaultRequestHeaders == null) yield break;
+
 			foreach (var h in httpClient.DefaultRequestHeaders) {
-				// MS isn't making this easy. In some cases, a header value will be split into multiple values, but when iterating the collection
-				// there's no way to know exactly how to piece them back together. The standard says multiple values should be comma-delimited,
-				// but with User-Agent they need to be space-delimited. ToString() on properties like UserAgent do this correctly though, so when spinning
-				// through the collection we'll try to match the header name to a property and ToString() it, otherwise we'll comma-delimit the values.
-				if (_reqHeaderProps.TryGetValue(h.Key.Replace("-", "").ToLower(), out var prop)) {
-					var val = prop.GetValue(httpClient.DefaultRequestHeaders).ToString();
-					yield return (h.Key, val);
+				if (_reqHeaderProps.TryGetValue(h.Key.Replace("-", ""), out var prop)) {
+					var val = prop.GetValue(httpClient.DefaultRequestHeaders)?.ToString();
+					if (val != null) {
+						yield return (h.Key, val);
+					}
 				}
 				else {
 					yield return (h.Key, string.Join(",", h.Value));
@@ -194,16 +202,22 @@ namespace Flurl.Http
 			FlurlRequest.SyncHeaders(this, req);
 
 			// copy headers from FlurlRequest to HttpRequestMessage
-			foreach (var header in req.Headers)
-				reqMsg.SetHeader(header.Name, header.Value.Trim(), false);
+			if (req.Headers.Count > 0) {
+				foreach (var header in req.Headers) {
+					reqMsg.SetHeader(header.Name, header.Value.Trim(), false);
+				}
+			}
 
-			if (reqMsg.Content == null)
-				return;
+			if (reqMsg.Content == null) return;
 
 			// copy headers from HttpContent to FlurlRequest
-			foreach (var header in reqMsg.Content.Headers.ToList()) {
-				if (!req.Headers.Contains(header.Key))
-					req.Headers.AddOrReplace(header.Key, string.Join(",", header.Value));
+			var contentHeaders = reqMsg.Content.Headers;
+			if (contentHeaders.Count > 0) {
+				foreach (var header in contentHeaders) {
+					if (!req.Headers.Contains(header.Key)) {
+						req.Headers.AddOrReplace(header.Key, string.Join(",", header.Value));
+					}
+				}
 			}
 		}
 
@@ -251,7 +265,6 @@ namespace Flurl.Http
 			}
 		}
 
-		// partially lifted from https://github.com/dotnet/runtime/blob/master/src/libraries/System.Net.Http/src/System/Net/Http/SocketsHttpHandler/RedirectHandler.cs
 		private static FlurlRedirect GetRedirect(FlurlCall call) {
 			if (call.Response.StatusCode < 300 || call.Response.StatusCode > 399)
 				return null;
@@ -260,24 +273,30 @@ namespace Flurl.Http
 				return null;
 
 			var redir = new FlurlRedirect();
+			var requestUrl = call.Request.Url;
 
-			if (Url.IsValid(location))
+			// Optimize URL construction for redirects
+			if (Url.IsValid(location)) {
 				redir.Url = new Url(location);
-			else if (location.OrdinalStartsWith("//"))
-				redir.Url = new Url(call.Request.Url.Scheme + ":" + location);
-			else if (location.OrdinalStartsWith("/"))
-				redir.Url = Url.Combine(call.Request.Url.Root, location);
-			else
-				redir.Url = Url.Combine(call.Request.Url.Root, call.Request.Url.Path, location);
+			}
+			else if (location.OrdinalStartsWith("//")) {
+				redir.Url = new Url(requestUrl.Scheme + ":" + location);
+			}
+			else if (location.OrdinalStartsWith("/")) {
+				redir.Url = Url.Combine(requestUrl.Root, location);
+			}
+			else {
+				redir.Url = Url.Combine(requestUrl.Root, requestUrl.Path, location);
+			}
 
-			// Per https://tools.ietf.org/html/rfc7231#section-7.1.2, a redirect location without a
-			// fragment should inherit the fragment from the original URI.
-			if (string.IsNullOrEmpty(redir.Url.Fragment))
-				redir.Url.Fragment = call.Request.Url.Fragment;
+			// Inherit fragment from original URI if not present
+			if (string.IsNullOrEmpty(redir.Url.Fragment)) {
+				redir.Url.Fragment = requestUrl.Fragment;
+			}
 
 			redir.Count = 1 + (call.Request.RedirectedFrom?.Redirect?.Count ?? 0);
 
-			var isSecureToInsecure = (call.Request.Url.IsSecureScheme && !redir.Url.IsSecureScheme);
+			var isSecureToInsecure = (requestUrl.IsSecureScheme && !redir.Url.IsSecureScheme);
 
 			redir.Follow =
 				new[] { 301, 302, 303, 307, 308 }.Contains(call.Response.StatusCode) &&
