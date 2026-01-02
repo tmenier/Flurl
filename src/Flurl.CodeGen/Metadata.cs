@@ -125,6 +125,9 @@ namespace Flurl.CodeGen
 			yield return Create("WithCookies", "Creates a new FlurlRequest and adds name-value pairs to its Cookie header based on property names/values of the provided object, or keys/values if object is a dictionary. " +
 											   "To automatically maintain a cookie \"session\", consider using a CookieJar or CookieSession instead.")
 				.AddArg("values", "object", "Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.");
+			yield return Create("WithCookies", "Creates a new FlurlRequest and adds name-value pairs to its Cookie header. " +
+			                                   "To automatically maintain a cookie \"session\", consider using a CookieJar or CookieSession instead.")
+				.AddArg("values", "IEnumerable<(string Key, string Value)>", "Names/values of HTTP cookies to set.");
 			yield return Create("WithCookies", "Creates a new FlurlRequest and sets the CookieJar associated with this request, which will be updated with any Set-Cookie headers present in the response and is suitable for reuse in subsequent requests.")
 				.AddArg("cookieJar", "CookieJar", "The CookieJar.");
 			yield return Create("WithCookies", "Creates a new FlurlRequest and associates it with a new CookieJar, which will be updated with any Set-Cookie headers present in the response and is suitable for reuse in subsequent requests.")

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Flurl.Util;
 
@@ -30,15 +31,31 @@ namespace Flurl.Http
 		/// <param name="request">The IFlurlRequest.</param>
 		/// <param name="values">Names/values of HTTP cookies to set. Typically an anonymous object or IDictionary.</param>
 		/// <returns>This IFlurlClient.</returns>
-		public static IFlurlRequest WithCookies(this IFlurlRequest request, object values) {
+		public static IFlurlRequest WithCookies(this IFlurlRequest request, object values)
+		{
+			var kvPairs = values.ToKeyValuePairs()
+				.Select(kv => (kv.Key, kv.Value.ToInvariantString()));
+			return request.WithCookies(kvPairs);
+		}
+
+		/// <summary>
+		/// Adds or updates name-value pairs in this request's Cookie header.
+		/// To automatically maintain a cookie "session", consider using a CookieJar or CookieSession instead.
+		/// </summary>
+		/// <param name="request">The IFlurlRequest.</param>
+		/// <param name="values">Names/values of HTTP cookies to set.</param>
+		/// <returns>This IFlurlClient.</returns>
+		public static IFlurlRequest WithCookies(this IFlurlRequest request, IEnumerable<(string Key, string Value)> values)
+		{
 			var cookies = new NameValueList<string>(request.Cookies, true); // cookie names are case-sensitive https://stackoverflow.com/a/11312272/62600
 			// although rare, we need to accommodate the possibility of multiple cookies with the same name
-			foreach (var group in values.ToKeyValuePairs().GroupBy(x => x.Key)) {
+			foreach (var group in values.GroupBy(x => x.Key))
+			{
 				// add or replace the first one (by name)
-				cookies.AddOrReplace(group.Key, group.First().Value.ToInvariantString());
+				cookies.AddOrReplace(group.Key, group.First().Value);
 				// append the rest
 				foreach (var kv in group.Skip(1))
-					cookies.Add(kv.Key, kv.Value.ToInvariantString());
+					cookies.Add(kv.Key, kv.Value);
 			}
 			return request.WithHeader("Cookie", CookieCutter.BuildRequestHeader(cookies));
 		}
